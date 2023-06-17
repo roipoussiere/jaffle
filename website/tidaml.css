@@ -5,14 +5,22 @@ body {
 #buttons {
     position: absolute;
     border-radius: 10px;
-    top: 15px;
-    right: 15px;
+    top: 10px;
+    right: 10px;
 }
 
 button {
-    padding: 0.8em;
+    margin: 5px;
     cursor: pointer;
-    width: 5em;
+    width: 4em;
+    height: 3em;
+    float: right;
+}
+
+#select_tune {
+    margin: 5px;
+    display: block;
+    height: 2em;
 }
 
 .cm-editor {

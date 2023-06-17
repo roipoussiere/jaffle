@@ -12,24 +12,71 @@ import { solarizedLight } from '@uiw/codemirror-theme-solarized';
 import * as yamlMode from '@codemirror/legacy-modes/mode/yaml';
 import { StreamLanguage, LanguageSupport } from "@codemirror/language"
 
+const TUNES_PATH = './tunes/'
+const TUNES = [
+  'ws1_multi-lines',
+  'ws2_stack',
+  'ws3_delay',
+  'ws3_dub_tune',
+  'ws3_stack_in_stack',
+  'ws4_add_stack'
+];
 
-const DEFAULT_TUNE = './tunes/workshop1.yml';
-
-const yaml_lang = new LanguageSupport(StreamLanguage.define(yamlMode.yaml));
-let editor;
 const ctx = webaudio.getAudioContext();
 
+const yaml_lang = new LanguageSupport(StreamLanguage.define(yamlMode.yaml));
+const domSelectTune = document.getElementById('select_tune');
+const editor = new EditorView({
+  extensions: [
+    solarizedLight,
+    yaml_lang,
+    keymap.of([
+      { key: 'Ctrl-Enter', run: () => onPlay() },
+      { key: 'Ctrl-.', run: () => onStop() },
+    ])
+  ],
+  parent: document.getElementById('input')
+});
+
 initAudio();
+
+window.addEventListener('DOMContentLoaded', () => {
+  TUNES.map( tune => {
+    const domTuneItem = document.createElement('option');
+    domTuneItem.value = tune;
+    domTuneItem.innerHTML = tune.replaceAll('_', ' ');
+    domSelectTune.append(domTuneItem);
+  });
+  const randomTune = TUNES[Math.floor(Math.random() * TUNES.length)];
+  loadTune(randomTune)
+  console.log(randomTune)
+  domSelectTune.value = randomTune
+});
+
+domSelectTune.addEventListener('change', event => {
+  loadTune(event.target.value);
+});
 
 const { evaluate, stop } = core.repl({
   defaultOutput: webaudio.webaudioOutput,
   getTime: () => ctx.currentTime,
-  transpiler,
+  transpiler
 });
 
-fetch(DEFAULT_TUNE)
+function loadTune(tune_name) {
+  console.log('loading tune:', tune_name)
+  fetch(TUNES_PATH + tune_name + '.yml')
   .then(response => response.text())
-  .then((data) => editor = getEditor(data));
+  .then((data) => {
+    editor.dispatch({
+      changes: {
+        from: 0,
+        to: editor.state.doc.length,
+        insert: data
+      }
+    })
+  });
+}
 
 document.getElementById('start').addEventListener('click', onPlay);
 document.getElementById('stop').addEventListener('click', onStop);
@@ -50,26 +97,9 @@ function initAudio() {
   core.evalScope(core.controls, core, mini, webaudio, tonal);  
 }
 
-function getEditor(data) {
-  const editor = new EditorView({
-    doc: data,
-    extensions: [
-      solarizedLight,
-      yaml_lang,
-      keymap.of([
-        { key: 'Ctrl-Enter', run: () => onPlay() },
-        { key: 'Ctrl-.', run: () => onStop() },
-      ])
-    ],
-    parent: document.getElementById('input')
-  });
-  return editor;
-}
-
 function transpiler(input_yaml) {
   const tune = yaml.load(input_yaml)
   let output_js = readBlock(tune) + '\n\n'
-  console.log('Playing tune:');
   console.log(output_js);
   output_js = _transpiler(output_js) // todo: remove
   return output_js
@@ -104,7 +134,9 @@ function getMainAttr(obj) {
 }
 
 function valueToString(value) {
-  return '"' + `${ value }`.trim() + '"'
+  value = `${ value }`.trim()
+  value = value[0] === '_' ? value.substring(1) : value
+  return `"${ value }"`
 }
 
 function indent(lvl) {
