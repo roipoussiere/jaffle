@@ -95,44 +95,31 @@ function readStack(stack) {
   return `stack(${ stackItems.join(',\n') }\n)`
 }
 
-function readStackItem(stackItem) {
-  let js = '';
+function getMainAttr(stackItem) {
+  const mainAttrs = Object.keys(stackItem).filter(key => key[0] == key[0].toUpperCase())
+  let mainAttr = ''
 
-  // const entries = Object.keys(stackItem).filter(key => key[0] == key[0].toUpperCase())
-  // if (entries.length != 1) {
-  //   throw new Error('stack item should have exactly one entry.')
-  // }
-
-  if ('N' in stackItem) {
-    js += `\n  n("${ stackItem.N.trim() }")`
-  } else if ('Note' in stackItem) {
-    js += `\n  note("${ stackItem.Note.trim() }")`
-  } else if ('Sound' in stackItem) {
-    js += `\n  sound("${ stackItem.Sound.trim() }")`
+  if (mainAttrs.length == 0) {
+    console.error('Stack items should have at least one main attribute.')
+  } else if (mainAttrs.length > 1) {
+    console.error('Stack items should have only one main attribute.')
   } else {
-    throw new Error('No main property.')
+    mainAttr = mainAttrs[0]
   }
+  return mainAttr
+}
 
-  if ('sound' in stackItem) {
-    js += `\n    .sound("${ stackItem.sound }")`
-  }
-  if ('delay' in stackItem) {
-    js += `\n    .delay(${ stackItem.delay })`
-  }
-  if ('scale' in stackItem) {
-    js += `\n    .scale("${ stackItem.scale }")`
-  }
-  if ('bank' in stackItem) {
-    js += `\n    .bank("${ stackItem.bank }")`
-  }
-  if ('lpf' in stackItem) {
-    js += `\n    .lpf(${ stackItem.lpf })`
-  }
-  if ('room' in stackItem) {
-    js += `\n    .room(${ stackItem.lpf })`
-  }
-  if ('gain' in stackItem) {
-    js += `\n    .gain(${ stackItem.lpf })`
+function valueToString(value) {
+  return '"' + `${ value }`.trim() + '"'
+}
+
+function readStackItem(stackItem) {
+  const mainAttr = getMainAttr(stackItem)
+  let js = `\n  ${ mainAttr.toLowerCase() }(${ valueToString(stackItem[mainAttr]) })`
+
+  const attrs = Object.keys(stackItem).filter(key => key[0] == key[0].toLowerCase())
+  for (const attr of attrs) {
+    js += `\n    .${ attr }(${ valueToString(stackItem[attr]) })`
   }
 
   return js;
