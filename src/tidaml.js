@@ -68,41 +68,35 @@ function getEditor(data) {
 
 function transpiler(input_yaml) {
   const tune = yaml.load(input_yaml)
-  let output_js = readRoot(tune)
+  let output_js = readBlock(tune) + '\n\n'
   console.log('Playing tune:');
   console.log(output_js);
   output_js = _transpiler(output_js) // todo: remove
   return output_js
 }
 
-function readRoot(root) {
-  let rootJS = ''
+function readBlock(block, indent_lvl=0) {
+  let js = ''
 
-  if ('stack' in root) {
-    rootJS += readStack(root.stack);
+  if (block instanceof Array) {
+    js += block.map(item => readBlock(item, indent_lvl + 2)).join(',')
+  } else if (block instanceof Object) {
+    js += readObject(block, indent_lvl)
+  } else {
+    js += valueToString(block)
   }
 
-  return rootJS
+  return js
 }
 
-function readStack(stack) {
-  let stackItems = []
-
-  stack.forEach(stackItem => {
-    stackItems.push(readStackItem(stackItem))
-  });
-
-  return `stack(${ stackItems.join(',\n') }\n)`
-}
-
-function getMainAttr(stackItem) {
-  const mainAttrs = Object.keys(stackItem).filter(key => key[0] == key[0].toUpperCase())
+function getMainAttr(obj) {
+  const mainAttrs = Object.keys(obj).filter(key => key[0] == key[0].toUpperCase())
   let mainAttr = ''
 
   if (mainAttrs.length == 0) {
-    console.error('Stack items should have at least one main attribute.')
+    console.error('Main attribute not found.')
   } else if (mainAttrs.length > 1) {
-    console.error('Stack items should have only one main attribute.')
+    console.error('Too many main attributes.')
   } else {
     mainAttr = mainAttrs[0]
   }
@@ -113,13 +107,17 @@ function valueToString(value) {
   return '"' + `${ value }`.trim() + '"'
 }
 
-function readStackItem(stackItem) {
-  const mainAttr = getMainAttr(stackItem)
-  let js = `\n  ${ mainAttr.toLowerCase() }(${ valueToString(stackItem[mainAttr]) })`
+function indent(lvl) {
+  return '\n' + '  '.repeat(lvl)
+}
 
-  const attrs = Object.keys(stackItem).filter(key => key[0] == key[0].toLowerCase())
+function readObject(obj, indent_lvl) {
+  const mainAttr = getMainAttr(obj)
+  let js = indent(indent_lvl) + `${ mainAttr.toLowerCase() }(${ readBlock(obj[mainAttr]) })`
+
+  const attrs = Object.keys(obj).filter(key => key[0] == key[0].toLowerCase())
   for (const attr of attrs) {
-    js += `\n    .${ attr }(${ valueToString(stackItem[attr]) })`
+    js += indent(indent_lvl + 1) + `.${ attr }(${ readBlock(obj[attr]) })`
   }
 
   return js;
