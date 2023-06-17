@@ -2,12 +2,13 @@
   "name": "tidaml",
   "version": "0.1.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "esbuild": "esbuild ./src/tidaml.js --bundle --outfile=./public/tidaml.js --target=es2021",
+    "copy": "mkdir -p ./public && cp ./website/* ./public && cp -r tunes/ public/",
+    "build": "npm run copy && npm run esbuild",
+    "start": "npm run copy && npm run esbuild -- --servedir=./public"
   },
   "devDependencies": {
-    "vite": "^4.3.3"
+    "esbuild": "^0.18.4"
   },
   "dependencies": {
     "@codemirror/language": "^6.8.0",
