@@ -1,0 +1,6 @@
+Stack:
+- Note: ~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]
+  sound: gm_electric_guitar_muted
+- Sound: <bd rim>
+  bank: RolandTR707
+delay: .5
