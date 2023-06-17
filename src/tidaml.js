@@ -47,10 +47,9 @@ window.addEventListener('DOMContentLoaded', () => {
     domTuneItem.innerHTML = tune.replaceAll('_', ' ');
     domSelectTune.append(domTuneItem);
   });
-  const randomTune = TUNES[Math.floor(Math.random() * TUNES.length)];
-  loadTune(randomTune)
-  console.log(randomTune)
-  domSelectTune.value = randomTune
+
+  loadTune(window.location.hash.substring(1)
+    || TUNES[Math.floor(Math.random() * TUNES.length)]);
 });
 
 domSelectTune.addEventListener('change', event => {
@@ -63,9 +62,9 @@ const { evaluate, stop } = core.repl({
   transpiler
 });
 
-function loadTune(tune_name) {
-  console.log('loading tune:', tune_name)
-  fetch(TUNES_PATH + tune_name + '.yml')
+function loadTune(tuneName) {
+  console.log(`Loading tune ${tuneName}...`)
+  fetch(TUNES_PATH + tuneName + '.yml')
   .then(response => response.text())
   .then((data) => {
     editor.dispatch({
@@ -76,6 +75,8 @@ function loadTune(tune_name) {
       }
     })
   });
+  domSelectTune.value = tuneName
+  window.location.hash = `#${ tuneName }`
 }
 
 document.getElementById('start').addEventListener('click', onPlay);
