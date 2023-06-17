@@ -1,4 +1,4 @@
-image: npm:latest
+image: node:20-alpine
 
 pages:
   script:
