@@ -1,0 +1,8 @@
+image: npm:latest
+
+pages:
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - public
