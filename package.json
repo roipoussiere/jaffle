@@ -1,0 +1,25 @@
+{
+  "name": "tidaml",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^4.3.3"
+  },
+  "dependencies": {
+    "@codemirror/language": "^6.8.0",
+    "@codemirror/legacy-modes": "^6.3.2",
+    "@strudel.cycles/core": "^0.8.1",
+    "@strudel.cycles/mini": "^0.8.1",
+    "@strudel.cycles/soundfonts": "^0.8.1",
+    "@strudel.cycles/tonal": "^0.8.1",
+    "@strudel.cycles/transpiler": "^0.8.1",
+    "@strudel.cycles/webaudio": "^0.8.1",
+    "@uiw/codemirror-theme-solarized": "^4.21.3",
+    "codemirror": "^6.0.1",
+    "js-yaml": "^4.1.0"
+  }
+}

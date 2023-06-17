@@ -1,0 +1,20 @@
+body {
+    margin: 0;
+}
+
+#buttons {
+    position: absolute;
+    border-radius: 10px;
+    top: 15px;
+    right: 15px;
+}
+
+button {
+    padding: 0.8em;
+    cursor: pointer;
+    width: 5em;
+}
+
+.cm-editor {
+    height: 100vh
+}
