@@ -174,6 +174,9 @@ function readObject(obj, indentLvl) {
 
   if (mainAttr === 'M') {
     js = readBlock(obj[mainAttr], indentLvl)
+  } else if (mainAttr === 'Set') {
+    js = 'x=>x'
+    indentLvl += 1
   } else {
     js = indent(indentLvl) + mainAttr.toLowerCase()
     if (obj[mainAttr] !== null && ! SIGNALS_FN.includes(mainAttr)) {
