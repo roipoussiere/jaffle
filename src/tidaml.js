@@ -136,7 +136,9 @@ function getMainAttr(obj) {
 }
 
 function valueToString(value) {
-  if (isNaN(value)) {
+  if (value === null) {
+    value = ''
+  } else if (isNaN(value)) {
     value = value[0] === '_' ? value.substring(1) : value
     value = `mini('${ value.trim() }')`
   } else {
