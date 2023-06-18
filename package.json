@@ -17,7 +17,6 @@
     "@strudel.cycles/mini": "^0.8.1",
     "@strudel.cycles/soundfonts": "^0.8.1",
     "@strudel.cycles/tonal": "^0.8.1",
-    "@strudel.cycles/transpiler": "^0.8.1",
     "@strudel.cycles/webaudio": "^0.8.1",
     "@uiw/codemirror-theme-solarized": "^4.21.3",
     "codemirror": "^6.0.1",

@@ -5,15 +5,15 @@ import * as mini from '@strudel.cycles/mini';
 import * as webaudio from '@strudel.cycles/webaudio';
 import * as tonal from '@strudel.cycles/tonal';
 import { registerSoundfonts } from '@strudel.cycles/soundfonts';
-import { transpiler as _transpiler } from '@strudel.cycles/transpiler';
 
 import { EditorView, keymap } from '@codemirror/view';
 import { solarizedLight } from '@uiw/codemirror-theme-solarized';
 import * as yamlMode from '@codemirror/legacy-modes/mode/yaml';
-import { StreamLanguage, LanguageSupport } from "@codemirror/language"
+import { StreamLanguage, LanguageSupport } from '@codemirror/language'
 
 const TUNES_PATH = './tunes/'
 const TUNES = [
+  // 'dev',
   'ws1_multi-lines',
   'ws2_stack',
   'ws3_delay',
@@ -21,6 +21,8 @@ const TUNES = [
   'ws3_stack_in_stack',
   'ws4_add_stack'
 ];
+const JS_HEADER = `return `
+const JS_FOOTER = `\n`
 
 const ctx = webaudio.getAudioContext();
 
@@ -100,9 +102,8 @@ function initAudio() {
 
 function transpiler(input_yaml) {
   const tune = yaml.load(input_yaml)
-  let output_js = readBlock(tune) + '\n\n'
+  let output_js = JS_HEADER + readBlock(tune) + JS_FOOTER
   console.log(output_js);
-  output_js = _transpiler(output_js) // todo: remove
   return output_js
 }
 
@@ -135,13 +136,17 @@ function getMainAttr(obj) {
 }
 
 function valueToString(value) {
-  value = `${ value }`.trim()
-  value = value[0] === '_' ? value.substring(1) : value
-  return `"${ value }"`
+  if (isNaN(value)) {
+    value = value[0] === '_' ? value.substring(1) : value
+    value = `mini('${ value.trim() }')`
+  } else {
+    value = `${ value }`
+  }
+  return value
 }
 
 function indent(lvl) {
-  return '\n' + '  '.repeat(lvl)
+  return lvl == 0 ? '' : '\n' + '  '.repeat(lvl)
 }
 
 function readObject(obj, indent_lvl) {
