@@ -26,12 +26,12 @@ const JS_FOOTER = `\n`
 
 const ctx = webaudio.getAudioContext();
 
-const yaml_lang = new LanguageSupport(StreamLanguage.define(yamlMode.yaml));
+const yamlLang = new LanguageSupport(StreamLanguage.define(yamlMode.yaml));
 const domSelectTune = document.getElementById('select_tune');
 const editor = new EditorView({
   extensions: [
     solarizedLight,
-    yaml_lang,
+    yamlLang,
     keymap.of([
       { key: 'Ctrl-Enter', run: () => onPlay() },
       { key: 'Ctrl-.', run: () => onStop() },
@@ -100,20 +100,20 @@ function initAudio() {
   core.evalScope(core.controls, core, mini, webaudio, tonal);  
 }
 
-function transpiler(input_yaml) {
-  const tune = yaml.load(input_yaml)
-  let output_js = JS_HEADER + readBlock(tune) + JS_FOOTER
-  console.log(output_js);
-  return output_js
+function transpiler(inputYaml) {
+  const tune = yaml.load(inputYaml)
+  let outputJs = JS_HEADER + readBlock(tune) + JS_FOOTER
+  console.log(outputJs);
+  return outputJs
 }
 
-function readBlock(block, indent_lvl=0) {
+function readBlock(block, indentLvl=0) {
   let js = ''
 
   if (block instanceof Array) {
-    js += block.map(item => readBlock(item, indent_lvl + 2)).join(',')
+    js += block.map(item => readBlock(item, indentLvl + 2)).join(',')
   } else if (block instanceof Object) {
-    js += readObject(block, indent_lvl)
+    js += readObject(block, indentLvl)
   } else {
     js += valueToString(block)
   }
@@ -151,20 +151,21 @@ function indent(lvl) {
   return lvl == 0 ? '' : '\n' + '  '.repeat(lvl)
 }
 
-function readObject(obj, indent_lvl) {
+function readObject(obj, indentLvl) {
   let js;
+
   const mainAttr = getMainAttr(obj)
   let attrName = mainAttr.toLowerCase()
 
   if (attrName === 'm') {
     js = readBlock(obj[mainAttr])
   } else {
-    js = indent(indent_lvl) + `${ attrName }(${ readBlock(obj[mainAttr]) })`
+    js = indent(indentLvl) + `${ attrName }(${ readBlock(obj[mainAttr]) })`
   }
 
   const attrs = Object.keys(obj).filter(key => key[0] == key[0].toLowerCase())
   for (const attr of attrs) {
-    js += indent(indent_lvl + 1) + `.${ attr }(${ readBlock(obj[attr]) })`
+    js += indent(indentLvl + 1) + `.${ attr }(${ readBlock(obj[attr]) })`
   }
 
   return js;
