@@ -152,8 +152,15 @@ function indent(lvl) {
 }
 
 function readObject(obj, indent_lvl) {
+  let js;
   const mainAttr = getMainAttr(obj)
-  let js = indent(indent_lvl) + `${ mainAttr.toLowerCase() }(${ readBlock(obj[mainAttr]) })`
+  let attrName = mainAttr.toLowerCase()
+
+  if (attrName === 'm') {
+    js = readBlock(obj[mainAttr])
+  } else {
+    js = indent(indent_lvl) + `${ attrName }(${ readBlock(obj[mainAttr]) })`
+  }
 
   const attrs = Object.keys(obj).filter(key => key[0] == key[0].toLowerCase())
   for (const attr of attrs) {
