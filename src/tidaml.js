@@ -122,7 +122,7 @@ function readBlock(block, indentLvl=0) {
 }
 
 function getMainAttr(obj) {
-  const mainAttrs = Object.keys(obj).filter(key => key[0] == key[0].toUpperCase())
+  const mainAttrs = Object.keys(obj).filter(key => key[0] == key[0].toUpperCase() || key[0] == '^')
   let mainAttr = ''
 
   if (mainAttrs.length == 0) {
@@ -153,17 +153,17 @@ function indent(lvl) {
 
 function readObject(obj, indentLvl) {
   let js;
-
   const mainAttr = getMainAttr(obj)
-  let attrName = mainAttr.toLowerCase()
 
-  if (attrName === 'm') {
+  if (mainAttr === 'M') {
     js = readBlock(obj[mainAttr])
   } else {
-    js = indent(indentLvl) + `${ attrName }(${ readBlock(obj[mainAttr]) })`
+    let prefix = mainAttr[0] == '^' ? ('await ' + mainAttr.substring(1)) : mainAttr
+    js = indent(indentLvl) + prefix.toLowerCase()
+    js += `(${ readBlock(obj[mainAttr]) })`
   }
 
-  const attrs = Object.keys(obj).filter(key => key[0] == key[0].toLowerCase())
+  const attrs = Object.keys(obj).filter(key => key[0] == key[0].toLowerCase() && key[0] != '^')
   for (const attr of attrs) {
     js += indent(indentLvl + 1) + `.${ attr }(${ readBlock(obj[attr]) })`
   }
