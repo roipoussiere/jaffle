@@ -13,7 +13,6 @@ import { StreamLanguage, LanguageSupport } from '@codemirror/language'
 
 const TUNES_PATH = './tunes/'
 const TUNES = [
-  // 'dev',
   'ws1_multi-lines',
   'ws2_stack',
   'ws3_delay',
@@ -21,8 +20,6 @@ const TUNES = [
   'ws3_stack_in_stack',
   'ws4_add_stack'
 ];
-const JS_HEADER = `return `
-const JS_FOOTER = `\n`
 const SIGNALS_FN = [ 'Saw', 'Sine', 'Cosine', 'Tri', 'Square', 'Rand', 'Perlin',
   'Saw2', 'Sine2', 'Cosine2', 'Tri2', 'Square2', 'Rand2' ]
 
@@ -104,37 +101,45 @@ function initAudio() {
 
 function transpiler(inputYaml) {
   const tune = yaml.load(inputYaml)
-  let outputJs = JS_HEADER + readBlock(tune) + JS_FOOTER
+  let outputJs = readBlock(tune) + '\n'
   console.log(outputJs);
   return outputJs
 }
 
 function readBlock(block, indentLvl=0) {
-  let js = ''
+  let js
 
   if (block instanceof Array) {
-    js += block.map(item => readBlock(item, indentLvl + 2)).join(',')
+    js = block.map(item => readBlock(item, indentLvl + 2)).join(',')
   } else if (block instanceof Object) {
-    js += readObject(block, indentLvl)
+    js = readObject(block, indentLvl)
   } else {
-    js += valueToString(block)
+    js = valueToString(block)
   }
 
   return js
 }
 
-function getMainAttr(obj) {
-  const mainAttrs = Object.keys(obj).filter(key => key[0] == key[0].toUpperCase() || key[0] == '^')
+function getMainAttribute(obj) {
+  const mainAttrs = Object.keys(obj).filter(key => key[0] != key[0].toLowerCase())
   let mainAttr = ''
 
   if (mainAttrs.length == 0) {
     console.error('Main attribute not found.')
   } else if (mainAttrs.length > 1) {
-    console.error('Too many main attributes.')
+    console.error(`Too many main attributes: ${ mainAttrs.join(', ') }`)
   } else {
     mainAttr = mainAttrs[0]
   }
   return mainAttr
+}
+
+function getAsyncAttributes(obj) {
+  return Object.keys(obj).filter(key => key[0] == '^')
+}
+
+function getOtherAttributes(obj) {
+  return Object.keys(obj).filter(key => key[0] == key[0].toLowerCase() && key[0] != '^')
 }
 
 function valueToString(value) {
@@ -154,21 +159,28 @@ function indent(lvl) {
 }
 
 function readObject(obj, indentLvl) {
-  let js;
-  const mainAttr = getMainAttr(obj)
+  let js = '';
+  const mainAttr = getMainAttribute(obj)
 
-  if (mainAttr === 'M') {
-    js = readBlock(obj[mainAttr])
-  } else {
-    const prefix = mainAttr[0] == '^' ? ('await ' + mainAttr.substring(1)) : mainAttr
-    const value = readBlock(obj[mainAttr])
-
-    js = indent(indentLvl) + prefix.toLowerCase()
-    js += value == '' && SIGNALS_FN.includes(mainAttr) ? '' : `(${ value })`
+  for (const attr of getAsyncAttributes(obj)) {
+    const json = JSON.stringify(obj[attr][0], null, '  ').replaceAll('"', "'")
+    js += `await ${ attr.substring(1)}(${ json }, '${ obj[attr][1] }')\n`
   }
 
-  const attrs = Object.keys(obj).filter(key => key[0] == key[0].toLowerCase() && key[0] != '^')
-  for (const attr of attrs) {
+  if (indentLvl == 0) {
+    js += 'return '
+  }
+
+  if (mainAttr === 'M') {
+    js += readBlock(obj[mainAttr])
+  } else {
+    js += indent(indentLvl) + mainAttr.toLowerCase()
+    if (obj[mainAttr] !== null && ! SIGNALS_FN.includes(mainAttr)) {
+      js += `(${ readBlock(obj[mainAttr]) })`
+    }
+  }
+
+  for (const attr of getOtherAttributes(obj)) {
     js += indent(indentLvl + 1) + `.${ attr }(${ readBlock(obj[attr]) })`
   }
 
