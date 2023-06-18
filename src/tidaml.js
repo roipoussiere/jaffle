@@ -101,7 +101,8 @@ function initAudio() {
 
 function transpiler(inputYaml) {
   const tune = yaml.load(inputYaml)
-  let outputJs = readBlock(tune) + '\n'
+  let outputJs = readAsyncs(tune)
+  outputJs += `return ${ readBlock(tune) }\n`
   console.log(outputJs);
   return outputJs
 }
@@ -158,30 +159,30 @@ function indent(lvl) {
   return lvl == 0 ? '' : '\n' + '  '.repeat(lvl)
 }
 
-function readObject(obj, indentLvl) {
-  let js = '';
-  const mainAttr = getMainAttribute(obj)
-
+function readAsyncs(obj) {
+  let js = ''
   for (const attr of getAsyncAttributes(obj)) {
     const json = JSON.stringify(obj[attr][0], null, '  ').replaceAll('"', "'")
     js += `await ${ attr.substring(1)}(${ json }, '${ obj[attr][1] }')\n`
   }
+  return js
+}
 
-  if (indentLvl == 0) {
-    js += 'return '
-  }
+function readObject(obj, indentLvl) {
+  let js;
+  const mainAttr = getMainAttribute(obj)
 
   if (mainAttr === 'M') {
-    js += readBlock(obj[mainAttr])
+    js = readBlock(obj[mainAttr], indentLvl)
   } else {
-    js += indent(indentLvl) + mainAttr.toLowerCase()
+    js = indent(indentLvl) + mainAttr.toLowerCase()
     if (obj[mainAttr] !== null && ! SIGNALS_FN.includes(mainAttr)) {
-      js += `(${ readBlock(obj[mainAttr]) })`
+      js += `(${ readBlock(obj[mainAttr], indentLvl) })`
     }
   }
 
   for (const attr of getOtherAttributes(obj)) {
-    js += indent(indentLvl + 1) + `.${ attr }(${ readBlock(obj[attr]) })`
+    js += indent(indentLvl + 1) + `.${ attr }(${ readBlock(obj[attr], indentLvl) })`
   }
 
   return js;
