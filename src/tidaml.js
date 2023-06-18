@@ -23,6 +23,8 @@ const TUNES = [
 ];
 const JS_HEADER = `return `
 const JS_FOOTER = `\n`
+const SIGNALS_FN = [ 'Saw', 'Sine', 'Cosine', 'Tri', 'Square', 'Rand', 'Perlin',
+  'Saw2', 'Sine2', 'Cosine2', 'Tri2', 'Square2', 'Rand2' ]
 
 const ctx = webaudio.getAudioContext();
 
@@ -158,9 +160,11 @@ function readObject(obj, indentLvl) {
   if (mainAttr === 'M') {
     js = readBlock(obj[mainAttr])
   } else {
-    let prefix = mainAttr[0] == '^' ? ('await ' + mainAttr.substring(1)) : mainAttr
+    const prefix = mainAttr[0] == '^' ? ('await ' + mainAttr.substring(1)) : mainAttr
+    const value = readBlock(obj[mainAttr])
+
     js = indent(indentLvl) + prefix.toLowerCase()
-    js += `(${ readBlock(obj[mainAttr]) })`
+    js += value == '' && SIGNALS_FN.includes(mainAttr) ? '' : `(${ value })`
   }
 
   const attrs = Object.keys(obj).filter(key => key[0] == key[0].toLowerCase() && key[0] != '^')
