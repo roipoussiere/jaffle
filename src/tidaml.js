@@ -22,6 +22,7 @@ const TUNES = [
 ];
 const SIGNALS_FN = [ 'Saw', 'Sine', 'Cosine', 'Tri', 'Square', 'Rand', 'Perlin',
   'Saw2', 'Sine2', 'Cosine2', 'Tri2', 'Square2', 'Rand2' ]
+const LAMBDA_PARAMS_NAME = [ 'a', 'b', 'c']
 
 const ctx = webaudio.getAudioContext();
 
@@ -111,7 +112,7 @@ function readBlock(block, indentLvl=0) {
   let js
 
   if (block instanceof Array) {
-    js = block.map(item => readBlock(item, indentLvl + 2)).join(',')
+    js = block.map(item => readBlock(item, indentLvl + 2)).join(', ')
   } else if (block instanceof Object) {
     js = readObject(block, indentLvl)
   } else {
@@ -146,11 +147,14 @@ function getOtherAttributes(obj) {
 function valueToString(value) {
   if (value === null) {
     value = ''
-  } else if (isNaN(value)) {
-    value = value[0] === '_' ? value.substring(1) : value
-    value = `mini('${ value.trim() }')`
-  } else {
+  } else if ( ! isNaN(value)) {
     value = `${ value }`
+  } else if (value[0] === '=') {
+    value = value.substring(1).replaceAll(/[^a-c0-9\.\+\-\*\/\(\)]/g, '')
+  } else if (value[0] === '_') {
+    value = `mini('${ value.substring(1).trim() }')`
+  } else {
+    value = `'${ value }'`
   }
   return value
 }
@@ -175,8 +179,13 @@ function readObject(obj, indentLvl) {
   if (mainAttr === 'M') {
     js = readBlock(obj[mainAttr], indentLvl)
   } else if (mainAttr === 'Set') {
-    js = 'x=>x'
-    indentLvl += 1
+    if (obj[mainAttr] === null) {
+      js = 'x => x'
+    } else {
+      const param_names = LAMBDA_PARAMS_NAME.slice(0, obj[mainAttr])
+      js = `(x, ${ param_names.join(', ') }) => x`
+    }
+    indentLvl -= 1
   } else {
     js = indent(indentLvl) + mainAttr.toLowerCase()
     if (obj[mainAttr] !== null && ! SIGNALS_FN.includes(mainAttr)) {
