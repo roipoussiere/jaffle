@@ -154,9 +154,9 @@ function valueToString(value) {
   } else if (value[0] === ':') {
     value = `'${ value.substring(1) }'`
   } else if (value[0] === '/') {
-    value = `mini('${ value.substring(1) }')`
+    value = `mini('${ value.substring(1).trim() }')`
   } else {
-    value = `mini('${ value }')`
+    value = `mini('${ value.trim() }')`
   }
   return value
 }
@@ -174,8 +174,24 @@ function readAsyncs(obj) {
   return js
 }
 
+function getValue(attr, obj, indentLvl) {
+  let serialize = attr.split('^')[1]
+
+  if (serialize === undefined) {
+    return readBlock(obj[attr], indentLvl)
+  } else if (serialize === '') {
+      return JSON.stringify(obj[attr], null, '  ').replaceAll('"', "'")
+  } else {
+    const paramId = parseInt(serialize) - 1
+    return obj[attr].map((value, id) =>
+      id == paramId ?
+        JSON.stringify(value, null, '  ').replaceAll('"', "'")
+      : valueToString(value))
+  }
+}
+
 function readObject(obj, indentLvl) {
-  let js;
+  let js, value
   const mainAttr = getMainAttribute(obj)
 
   if (mainAttr === 'M') {
@@ -189,14 +205,18 @@ function readObject(obj, indentLvl) {
     }
     indentLvl -= 1
   } else {
-    js = indent(indentLvl) + mainAttr.toLowerCase()
-    if (obj[mainAttr] !== null && ! SIGNALS_FN.includes(mainAttr)) {
-      js += `(${ readBlock(obj[mainAttr], indentLvl) })`
+    const newAttr = mainAttr.split('^')[0]
+    js = indent(indentLvl) + newAttr[0].toLowerCase() + newAttr.substring(1)
+    if (obj[mainAttr] !== null && ! SIGNALS_FN.includes(newAttr)) {
+      value = getValue(mainAttr, obj, indentLvl)
+      js += `(${ value })`
     }
   }
 
-  for (const attr of getOtherAttributes(obj)) {
-    js += indent(indentLvl + 1) + `.${ attr }(${ readBlock(obj[attr], indentLvl) })`
+  for (let attr of getOtherAttributes(obj)) {
+    const newAttr = attr.split('^')[0]
+    value = getValue(attr, obj, indentLvl)
+    js += indent(indentLvl + 1) + `.${ newAttr }(${ value })`
   }
 
   return js;
