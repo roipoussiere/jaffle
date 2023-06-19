@@ -151,10 +151,12 @@ function valueToString(value) {
     value = `${ value }`
   } else if (value[0] === '=') {
     value = value.substring(1).replaceAll(/[^a-c0-9\.\+\-\*\/\(\)]/g, '')
-  } else if (value[0] === '_') {
-    value = `mini('${ value.substring(1).trim() }')`
+  } else if (value[0] === ':') {
+    value = `'${ value.substring(1) }'`
+  } else if (value[0] === '/') {
+    value = `mini('${ value.substring(1) }')`
   } else {
-    value = `'${ value }'`
+    value = `mini('${ value }')`
   }
   return value
 }
@@ -177,7 +179,7 @@ function readObject(obj, indentLvl) {
   const mainAttr = getMainAttribute(obj)
 
   if (mainAttr === 'M') {
-    js = readBlock(obj[mainAttr], indentLvl)
+    js = valueToString(obj[mainAttr])
   } else if (mainAttr === 'Set') {
     if (obj[mainAttr] === null) {
       js = 'x => x'
