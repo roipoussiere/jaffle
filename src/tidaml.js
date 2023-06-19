@@ -103,7 +103,7 @@ function initAudio() {
 function transpiler(inputYaml) {
   const tune = yaml.load(inputYaml)
   let outputJs = readAsyncs(tune)
-  outputJs += `return ${ readBlock(tune) }\n`
+  outputJs += `return ${ readBlock(tune instanceof Array ? { 'Stack': tune } : tune) }\n`
   console.log(outputJs);
   return outputJs
 }
