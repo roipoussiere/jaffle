@@ -1,84 +1,186 @@
 # Tidaml
 
-A protoype for a yaml-based syntax for [Tidal-cycles](https://tidalcycles.org/), based on [https://strudel.tidalcycles.org](Strudel).
+A yaml-based syntax for [Tidal-cycles](https://tidalcycles.org/), based on [Strudel](https://strudel.tidalcycles.org).
 
-Tidaml is used to write tunes in yaml instead of a programming language like JavaScript or Haskel.
+## Introduction
+
+Tidaml is used to write tunes in yaml instead of JavaScript or Haskel, resulting in a lighter syntax. Its purpose is to make algorithmic music more accessible for people who are not familiar with programming languages.
+
+Under the hood, it's a transpiler generating JavaScript code, which is then interpreted by Strudel.
 
 ## Syntax
 
-### Attributes
+This chapter aims to provide an overview of the Tidaml syntax, for people already familiar with Strudel. If necessary, read the [Strudel documentation](https://strudel.tidalcycles.org/learn).
 
-Strudel's functions chaining like this:
+### Comments
+
+Yaml comments starts with a `#`:
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
 
 ```js
-n("1 2 3")
-  .scale("C:minor")
+// I'm a comment
 ```
-
-are replaced by object attributes in the same level:
+</td><td>
 
 ```yml
-N: 1 2 3
-scale: C:minor
+# I'm a comment
+```
+</td></tr>
+</table>
+
+### Quotes
+
+Most of the time, quotes are optional (although many yaml syntax highlighters sucks are render them correctly):
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
+
+```js
+note("c@3 eb")
+```
+</td><td>
+
+```yml
+Note: c@3 eb
+```
+</td></tr>
+</table>
+
+But be careful, some mini-notations could me misinterpreted by the yaml parser, for instance when starting the notation with `[` (used to define arrays):
+
+```yml
+Sound: hh*8
+    gain: [.25 1]*2 # not working
 ```
 
-Because disctionnaries are not ordered, the first instruction is capitalized (here `N` instead `n`). Then follows chained functions.
+To address this, you can use simple or double quotes, or prepend the mini-notation with the `/` character, which is ignored:
 
-Most of the time, quotes are optional in yaml (although many yaml syntax highlighters sucks are render them correctly).
+```yml
+- S: '~ sd ~'
+- S: "tb*2 cb*2 ~"
+- S: /bd ~ hh*2
+```
 
-### Passing arrays
+### Function chaining
 
-Some functions takes several parameters:
+The chained functions are on the same indentation level:
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
+
+```js
+note("c@3 eb")
+  .lpf(600)
+  .delay(.5)
+  .gain(2)
+```
+</td><td>
+
+```yml
+Note: c@3 eb
+lpf: 600
+delay: .5
+gain: 2
+```
+</td></tr>
+</table>
+
+Also, because dictionnaries are not ordered, the first instruction is capitalized (here `Note` instead `note`).
+
+### Functions without parameters
+
+It's totally safe to have a yaml attribute without value (just don't forget the `:`):
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
+
+```js
+note("c@3 eb")
+  .piano()
+  .log()
+```
+</td><td>
+
+```yml
+
+Note: c@3 eb
+piano:
+log:
+```
+</td></tr>
+</table>
+
+### Functions with multiple parameters
+
+Use yaml arrays:
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
 
 ```js
 stack(
-  n("1 2")
-    .scale("C:minor"),
-  note("c a f e"))
+  s("oh*2 cb*2 ~"),
+  s("bd sd hh*2")
+)
 ```
-
-Those are passed as yaml arrays:
+</td><td>
 
 ```yml
 Stack:
-- N: 1 2
-  scale: C:minor
-- Note: c a f e
+- S: oh*2 cb*2 ~
+- S: bd sd hh*2
+```
+</td></tr>
+</table>
+
+Alternatively, with inline arrays:
+
+```yml
+Stack: [ S: oh*2 cb*2 ~, S: bd sd hh*2 ]
+```
+
+If the root node is an array, the surrounding function is `Stack` by default. The code above can also be written like this:
+
+```yml
+- S: oh*2 cb*2 ~
+- S: bd sd hh*2
 ```
 
 ### Mini-notation
 
-Functions can enventually be applied directly to mini-notation:
+When applying functions directly to a mini-notation, the `M` keyword must be used:
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
 
 ```js
-"c3 [eb3,g3]".note()
+"c3 [eb3,g3]"
+  .note()
 ```
-
-The `M` parameter is used in this case:
+</td><td>
 
 ```yml
 M: c3 [eb3,g3]
 note:
 ```
-
-### Functions without parameters
-
-Some function doesn't take any parameter:
-
-```js
-note('c a f e').log()
-```
-
-It's not a problem to have a key without value in yaml:
-
-```yml
-Note: c a f e
-log:
-```
+</td></tr>
+</table>
 
 ### Loading samples
 
-You may want to load samples:
+You must prepend the `sample` attribute with the `^` sign:
+
+<table style="width: 100%">
+<td>Strudel</td>
+<tr><td>
 
 ```js
 await samples({
@@ -88,8 +190,12 @@ await samples({
 }, 'github:tidalcycles/Dirt-Samples/master/');
 s("<bd:0 bd:1>,~ <sd:0 sd:1>,[hh:0 hh:1]*2")
 ```
+</td></tr>
+</table>
 
-You must use the `^` identifier in this case:
+<table style="width: 100%">
+<td>Tidaml</td>
+<tr><td>
 
 ```yml
 ^samples:
@@ -99,16 +205,26 @@ You must use the `^` identifier in this case:
 - github:tidalcycles/Dirt-Samples/master/
 S: <bd:0 bd:1>,~ <sd:0 sd:1>,[hh:0 hh:1]*2
 ```
+</td></tr>
+</table>
+
+Such instructions are `await`ed, and their content are serialised (here `bd`, `sd` and `hh` are not considered as chained functions).
 
 ### Signals
 
-What about signals?
+Signals are written like they was functions:
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
 
 ```js
-saw.range(50, 80).segment(24).note()
+saw
+  .range(50, 80)
+  .segment(24)
+  .note()
 ```
-
-They are writen like they was functions:
+</td><td>
 
 ```yml
 Saw:
@@ -116,59 +232,114 @@ range: [50, 80]
 segment: 24
 note:
 ```
+</td></tr>
+</table>
 
 Note the clever use of the inline array in the `range` function to avoid line returns.
 
-### Lamda functions
+### Expressions
 
-Some functions takes a function as parameter:
+If you want to put an expression in a parameter, prepend it by the `=` sign:
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
 
 ```js
-note("c3 eb3 g3 a3").sometimes(x=>x.gain(8))
+"c3 [eb3,g3]"
+  .add(1/3)
+  .note()
 ```
+</td><td>
 
-The `Set` attribute must be used in this case:
+```yml
+M: c3 [eb3,g3]
+add: =1/3
+note:
+```
+</td></tr>
+</table>
+
+### Function in parameter
+
+Use the `Set` keyword to pass a function as parameter, such as in accumulation modifiers (here with an inline dictionnary):
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
+
+```js
+note("c3 eb3 g3 a3")
+  .sometimes(x=>x.gain(8))
+```
+</td><td>
 
 ```yml
 Note: c3 eb3 g3 a3
-sometimes:
-  Set:
-  gain: 8
+sometimes: { Set: , gain: 8 }
 ```
+</td></tr>
+</table>
 
-## Testing
+If necessary, the number of additional parameters must be passed to the `Set` value:
 
-```
-cd tidaml
-npm install
-npm run dev
-```
-
-## Things to fix
-
-### Applying a function to a mini-notation
+<table style="width: 100%">
+<td>Strudel</td>
+<tr><td>
 
 ```js
-stack(
-  n("<0 [2 4] <3 5> [~ <4 1>]>*2".add("<0 [0,2,4]>/4"))
-  .scale("C5:minor")
-)
+"<0 [2 4]>"
+  .echoWith(4, 1/8, (p,n) => p.add(n*2))
+  .scale('C minor')
+  .note()
 ```
+</td></tr>
+</table>
 
-Not same as:
+<table style="width: 100%">
+<td>Tidaml</td>
+<tr><td>
 
-```js
-stack(
-  n("<0 [2 4] <3 5> [~ <4 1>]>*2")
-  .add("<0 [0,2,4]>/4")
-  .scale("C5:minor")
-)
+```yml
+M: <0 [2 4]>
+echoWith: [ 4, =1/8, { Set: 1, add: =a*2 } ]
+scale: C minor
+note:
 ```
+</td></tr>
+</table>
 
-### Passing a function in attribute
+Such parameters are named `a`, then `b`, then `c`.
 
-```js
-n("0 1 [2 3] 2")
-  .scale("C5:minor")
-  .jux(rev)
-```
+## Contributing
+
+See the [contribution guide](./CONTRIBUTING.md)!
+
+## Authorship
+
+### Tidaml transpiler and demo website
+
+- credits: Nathanaël Jourdane and contributors
+- license: [AGPL-3.0](./LICENSE)
+- source: https://framagit.org/roipoussiere/tidaml
+
+### Strudel engine
+
+- credits: Strudel contributors
+- license: [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.txt)
+- source: https://github.com/tidalcycles/strudel
+
+### Pre-loaded sounds
+
+- piano:
+  - credits: Alexander Holm
+  - license: [CC-by](http://creativecommons.org/licenses/by/3.0)
+  - source: https://archive.org/details/SalamanderGrandPianoV3
+- VCSL:
+  - credits: Versilian Studios LLC
+  - license: [CC0](https://creativecommons.org/publicdomain/zero/1.0/)
+  - source: https://github.com/sgossner/VCSL
+- Tidal drum machines:
+  - source: https://github.com/ritchse/tidal-drum-machines
+- EmuSP12:
+  - source: https://github.com/tidalcycles/Dirt-Samples
