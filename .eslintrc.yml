@@ -2,7 +2,7 @@ root: true
 parser: '@typescript-eslint/parser'
 
 extends:
-- eslint:recommended
+- airbnb
 - plugin:@typescript-eslint/recommended
 
 plugins:
