@@ -14,5 +14,5 @@ Stack:
   room: .5
 - N: 0 1 [2 3] 2
   # sound: jazz # bug: sound not found
-  jux: { rev: }
+  jux: { Rev: }
   slow: 2

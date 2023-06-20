@@ -12,14 +12,9 @@ import * as yamlMode from '@codemirror/legacy-modes/mode/yaml';
 import { StreamLanguage, LanguageSupport } from '@codemirror/language'
 
 const TUNES_PATH = './tunes/'
-const TUNES = [
-  'ws1_multi-lines',
-  'ws2_stack',
-  'ws3_delay',
-  'ws3_dub_tune',
-  'ws3_stack_in_stack',
-  'ws4_add_stack'
-];
+const TUNES = [ 'ws2_stack', 'ws3_delay', 'ws3_dub_tune', 'ws3_stack_in_stack', 'ws4_add_stack',
+  'barry_harris', 'giant_steps', 'sample_drums', 'zelda_rescue' ];
+  // 'blippy_rhodes', 'caverave', 'festival_of_fingers', 'swimming', 'wavy_kalimba' ];
 const SIGNALS_FN = [ 'Saw', 'Sine', 'Cosine', 'Tri', 'Square', 'Rand', 'Perlin',
   'Saw2', 'Sine2', 'Cosine2', 'Tri2', 'Square2', 'Rand2' ]
 const LAMBDA_PARAMS_NAME = [ 'a', 'b', 'c']

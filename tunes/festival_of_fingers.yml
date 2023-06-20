@@ -1,0 +1,42 @@
+# "Festival of fingers"
+# @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
+# @by Felix Roos
+
+$Chords:
+  M: <Cm7 Fm7 G7 F#7>
+
+Stack:
+- $Chords:
+  voicings: lefthand
+  struct: x(3,8,-1)
+  velocity: .5
+  off:
+  - =1/7
+  - Set:
+    transpose: 12
+    velocity: .2
+- $Chords:
+  rootNotes: 2
+  struct: x(4,8,-2)
+- $Chords:
+  rootNotes: 4
+  scale:
+    Cat: [ C minor, F dorian, G dorian, F# mixolydian ]
+  struct:
+    M: x(3,8,-2)
+    fast: 2
+  scaleTranspose:
+    M: 0 4 0 6
+    early: .125 .5
+  layer:
+    scaleTranspose: 0,<2 [4,6] [5,7]>/4
+
+slow: 2
+velocity:
+  Sine:
+  struct: x*8
+  add: =3/5
+  mul: =2/5
+  fast: 8
+note:
+piano:
