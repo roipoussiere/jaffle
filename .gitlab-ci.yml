@@ -1,9 +1,9 @@
 image: node:20-alpine
 
 pages:
-  script:
-    - npm install
-    - npm run build
-  artifacts:
-    paths:
-      - public
+	script:
+	- npm install
+	- npm run build
+	artifacts:
+		paths:
+		- public

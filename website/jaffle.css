@@ -1,28 +1,28 @@
 body {
-    margin: 0;
+	margin: 0;
 }
 
 #buttons {
-    position: absolute;
-    border-radius: 10px;
-    top: 10px;
-    right: 10px;
+	position: absolute;
+	border-radius: 10px;
+	top: 10px;
+	right: 10px;
 }
 
 button {
-    margin: 5px;
-    cursor: pointer;
-    width: 4em;
-    height: 3em;
-    float: right;
+	margin: 5px;
+	cursor: pointer;
+	width: 4em;
+	height: 3em;
+	float: right;
 }
 
 #select_tune {
-    margin: 5px;
-    display: block;
-    height: 2em;
+	margin: 5px;
+	display: block;
+	height: 2em;
 }
 
 .cm-editor {
-    height: 100vh
+	height: 100vh
 }
