@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as yaml from 'js-yaml'
 
 import { EditorView, keymap } from '@codemirror/view';
@@ -150,7 +152,7 @@ function valueToString(value: any): string {
   } else if ( ! isNaN(value)) {
     value = `${ value }`
   } else if (value[0] === '=') {
-    value = value.substring(1).replaceAll(/[^a-c0-9\.\+\-\*\/\(\)]/g, '')
+    value = value.substring(1).replaceAll(/[^a-c0-9.+\-*/()]/g, '')
   } else if (value[0] === ':') {
     value = `'${ value.substring(1) }'`
   } else if (value[0] === '/') {
@@ -176,7 +178,7 @@ function parseOutro(node: any): string {
 }
 
 function getValue(attr: string, node: any, indentLvl: number): string {
-  let serialize = attr.split('^')[1]
+  const serialize = attr.split('^')[1]
 
   if (serialize === undefined) {
     return parseNode(node[attr], indentLvl)
@@ -214,7 +216,7 @@ function parseObject(node: any, indentLvl: number): string {
     }
   }
 
-  for (let attr of getOtherAttributes(node)) {
+  for (const attr of getOtherAttributes(node)) {
     const newAttr = attr.split('^')[0]
     value = getValue(attr, node, indentLvl)
     js += indent(indentLvl + 1) + `.${ newAttr }(${ value })`

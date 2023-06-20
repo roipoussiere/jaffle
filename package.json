@@ -5,10 +5,14 @@
     "esbuild": "esbuild ./src/tidaml.ts --bundle --outfile=./public/tidaml.js --target=es2022",
     "copy": "mkdir -p ./public && cp ./website/* ./public && cp -r tunes/ public/",
     "build": "npm run copy && npm run esbuild",
-    "start": "npm run copy && npm run esbuild -- --servedir=./public"
+    "start": "npm run copy && npm run esbuild -- --servedir=./public",
+    "lint": "eslint src/**"
   },
   "devDependencies": {
-    "esbuild": "^0.18.4"
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
+    "esbuild": "^0.18.4",
+    "eslint": "^8.43.0"
   },
   "dependencies": {
     "@codemirror/language": "^6.8.0",
