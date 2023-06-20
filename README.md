@@ -1,23 +1,25 @@
-# Tidaml
+# Jaffle
 
-A yaml-based syntax for [Tidal-cycles](https://tidalcycles.org/), based on [Strudel](https://strudel.tidalcycles.org).
+**J**ust **a**nother **f**lat **f**ile **l**ivecoding **e**nvironment.
 
 ## Introduction
 
-Tidaml is used to write tunes in yaml instead of JavaScript or Haskel, resulting in a lighter syntax. Its purpose is to make algorithmic music more accessible for people who are not familiar with programming languages.
+Jaffle is a yaml-based syntax for [Tidal-cycles](https://tidalcycles.org/), based on [Strudel](https://strudel.tidalcycles.org).
 
-Under the hood, it's a transpiler generating JavaScript code, which is then interpreted by Strudel.
+It is used to write tunes in yaml instead of JavaScript or Haskel, resulting in a lighter syntax. Its purpose is to make algorithmic music more accessible for people who are not familiar with programming languages.
+
+Under the hood, Jaffle is a transpiler generating JavaScript code, which is then interpreted by Strudel.
 
 ## Syntax
 
-This chapter aims to provide an overview of the Tidaml syntax, for people already familiar with Strudel. If necessary, read the [Strudel documentation](https://strudel.tidalcycles.org/learn).
+This chapter aims to provide an overview of the Jaffle syntax, for people already familiar with Strudel. If necessary, read the [Strudel documentation](https://strudel.tidalcycles.org/learn).
 
 ### Comments
 
 Yaml comments starts with a `#`:
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -36,7 +38,7 @@ Yaml comments starts with a `#`:
 Most of the time, quotes are optional (although many yaml syntax highlighters sucks are render them correctly):
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -70,7 +72,7 @@ To address this, you can use simple or double quotes, or prepend the mini-notati
 The chained functions are on the same indentation level:
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -97,7 +99,7 @@ Also, because dictionnaries are not ordered, the first instruction is capitalize
 It's totally safe to have a yaml attribute without value (just don't forget the `:`):
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -121,7 +123,7 @@ log:
 Use yaml arrays:
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -158,7 +160,7 @@ If the root node is an array, the surrounding function is `Stack` by default. Th
 When applying functions directly to a mini-notation, the `M` keyword must be used:
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -176,10 +178,10 @@ note:
 
 ### Escaping mini-notation
 
-Strudel makes the difference between mininotations and strings by using simple or double quotes. In Tidaml, strings are analysed as mini-notations by default. You must prepend them by the `:` sign to avoid this behavior.
+While Strudel distinguish mini-notations and strings by using simple or double quotes, Jaffle analyses strings as mini-notations by default. You must prepend them by the `:` sign to avoid this behavior.
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -200,7 +202,7 @@ scale: :C minor
 To pass a dictionnary as a function parameter, you must append the `^` sign to the attribute name.
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -219,7 +221,7 @@ pianoroll^: { fold: 1 }
 You may want to pass a dictionnary on a specific argument, by adding its index next to `^`, starting from 1.
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -263,7 +265,7 @@ s("<bd:0 bd:1>,~ <sd:0 sd:1>,[hh:0 hh:1]*2")
 </table>
 
 <table style="width: 100%">
-<td>Tidaml</td>
+<td>Jaffle</td>
 <tr><td>
 
 ```yml
@@ -281,7 +283,7 @@ Not the both use of the prefix `.` and the suffix `^1` to serialize the first pa
 
 You can add an extra `.` to `await` functions:
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -308,7 +310,7 @@ await samples({
 Signals are written like they was functions:
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -335,7 +337,7 @@ Note the clever use of the inline array in the `range` function to avoid line re
 If you want to put an expression in a parameter, prepend it by the `=` sign:
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -360,7 +362,7 @@ Such expressions are limited to simple mathematics (`+`, `=`, `*`, `/`).
 Use the `Set` keyword to pass a function as parameter, such as in accumulation modifiers (here with an inline dictionnary):
 
 <table style="width: 100%">
-<td>Strudel</td><td>Tidaml</td>
+<td>Strudel</td><td>Jaffle</td>
 <tr><td>
 
 ```js
@@ -392,7 +394,7 @@ If necessary, the number of additional parameters must be passed to the `Set` va
 </table>
 
 <table style="width: 100%">
-<td>Tidaml</td>
+<td>Jaffle</td>
 <tr><td>
 
 ```yml
@@ -412,11 +414,11 @@ See the [contribution guide](./CONTRIBUTING.md)!
 
 ## Authorship
 
-### Tidaml transpiler and demo website
+### Jaffle transpiler and demo website
 
 - credits: Nathanaël Jourdane and contributors
 - license: [AGPL-3.0](./LICENSE)
-- source: https://framagit.org/roipoussiere/tidaml
+- source: https://framagit.org/roipoussiere/jaffle
 
 ### Strudel engine
 

@@ -1,8 +1,8 @@
 {
-  "name": "tidaml",
+  "name": "jaffle",
   "version": "0.1.0",
   "scripts": {
-    "esbuild": "esbuild ./src/tidaml.ts --bundle --outfile=./public/tidaml.js --target=es2022",
+    "esbuild": "esbuild ./src/jaffle.ts --bundle --outfile=./public/jaffle.js --target=es2022",
     "copy": "mkdir -p ./public && cp ./website/* ./public && cp -r tunes/ public/",
     "build": "npm run copy && npm run esbuild",
     "start": "npm run copy && npm run esbuild -- --servedir=./public",

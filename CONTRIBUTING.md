@@ -1,4 +1,4 @@
-# contributing to Tidaml
+# contributing to Jaffle
 
 If you want to contribute to Strudel itself (for instance to add new functions), you must refer to the [Strudel repository](https://github.com/tidalcycles/strudel).
 
@@ -6,7 +6,7 @@ If you want to contribute to Strudel itself (for instance to add new functions),
 
 They are highly appreciated! You can either:
 
-- create issues and suggestions on [Framagit](https://framagit.org/roipoussiere/tidaml/-/issues) (GitLab instance);
+- create issues and suggestions on [Framagit](https://framagit.org/roipoussiere/jaffle/-/issues) (GitLab instance);
 - say hello to `@roipoussiere` on the Strudel Discord :)
 
 ## Contributing to code
@@ -14,8 +14,8 @@ They are highly appreciated! You can either:
 To download the project and its dependencies:
 
 ```
-git clone https://framagit.org/roipoussiere/tidaml
-cd tidaml
+git clone https://framagit.org/roipoussiere/jaffle
+cd jaffle
 npm install
 ```
 
