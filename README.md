@@ -140,7 +140,7 @@ Stack:
 </td></tr>
 </table>
 
-Alternatively, with inline arrays:
+You could eventually use an inline array:
 
 ```yml
 Stack: [ S: oh*2 cb*2 ~, S: bd sd hh*2 ]
@@ -174,16 +174,85 @@ note:
 </td></tr>
 </table>
 
-### Loading samples
+### Escaping mini-notation
 
-You must prepend the `sample` attribute with the `^` sign:
+Strudel makes the difference between mininotations and strings by using simple or double quotes. In Tidaml, strings are analysed as mini-notations by default. You must prepend them by the `:` sign to avoid this behavior.
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
+
+```js
+n("1 2 3")
+  .scale('C minor')
+```
+</td><td>
+
+```yml
+N: 1 2 3
+scale: :C minor
+```
+</td></tr>
+</table>
+
+### Data serialization
+
+To pass a dictionnary as a function parameter, you must append the `^` sign to the attribute name.
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
+
+```js
+s("sd oh*2 hh")
+  .pianoroll({ fold: 1 })
+```
+</td><td>
+
+```yml
+S: sd oh*2 hh
+pianoroll^: { fold: 1 }
+```
+</td></tr>
+</table>
+
+You may want to pass a dictionnary on a specific argument, by adding its index next to `^`, starting from 1.
+
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
+
+```js
+samples({
+  bd: '...',
+  sd: '...',
+  hh: '...' }
+  , '...')
+```
+</td><td>
+
+```yml
+samples^1:
+- bd: ...
+  sd: ...
+  hh: ...
+- ...
+```
+</td></tr>
+</table>
+
+Note: the `sample` example above does not work as is, see below.
+
+### Out of scope functions
+
+Some functions like `samples` are not part of the main music structure like `Stack` or `Cat`. You must prepend their name with the `.` sign:
 
 <table style="width: 100%">
 <td>Strudel</td>
 <tr><td>
 
 ```js
-await samples({
+samples({
   bd: ['bd/BT0AADA.wav','bd/BT0AAD0.wav'],
   sd: ['sd/rytm-01-classic.wav','sd/rytm-00-hard.wav'],
   hh: ['hh27/000_hh27closedhh.wav','hh/000_hh3closedhh.wav'],
@@ -198,17 +267,41 @@ s("<bd:0 bd:1>,~ <sd:0 sd:1>,[hh:0 hh:1]*2")
 <tr><td>
 
 ```yml
-^samples:
+.samples^1:
 - bd: [ bd/BT0AADA.wav, bd/BT0AAD0.wav ]
   sd: [ sd/rytm-01-classic.wav, sd/rytm-00-hard.wav ]
   hh: [ hh27/000_hh27closedhh.wav, hh/000_hh3closedhh.wav ]
-- github:tidalcycles/Dirt-Samples/master/
+- :github:tidalcycles/Dirt-Samples/master/
 S: <bd:0 bd:1>,~ <sd:0 sd:1>,[hh:0 hh:1]*2
 ```
 </td></tr>
 </table>
 
-Such instructions are `await`ed, and their content are serialised (here `bd`, `sd` and `hh` are not considered as chained functions).
+Not the both use of the prefix `.` and the suffix `^1` to serialize the first parameter.
+
+You can add an extra `.` to `await` functions:
+<table style="width: 100%">
+<td>Strudel</td><td>Tidaml</td>
+<tr><td>
+
+```js
+await samples({
+  bd: '...',
+  sd: '...',
+  hh: '...' }
+  , '...')
+```
+</td><td>
+
+```yml
+..samples^1:
+- bd: ...
+  sd: ...
+  hh: ...
+- ...
+```
+</td></tr>
+</table>
 
 ### Signals
 
@@ -259,6 +352,8 @@ note:
 ```
 </td></tr>
 </table>
+
+Such expressions are limited to simple mathematics (`+`, `=`, `*`, `/`).
 
 ### Function in parameter
 
