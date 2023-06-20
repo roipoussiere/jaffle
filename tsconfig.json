@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"module": "ES2022",
+		"target": "ES2022",
+		"outDir": "dist",
+		"lib": [ "ES2022" ],
+		"sourceMap": true,
+		"rootDir": "src",
+		"strict": true,
+		"moduleResolution": "nodenext",
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedParameters": true,
+	},
+	"include": [
+		"node_modules/@codemirror/legacy-modes/mode/yaml.d.ts"	
+	]
+}
