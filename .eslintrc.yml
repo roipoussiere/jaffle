@@ -11,3 +11,10 @@ plugins:
 rules:
   indent: [ error, tab ]
   no-tabs: off
+  no-underscore-dangle: off
+  import/extensions: [ error, never ]
+
+settings:
+  import/resolver:
+    node:
+      extensions: [ .js, .ts ]
