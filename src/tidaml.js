@@ -102,7 +102,7 @@ function initAudio() {
 
 function transpiler(inputYaml) {
   const tune = yaml.load(inputYaml)
-  let outputJs = readAsyncs(tune)
+  let outputJs = readOutro(tune)
   outputJs += `return ${ readBlock(tune instanceof Array ? { 'Stack': tune } : tune) }\n`
   console.log(outputJs);
   return outputJs
@@ -136,12 +136,12 @@ function getMainAttribute(obj) {
   return mainAttr
 }
 
-function getAsyncAttributes(obj) {
-  return Object.keys(obj).filter(key => key[0] == '^')
+function getOutroAttributes(obj) {
+  return Object.keys(obj).filter(key => key[0] === '.')
 }
 
 function getOtherAttributes(obj) {
-  return Object.keys(obj).filter(key => key[0] == key[0].toLowerCase() && key[0] != '^')
+  return Object.keys(obj).filter(key => key[0] === key[0].toLowerCase() && key[0] !== '.')
 }
 
 function valueToString(value) {
@@ -165,11 +165,12 @@ function indent(lvl) {
   return lvl == 0 ? '' : '\n' + '  '.repeat(lvl)
 }
 
-function readAsyncs(obj) {
+function readOutro(obj) {
   let js = ''
-  for (const attr of getAsyncAttributes(obj)) {
-    const json = JSON.stringify(obj[attr][0], null, '  ').replaceAll('"', "'")
-    js += `await ${ attr.substring(1)}(${ json }, '${ obj[attr][1] }')\n`
+  for (const attr of getOutroAttributes(obj)) {
+    const newAttr = attr.split('^')[0]
+    const prefix = attr[1] === '.' ? `await ${ newAttr.substring(2) }` : newAttr.substring(1)
+    js += `${ prefix }(${ getValue(attr, obj) })\n`
   }
   return js
 }
