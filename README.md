@@ -2,6 +2,10 @@
 
 **J**ust **a**nother **f**lat **f**ile **l**ivecoding **e**nvironment.
 
+<p style="text-align: center;">
+<img src="./images/jaffle_icon_128.png"/>
+</p>
+
 ## Introduction
 
 Jaffle is a yaml-based syntax for [Tidal-cycles](https://tidalcycles.org/), based on [Strudel](https://strudel.tidalcycles.org).
