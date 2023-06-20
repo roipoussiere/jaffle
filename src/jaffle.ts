@@ -158,7 +158,7 @@ function valueToString(value: any): string {
 	} if (!value.isNaN()) {
 		return `${value}`;
 	} if (value[0] === '=') {
-		return value.substring(1).replaceAll(/[^a-c0-9.+\-*/()]/g, '');
+		return value.substring(1).replace(/[^a-c0-9.+\-*/()]/g, '');
 	} if (value[0] === ':') {
 		return `'${value.substring(1)}'`;
 	} if (value[0] === '/') {
@@ -181,19 +181,22 @@ function parseOutro(node: any): string {
 	return js;
 }
 
-function getValue(attr: string, node: any, indentLvl: number): string {
-	const serialize = attr.split('^')[1];
+function serialize(node: any): string {
+	return JSON.stringify(node, null, '  ').replace(/"/g, "'");
+}
 
-	if (serialize === undefined) {
+function getValue(attr: string, node: any, indentLvl: number): string {
+	const suffix = attr.split('^')[1];
+
+	if (suffix === undefined) {
 		return parseNode(node[attr], indentLvl);
-	} if (serialize === '') {
-		return JSON.stringify(node[attr], null, '  ').replace(/_/g, ' ');
 	}
-	const paramId = parseInt(serialize, 10) - 1;
+	if (suffix === '') {
+		return serialize(node[attr]);
+	}
+	const paramId = parseInt(suffix, 10) - 1;
 	return node[attr].map((child: any, id: number) => (
-		id === paramId
-			? JSON.stringify(child, null, '  ').replace(/_/g, ' ')
-			: valueToString(child)
+		id === paramId ? serialize(child) : valueToString(child)
 	));
 }
 
