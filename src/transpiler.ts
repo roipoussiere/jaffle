@@ -16,9 +16,9 @@ function valueToString(value: any): string {
 	} if (value[0] === ':') {
 		return `'${value.substring(1)}'`;
 	} if (value[0] === '/') {
-		return `mini('${value.substring(1).trim()}')`;
+		return `mini('${value.substring(1).replace(/\s+/g, ' ')}')`;
 	}
-	return `mini('${value.trim()}')`;
+	return `mini('${value.replace(/\s+/g, ' ')}')`;
 }
 
 function parseNode(node: any, indentLvl = 0): string {
