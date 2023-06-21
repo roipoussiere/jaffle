@@ -82,8 +82,8 @@ class JaffleEditor {
 
 		const domButtons = document.createElement('div');
 		domButtons.id = 'jaffle_buttons';
-		domButtons.appendChild(domBtnStart);
 		domButtons.appendChild(domBtnStop);
+		domButtons.appendChild(domBtnStart);
 
 		this.container.appendChild(domButtons);
 	}
@@ -97,7 +97,6 @@ class JaffleEditor {
 
 		#jaffle_buttons {
 			position: absolute;
-			border-radius: 10px;
 			top: 10px;
 			right: 10px;
 			z-index: 6;
@@ -109,6 +108,14 @@ class JaffleEditor {
 			width: 4em;
 			height: 3em;
 			float: right;
+			border-radius: 5px;
+			background-color: darkolivegreen;
+			border: none;
+			color: white;
+		}
+
+		.jaffle_btn:hover {
+			background-color: darkcyan;
 		}
 		
 		.cm-editor {
