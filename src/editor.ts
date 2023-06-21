@@ -24,6 +24,7 @@ class JaffleEditor {
 		this.container.className = 'jaffle_container';
 		this.buildEditor();
 		this.buildButtons();
+		this.buildStyleSheet();
 	}
 
 	public getText(): string {
@@ -85,6 +86,36 @@ class JaffleEditor {
 		domButtons.appendChild(domBtnStop);
 
 		this.container.appendChild(domButtons);
+	}
+
+	private buildStyleSheet() {
+		this.style = new CSSStyleSheet();
+		this.style.replaceSync(`
+		.jaffle_container {
+			position: relative;
+		}
+
+		#jaffle_buttons {
+			position: absolute;
+			border-radius: 10px;
+			top: 10px;
+			right: 10px;
+			z-index: 6;
+		}
+		
+		.jaffle_btn {
+			margin: 5px;
+			cursor: pointer;
+			width: 4em;
+			height: 3em;
+			float: right;
+		}
+		
+		.cm-editor {
+			height: 100%
+		}
+		`);
+		document.adoptedStyleSheets = [this.style];
 	}
 }
 

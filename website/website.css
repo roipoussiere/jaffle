@@ -7,27 +7,3 @@ body {
 	display: block;
 	height: 2em;
 }
-
-.jaffle_container {
-	position: relative;
-}
-
-#jaffle_buttons {
-	position: absolute;
-	border-radius: 10px;
-	top: 10px;
-	right: 10px;
-	z-index: 6;
-}
-
-.jaffle_btn {
-	margin: 5px;
-	cursor: pointer;
-	width: 4em;
-	height: 3em;
-	float: right;
-}
-
-.cm-editor {
-	height: 100%
-}
