@@ -29,13 +29,13 @@ $Drums:
 $Thru:
   Set:
   transpose: <0 1>/8
-  transpose#1: -1
+  transpose': -1
 
 $Synths:
   Stack:
   - M: <eb4 d4 c4 b3>/2
     scale:
-      timeCat: [3, 'C minor'], [1, 'C melodic minor']
+      timeCat^: [ [ 3, C minor ], [ 1, C melodic minor ] ]
       slow: 8
     struct: /[~ x]*2
     layer:
@@ -47,7 +47,7 @@ $Synths:
     note:
     apply: $Keys:
     mask: <~ x>/16
-    color: darkseagreen
+    color: :darkseagreen
 
   - Note: <C2 Bb1 Ab1 [G1 [G2 G1]]>/2
     apply: $Thru:
@@ -59,14 +59,14 @@ $Synths:
     decay: 0.2
     sustain: 1
     cutoff: 500
-    color: brown
+    color: :brown
 
   - M: <Cm7 Bb7 Fm7 G7b13>/2
     struct:
       M: ~ [x@0.2 ~]
       fast: 2
-    voicings: lefthand
-    apply: thru
+    voicings: :lefthand
+    apply: $Thru:
     every: [ 2, early: =1/8 ]
     note:
     apply: $Keys:
@@ -79,7 +79,7 @@ $Synths:
 Stack:
 - $Drums:
   fast: 2
-  color: tomato
+  color: :tomato
 - $Synths:
 slow: 2
 pianoroll^: { fold: 1 }

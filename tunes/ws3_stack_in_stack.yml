@@ -1,8 +1,11 @@
+# "Strudel workshop, first effects: stacks within stacks"
+# @by Felix Roos
+# @source: https://strudel.tidalcycles.org/workshop/first-effects#some-basic-effects
+
 Stack:
 - Stack:
   - Sound: hh*8
-    # first '_' are stripped (avoid [] to be read as yaml array)
-    gain: _[.25 1]*2
+    gain: /[.25 1]*2
   - Sound: bd*2,~ sd:1
 
 - Note: <[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2

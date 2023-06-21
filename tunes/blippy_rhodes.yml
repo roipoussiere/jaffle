@@ -2,7 +2,7 @@
 # @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
 # @by Felix Roos
 
-.samples^1:
+.samples^:
 - bd: samples/tidal/bd/BT0A0D0.wav
   sn: samples/tidal/sn/ST0T0S3.wav
   hh: samples/tidal/hh/000_hh3closedhh.wav
@@ -14,14 +14,14 @@
     E5: samples/rhodes/MK2Md2048.mp3
     E6: samples/rhodes/MK2Md2060.mp3
     E7: samples/rhodes/MK2Md2072.mp3
-- :https://loophole-letters.vercel.app/
+- https://loophole-letters.vercel.app/
 
 $Scales:
   Cat:
-  - C major
-  - C mixolydian
-  - F lydian
-  - [ F minor, Cat: [ Db major, Db mixolydian ] ]
+  - :C major
+  - :C mixolydian
+  - :F lydian
+  - [ :F minor, Cat: [ :Db major, :Db mixolydian ] ]
 
 Stack:
 - S: <bd sn> <hh hh*2 hh*3>

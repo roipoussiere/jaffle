@@ -7,7 +7,7 @@
     c5: https://freesound.org/data/previews/536/536549_11935698-lq.mp3
 
 $Scales: 
-  Cat: [ C major, C mixolydian, F lydian, [ F minor, Db major ] ]
+  Cat^: [ C major, C mixolydian, F lydian, [ F minor, Db major ] ]
 
 Stack:
 - M: /[0 2 4 6 9 2 0 -2]*3
@@ -18,7 +18,7 @@ Stack:
   slow: 2
 
 - M: <c2 c2 f2 [[F2 C2] db2]>
-  scale: scales
+  scale: $Scales:
   scaleTranspose: /[0 <2 4>]*2
   struct: x*4
   velocity: <.8 .5>*4

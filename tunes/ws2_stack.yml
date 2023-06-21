@@ -1,3 +1,7 @@
+# "Strudel workshop, first notes: stack example"
+# @by Felix Roos
+# @source https://strudel.tidalcycles.org/workshop/first-notes#examples
+
 Stack:
 - Note: <[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2
   sound: gm_synth_bass_1

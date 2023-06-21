@@ -21,7 +21,7 @@ Stack:
 - $Chords:
   rootNotes: 4
   scale:
-    Cat: [ C minor, F dorian, G dorian, F# mixolydian ]
+    Cat^: [ C minor, F dorian, G dorian, F# mixolydian ]
   struct:
     M: x(3,8,-2)
     fast: 2
