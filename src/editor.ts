@@ -1,5 +1,5 @@
 import { EditorView, keymap } from '@codemirror/view';
-import { solarizedLight } from '@uiw/codemirror-theme-solarized';
+import { solarizedDark } from '@uiw/codemirror-theme-solarized';
 import { yaml as yamlMode } from '@codemirror/legacy-modes/mode/yaml';
 import { StreamLanguage, LanguageSupport } from '@codemirror/language';
 
@@ -44,7 +44,7 @@ class JaffleEditor {
 	private buildEditor(): void {
 		this.editor = new EditorView({
 			extensions: [
-				solarizedLight,
+				solarizedDark,
 				yamlLang,
 				keymap.of([{
 					key: 'Ctrl-Enter',
@@ -113,6 +113,14 @@ class JaffleEditor {
 		
 		.cm-editor {
 			height: 100%
+		}
+		
+		.cm-content {
+			font-size: 16px;
+		}
+
+		#test-canvas {
+			opacity: 0.5;
 		}
 		`);
 		document.adoptedStyleSheets = [this.style];
