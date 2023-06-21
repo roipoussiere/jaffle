@@ -123,7 +123,7 @@ class JaffleEditor {
 		}
 		
 		.cm-content {
-			font-size: 16px;
+			font-size: 15.5px;
 		}
 
 		#test-canvas {

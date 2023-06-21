@@ -10,8 +10,8 @@ body {
 }
 
 #jaffle {
-	max-width: 800px;
-	height: 450px;
+	max-width: 600px;
+	height: 400px;
 	margin: auto;
 	box-shadow: 0 0 10px black;
 }

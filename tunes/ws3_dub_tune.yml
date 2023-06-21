@@ -1,6 +1,5 @@
 # "Strudel workshop, first effects: little dub tune"
 # @by Felix Roos
-# @source: https://strudel.tidalcycles.org/workshop/first-effects#some-basic-effects
 
 Stack:
 - Note: ~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]
