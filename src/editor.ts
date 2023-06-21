@@ -11,26 +11,14 @@ type OnPlay = (editor: JaffleEditor) => void
 type OnStop = (editor: JaffleEditor) => void
 
 class JaffleEditor {
-	private onPlay: OnPlay;
+	public onPlay: OnPlay;
 
-	private onStop: OnStop;
+	public onStop: OnStop;
 
 	private editor: EditorView;
 
-	constructor(onPlay: OnPlay, onStop: OnStop) {
-		this.onPlay = onPlay;
-		this.onStop = onStop;
+	constructor() {
 		this.editor = this.buildEditor();
-	}
-
-	private _onPlay(): boolean {
-		this.onPlay(this);
-		return false;
-	}
-
-	private _onStop(): boolean {
-		this.onStop(this);
-		return false;
 	}
 
 	private buildEditor(): EditorView {
@@ -38,9 +26,19 @@ class JaffleEditor {
 			extensions: [
 				solarizedLight,
 				yamlLang,
-				keymap.of([
-					{ key: 'Ctrl-Enter', run: this._onPlay },
-					{ key: 'Ctrl-.', run: this._onStop },
+				keymap.of([{
+					key: 'Ctrl-Enter',
+					run: () => {
+						this.onPlay(this);
+						return false;
+					},
+				}, {
+					key: 'Ctrl-.',
+					run: () => {
+						this.onStop(this);
+						return false;
+					},
+				},
 				]),
 			],
 			parent: <HTMLElement> document.getElementById('input'),

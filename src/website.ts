@@ -16,6 +16,8 @@ const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune')
 const domBtnStart = <HTMLInputElement> document.getElementById('start');
 const domBtnStop = <HTMLInputElement> document.getElementById('stop');
 
+const editor = new JaffleEditor();
+
 const ctx = webaudio.getAudioContext();
 
 const { evaluate, stop } = core.repl({
@@ -24,7 +26,7 @@ const { evaluate, stop } = core.repl({
 	transpiler,
 });
 
-function onPlay(editor: JaffleEditor): void {
+function onPlay(): void {
 	ctx.resume();
 	evaluate(editor.getText());
 }
@@ -33,7 +35,8 @@ function onStop(): void {
 	stop();
 }
 
-const editor = new JaffleEditor(onPlay, onStop);
+editor.onPlay = onPlay;
+editor.onStop = onStop;
 
 function loadTune(tuneName: string): void {
 	// eslint-disable-next-line no-console
@@ -88,7 +91,7 @@ function initAudio(): void {
 initAudio();
 
 window.addEventListener('DOMContentLoaded', onDomLoaded);
-domBtnStart.addEventListener('click', () => onPlay(editor));
+domBtnStart.addEventListener('click', onPlay);
 domBtnStop.addEventListener('click', onStop);
 domSelectTune.addEventListener('change', (event) => {
 	loadTune((<HTMLSelectElement> event.target).value);
