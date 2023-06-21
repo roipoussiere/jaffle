@@ -26,13 +26,19 @@ const { evaluate, stop } = core.repl({
 	transpiler,
 });
 
+function getPianoRoll(): HTMLCanvasElement {
+	return <HTMLCanvasElement> document.getElementById('test-canvas');
+}
+
 function onPlay(): void {
 	ctx.resume();
 	evaluate(editor.getText());
+	getPianoRoll().style.display = 'block';
 }
 
 function onStop(): void {
 	stop();
+	getPianoRoll().style.display = 'none';
 }
 
 editor.onPlay = onPlay;
