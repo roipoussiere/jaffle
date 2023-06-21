@@ -8,7 +8,7 @@ const TUNES_PATH = './tunes/';
 const TUNES = ['ws2_stack', 'ws3_delay', 'ws3_dub_tune', 'ws3_stack_in_stack', 'ws4_add_stack',
 	'barry_harris', 'giant_steps', 'sample_drums', 'zelda_rescue'];
 	// 'blippy_rhodes', 'caverave', 'festival_of_fingers', 'swimming', 'wavy_kalimba' ];
-
+const DEFAULT_TUNE = 'ws2_stack';
 const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune');
 const editor = new JaffleEditor();
 const strudel = new Strudel();
@@ -52,7 +52,7 @@ editor.onStop = () => strudel.stop();
 window.addEventListener('DOMContentLoaded', () => {
 	editor.build(<HTMLInputElement> document.getElementById('jaffle'));
 	fillTunesList();
-	loadTune(window.location.hash.substring(1) || getRandomTune());
+	loadTune(window.location.hash.substring(1) || DEFAULT_TUNE);
 });
 
 domSelectTune.addEventListener('change', (event) => {
