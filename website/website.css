@@ -2,14 +2,25 @@ body {
 	margin: 0;
 }
 
-#buttons {
+#select_tune {
+	margin: 5px;
+	display: block;
+	height: 2em;
+}
+
+.jaffle_container {
+	position: relative;
+}
+
+#jaffle_buttons {
 	position: absolute;
 	border-radius: 10px;
 	top: 10px;
 	right: 10px;
+	z-index: 6;
 }
 
-button {
+.jaffle_btn {
 	margin: 5px;
 	cursor: pointer;
 	width: 4em;
@@ -17,12 +28,6 @@ button {
 	float: right;
 }
 
-#select_tune {
-	margin: 5px;
-	display: block;
-	height: 2em;
-}
-
 .cm-editor {
-	height: 100vh
+	height: 100%
 }

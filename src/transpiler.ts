@@ -117,13 +117,11 @@ function parseObject(node: any, indentLvl: number): string {
 	return js;
 }
 
-function transpiler(inputYaml: string): string {
+function transpile(inputYaml: string): string {
 	const tune = yaml.load(inputYaml);
 	let outputJs = parseOutro(tune);
 	outputJs += `return ${parseNode(tune instanceof Array ? { Stack: tune } : tune)}\n`;
-	// eslint-disable-next-line no-console
-	console.log(outputJs);
 	return outputJs;
 }
 
-export default transpiler;
+export default transpile;

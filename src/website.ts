@@ -1,11 +1,8 @@
-import * as core from '@strudel.cycles/core';
-import * as mini from '@strudel.cycles/mini';
-import * as webaudio from '@strudel.cycles/webaudio';
-import * as tonal from '@strudel.cycles/tonal';
-import { registerSoundfonts } from '@strudel.cycles/soundfonts';
+/* eslint-disable no-console */
 
-import transpiler from './transpiler';
+import transpile from './transpiler';
 import JaffleEditor from './editor';
+import Strudel from './strudel_helper';
 
 const TUNES_PATH = './tunes/';
 const TUNES = ['ws2_stack', 'ws3_delay', 'ws3_dub_tune', 'ws3_stack_in_stack', 'ws4_add_stack',
@@ -13,92 +10,51 @@ const TUNES = ['ws2_stack', 'ws3_delay', 'ws3_dub_tune', 'ws3_stack_in_stack', '
 	// 'blippy_rhodes', 'caverave', 'festival_of_fingers', 'swimming', 'wavy_kalimba' ];
 
 const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune');
-const domBtnStart = <HTMLInputElement> document.getElementById('start');
-const domBtnStop = <HTMLInputElement> document.getElementById('stop');
-
 const editor = new JaffleEditor();
-
-const ctx = webaudio.getAudioContext();
-
-const { evaluate, stop } = core.repl({
-	defaultOutput: webaudio.webaudioOutput,
-	getTime: () => ctx.currentTime,
-	transpiler,
-});
-
-function getPianoRoll(): HTMLCanvasElement {
-	return <HTMLCanvasElement> document.getElementById('test-canvas');
-}
-
-function onPlay(): void {
-	ctx.resume();
-	evaluate(editor.getText());
-	getPianoRoll().style.display = 'block';
-}
-
-function onStop(): void {
-	stop();
-	getPianoRoll().style.display = 'none';
-}
-
-editor.onPlay = onPlay;
-editor.onStop = onStop;
+const strudel = new Strudel();
 
 function loadTune(tuneName: string): void {
-	// eslint-disable-next-line no-console
 	console.log(`Loading tune ${tuneName}...`);
 	fetch(`${TUNES_PATH}${tuneName}.yml`)
 		.then((response) => response.text())
-		.then((data) => editor.setText(data));
+		.then((data) => {
+			editor.setText(data);
+			console.log('Tune loaded.');
+		});
 	domSelectTune.value = tuneName;
 	window.location.hash = `#${tuneName}`;
 }
 
-function onDomLoaded(): void {
+function getRandomTune(): string {
+	return TUNES[Math.floor(Math.random() * TUNES.length)];
+}
+
+function fillTunesList(): void {
 	TUNES.forEach((tune) => {
 		const domTuneItem = document.createElement('option');
 		domTuneItem.value = tune;
 		domTuneItem.innerHTML = tune.replace(/_/g, ' ');
 		domSelectTune.append(domTuneItem);
 	});
-
-	loadTune(window.location.hash.substring(1)
-		|| TUNES[Math.floor(Math.random() * TUNES.length)]);
 }
 
-function initAudio(): void {
-	webaudio.samples(
-		'https://strudel.tidalcycles.org/vcsl.json',
-		'github:sgossner/VCSL/master/',
-		{ prebake: true },
-	);
-	webaudio.samples(
-		'https://strudel.tidalcycles.org/piano.json',
-		'https://strudel.tidalcycles.org/piano/',
-		{ prebake: true },
-	);
-	webaudio.samples(
-		'https://strudel.tidalcycles.org/tidal-drum-machines.json',
-		'github:ritchse/tidal-drum-machines/main/machines/',
-		{ prebake: true, tag: 'drum-machines' },
-	);
-	webaudio.samples(
-		'https://strudel.tidalcycles.org/EmuSP12.json',
-		'https://strudel.tidalcycles.org/EmuSP12/',
-		{ prebake: true, tag: 'drum-machines' },
-	);
-
-	webaudio.initAudioOnFirstClick();
-	webaudio.registerSynthSounds();
-	registerSoundfonts();
-	core.evalScope(core.controls, core, mini, webaudio, tonal);
+function transpiler(input: string) {
+	const output = transpile(input);
+	console.log(output);
+	return output;
 }
 
-initAudio();
+strudel.transpiler = (tune) => transpiler(tune);
+strudel.init();
+editor.onPlay = () => strudel.play(editor.getText());
+editor.onStop = () => strudel.stop();
 
-window.addEventListener('DOMContentLoaded', onDomLoaded);
-domBtnStart.addEventListener('click', onPlay);
-domBtnStop.addEventListener('click', onStop);
+window.addEventListener('DOMContentLoaded', () => {
+	editor.build(<HTMLInputElement> document.getElementById('jaffle'));
+	fillTunesList();
+	loadTune(window.location.hash.substring(1) || getRandomTune());
+});
+
 domSelectTune.addEventListener('change', (event) => {
 	loadTune((<HTMLSelectElement> event.target).value);
 });
