@@ -40,7 +40,7 @@ a:hover {
 	text-align: center;
 }
 
-#source_code a {
+footer {
 	position: absolute;
 	right: 10px; 
 	bottom: 10px;

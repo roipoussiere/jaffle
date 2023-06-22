@@ -1,0 +1,7 @@
+{{ define "footer" }}
+
+{{ range .Site.Params.links }}
+	<a href="{{ .url }}">{{ .name }}</a>
+{{ end }}
+
+{{ end }}

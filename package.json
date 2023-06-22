@@ -2,10 +2,7 @@
 	"name": "jaffle",
 	"version": "0.1.0",
 	"scripts": {
-		"esbuild": "esbuild ./src/website.ts --bundle --outfile=./public/website.js --target=es2022",
-		"copy": "mkdir -p ./public && cp ./website/* ./public && cp -r tunes/ public/ && cp images/jaffle_icon_32.png public/favicon.png",
-		"build": "npm run copy && npm run esbuild",
-		"start": "npm run copy && npm run esbuild -- --servedir=./public",
+		"build": "esbuild ./src/website.ts --bundle --outfile=./website/static/js/website.js --target=es2022",
 		"lint": "eslint src/*"
 	},
 	"devDependencies": {

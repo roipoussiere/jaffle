@@ -1,0 +1,13 @@
+baseURL: https://roipoussiere.frama.io/jaffle/
+disableKinds: [ section, taxonomy, term, RSS, robotsTXT ]
+defaultContentLanguage: en
+title: Jaffle
+publishDir: ../public
+
+params:
+  description: Live coding in Yaml
+  favicon: images/jaffle_icon_32.png
+  scripts: [ js/website.js ]
+  links:
+  - name: Source code
+    url: https://framagit.org/roipoussiere/jaffle

@@ -1,9 +1,20 @@
-image: node:20-alpine
-
-pages:
+build:
+  stage: build
+  image: node:20-alpine
   script:
   - npm install
   - npm run build
+  artifacts:
+    paths:
+      - website/static/js/website.js
+
+pages:
+  stage: deploy
+  image:
+    name: klakegg/hugo:alpine
+    entrypoint: [ '' ]
+  script:
+  - hugo -s website
   artifacts:
     paths:
     - public

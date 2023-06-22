@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" charset="utf-8">
+	<head>
+		{{ block "head" . }}{{ end }}
+	</head>
+	<body>
+		<header>
+			{{ block "header" . }}{{ end }}
+		</header>
+		<main>
+			{{ block "main" . }}{{ end }}
+		</main>
+		<footer>
+			{{ block "footer" . }}{{ end }}
+		</footer>
+
+		{{ range .Site.Params.scripts }}
+			<script type="module" src="{{ . }}"></script>
+		{{ end }}
+
+	</body>
+</html>

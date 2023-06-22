@@ -1,3 +1,14 @@
+# Dependencies
 node_modules
-public
+
+# Generated website
+/public
+
+# Bundle
+/website/static/js/website.js
+
+# Temporary files used when developping
 __*
+
+# Hugo lock file
+.hugo_build.lock

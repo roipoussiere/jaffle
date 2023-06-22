@@ -1,0 +1,16 @@
+{{ define "head" }}
+
+<link
+	rel="stylesheet"
+	href='{{ "css/custom.css" | absURL }}'
+>
+
+<link
+	rel="icon"
+	type="image/png"
+	href='{{ .Site.Params.Favicon | absURL }}'
+/>
+
+<title>{{ .Site.Title }} - {{ .Site.Params.description }}</title>
+
+{{ end }}
