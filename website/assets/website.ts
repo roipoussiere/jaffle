@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
 
-import transpile from './transpiler';
-import JaffleEditor from './editor';
-import Strudel from './strudel_helper';
+import { transpiler as _transpiler, JaffleEditor, Strudel } from './jaffle';
 
 const TUNES_PATH = './tunes/';
 const TUNES = ['ws2_stack', 'ws3_delay', 'ws3_dub_tune', 'ws3_stack_in_stack', 'ws4_add_stack',
@@ -39,7 +37,7 @@ function fillTunesList(): void {
 }
 
 function transpiler(input: string) {
-	const output = transpile(input);
+	const output = _transpiler(input);
 	console.log(output);
 	return output;
 }

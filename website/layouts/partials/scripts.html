@@ -1,0 +1,9 @@
+{{ define "scripts" }}
+
+{{ $script := resources.Get "website.ts" | js.Build }}
+<script
+	src="{{ $script.RelPermalink }}"
+	defer>
+</script>
+
+{{ end }}

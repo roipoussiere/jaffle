@@ -20,7 +20,10 @@
 	},
 	"browser": "src/index.ts",
 	"scripts": {
-		"build": "esbuild ./src/website.ts --bundle --outfile=./website/static/js/website.js --target=es2022",
+		"build": "esbuild ./index.ts --bundle --outfile=./dist/jaffle.js --target=es2022",
+		"watch": "npm run build -- --watch",
+		"build_website": "hugo -s website",
+		"watch_website": "npm run build_website -- server",
 		"lint": "eslint src/*"
 	},
 	"devDependencies": {

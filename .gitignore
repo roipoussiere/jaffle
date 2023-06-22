@@ -4,8 +4,8 @@ node_modules
 # Generated website
 /public
 
-# Bundle
-/website/static/js/website.js
+# Bundled module
+/dist
 
 # Temporary files used when developping
 __*

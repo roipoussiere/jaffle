@@ -14,9 +14,6 @@
 			{{ block "footer" . }}{{ end }}
 		</footer>
 
-		{{ range .Site.Params.scripts }}
-			<script type="module" src="{{ . }}"></script>
-		{{ end }}
-
+		{{ block "scripts" . }}{{ end }}
 	</body>
 </html>
