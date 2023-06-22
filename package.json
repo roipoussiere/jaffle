@@ -1,6 +1,24 @@
 {
 	"name": "jaffle",
 	"version": "0.1.0",
+	"description": "A yaml-based syntax for Tidal-cycles, based on Strudel.",
+	"keywords": ["yaml", "strudel", "tidal", "music", "livecoding", "algorave"],
+	"homepage": "https://roipoussiere.frama.io/jaffle",
+	"bugs": "https://framagit.org/roipoussiere/jaffle/-/issues",
+	"license": "AGPL-3.0-or-later",
+	"author": "Nathanaël Jourdane",
+	"funding": {
+		"type": "opencollective",
+		"url": "https://opencollective.com/tidalcycles"
+	},
+	"files": [
+		"src"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://roipoussiere.frama.io/jaffle.git"
+	},
+	"browser": "src/index.ts",
 	"scripts": {
 		"build": "esbuild ./src/website.ts --bundle --outfile=./website/static/js/website.js --target=es2022",
 		"lint": "eslint src/*"
