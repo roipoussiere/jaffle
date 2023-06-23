@@ -14,7 +14,7 @@ function valueToString(value: any): string {
 	} if (value[0] === '=') {
 		return value.substring(1).replace(/[^a-c0-9.+\-*/()]/g, '');
 	} if (value[0] === ':') {
-		return `'${value.substring(1)}'`;
+		return `\`${value.substring(1)}\``;
 	} if (value[0] === '/') {
 		return `mini('${value.substring(1).replace(/\s+/g, ' ')}')`;
 	}
@@ -80,7 +80,7 @@ function parseOutro(node: any): string {
 	getOutroAttributes(node).forEach((attr) => {
 		const newAttr = attr.split('^')[0];
 		const prefix = attr[1] === '.' ? `await ${newAttr.substring(2)}` : newAttr.substring(1);
-		js += `${prefix}(${getValue(attr, node, 0)})\n`;
+		js += `${prefix}(${getValue(attr, node, 0)});\n`;
 	});
 	return js;
 }
@@ -120,7 +120,7 @@ function parseObject(node: any, indentLvl: number): string {
 function transpile(inputYaml: string): string {
 	const tune = yaml.load(inputYaml);
 	let outputJs = parseOutro(tune);
-	outputJs += `return ${parseNode(tune instanceof Array ? { Stack: tune } : tune)}\n`;
+	outputJs += `\nreturn ${parseNode(tune instanceof Array ? { Stack: tune } : tune)};\n`;
 	return outputJs;
 }
 
