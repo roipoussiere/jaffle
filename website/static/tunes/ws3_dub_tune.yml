@@ -2,18 +2,25 @@
 # @by Felix Roos
 
 Stack:
-- Note: ~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]
-  sound: gm_electric_guitar_muted
-  delay: .5
-- Sound: <bd rim>
-  bank: RolandTR707
-  delay: .5
-- N: <4 [3@3 4] [<2 0> ~@16] ~>/2
-  scale: D4:minor
-  sound: gm_accordion:2
-  room: 2
-  gain: .4
-- N: <0 [~ 0] 4 [3 2] [0 ~] [0 ~] <0 2> ~>*2
-  scale: D2:minor
-  sound: sawtooth,triangle
-  lpf: 800
+- Note:
+  - ~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]
+  - sound: gm_electric_guitar_muted
+  - delay: .5
+
+- Sound:
+  - <bd rim>
+  - bank: RolandTR707
+  - delay: .5
+
+- N:
+  - <4 [3@3 4] [<2 0> ~@16] ~>/2
+  - scale: D4:minor
+  - sound: gm_accordion:2
+  - room: 2
+  - gain: .4
+
+- N:
+  - <0 [~ 0] 4 [3 2] [0 ~] [0 ~] <0 2> ~>*2
+  - scale: D2:minor
+  - sound: sawtooth,triangle
+  - lpf: 800

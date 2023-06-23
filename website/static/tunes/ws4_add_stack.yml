@@ -3,19 +3,23 @@
 
 Stack:
 - N:
-    M: <0 [2 4] <3 5> [~ <4 1>]>*2
-    add: <0 [0,2,4]>/4
-  scale: C5:minor
-  sound: gm_xylophone
-  room: .4
-  delay: .125
+  - <0 [2 4] <3 5> [~ <4 1>]>*2
+    - add: <0 [0,2,4]>/4
+  - scale: C5:minor
+  - sound: gm_xylophone
+  - room: .4
+  - delay: .125
+
 - Note:
-    M: c2 [eb3,g3]
-    add: <0 <1 -1>>
+  - c2 [eb3,g3]
+    - add: <0 <1 -1>>
   # adsr: /[.1 0]:.2:[1 0] # bug: adsr is not a function
-  sound: gm_acoustic_bass
-  room: .5
-- N: 0 1 [2 3] 2
-  # sound: jazz # bug: sound not found
-  jux: { Rev: }
-  slow: 2
+  - sound: gm_acoustic_bass
+  - room: .5
+
+- N:
+  - 0 1 [2 3] 2
+  # - sound: jazz # bug: sound not found
+  - jux:
+    - Rev:
+  - slow: 2
