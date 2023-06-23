@@ -12,7 +12,8 @@
 		"url": "https://opencollective.com/tidalcycles"
 	},
 	"files": [
-		"src"
+		"src",
+		"dist"
 	],
 	"repository": {
 		"type": "git",
@@ -20,7 +21,7 @@
 	},
 	"browser": "src/index.ts",
 	"scripts": {
-		"build": "esbuild ./index.ts --bundle --outfile=./dist/jaffle.js --target=es2022",
+		"build": "esbuild ./src/index.ts --bundle --outfile=./dist/jaffle.js --target=es2022",
 		"watch": "npm run build -- --watch",
 		"build_website": "hugo -s website",
 		"watch_website": "npm run build_website -- server",
