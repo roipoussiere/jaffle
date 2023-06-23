@@ -1,0 +1,38 @@
+# "Bridge is over"
+# @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
+# @by Felix Roos, bassline by BDP - The Bridge Is Over
+
+.samples^:
+  mad: https://freesound.org/data/previews/22/22274_109943-lq.mp3
+
+Stack:
+- Stack:
+  - M: c3*2 [[c3@1.4 bb2] ab2] gb2*2 <[[gb2@1.4 ab2] bb2] gb2>
+    legato:
+      M: .5 1
+      fast: 2
+    velocity: .8
+  - M: 0 ~
+    scale: :c4 whole tone
+    euclidLegato: [ 3, 8 ]
+    slow: 2
+    mask: x ~
+    stutWith:
+    - 8
+    - =1/16
+    - Set: 1
+      scaleTranspose: =a
+      # velocity: =.7^a
+    scaleTranspose: <0 1 2 3 4 3 2 1>
+    fast: 2
+    velocity: .7
+    legato: .5
+    stut: [ 3, .5, =1/8 ]
+  transpose: -1
+  note:
+  # piano:
+  s: mad
+  slow: 2
+cpm: 78
+slow: 4
+pianoroll:
