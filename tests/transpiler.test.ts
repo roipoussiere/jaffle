@@ -1,5 +1,5 @@
-// import { errors } from '../src';
-// import { getParameters } from '../src/transpiler';
+import { describe, expect, test } from '@jest/globals';
+
 import * as e from '../src/errors';
 import { testing as t } from '../src/transpiler';
 
