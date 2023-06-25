@@ -89,6 +89,19 @@ describe('Testing checkDict()', () => {
 	});
 });
 
+describe('Testing checkArray()', () => {
+	test('Array should pass', () => {
+		expect(t.checkArray([1, 2, 3]));
+	});
+
+	test('Non-array should fail', () => {
+		expect(() => t.checkArray(42)).toThrow(e.JaffleErrorBadType);
+		expect(() => t.checkArray('foo')).toThrow(e.JaffleErrorBadType);
+		expect(() => t.checkArray(null)).toThrow(e.JaffleErrorBadType);
+		expect(() => t.checkArray({ foo: 42 })).toThrow(e.JaffleErrorBadType);
+	});
+});
+
 describe('Testing transpile()', () => {
 	test('Non-valid yaml should fail', () => {
 		expect(() => t.transpile(`

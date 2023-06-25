@@ -84,20 +84,22 @@ type Dict = { [attr: string]: any }
 // 	));
 // }
 
-// function checkObject(thing: any) {
-// 	if (!(thing instanceof Object)) {
-// 		throw new Error(`Expecting an object, not ${typeof thing}.`);
-// 	}
-// }
+function checkDict(thing: any): void {
+	if (!(thing instanceof Object) || thing instanceof Array) {
+		throw new errors.JaffleErrorBadType('dictionary', typeof thing);
+	}
+}
 
-// function checkArray(thing: any) {
-// 	if (!(thing instanceof Array)) {
-// 		throw new Error(`Expecting an array, not ${typeof thing}.`);
-// 	}
-// }
+function checkArray(thing: any) {
+	if (!(thing instanceof Array)) {
+		throw new errors.JaffleErrorBadType('array', typeof thing);
+	}
+}
 
-function getUniqueAttr(obj: Dict) {
-	const keys = Object.keys(obj);
+function getUniqueAttr(dict: Dict) {
+	checkDict(dict);
+
+	const keys = Object.keys(dict);
 	if (keys.length === 0) {
 		throw new errors.JaffleAttributeError('object is empty');
 	}
@@ -169,17 +171,10 @@ function initArrayToJs(initArray: Array<Dict> | undefined): string {
 // 	return [];
 // }
 
-function checkDict(thing: any): void {
-	if (!(thing instanceof Object) || thing instanceof Array) {
-		throw new errors.JaffleErrorBadType('dictionary', typeof thing);
-	}
-}
-
 function dictToJs(dict: Dict): string {
-	checkDict(dict);
+	const attr = getUniqueAttr(dict);
 
-	// 	const mainAttr = getMainAttr(obj);
-	// 	checkArray(obj[mainAttr]);
+	checkArray(dict[attr]);
 
 	// 	let js = mainAttr;
 
@@ -247,7 +242,7 @@ function transpile(inputYaml: string): string {
 }
 
 export const testing = {
-	getParameters, getUniqueAttr, isChainItem, checkDict, transpile,
+	getParameters, getUniqueAttr, isChainItem, checkDict, checkArray, transpile,
 };
 
 export default transpile;
