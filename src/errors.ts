@@ -28,6 +28,13 @@ export class JaffleErrorBadType extends JaffleError {
 	}
 }
 
+export class JaffleAttributeError extends JaffleError {
+	constructor(message: string) {
+		super(`attribute error: ${message}`);
+		this.name = JaffleAttributeError.name;
+	}
+}
+
 export class JaffleErrorMainAttr extends JaffleError {
 	constructor(message: string) {
 		super(`main attribute ${message}`);
