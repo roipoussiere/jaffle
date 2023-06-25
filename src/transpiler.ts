@@ -3,6 +3,8 @@
 import * as yaml from 'js-yaml';
 import * as errors from './errors';
 
+type Dict = { [attr: string]: any }
+
 // const SIGNALS_FN = ['Saw', 'Sine', 'Cosine', 'Tri', 'Square', 'Rand', 'Perlin',
 // 	'Saw2', 'Sine2', 'Cosine2', 'Tri2', 'Square2', 'Rand2'];
 // const LAMBDA_PARAMS_NAME = ['a', 'b', 'c'];
@@ -94,9 +96,7 @@ import * as errors from './errors';
 // 	}
 // }
 
-type Obj = { [attr: string]: number }
-
-function getUniqueAttr(obj: Obj) {
+function getUniqueAttr(obj: Dict) {
 	const keys = Object.keys(obj);
 	if (keys.length === 0) {
 		throw new errors.JaffleAttributeError('object is empty');
@@ -146,62 +146,75 @@ function getParameters(array: Array<any>): Array<any> {
 	return paramEntries.map(([attr]) => attr);
 }
 
-// function initArrayToJs(initNode: Array<object>): string {
-// 	let js = '';
-// 	if (!(initNode instanceof Array)) {
-// 		throw new Error('Init content must be an array.');
-// 	}
-// 	initNode.forEach((item) => {
-// 		const attr = getUniqueAttr(item);
-// 		const newAttr = attr.split('^')[0];
-// 		const prefix = attr[0] === '.' ? `await ${newAttr.substring(1)}` : newAttr.substring(0);
+function initArrayToJs(initArray: Array<Dict> | undefined): string {
+	if (initArray === undefined) {
+		return '';
+	}
 
-// 		js += `${prefix}(${getValue(attr, item, 0)});\n`;
-// 	});
-// 	return js;
-// }
+	const js = '';
+	if (!(initArray instanceof Array)) {
+		throw new errors.JaffleErrorBadType('array', typeof initArray);
+	}
+	// initArray.forEach((item) => {
+	// 	const attr = getUniqueAttr(item);
+	// 	const newAttr = attr.split('^')[0];
+	// 	const prefix = attr[0] === '.' ? `await ${newAttr.substring(1)}` : newAttr.substring(0);
+
+	// 	js += `${prefix}(${getValue(attr, item, 0)});\n`;
+	// });
+	return js;
+}
 
 // function getChain(array: Array<object | string>): Array<[string, any]> {
 // 	return [];
 // }
 
-// function objectToJs(obj: object): string {
-// 	const mainAttr = getMainAttr(obj);
-// 	checkArray(obj[mainAttr]);
+function checkDict(thing: any): void {
+	if (!(thing instanceof Object) || thing instanceof Array) {
+		throw new errors.JaffleErrorBadType('dictionary', typeof thing);
+	}
+}
 
-// 	let js = mainAttr;
+function dictToJs(dict: Dict): string {
+	checkDict(dict);
 
-// 	if (!SIGNALS_FN.includes(mainAttr)) {
-// 		const params = getParameters(obj[mainAttr]);
-// 		const paramsJs = params.map((attr, child) => anyToJs(child));
-// 		js += `(${paramsJs.join(', ')})`;
-// 	}
+	// 	const mainAttr = getMainAttr(obj);
+	// 	checkArray(obj[mainAttr]);
 
-// 	const chain = getChain(obj[mainAttr]);
-// 	if (chain.length !== 0) {
-// 		const chainJS = chain.map((attr, child) => `.${attr}(${anyToJs(child)})`);
-// 		js += chainJS.join('');
-// 	}
+	// 	let js = mainAttr;
 
-// 	return js;
-// const chainJS = .map((attr, child) => anyToJs(child));
-// if (mainAttr === 'M') {
-// 	js = valueToString(obj[mainAttr]);
-// } else if (mainAttr === 'Set') {
-// 	if (obj[mainAttr] === null) {
-// 		js = 'x => x';
-// 	} else {
-// 		const paramNames = LAMBDA_PARAMS_NAME.slice(0, obj[mainAttr]);
-// 		js = `(x, ${paramNames.join(', ')}) => x`;
-// 	}
-// } else {
-// 	const newAttr = mainAttr.split('^')[0];
-// 	js = indent(indentLvl) + newAttr[0].toLowerCase() + newAttr.substring(1);
-// 	if (obj[mainAttr] !== null && !SIGNALS_FN.includes(newAttr)) {
-// 		value = getValue(mainAttr, obj, indentLvl);
-// 		js += `(${value})`;
-// 	}
-// }
+	// 	if (!SIGNALS_FN.includes(mainAttr)) {
+	// 		const params = getParameters(obj[mainAttr]);
+	// 		const paramsJs = params.map((attr, child) => anyToJs(child));
+	// 		js += `(${paramsJs.join(', ')})`;
+	// 	}
+
+	// 	const chain = getChain(obj[mainAttr]);
+	// 	if (chain.length !== 0) {
+	// 		const chainJS = chain.map((attr, child) => `.${attr}(${anyToJs(child)})`);
+	// 		js += chainJS.join('');
+	// 	}
+
+	// 	return js;
+	// const chainJS = .map((attr, child) => anyToJs(child));
+	// if (mainAttr === 'M') {
+	// 	js = valueToString(obj[mainAttr]);
+	// } else if (mainAttr === 'Set') {
+	// 	if (obj[mainAttr] === null) {
+	// 		js = 'x => x';
+	// 	} else {
+	// 		const paramNames = LAMBDA_PARAMS_NAME.slice(0, obj[mainAttr]);
+	// 		js = `(x, ${paramNames.join(', ')}) => x`;
+	// 	}
+	// } else {
+	// 	const newAttr = mainAttr.split('^')[0];
+	// 	js = indent(indentLvl) + newAttr[0].toLowerCase() + newAttr.substring(1);
+	// 	if (obj[mainAttr] !== null && !SIGNALS_FN.includes(newAttr)) {
+	// 		value = getValue(mainAttr, obj, indentLvl);
+	// 		js += `(${value})`;
+	// 	}
+	return '';
+}
 
 // getOtherAttributes(obj).forEach((attr) => {
 // 	const newAttr = attr.split('^')[0];
@@ -213,35 +226,28 @@ function getParameters(array: Array<any>): Array<any> {
 // }
 
 function transpile(inputYaml: string): string {
-	let tune: any;
-	// 	let outputJs = '';
+	let tune: Dict;
+	let outputJs = '';
 
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		tune = <any> yaml.load(inputYaml);
+		tune = <Dict> yaml.load(inputYaml);
 	} catch (err) {
 		throw new errors.JaffleErrorBadYaml(err.message);
 	}
 
-	// 	if (tune instanceof Object) {
-	// 		// if ('Init' in tune) {
-	// 		// 	checkArray(tune.Init);
-	// 		// 	outputJs += initArrayToJs(tune.Init);
-	// 		// }
-	// 		outputJs += objectToJs(tune);
-	// 	} else if (tune instanceof Array) {
-	// 		throw new errors.JaffleErrorNotImplemented();
-	// 		// outputJs += objectToJs(tune, 0);
-	// 	} else {
-	// 		throw new errors.JaffleErrorBadType('array or dictionnary', typeof tune);
-	// 	}
+	if (tune instanceof Object && !(tune instanceof Array)) {
+		const { Init: initArray, ...main } = tune;
+		outputJs += initArrayToJs(initArray);
+		outputJs += `return ${dictToJs(main)};`;
+	} else {
+		throw new errors.JaffleErrorBadType('dictionary', typeof tune);
+	}
 
-	// 	return `\nreturn ${outputJs};\n`;
-	return '';
+	return outputJs;
 }
 
 export const testing = {
-	getParameters, getUniqueAttr, isChainItem, transpile,
+	getParameters, getUniqueAttr, isChainItem, checkDict, transpile,
 };
 
 export default transpile;

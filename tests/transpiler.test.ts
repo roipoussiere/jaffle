@@ -76,12 +76,50 @@ describe('Testing getParameters()', () => {
 	});
 });
 
+describe('Testing checkDict()', () => {
+	test('Dict should pass', () => {
+		expect(t.checkDict({ foo: 42 }));
+	});
+
+	test('Non-dict should fail', () => {
+		expect(() => t.checkDict(42)).toThrow(e.JaffleErrorBadType);
+		expect(() => t.checkDict('foo')).toThrow(e.JaffleErrorBadType);
+		expect(() => t.checkDict(null)).toThrow(e.JaffleErrorBadType);
+		expect(() => t.checkDict([1, 2, 3])).toThrow(e.JaffleErrorBadType);
+	});
+});
+
 describe('Testing transpile()', () => {
 	test('Non-valid yaml should fail', () => {
 		expect(() => t.transpile(`
 - c@3 eb
 note:
-	`)).toThrow(e.JaffleErrorBadYaml);
+		`)).toThrow(e.JaffleErrorBadYaml);
+	});
+
+	test('Yaml root not being an object should fail', () => {
+		expect(() => t.transpile('foo')).toThrow(e.JaffleErrorBadType);
+		expect(() => t.transpile('42')).toThrow(e.JaffleErrorBadType);
+		expect(() => t.transpile('null')).toThrow(e.JaffleErrorBadType);
+		expect(() => t.transpile('[1, 2, 3]')).toThrow(e.JaffleErrorBadType);
+	});
+
+	test.skip('Yaml root without valid parameter should fail', () => {
+		expect(() => t.transpile('{foo: 42}')).toThrow(e.JaffleAttributeError);
+		expect(() => t.transpile('{foo: 42, bar: 24}')).toThrow(e.JaffleAttributeError);
+		expect(() => t.transpile('{Foo: 42, bar: 24}')).toThrow(e.JaffleAttributeError);
+		expect(() => t.transpile('{foo: 42, Bar: 24}')).toThrow(e.JaffleAttributeError);
+		expect(() => t.transpile('{Foo: 42, Bar: 24}')).toThrow(e.JaffleAttributeError);
+	});
+
+	test.skip('Yaml root parameter with literal value should return code', () => {
+		expect(t.transpile('{Foo: 42}')).toBe('return foo(42);');
+		expect(t.transpile('{Foo: bar}')).toBe('return foo(`bar`);');
+		expect(t.transpile('{Foo: }')).toBe('return foo();');
+	});
+
+	test.skip('Yaml root with Init should return code with init functions', () => {
+		expect(t.transpile('{Init: [], Foo: 42}')).toBe('return foo(42);');
 	});
 });
 
