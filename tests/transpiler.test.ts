@@ -76,12 +76,12 @@ test('Getting parameters from chain then parameter fails', () => {
 	expect(() => t.getParameters([{ bar: 24 }, [1, 2, 3]])).toThrow(e.JaffleAttributeError);
 });
 
-// test('Non-valid yaml should fail', () => {
-// 	expect(transpiler(`
-// - c@3 eb
-//   note:
-// `)).toThrow(errors.JaffleErrorBadYaml);
-// });
+test('Non-valid yaml should fail', () => {
+	expect(() => t.transpile(`
+- c@3 eb
+  note:
+`)).toThrow(e.JaffleErrorBadYaml);
+});
 
 // test('Empty root should return nothing', () => {
 // 	expect(transpiler(`

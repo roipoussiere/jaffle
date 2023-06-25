@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// import * as yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 import * as errors from './errors';
 
 // const SIGNALS_FN = ['Saw', 'Sine', 'Cosine', 'Tri', 'Square', 'Rand', 'Perlin',
@@ -212,35 +212,36 @@ function getParameters(array: Array<any>): Array<any> {
 // return js;
 // }
 
-const transpile = () => '';
-// function transpile(inputYaml: string): string {
-// 	let tune: any;
-// 	let outputJs = '';
+function transpile(inputYaml: string): string {
+	let tune: any;
+	// 	let outputJs = '';
 
-// 	try {
-// 		tune = <any> yaml.load(inputYaml);
-// 	} catch (err) {
-// 		throw new errors.JaffleErrorBadYaml(err);
-// 	}
+	try {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		tune = <any> yaml.load(inputYaml);
+	} catch (err) {
+		throw new errors.JaffleErrorBadYaml(err.message);
+	}
 
-// 	if (tune instanceof Object) {
-// 		// if ('Init' in tune) {
-// 		// 	checkArray(tune.Init);
-// 		// 	outputJs += initArrayToJs(tune.Init);
-// 		// }
-// 		outputJs += objectToJs(tune);
-// 	} else if (tune instanceof Array) {
-// 		throw new errors.JaffleErrorNotImplemented();
-// 		// outputJs += objectToJs(tune, 0);
-// 	} else {
-// 		throw new errors.JaffleErrorBadType('array or dictionnary', typeof tune);
-// 	}
+	// 	if (tune instanceof Object) {
+	// 		// if ('Init' in tune) {
+	// 		// 	checkArray(tune.Init);
+	// 		// 	outputJs += initArrayToJs(tune.Init);
+	// 		// }
+	// 		outputJs += objectToJs(tune);
+	// 	} else if (tune instanceof Array) {
+	// 		throw new errors.JaffleErrorNotImplemented();
+	// 		// outputJs += objectToJs(tune, 0);
+	// 	} else {
+	// 		throw new errors.JaffleErrorBadType('array or dictionnary', typeof tune);
+	// 	}
 
-// 	return `\nreturn ${outputJs};\n`;
-// }
+	// 	return `\nreturn ${outputJs};\n`;
+	return '';
+}
 
 export const testing = {
-	getParameters, getUniqueAttr, isChainItem,
+	getParameters, getUniqueAttr, isChainItem, transpile,
 };
 
 export default transpile;
