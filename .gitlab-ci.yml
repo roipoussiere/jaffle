@@ -1,13 +1,20 @@
+image: node:20-alpine
+
 build:
   stage: build
-  image: node:20-alpine
   script:
   - npm install
   artifacts:
     paths:
       - node_modules
 
+test:
+  stage: test
+  script:
+  - npm test
+
 pages:
+  only: [ main ]
   stage: deploy
   image:
     name: klakegg/hugo:alpine
