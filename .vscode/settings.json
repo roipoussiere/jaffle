@@ -3,4 +3,7 @@
         "watch": false,
         "onStartup?": ["all-tests"]
     },
+    "editor.rulers": [
+        100
+    ],
 }
