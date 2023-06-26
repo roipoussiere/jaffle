@@ -115,33 +115,36 @@ describe('Testing checkArray()', () => {
 // describe('Testing anyToJs()', () => {
 // });
 
-describe('Testing initArrayToJs()', () => {
+// describe('Testing dictToJs()', () => {
+// });
+
+describe('Testing initListToJs()', () => {
 	test('Empty arrays or dicts should return an empty string', () => {
-		expect(t.initArrayToJs([])).toBe('');
-		expect(t.initArrayToJs([{}])).toBe('');
-		expect(t.initArrayToJs([{}, {}])).toBe('');
+		expect(t.initListToJs([])).toBe('');
+		expect(t.initListToJs([{}])).toBe('');
+		expect(t.initListToJs([{}, {}])).toBe('');
 	});
 
 	test('Array containing a function should return code calling the function', () => {
-		expect(t.initArrayToJs([{ Foo: 42 }])).toBe('foo(42);\n');
-		expect(t.initArrayToJs([{ Foo: 'bar' }])).toBe('foo(`bar`);\n');
-		expect(t.initArrayToJs([{ Foo: null }])).toBe('foo();\n');
-		expect(t.initArrayToJs([{ Foo: ['bar', 42] }])).toBe('foo(`bar`, 42);\n');
-		expect(t.initArrayToJs([{ Foo: { Bar: 42 } }])).toBe('foo(bar(42));\n');
-		// expect(t.initArrayToJs([{ Foo: [{ Bar: 42 }, { baz: 24 }] }])).toBe('foo(bar(42)).baz(24);');
+		expect(t.initListToJs([{ Foo: 42 }])).toBe('foo(42);\n');
+		expect(t.initListToJs([{ Foo: 'bar' }])).toBe('foo(`bar`);\n');
+		expect(t.initListToJs([{ Foo: null }])).toBe('foo();\n');
+		expect(t.initListToJs([{ Foo: ['bar', 42] }])).toBe('foo(`bar`, 42);\n');
+		expect(t.initListToJs([{ Foo: { Bar: 42 } }])).toBe('foo(bar(42));\n');
 	});
 
 	test('Array containing several functions should return code calling those functions', () => {
-		expect(t.initArrayToJs([{ Foo: 42 }, { Bar: 24 }])).toBe('foo(42);\nbar(24);\n');
+		expect(t.initListToJs([{ Foo: 42 }, { Bar: 24 }])).toBe('foo(42);\nbar(24);\n');
 	});
 
-	test('Array containing a chain should return an empty string', () => {
-		// expect(t.initArrayToJs([{ foo: 42 }])).toBe('');
+	test.skip('Array containing a chain should return code calling the chain', () => {
+		expect(t.initListToJs([{ Foo: [{ Bar: 42 }, { baz: 24 }] }])).toBe('foo(bar(42)).baz(24);');
+		expect(t.initListToJs([{ foo: 42 }])).toBe('');
 	});
 
-	test('Array containing non-valid functions should fail', () => {
-		// expect(() => t.initArrayToJs([{ foo: 42, bar: 24 }])).toThrow(e.JaffleAttributeError);
-		// expect(() => t.initArrayToJs([{ foo: 42 }, { Bar: 24 }])).toThrow(e.JaffleAttributeError);
+	test.skip('Array containing non-valid functions should fail', () => {
+		expect(() => t.initListToJs([{ foo: 42, bar: 24 }])).toThrow(e.JaffleAttributeError);
+		expect(() => t.initListToJs([{ foo: 42 }, { Bar: 24 }])).toThrow(e.JaffleAttributeError);
 	});
 });
 

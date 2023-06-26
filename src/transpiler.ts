@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as yaml from 'js-yaml';
 import * as errors from './errors';
 
-type Dict = { [attr: string]: any }
+type Literal = string | number | null;
+// eslint-disable-next-line no-use-before-define
+type Thing = Literal | Dict | List
+type List = Array<Thing>
+type Dict = { [attr: string]: Thing }
 
-// const SIGNALS_FN = ['Saw', 'Sine', 'Cosine', 'Tri', 'Square', 'Rand', 'Perlin',
-// 	'Saw2', 'Sine2', 'Cosine2', 'Tri2', 'Square2', 'Rand2'];
 // const LAMBDA_PARAMS_NAME = ['a', 'b', 'c'];
 
 function stringToJs(str: string): string {
@@ -21,7 +21,7 @@ function stringToJs(str: string): string {
 	// return `mini('${str.replace(/\s+/g, ' ')}')`;
 }
 
-function anyToJs(thing: any): string {
+function anyToJs(thing: Thing): string {
 	if (thing instanceof Array) {
 		return thing.map((item) => anyToJs(item)).join(', ');
 	}
@@ -85,16 +85,18 @@ function anyToJs(thing: any): string {
 // 	));
 // }
 
-function checkDict(thing: any): void {
+function checkDict(thing: Thing): Dict {
 	if (!(thing instanceof Object) || thing instanceof Array) {
 		throw new errors.JaffleErrorBadType('dictionary', typeof thing);
 	}
+	return <Dict>thing;
 }
 
-function checkArray(thing: any) {
+function checkList(thing: Thing): List {
 	if (!(thing instanceof Array)) {
 		throw new errors.JaffleErrorBadType('array', typeof thing);
 	}
+	return <List>thing;
 }
 
 function getUniqueAttr(dict: Dict) {
@@ -110,7 +112,7 @@ function getUniqueAttr(dict: Dict) {
 	return keys[0];
 }
 
-function isChainItem(thing: any): boolean {
+function isChainItem(thing: Thing): boolean {
 	if (thing instanceof Object && !(thing instanceof Array)) {
 		const item = getUniqueAttr(thing);
 		return item[0] === item[0].toLowerCase();
@@ -118,7 +120,7 @@ function isChainItem(thing: any): boolean {
 	return false;
 }
 
-function isParamItem(thing: any): boolean {
+function isParamItem(thing: Thing): boolean {
 	if (thing instanceof Object && !(thing instanceof Array)) {
 		const item = getUniqueAttr(thing);
 		return item[0] === item[0].toUpperCase();
@@ -134,21 +136,21 @@ Return the parameters found in an array.
 - `42` returns `[42]`;
 - `[add: 2, N: 'b3e6']` throws an error;
 */
-function getParameters(thing: any): Array<any> {
+function getParameters(thing: Thing): Array<Thing> {
 	if (thing instanceof Array) {
-		const paramEntries = thing
-			.map((item, id) => [item, id])
-			.filter(([item]) => isParamItem(item));
+		const paramsId = thing
+			.map((item, id) => (isParamItem(item) ? id : -1))
+			.filter((id) => id !== -1);
 
-		if (paramEntries.length === 0) {
+		if (paramsId.length === 0) {
 			return [];
 		}
 
-		const lastParamId = paramEntries[paramEntries.length - 1][1];
-		if (lastParamId >= paramEntries.length) {
+		const lastParamId = paramsId[paramsId.length - 1];
+		if (lastParamId >= paramsId.length) {
 			throw new errors.JaffleAttributeError('Parameters must be defined before the chain.');
 		}
-		return paramEntries.map(([attr]) => attr);
+		return thing.filter((_item, id) => paramsId.includes(id));
 	}
 	return [thing];
 }
@@ -160,17 +162,12 @@ function getParameters(thing: any): Array<any> {
 function dictToJs(dict: Dict): string {
 	const attr = getUniqueAttr(dict);
 	const newAttr = attr[0].toLowerCase() + attr.substring(1);
+
+	let js = newAttr;
+
 	const params = getParameters(dict[attr]);
 	const paramsJs = params.map((param) => anyToJs(param));
-	const js = `${newAttr}(${paramsJs.join(', ')})`;
-	return js;
-	// 	let js = mainAttr;
-
-	// 	if (!SIGNALS_FN.includes(mainAttr)) {
-	// 		const params = getParameters(obj[mainAttr]);
-	// 		const paramsJs = params.map((attr, child) => anyToJs(child));
-	// 		js += `(${paramsJs.join(', ')})`;
-	// 	}
+	js += `(${paramsJs.join(', ')})`;
 
 	// 	const chain = getChain(obj[mainAttr]);
 	// 	if (chain.length !== 0) {
@@ -196,7 +193,7 @@ function dictToJs(dict: Dict): string {
 	// 		value = getValue(mainAttr, obj, indentLvl);
 	// 		js += `(${value})`;
 	// 	}
-	// return '';
+	return js;
 }
 
 // getOtherAttributes(obj).forEach((attr) => {
@@ -208,13 +205,11 @@ function dictToJs(dict: Dict): string {
 // return js;
 // }
 
-function initArrayToJs(initArray: Array<Dict> | undefined): string {
-	if (initArray === undefined) {
-		return '';
-	}
-	checkArray(initArray);
+function initListToJs(initArray: List): string {
+	checkList(initArray);
 
 	return initArray
+		.map((item) => checkDict(item))
 		.filter((item) => Object.keys(item).length !== 0)
 		.map((item) => `${dictToJs(item)};\n`)
 		.join('');
@@ -232,7 +227,9 @@ function transpile(inputYaml: string): string {
 
 	if (tune instanceof Object && !(tune instanceof Array)) {
 		const { Init: initArray, ...main } = tune;
-		outputJs += initArrayToJs(initArray);
+		if (initArray !== undefined) {
+			outputJs += initListToJs(checkList(initArray));
+		}
 		outputJs += `return ${dictToJs(main)};`;
 	} else {
 		throw new errors.JaffleErrorBadType('dictionary', typeof tune);
@@ -247,10 +244,10 @@ export const testing = {
 	isChainItem,
 	stringToJs,
 	anyToJs,
-	initArrayToJs,
+	initListToJs,
 	dictToJs,
 	checkDict,
-	checkArray,
+	checkArray: checkList,
 	transpile,
 };
 
