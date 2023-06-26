@@ -34,8 +34,15 @@ describe('Testing isChainItem()', () => {
 });
 
 describe('Testing getParameters()', () => {
-	test('Getting parameters from nothing returns any empty array', () => {
-		expect(t.getParameters([])).toStrictEqual([]);
+	test('Getting parameters of a non-array returns an array containing the value', () => {
+		expect(t.getParameters('foo')).toEqual(['foo']);
+		expect(t.getParameters(42)).toEqual([42]);
+		expect(t.getParameters(null)).toEqual([null]);
+		expect(t.getParameters({ foo: 42 })).toEqual([{ foo: 42 }]);
+	});
+
+	test('Getting parameters of empty array returns any empty array', () => {
+		expect(t.getParameters([])).toEqual([]);
 	});
 
 	test('Getting parameters from literals returns the literals', () => {
@@ -99,6 +106,42 @@ describe('Testing checkArray()', () => {
 		expect(() => t.checkArray('foo')).toThrow(e.JaffleErrorBadType);
 		expect(() => t.checkArray(null)).toThrow(e.JaffleErrorBadType);
 		expect(() => t.checkArray({ foo: 42 })).toThrow(e.JaffleErrorBadType);
+	});
+});
+
+// describe('Testing stringToJs()', () => {
+// });
+
+// describe('Testing anyToJs()', () => {
+// });
+
+describe('Testing initArrayToJs()', () => {
+	test('Empty arrays or dicts should return an empty string', () => {
+		expect(t.initArrayToJs([])).toBe('');
+		expect(t.initArrayToJs([{}])).toBe('');
+		expect(t.initArrayToJs([{}, {}])).toBe('');
+	});
+
+	test('Array containing a function should return code calling the function', () => {
+		expect(t.initArrayToJs([{ Foo: 42 }])).toBe('foo(42);\n');
+		expect(t.initArrayToJs([{ Foo: 'bar' }])).toBe('foo(`bar`);\n');
+		expect(t.initArrayToJs([{ Foo: null }])).toBe('foo();\n');
+		expect(t.initArrayToJs([{ Foo: ['bar', 42] }])).toBe('foo(`bar`, 42);\n');
+		expect(t.initArrayToJs([{ Foo: { Bar: 42 } }])).toBe('foo(bar(42));\n');
+		// expect(t.initArrayToJs([{ Foo: [{ Bar: 42 }, { baz: 24 }] }])).toBe('foo(bar(42)).baz(24);');
+	});
+
+	test('Array containing several functions should return code calling those functions', () => {
+		expect(t.initArrayToJs([{ Foo: 42 }, { Bar: 24 }])).toBe('foo(42);\nbar(24);\n');
+	});
+
+	test('Array containing a chain should return an empty string', () => {
+		// expect(t.initArrayToJs([{ foo: 42 }])).toBe('');
+	});
+
+	test('Array containing non-valid functions should fail', () => {
+		// expect(() => t.initArrayToJs([{ foo: 42, bar: 24 }])).toThrow(e.JaffleAttributeError);
+		// expect(() => t.initArrayToJs([{ foo: 42 }, { Bar: 24 }])).toThrow(e.JaffleAttributeError);
 	});
 });
 
