@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { transpiler as _transpiler, JaffleEditor, Strudel } from './jaffle';
+import { transpiler, JaffleEditor, Strudel } from './jaffle';
 
 const TUNES_PATH = './tunes/';
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'bridge_is_over',
@@ -39,15 +39,12 @@ function fillTunesList(): void {
 	});
 }
 
-function transpiler(input: string) {
-	const output = _transpiler(input);
-	console.log(output);
-	return output;
-}
-
 strudel.transpiler = (tune) => transpiler(tune);
 strudel.init();
-editor.onPlay = () => strudel.play(editor.getText());
+editor.onPlay = () => {
+	console.log(transpiler(editor.getText()));
+	strudel.play(editor.getText());
+};
 editor.onStop = () => strudel.stop();
 
 window.addEventListener('DOMContentLoaded', () => {
