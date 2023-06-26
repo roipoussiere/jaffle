@@ -12,3 +12,6 @@ __*
 
 # Hugo lock file
 .hugo_build.lock
+
+# Coverage report
+/coverage
