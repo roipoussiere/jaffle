@@ -1,15 +1,16 @@
 import * as yaml from 'js-yaml';
 import * as errors from './errors';
 
-type Literal = string | number | null;
+type JaffleLiteral = string | number | null;
 // eslint-disable-next-line no-use-before-define
-type Thing = Literal | Dict | List
-type List = Array<Thing>
-type Dict = { [attr: string]: Thing }
+type JaffleAny = JaffleLiteral | JaffleFunction | JaffleList
+type JaffleList = Array<JaffleAny>
+type JaffleFunction = { [attr: string]: JaffleAny }
 
 // const LAMBDA_PARAMS_NAME = ['a', 'b', 'c'];
+const NO_PAREN_SIGN = '_';
 
-function stringToJs(str: string): string {
+function jaffleStringToJs(str: string): string {
 	return `\`${str}\``;
 	// if (str[0] === '=') {
 	// 	return str.substring(1).replace(/[^a-c0-9.+\-*/()]/g, '');
@@ -21,24 +22,24 @@ function stringToJs(str: string): string {
 	// return `mini('${str.replace(/\s+/g, ' ')}')`;
 }
 
-function anyToJs(thing: Thing): string {
+function jaffleAnyToJs(thing: JaffleAny): string {
 	if (thing instanceof Array) {
-		return thing.map((item) => anyToJs(item)).join(', ');
+		return thing.map((item) => jaffleAnyToJs(item)).join(', ');
 	}
 	if (thing instanceof Object) {
 		// eslint-disable-next-line no-use-before-define
-		return dictToJs(thing);
+		return jaffleFunctionToJs(thing);
 	}
 	if (typeof thing === 'string') {
-		return stringToJs(thing);
+		return jaffleStringToJs(thing);
 	}
 	if (typeof thing === 'number') {
 		return `${thing}`;
 	}
 	if (thing === null) {
-		return '';
+		return 'null';
 	}
-	throw new errors.JaffleErrorBadType('basically anything', typeof thing);
+	throw new errors.BadTypeJaffleError('basically anything', typeof thing);
 }
 
 // function getMainAttr(node: any): string {
@@ -85,47 +86,47 @@ function anyToJs(thing: Thing): string {
 // 	));
 // }
 
-function checkDict(thing: Thing): Dict {
+function checkJaffleFunction(thing: JaffleAny): JaffleFunction {
 	if (!(thing instanceof Object) || thing instanceof Array) {
-		throw new errors.JaffleErrorBadType('dictionary', typeof thing);
+		throw new errors.BadFunctionJaffleError('Not a function');
 	}
-	return <Dict>thing;
+	return <JaffleFunction>thing;
 }
 
-function checkList(thing: Thing): List {
+function checkJaffleList(thing: JaffleAny): JaffleList {
 	if (!(thing instanceof Array)) {
-		throw new errors.JaffleErrorBadType('array', typeof thing);
+		throw new errors.BadListJaffleError('Not a list');
 	}
-	return <List>thing;
+	return <JaffleList>thing;
 }
 
-function getUniqueAttr(dict: Dict) {
-	checkDict(dict);
+function getJaffleFuncName(dict: JaffleFunction) {
+	checkJaffleFunction(dict);
 
 	const keys = Object.keys(dict);
 	if (keys.length === 0) {
-		throw new errors.JaffleAttributeError('object is empty');
+		throw new errors.BadFunctionJaffleError('object is empty');
 	}
 	if (keys.length > 1) {
-		throw new errors.JaffleAttributeError(`too many main attributes: ${keys.join(', ')}`);
+		throw new errors.BadFunctionJaffleError(`too many main attributes: ${keys.join(', ')}`);
 	}
 	return keys[0];
 }
 
-function isChainItem(thing: Thing): boolean {
+function isJaffleMainFunction(thing: JaffleAny): boolean {
 	if (thing instanceof Object && !(thing instanceof Array)) {
-		const item = getUniqueAttr(thing);
-		return item[0] === item[0].toLowerCase();
-	}
-	return false;
-}
-
-function isParamItem(thing: Thing): boolean {
-	if (thing instanceof Object && !(thing instanceof Array)) {
-		const item = getUniqueAttr(thing);
+		const item = getJaffleFuncName(thing);
 		return item[0] === item[0].toUpperCase();
 	}
 	return true;
+}
+
+function isJaffleChainedFunc(thing: JaffleAny): boolean {
+	if (thing instanceof Object && !(thing instanceof Array)) {
+		const item = getJaffleFuncName(thing);
+		return item[0] === item[0].toLowerCase();
+	}
+	return false;
 }
 
 /**
@@ -136,10 +137,10 @@ Return the parameters found in an array.
 - `42` returns `[42]`;
 - `[add: 2, N: 'b3e6']` throws an error;
 */
-function getParameters(thing: Thing): Array<Thing> {
+function getJaffleFuncParams(thing: JaffleAny): Array<JaffleAny> {
 	if (thing instanceof Array) {
 		const paramsId = thing
-			.map((item, id) => (isParamItem(item) ? id : -1))
+			.map((item, id) => (isJaffleMainFunction(item) ? id : -1))
 			.filter((id) => id !== -1);
 
 		if (paramsId.length === 0) {
@@ -148,7 +149,7 @@ function getParameters(thing: Thing): Array<Thing> {
 
 		const lastParamId = paramsId[paramsId.length - 1];
 		if (lastParamId >= paramsId.length) {
-			throw new errors.JaffleAttributeError('Parameters must be defined before the chain.');
+			throw new errors.BadFunctionJaffleError('Parameters must be defined before the chain.');
 		}
 		return thing.filter((_item, id) => paramsId.includes(id));
 	}
@@ -159,15 +160,25 @@ function getParameters(thing: Thing): Array<Thing> {
 // 	return [];
 // }
 
-function dictToJs(dict: Dict): string {
-	const attr = getUniqueAttr(dict);
+function jaffleFunctionToJs(dict: JaffleFunction): string {
+	if (Object.keys(dict).length === 0) {
+		throw new errors.BadFunctionJaffleError('Function is empty');
+	}
+
+	const attr = getJaffleFuncName(dict);
 	const newAttr = attr[0].toLowerCase() + attr.substring(1);
+	let js: string;
 
-	let js = newAttr;
-
-	const params = getParameters(dict[attr]);
-	const paramsJs = params.map((param) => anyToJs(param));
-	js += `(${paramsJs.join(', ')})`;
+	if (attr.includes(NO_PAREN_SIGN)) {
+		js = newAttr.substring(0, newAttr.length - 1);
+	} else {
+		const params = getJaffleFuncParams(dict[attr]);
+		if (params.length === 0 || (params.length === 1 && params[0] === null)) {
+			js = `${newAttr}()`;
+		} else {
+			js = `${newAttr}(${params.map((param) => jaffleAnyToJs(param)).join(', ')})`;
+		}
+	}
 
 	// 	const chain = getChain(obj[mainAttr]);
 	// 	if (chain.length !== 0) {
@@ -205,50 +216,50 @@ function dictToJs(dict: Dict): string {
 // return js;
 // }
 
-function initListToJs(initArray: List): string {
-	checkList(initArray);
+function jaffleInitListToJs(initArray: JaffleList): string {
+	checkJaffleList(initArray);
 
 	return initArray
-		.map((item) => checkDict(item))
+		.map((item) => checkJaffleFunction(item))
 		.filter((item) => Object.keys(item).length !== 0)
-		.map((item) => `${dictToJs(item)};\n`)
+		.map((item) => `${jaffleFunctionToJs(item)};\n`)
 		.join('');
 }
 
-function transpile(inputYaml: string): string {
-	let tune: Dict;
+function jaffleDocumentToJs(inputYaml: string): string {
+	let tune: JaffleFunction;
 	let outputJs = '';
 
 	try {
-		tune = <Dict> yaml.load(inputYaml);
+		tune = <JaffleFunction> yaml.load(inputYaml);
 	} catch (err) {
-		throw new errors.JaffleErrorBadYaml(err.message);
+		throw new errors.BadYamlJaffleError(err.message);
 	}
 
 	if (tune instanceof Object && !(tune instanceof Array)) {
 		const { Init: initArray, ...main } = tune;
 		if (initArray !== undefined) {
-			outputJs += initListToJs(checkList(initArray));
+			outputJs += jaffleInitListToJs(checkJaffleList(initArray));
 		}
-		outputJs += `return ${dictToJs(main)};`;
+		outputJs += `return ${jaffleFunctionToJs(main)};`;
 	} else {
-		throw new errors.JaffleErrorBadType('dictionary', typeof tune);
+		throw new errors.BadDocumentJaffleError(`Document root must be a dictionary, not ${typeof tune}`);
 	}
 
 	return outputJs;
 }
 
 export const testing = {
-	getParameters,
-	getUniqueAttr,
-	isChainItem,
-	stringToJs,
-	anyToJs,
-	initListToJs,
-	dictToJs,
-	checkDict,
-	checkArray: checkList,
-	transpile,
+	getJaffleFuncParams,
+	getJaffleFuncName,
+	isJaffleChainedFunc,
+	jaffleStringToJs,
+	jaffleAnyToJs,
+	jaffleInitListToJs,
+	jaffleFunctionToJs,
+	checkJaffleFunction,
+	checkJaffleList,
+	jaffleDocumentToJs,
 };
 
-export default transpile;
+export default jaffleDocumentToJs;

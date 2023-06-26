@@ -7,37 +7,51 @@ export class JaffleError extends Error {
 	}
 }
 
-export class JaffleErrorBadYaml extends JaffleError {
+export class NotImplementedJaffleError extends JaffleError {
 	constructor(message: string) {
 		super(message);
-		this.name = JaffleErrorBadYaml.name;
+		this.name = NotImplementedJaffleError.name;
 	}
 }
 
-export class JaffleErrorNotImplemented extends JaffleError {
+export class BadYamlJaffleError extends JaffleError {
 	constructor(message: string) {
 		super(message);
-		this.name = JaffleErrorNotImplemented.name;
+		this.name = BadYamlJaffleError.name;
 	}
 }
 
-export class JaffleErrorBadType extends JaffleError {
+export class BadTypeJaffleError extends JaffleError {
 	constructor(expecting: string, got: string) {
 		super(`expecting ${expecting} but got ${got}`);
-		this.name = JaffleErrorBadType.name;
+		this.name = BadTypeJaffleError.name;
 	}
 }
 
-export class JaffleAttributeError extends JaffleError {
+export class BadFunctionJaffleError extends JaffleError {
 	constructor(message: string) {
 		super(message);
-		this.name = JaffleAttributeError.name;
+		this.name = BadFunctionJaffleError.name;
 	}
 }
 
-export class JaffleErrorMainAttr extends JaffleError {
+export class BadListJaffleError extends JaffleError {
 	constructor(message: string) {
 		super(message);
-		this.name = JaffleErrorMainAttr.name;
+		this.name = BadListJaffleError.name;
+	}
+}
+
+export class BadInitBlockJaffleError extends JaffleError {
+	constructor(message: string) {
+		super(message);
+		this.name = BadInitBlockJaffleError.name;
+	}
+}
+
+export class BadDocumentJaffleError extends JaffleError {
+	constructor(message: string) {
+		super(message);
+		this.name = BadInitBlockJaffleError.name;
 	}
 }
