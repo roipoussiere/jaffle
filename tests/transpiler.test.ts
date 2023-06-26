@@ -101,7 +101,7 @@ describe('Testing checkArray()', () => {
 		expect(t.checkArray([1, 2, 3]));
 	});
 
-	test('Non-array should fail', () => {
+	test('Non-arrays should fail', () => {
 		expect(() => t.checkArray(42)).toThrow(e.JaffleErrorBadType);
 		expect(() => t.checkArray('foo')).toThrow(e.JaffleErrorBadType);
 		expect(() => t.checkArray(null)).toThrow(e.JaffleErrorBadType);
@@ -112,11 +112,49 @@ describe('Testing checkArray()', () => {
 // describe('Testing stringToJs()', () => {
 // });
 
-// describe('Testing anyToJs()', () => {
-// });
+describe('Testing anyToJs()', () => {
+	test('Literals should be transpiled into literals', () => {
+		expect(t.anyToJs(null)).toBe('');
+		expect(t.anyToJs(42)).toBe('42');
+		expect(t.anyToJs('bar')).toBe('`bar`');
+	});
+	test('Lists should be transpiled into lists', () => {
+		expect(t.anyToJs([])).toBe('');
+		expect(t.anyToJs([1, 2, 3])).toBe('1, 2, 3');
+		expect(t.anyToJs([42, null, 'foo'])).toBe('42, null, `foo`');
+	});
+	test('Functions should be transpiled into function calls', () => {
+		expect(t.anyToJs({})).toBe('');
+		expect(t.anyToJs({ Foo: 42 })).toBe('foo(42)');
+		expect(t.anyToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
+		expect(t.anyToJs({ Foo: null })).toBe('foo()');
+		expect(t.anyToJs({ Foo_: null })).toBe('foo');
+	});
+	test('Bad functions should fail when transpiled', () => {
+		expect(() => t.anyToJs({ foo: 42 })).toThrow(e.JaffleAttributeError);
+		expect(() => t.anyToJs([{ foo: 42 }, { Bar: 24 }])).toThrow(e.JaffleAttributeError);
+	});
+});
 
-// describe('Testing dictToJs()', () => {
-// });
+describe('Testing dictToJs()', () => {
+	test('An empty dict should be transpiled into empty string', () => {
+		expect(t.dictToJs({})).toBe('');
+	});
+
+	test('Dicts containing a function should be transpiled into a function call', () => {
+		expect(t.dictToJs({ Foo: 42 })).toBe('foo(42)');
+		expect(t.dictToJs({ Foo: 'bar' })).toBe('foo(`bar`)');
+		expect(t.dictToJs({ Foo: null })).toBe('foo()');
+		expect(t.dictToJs({ Foo_: null })).toBe('foo');
+		expect(t.dictToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
+		expect(t.dictToJs({ Foo: { Bar: 42 } })).toBe('foo(bar(42))');
+		expect(t.dictToJs({ Foo: [{ Bar: [1, 2] }, 3, 'baz'] })).toBe('foo(bar(1, 2), 3, `baz`)');
+	});
+
+	test.skip('Dicts containing a chain function should be transpiled into a chained function call', () => {
+		expect(t.dictToJs({ foo: 42 })).toBe('.foo(42)');
+	});
+});
 
 describe('Testing initListToJs()', () => {
 	test('Empty arrays or dicts should return an empty string', () => {
