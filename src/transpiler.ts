@@ -38,10 +38,7 @@ function jaffleAnyToJs(thing: JaffleAny): string {
 	if (typeof thing === 'number') {
 		return `${thing}`;
 	}
-	if (thing === null) {
-		return 'null';
-	}
-	throw new errors.BadTypeJaffleError('basically anything', typeof thing);
+	return 'null';
 }
 
 function serialize(thing: JaffleAny): string {
