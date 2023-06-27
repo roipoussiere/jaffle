@@ -8,7 +8,9 @@ type JaffleList = Array<JaffleAny>
 type JaffleFunction = { [funcName: string]: JaffleAny }
 
 // const LAMBDA_PARAMS_NAME = ['a', 'b', 'c'];
-const NO_PAREN_FUNC_SUFFIX = '_';
+const NO_PAREN_FUNC_SUFFIX = '-';
+const SERIALIZE_FUNC_SUFFIX = '^';
+
 const OPTIONAL_STRING_PREFIX = '_';
 const MINI_STRING_PREFIX = '.';
 const EXPRESSION_STRING_PREFIX = '=';
@@ -43,9 +45,9 @@ function jaffleAnyToJs(thing: JaffleAny): string {
 	throw new errors.BadTypeJaffleError('basically anything', typeof thing);
 }
 
-// function serialize(node: any): string {
-// 	return JSON.stringify(node, null, '	').replace(/"/g, "'");
-// }
+function serialize(thing: JaffleAny): string {
+	return JSON.stringify(thing).replace(/"/g, "'");
+}
 
 // function getValues(attr: string, node: any): string {
 // 	const suffix = attr.split('^')[1];
@@ -157,11 +159,16 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 		throw new errors.BadFunctionJaffleError('Function is empty');
 	}
 
+	const uncapitalize = (str: string) => str[0].toLowerCase() + str.substring(1);
 	const funcName = getJaffleFuncName(func);
-	const newFuncName = funcName[0].toLowerCase() + funcName.substring(1);
+	const [newFuncName, serializeSuffix] = uncapitalize(funcName).split(SERIALIZE_FUNC_SUFFIX);
 	let js: string;
 
-	if (funcName.includes(NO_PAREN_FUNC_SUFFIX)) {
+	if (serializeSuffix !== undefined) {
+		return `${newFuncName}(${serialize(func[funcName])})`;
+	}
+
+	if (funcName.slice(-1) === NO_PAREN_FUNC_SUFFIX) {
 		js = newFuncName.substring(0, newFuncName.length - 1);
 	} else {
 		const params = getJaffleFuncParams(func[funcName]);
@@ -187,7 +194,6 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	// 		js = `(x, ${paramNames.join(', ')}) => x`;
 	// 	}
 	// } else {
-	// 	const newAttr = mainAttr.split('^')[0];
 	// 	js = indent(indentLvl) + newAttr[0].toLowerCase() + newAttr.substring(1);
 	// 	if (obj[mainAttr] !== null && !SIGNALS_FN.includes(newAttr)) {
 	// 		value = getValue(mainAttr, obj, indentLvl);
@@ -245,6 +251,7 @@ export const testing = {
 	getJaffleFuncName,
 	isJaffleChainedFunc,
 	jaffleStringToJs,
+	serialize,
 	jaffleAnyToJs,
 	jaffleInitBlockToJs,
 	jaffleFunctionToJs,

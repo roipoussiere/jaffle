@@ -171,7 +171,7 @@ describe('Testing jaffleAnyToJs()', () => {
 		expect(t.jaffleAnyToJs({ Foo: 42 })).toBe('foo(42)');
 		expect(t.jaffleAnyToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
 		expect(t.jaffleAnyToJs({ Foo: null })).toBe('foo()');
-		expect(t.jaffleAnyToJs({ Foo_: null })).toBe('foo');
+		expect(t.jaffleAnyToJs({ 'Foo-': null })).toBe('foo');
 	});
 
 	test('Functions list transpile into list of function calls', () => {
@@ -180,6 +180,19 @@ describe('Testing jaffleAnyToJs()', () => {
 
 	test('Trying to transpile bad functions fails', () => {
 		expect(() => t.jaffleAnyToJs({})).toThrow(e.BadFunctionJaffleError);
+	});
+});
+
+describe('Testing serialize()', () => {
+	test('objects are correctly serialized', () => {
+		expect(t.serialize(42)).toBe('42');
+		expect(t.serialize(null)).toBe('null');
+		expect(t.serialize('bar')).toBe("'bar'");
+		expect(t.serialize([1, 2, 3])).toBe('[1,2,3]');
+		expect(t.serialize({ foo: 42 })).toBe("{'foo':42}");
+		expect(t.serialize({ foo: 'bar' })).toBe("{'foo':'bar'}");
+		expect(t.serialize({ foo: [1, 2, 3] })).toBe("{'foo':[1,2,3]}");
+		expect(t.serialize({ foo: { bar: 42 } })).toBe("{'foo':{'bar':42}}");
 	});
 });
 
@@ -192,7 +205,7 @@ describe('Testing jaffleFunctionToJs()', () => {
 		expect(t.jaffleFunctionToJs({ Foo: 42 })).toBe('foo(42)');
 		expect(t.jaffleFunctionToJs({ Foo: 'bar' })).toBe('foo(`bar`)');
 		expect(t.jaffleFunctionToJs({ Foo: null })).toBe('foo()');
-		expect(t.jaffleFunctionToJs({ Foo_: null })).toBe('foo');
+		expect(t.jaffleFunctionToJs({ 'Foo-': null })).toBe('foo');
 		expect(t.jaffleFunctionToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
 		expect(t.jaffleFunctionToJs({ Foo: { Bar: 42 } })).toBe('foo(bar(42))');
 		expect(t.jaffleFunctionToJs({ Fo: [{ Ba: [1, 2] }, 3, 'b'] })).toBe('fo(ba(1, 2), 3, `b`)');
@@ -200,6 +213,11 @@ describe('Testing jaffleFunctionToJs()', () => {
 
 	test('chained functions are transpiled into a function call', () => {
 		expect(t.jaffleFunctionToJs({ foo: 42 })).toBe('foo(42)');
+	});
+
+	test('serialized functions are transpiled into a function call with serialized param', () => {
+		expect(t.jaffleFunctionToJs({ 'foo^': 'bar' })).toBe("foo('bar')");
+		expect(t.jaffleFunctionToJs({ 'fo^': { Ba: { be: 42 } } })).toBe("fo({'Ba':{'be':42}})");
 	});
 });
 
