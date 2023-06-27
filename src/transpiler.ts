@@ -1,4 +1,4 @@
-import * as yaml from 'js-yaml';
+import { load as loadYaml } from 'js-yaml';
 import * as errors from './errors';
 
 type JaffleLiteral = string | number | null;
@@ -16,12 +16,12 @@ const EXPRESSION_STRING_PREFIX = '=';
 
 function jaffleStringToJs(str: string): string {
 	if (str[0] === MINI_STRING_PREFIX) {
-		return `mini(\`${str.substring(1)}\`)`;
+		return `mini('${str.substring(1)}')`;
 	}
 	if (str[0] === EXPRESSION_STRING_PREFIX) {
 		return str.substring(1).replace(/[^a-z0-9.+\-*/() ]|[a-z]{2,}/g, '');
 	}
-	return `\`${str[0] === OPTIONAL_STRING_PREFIX ? str.substring(1) : str}\``;
+	return `'${str[0] === OPTIONAL_STRING_PREFIX ? str.substring(1) : str}'`;
 }
 
 function jaffleAnyToJs(thing: JaffleAny): string {
@@ -197,7 +197,7 @@ function jaffleDocumentToJs(inputYaml: string): string {
 	let outputJs = '';
 
 	try {
-		tune = <JaffleFunction> yaml.load(inputYaml);
+		tune = <JaffleFunction> loadYaml(inputYaml);
 	} catch (err) {
 		throw new errors.BadYamlJaffleError(err.message);
 	}
