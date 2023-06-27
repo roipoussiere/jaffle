@@ -113,8 +113,46 @@ describe('Testing checkJaffleList()', () => {
 	});
 });
 
-// describe('Testing stringToJs()', () => {
-// });
+describe('Testing jaffleStringToJs()', () => {
+	test('Simple strings are transpiled to the string', () => {
+		expect(t.jaffleStringToJs('foo')).toBe('`foo`');
+		expect(t.jaffleStringToJs(' foo bar baz ')).toBe('` foo bar baz `');
+		expect(t.jaffleStringToJs('\nfoo\nbar\nbaz\n')).toBe('`\nfoo\nbar\nbaz\n`');
+	});
+
+	test('Strings with optional prefix are transpiled into the string without the prefix', () => {
+		expect(t.jaffleStringToJs('_foo')).toBe('`foo`');
+		expect(t.jaffleStringToJs('_foo bar\nbaz')).toBe('`foo bar\nbaz`');
+		expect(t.jaffleStringToJs('_=foo')).toBe('`=foo`');
+		expect(t.jaffleStringToJs('_.foo')).toBe('`.foo`');
+	});
+
+	test('Expression strings are transpiled into expressions', () => {
+		expect(t.jaffleStringToJs('=2+3')).toBe('2+3');
+		expect(t.jaffleStringToJs('=2-3')).toBe('2-3');
+		expect(t.jaffleStringToJs('=2*3')).toBe('2*3');
+		expect(t.jaffleStringToJs('=2/3')).toBe('2/3');
+		expect(t.jaffleStringToJs('=2**3')).toBe('2**3');
+		expect(t.jaffleStringToJs('=2 + 3 - 4 * 5')).toBe('2 + 3 - 4 * 5');
+
+		expect(t.jaffleStringToJs('=(42)')).toBe('(42)');
+		expect(t.jaffleStringToJs('=(1+2) - (3*4) / (5**6)')).toBe('(1+2) - (3*4) / (5**6)');
+
+		expect(t.jaffleStringToJs('=0.42')).toBe('0.42');
+		expect(t.jaffleStringToJs('=.42')).toBe('.42');
+
+		expect(t.jaffleStringToJs('=a')).toBe('a');
+		expect(t.jaffleStringToJs('=ab')).toBe('');
+		expect(t.jaffleStringToJs('=ab + cd')).toBe(' + ');
+		expect(t.jaffleStringToJs('=a b')).toBe('a b');
+		expect(t.jaffleStringToJs('=(a+1) - (b*2) / (c**3)')).toBe('(a+1) - (b*2) / (c**3)');
+	});
+
+	test('Mini-notation strings are transpiled into a call to mini', () => {
+		expect(t.jaffleStringToJs('.foo')).toBe('mini(`foo`)');
+		expect(t.jaffleStringToJs('.foo bar\nbaz')).toBe('mini(`foo bar\nbaz`)');
+	});
+});
 
 describe('Testing jaffleAnyToJs()', () => {
 	test('Literals transpile into literals', () => {

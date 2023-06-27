@@ -8,18 +8,19 @@ type JaffleList = Array<JaffleAny>
 type JaffleFunction = { [funcName: string]: JaffleAny }
 
 // const LAMBDA_PARAMS_NAME = ['a', 'b', 'c'];
-const NO_PAREN_SIGN = '_';
+const NO_PAREN_FUNC_SUFFIX = '_';
+const OPTIONAL_STRING_PREFIX = '_';
+const MINI_STRING_PREFIX = '.';
+const EXPRESSION_STRING_PREFIX = '=';
 
 function jaffleStringToJs(str: string): string {
-	return `\`${str}\``;
-	// if (str[0] === '=') {
-	// 	return str.substring(1).replace(/[^a-c0-9.+\-*/()]/g, '');
-	// } if (str[0] === ':') {
-	// 	return `\`${str.substring(1)}\``;
-	// } if (str[0] === '/') {
-	// 	return `mini('${str.substring(1).replace(/\s+/g, ' ')}')`;
-	// }
-	// return `mini('${str.replace(/\s+/g, ' ')}')`;
+	if (str[0] === MINI_STRING_PREFIX) {
+		return `mini(\`${str.substring(1)}\`)`;
+	}
+	if (str[0] === EXPRESSION_STRING_PREFIX) {
+		return str.substring(1).replace(/[^a-z0-9.+\-*/() ]|[a-z]{2,}/g, '');
+	}
+	return `\`${str[0] === OPTIONAL_STRING_PREFIX ? str.substring(1) : str}\``;
 }
 
 function jaffleAnyToJs(thing: JaffleAny): string {
@@ -160,7 +161,7 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	const newFuncName = funcName[0].toLowerCase() + funcName.substring(1);
 	let js: string;
 
-	if (funcName.includes(NO_PAREN_SIGN)) {
+	if (funcName.includes(NO_PAREN_FUNC_SUFFIX)) {
 		js = newFuncName.substring(0, newFuncName.length - 1);
 	} else {
 		const params = getJaffleFuncParams(func[funcName]);
