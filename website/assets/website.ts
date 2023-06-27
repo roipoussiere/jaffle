@@ -4,10 +4,9 @@ import { transpiler, JaffleEditor, Strudel } from './jaffle';
 
 const TUNES_PATH = './tunes/';
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'bridge_is_over',
-	'chop', 'delay', 'giant_steps', 'sample_drums', 'zelda_rescue',
+	'chop', 'delay', 'giant_steps', 'sample_drums', 'swimming', 'zelda_rescue',
 	'ws2_stack', 'ws3_delay', 'ws3_dub_tune', 'ws3_stack_in_stack', 'ws4_add_stack'];
-	// 'blippy_rhodes', 'caverave', 'csound_demo', 'festival_of_fingers', 'swimming',
-	// 'wavy_kalimba' ];
+	// 'blippy_rhodes', 'caverave', 'csound_demo', 'festival_of_fingers', 'wavy_kalimba' ];
 
 const DEFAULT_TUNE = 'ws2_stack';
 const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune');
@@ -26,9 +25,9 @@ function loadTune(tuneName: string): void {
 	window.location.hash = `#${tuneName}`;
 }
 
-function getRandomTune(): string {
-	return TUNES[Math.floor(Math.random() * TUNES.length)];
-}
+// function getRandomTune(): string {
+// 	return TUNES[Math.floor(Math.random() * TUNES.length)];
+// }
 
 function fillTunesList(): void {
 	TUNES.forEach((tune) => {

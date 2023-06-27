@@ -59,6 +59,6 @@ Stack:
   - /[F2 A2 Bb2 B2]
   - /[G2 C2 F2 F2]
   color: :#0077C9
-note:
-slow: 51
-pianoroll^: { fold: 1 }
+- note:
+- slow: 51
+- pianoroll^: { fold: 1 }

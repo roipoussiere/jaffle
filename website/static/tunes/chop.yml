@@ -3,8 +3,8 @@
 # @by Felix Roos
 
 Init:
-- samples^:
-  p: https://cdn.freesound.org/previews/648/648433_11943129-lq.mp3
+- Samples^:
+    p: https://cdn.freesound.org/previews/648/648433_11943129-lq.mp3
 
 S: p
 - loopAt: 32

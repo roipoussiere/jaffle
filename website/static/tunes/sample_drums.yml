@@ -8,11 +8,15 @@ Init:
   - :https://loophole-letters.vercel.app/samples/tidal/
 
 Stack:
-- - <bd!3 bd(3,4,3)>
-  - color: /#F5A623
-- - hh*4
-  - color: /#673AB7
-- - ~ <sn!3 sn(3,4,2)>
-  - color: /#4CAF50
+- M:
+  - <bd!3 bd(3,4,3)>
+  - color: :#F5A623
+- M:
+  - hh*4
+  - color: :#673AB7
+- M:
+  - ~ <sn!3 sn(3,4,2)>
+  - color: :#4CAF50
 - s:
-  - pianoroll^: { fold: 1 }
+- pianoroll:
+    fold: 1

@@ -10,5 +10,5 @@ Stack:
   - delayfeedback: .6 | .8
 
 - sometimes:
-  - set:
+  - Set:
   - speed: -1
