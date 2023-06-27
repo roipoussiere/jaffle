@@ -218,7 +218,8 @@ describe('Testing jaffleFunctionToJs()', () => {
 	test('serialized functions are transpiled into a function call with serialized param', () => {
 		expect(t.jaffleFunctionToJs({ 'foo^': 'bar' })).toBe("foo('bar')");
 		expect(t.jaffleFunctionToJs({ 'fo^': { Ba: { be: 42 } } })).toBe("fo({'Ba':{'be':42}})");
-		expect(t.jaffleFunctionToJs({ 'fo^1': [{ Ba: { be: 42 } }, { Bi: 42 }, { bo: 24 }] })).toBe("fo({'Ba':{'be':42}}, bi(42)).bo(24)");
+		expect(t.jaffleFunctionToJs({ 'fo^1': [{ Ba: { be: 42 } }, { Bi: 42 }, { bo: 24 }] }))
+			.toBe("fo({'Ba':{'be':42}}, bi(42)).bo(24)");
 	});
 });
 
@@ -247,7 +248,8 @@ describe('Testing jaffleInitBlockToJs()', () => {
 		expect(() => t.jaffleInitBlockToJs([{}])).toThrow(e.BadInitBlockJaffleError);
 		expect(() => t.jaffleInitBlockToJs([{ foo: 42 }])).toThrow(e.BadInitBlockJaffleError);
 		expect(() => t.jaffleInitBlockToJs([{ fo: 1, ba: 2 }])).toThrow(e.BadInitBlockJaffleError);
-		expect(() => t.jaffleInitBlockToJs([{ f: 1 }, { B: 2 }])).toThrow(e.BadInitBlockJaffleError);
+		expect(() => t.jaffleInitBlockToJs([{ f: 1 }, { B: 2 }]))
+			.toThrow(e.BadInitBlockJaffleError);
 	});
 });
 
@@ -288,12 +290,14 @@ note:
 describe('Testing errors', () => {
 	test('Errors should throw when throwed', () => {
 		expect(() => { throw new e.JaffleError(''); }).toThrow(e.JaffleError);
-		expect(() => { throw new e.NotImplementedJaffleError(''); }).toThrow(e.NotImplementedJaffleError);
+		expect(() => { throw new e.NotImplementedJaffleError(''); })
+			.toThrow(e.NotImplementedJaffleError);
 		expect(() => { throw new e.BadYamlJaffleError(''); }).toThrow(e.BadYamlJaffleError);
 		expect(() => { throw new e.BadTypeJaffleError('a', 'b'); }).toThrow(e.BadTypeJaffleError);
 		expect(() => { throw new e.BadFunctionJaffleError(''); }).toThrow(e.BadFunctionJaffleError);
 		expect(() => { throw new e.BadListJaffleError(''); }).toThrow(e.BadListJaffleError);
-		expect(() => { throw new e.BadInitBlockJaffleError(''); }).toThrow(e.BadInitBlockJaffleError);
+		expect(() => { throw new e.BadInitBlockJaffleError(''); })
+			.toThrow(e.BadInitBlockJaffleError);
 		expect(() => { throw new e.BadDocumentJaffleError(''); }).toThrow(e.BadDocumentJaffleError);
 	});
 });

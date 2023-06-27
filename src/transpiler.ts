@@ -223,7 +223,9 @@ function jaffleDocumentToJs(inputYaml: string): string {
 		checkJaffleMainFunction(main);
 		outputJs += `return ${jaffleFunctionToJs(main)};`;
 	} else {
-		throw new errors.BadDocumentJaffleError(`Document root must be a dictionary, not ${typeof tune}`);
+		throw new errors.BadDocumentJaffleError(
+			`Document root must be a dictionary, not ${typeof tune}`,
+		);
 	}
 
 	return outputJs;
