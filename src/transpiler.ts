@@ -7,7 +7,6 @@ type JaffleAny = JaffleLiteral | JaffleFunction | JaffleList
 type JaffleList = Array<JaffleAny>
 type JaffleFunction = { [funcName: string]: JaffleAny }
 
-// const LAMBDA_PARAMS_NAME = ['a', 'b', 'c'];
 const NO_PAREN_FUNC_SUFFIX = '-';
 const SERIALIZE_FUNC_SUFFIX = '^';
 
@@ -144,10 +143,15 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 		throw new errors.BadFunctionJaffleError('Function is empty');
 	}
 
-	const uncapitalize = (str: string) => str[0].toLowerCase() + str.substring(1);
 	const funcName = getJaffleFuncName(func);
-	const [newFuncName, serializeSuffix] = uncapitalize(funcName).split(SERIALIZE_FUNC_SUFFIX);
+	const funcNameAndSuffix = funcName.split(SERIALIZE_FUNC_SUFFIX);
+	const serializeSuffix = funcNameAndSuffix[1];
+	let [newFuncName] = funcNameAndSuffix;
 	let js: string;
+
+	newFuncName = newFuncName === 'M'
+		? 'mini'
+		: newFuncName[0].toLowerCase() + newFuncName.substring(1);
 
 	let serializedParamId = -1;
 	if (serializeSuffix !== undefined) {
@@ -162,7 +166,9 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	} else {
 		const params = getJaffleFuncParams(func[funcName], serializedParamId);
 		if (params.length === 0 || (params.length === 1 && params[0] === null)) {
-			js = `${newFuncName}()`;
+			js = funcName === 'Set' ? 'x => x' : `${newFuncName}()`;
+		} else if (funcName === 'Set') {
+			js = `(x, ${(<string>params[0]).split('').join(', ')}) => x`;
 		} else {
 			const newParams = params.map((param, id) => (
 				id === serializedParamId ? serialize(param) : jaffleAnyToJs(param)
@@ -175,22 +181,6 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 		.map((chainedFunc) => `.${jaffleFunctionToJs(chainedFunc)}`)
 		.join('');
 
-	// const chainJS = .map((attr, child) => anyToJs(child));
-	// if (mainAttr === 'M') {
-	// 	js = valueToString(obj[mainAttr]);
-	// } else if (mainAttr === 'Set') {
-	// 	if (obj[mainAttr] === null) {
-	// 		js = 'x => x';
-	// 	} else {
-	// 		const paramNames = LAMBDA_PARAMS_NAME.slice(0, obj[mainAttr]);
-	// 		js = `(x, ${paramNames.join(', ')}) => x`;
-	// 	}
-	// } else {
-	// 	js = indent(indentLvl) + newAttr[0].toLowerCase() + newAttr.substring(1);
-	// 	if (obj[mainAttr] !== null && !SIGNALS_FN.includes(newAttr)) {
-	// 		value = getValue(mainAttr, obj, indentLvl);
-	// 		js += `(${value})`;
-	// 	}
 	return js;
 }
 

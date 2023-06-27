@@ -197,11 +197,11 @@ describe('Testing serialize()', () => {
 });
 
 describe('Testing jaffleFunctionToJs()', () => {
-	test('Trying to transpile an empty function fails', () => {
+	test('trying to transpile an empty function fails', () => {
 		expect(() => t.jaffleFunctionToJs({})).toThrowError(e.BadFunctionJaffleError);
 	});
 
-	test('Main functions are transpiled into main function call', () => {
+	test('main functions are transpiled into main function call', () => {
 		expect(t.jaffleFunctionToJs({ Foo: 42 })).toBe('foo(42)');
 		expect(t.jaffleFunctionToJs({ Foo: 'bar' })).toBe('foo(`bar`)');
 		expect(t.jaffleFunctionToJs({ Foo: null })).toBe('foo()');
@@ -209,6 +209,10 @@ describe('Testing jaffleFunctionToJs()', () => {
 		expect(t.jaffleFunctionToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
 		expect(t.jaffleFunctionToJs({ Foo: { Bar: 42 } })).toBe('foo(bar(42))');
 		expect(t.jaffleFunctionToJs({ Fo: [{ Ba: [1, 2] }, 3, 'b'] })).toBe('fo(ba(1, 2), 3, `b`)');
+	});
+
+	test('function named M are transpiled into a call to mini()', () => {
+		expect(t.jaffleFunctionToJs({ M: 'foo' })).toBe('mini(`foo`)');
 	});
 
 	test('chained functions are transpiled into a function call', () => {
@@ -220,6 +224,13 @@ describe('Testing jaffleFunctionToJs()', () => {
 		expect(t.jaffleFunctionToJs({ 'fo^': { Ba: { be: 42 } } })).toBe("fo({'Ba':{'be':42}})");
 		expect(t.jaffleFunctionToJs({ 'fo^1': [{ Ba: { be: 42 } }, { Bi: 42 }, { bo: 24 }] }))
 			.toBe("fo({'Ba':{'be':42}}, bi(42)).bo(24)");
+	});
+
+	test('Lambda functions are transpiled into lambda function calls', () => {
+		expect(t.jaffleFunctionToJs({ Set: [{ foo: 42 }] })).toBe('x => x.foo(42)');
+		expect(t.jaffleFunctionToJs({ Set: ['n', { foo: '=n-1' }] })).toBe('(x, n) => x.foo(n-1)');
+		expect(t.jaffleFunctionToJs({ Set: ['nm', { foo: '=n' }, { bar: '=m' }] }))
+			.toBe('(x, n, m) => x.foo(n).bar(m)');
 	});
 });
 
