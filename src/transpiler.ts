@@ -49,21 +49,6 @@ function serialize(thing: JaffleAny): string {
 	return JSON.stringify(thing).replace(/"/g, "'");
 }
 
-// function getValues(attr: string, node: any): string {
-// 	const suffix = attr.split('^')[1];
-
-// 	if (suffix === undefined) {
-// 		return parseNode(node[attr]);
-// 	}
-// 	if (suffix === '') {
-// 		return serialize(node[attr]);
-// 	}
-// 	const paramId = parseInt(suffix, 10) - 1;
-// 	return node[attr].map((child: any, id: number) => (
-// 		id === paramId ? serialize(child) : literalToJs(child)
-// 	));
-// }
-
 function checkJaffleFunction(thing: JaffleAny): JaffleFunction {
 	if (!(thing instanceof Object) || thing instanceof Array) {
 		throw new errors.BadFunctionJaffleError('Not a function');
@@ -124,13 +109,13 @@ Return the parameters found in an array.
 - `42` returns `[42]`;
 - `[add: 2, N: 'b3e6']` throws an error;
 */
-function getJaffleFuncParams(thing: JaffleAny): Array<JaffleAny> {
+function getJaffleFuncParams(thing: JaffleAny, serializedParamId = -1): Array<JaffleAny> {
 	if (!(thing instanceof Array)) {
 		return [thing];
 	}
 
 	const paramsId = thing
-		.map((item, id) => (isJaffleFuncParameter(item) ? id : -1))
+		.map((item, id) => (id === serializedParamId || isJaffleFuncParameter(item) ? id : -1))
 		.filter((id) => id !== -1);
 
 	if (paramsId.length === 0) {
@@ -164,18 +149,25 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	const [newFuncName, serializeSuffix] = uncapitalize(funcName).split(SERIALIZE_FUNC_SUFFIX);
 	let js: string;
 
+	let serializedParamId = -1;
 	if (serializeSuffix !== undefined) {
-		return `${newFuncName}(${serialize(func[funcName])})`;
+		if (serializeSuffix === '') {
+			return `${newFuncName}(${serialize(func[funcName])})`;
+		}
+		serializedParamId = parseInt(serializeSuffix, 10) - 1;
 	}
 
 	if (funcName.slice(-1) === NO_PAREN_FUNC_SUFFIX) {
 		js = newFuncName.substring(0, newFuncName.length - 1);
 	} else {
-		const params = getJaffleFuncParams(func[funcName]);
+		const params = getJaffleFuncParams(func[funcName], serializedParamId);
 		if (params.length === 0 || (params.length === 1 && params[0] === null)) {
 			js = `${newFuncName}()`;
 		} else {
-			js = `${newFuncName}(${params.map((param) => jaffleAnyToJs(param)).join(', ')})`;
+			const newParams = params.map((param, id) => (
+				id === serializedParamId ? serialize(param) : jaffleAnyToJs(param)
+			));
+			js = `${newFuncName}(${newParams.join(', ')})`;
 		}
 	}
 
@@ -201,15 +193,6 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	// 	}
 	return js;
 }
-
-// getOtherAttributes(obj).forEach((attr) => {
-// 	const newAttr = attr.split('^')[0];
-// 	value = getValue(attr, obj, indentLvl);
-// 	js += `${indent(indentLvl + 1)}.${newAttr}(${value})`;
-// });
-
-// return js;
-// }
 
 function jaffleInitBlockToJs(initBlock: JaffleList): string {
 	try {
