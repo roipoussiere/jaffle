@@ -5,7 +5,7 @@ type JaffleLiteral = string | number | null;
 // eslint-disable-next-line no-use-before-define
 type JaffleAny = JaffleLiteral | JaffleFunction | JaffleList
 type JaffleList = Array<JaffleAny>
-type JaffleFunction = { [attr: string]: JaffleAny }
+type JaffleFunction = { [funcName: string]: JaffleAny }
 
 // const LAMBDA_PARAMS_NAME = ['a', 'b', 'c'];
 const NO_PAREN_SIGN = '_';
@@ -42,31 +42,6 @@ function jaffleAnyToJs(thing: JaffleAny): string {
 	throw new errors.BadTypeJaffleError('basically anything', typeof thing);
 }
 
-// function getMainAttr(node: any): string {
-// 	const mainAttrs = Object.keys(node).filter((key) => key[0] !== key[0].toLowerCase());
-
-// 	if (mainAttrs.length === 0) {
-// 		throw new Error('Main attribute not found.');
-// 	}
-// 	if (mainAttrs.length > 1) {
-// 		throw new Error(`Too many main attributes: ${mainAttrs.join(', ')}`);
-// 	}
-// 	return mainAttrs[0];
-// 	return '';
-// }
-
-// function getOutroAttributes(node: any): string[] {
-// 	return Object.keys(node).filter((key) => key[0] === '.');
-// }
-
-// function getOtherAttributes(node: any): string[] {
-// 	return Object.keys(node).filter((key) => key[0] === key[0].toLowerCase() && key[0] !== '.');
-// }
-
-// function indent(lvl: number): string {
-// 	return lvl === 0 ? '' : `\n${'	'.repeat(lvl)}`;
-// }
-
 // function serialize(node: any): string {
 // 	return JSON.stringify(node, null, '	').replace(/"/g, "'");
 // }
@@ -100,23 +75,32 @@ function checkJaffleList(thing: JaffleAny): JaffleList {
 	return <JaffleList>thing;
 }
 
-function getJaffleFuncName(dict: JaffleFunction) {
-	checkJaffleFunction(dict);
+function getJaffleFuncName(func: JaffleFunction) {
+	checkJaffleFunction(func);
 
-	const keys = Object.keys(dict);
+	const keys = Object.keys(func);
 	if (keys.length === 0) {
-		throw new errors.BadFunctionJaffleError('object is empty');
+		throw new errors.BadFunctionJaffleError('could not find function name');
 	}
 	if (keys.length > 1) {
-		throw new errors.BadFunctionJaffleError(`too many main attributes: ${keys.join(', ')}`);
+		throw new errors.BadFunctionJaffleError(`too many function names: ${keys.join(', ')}`);
 	}
 	return keys[0];
 }
 
-function isJaffleMainFunction(thing: JaffleAny): boolean {
+function checkJaffleMainFunction(thing: JaffleAny): JaffleFunction {
+	const funcName = getJaffleFuncName(checkJaffleFunction(thing));
+	if (funcName[0] !== funcName[0].toUpperCase()) {
+		throw new errors.BadFunctionJaffleError('expecting a main function');
+	}
+
+	return <JaffleFunction>thing;
+}
+
+function isJaffleFuncParameter(thing: JaffleAny): boolean {
 	if (thing instanceof Object && !(thing instanceof Array)) {
-		const item = getJaffleFuncName(thing);
-		return item[0] === item[0].toUpperCase();
+		const funcName = getJaffleFuncName(thing);
+		return funcName[0] === funcName[0].toUpperCase();
 	}
 	return true;
 }
@@ -138,55 +122,59 @@ Return the parameters found in an array.
 - `[add: 2, N: 'b3e6']` throws an error;
 */
 function getJaffleFuncParams(thing: JaffleAny): Array<JaffleAny> {
-	if (thing instanceof Array) {
-		const paramsId = thing
-			.map((item, id) => (isJaffleMainFunction(item) ? id : -1))
-			.filter((id) => id !== -1);
-
-		if (paramsId.length === 0) {
-			return [];
-		}
-
-		const lastParamId = paramsId[paramsId.length - 1];
-		if (lastParamId >= paramsId.length) {
-			throw new errors.BadFunctionJaffleError('Parameters must be defined before the chain.');
-		}
-		return thing.filter((_item, id) => paramsId.includes(id));
+	if (!(thing instanceof Array)) {
+		return [thing];
 	}
-	return [thing];
+
+	const paramsId = thing
+		.map((item, id) => (isJaffleFuncParameter(item) ? id : -1))
+		.filter((id) => id !== -1);
+
+	if (paramsId.length === 0) {
+		return [];
+	}
+
+	const lastParamId = paramsId[paramsId.length - 1];
+	if (lastParamId >= paramsId.length) {
+		throw new errors.BadFunctionJaffleError('Parameters must be defined before the chain.');
+	}
+
+	return thing.filter((_item, id) => paramsId.includes(id));
 }
 
-// function getChain(array: Array<object | string>): Array<[string, any]> {
-// 	return [];
-// }
+function getJaffleFuncChain(thing: JaffleAny): Array<JaffleFunction> {
+	if (!(thing instanceof Array)) {
+		return [];
+	}
+	return thing
+		.filter((item) => isJaffleChainedFunc(item))
+		.map((func) => checkJaffleFunction(func));
+}
 
-function jaffleFunctionToJs(dict: JaffleFunction): string {
-	if (Object.keys(dict).length === 0) {
+function jaffleFunctionToJs(func: JaffleFunction): string {
+	if (Object.keys(func).length === 0) {
 		throw new errors.BadFunctionJaffleError('Function is empty');
 	}
 
-	const attr = getJaffleFuncName(dict);
-	const newAttr = attr[0].toLowerCase() + attr.substring(1);
+	const funcName = getJaffleFuncName(func);
+	const newFuncName = funcName[0].toLowerCase() + funcName.substring(1);
 	let js: string;
 
-	if (attr.includes(NO_PAREN_SIGN)) {
-		js = newAttr.substring(0, newAttr.length - 1);
+	if (funcName.includes(NO_PAREN_SIGN)) {
+		js = newFuncName.substring(0, newFuncName.length - 1);
 	} else {
-		const params = getJaffleFuncParams(dict[attr]);
+		const params = getJaffleFuncParams(func[funcName]);
 		if (params.length === 0 || (params.length === 1 && params[0] === null)) {
-			js = `${newAttr}()`;
+			js = `${newFuncName}()`;
 		} else {
-			js = `${newAttr}(${params.map((param) => jaffleAnyToJs(param)).join(', ')})`;
+			js = `${newFuncName}(${params.map((param) => jaffleAnyToJs(param)).join(', ')})`;
 		}
 	}
 
-	// 	const chain = getChain(obj[mainAttr]);
-	// 	if (chain.length !== 0) {
-	// 		const chainJS = chain.map((attr, child) => `.${attr}(${anyToJs(child)})`);
-	// 		js += chainJS.join('');
-	// 	}
+	js += getJaffleFuncChain(func[funcName])
+		.map((chainedFunc) => `.${jaffleFunctionToJs(chainedFunc)}`)
+		.join('');
 
-	// 	return js;
 	// const chainJS = .map((attr, child) => anyToJs(child));
 	// if (mainAttr === 'M') {
 	// 	js = valueToString(obj[mainAttr]);
@@ -216,14 +204,15 @@ function jaffleFunctionToJs(dict: JaffleFunction): string {
 // return js;
 // }
 
-function jaffleInitListToJs(initArray: JaffleList): string {
-	checkJaffleList(initArray);
-
-	return initArray
-		.map((item) => checkJaffleFunction(item))
-		.filter((item) => Object.keys(item).length !== 0)
-		.map((item) => `${jaffleFunctionToJs(item)};\n`)
-		.join('');
+function jaffleInitBlockToJs(initBlock: JaffleList): string {
+	try {
+		return checkJaffleList(initBlock)
+			.map((item) => checkJaffleMainFunction(item))
+			.map((item) => `${jaffleFunctionToJs(item)};\n`)
+			.join('');
+	} catch (err) {
+		throw new errors.BadInitBlockJaffleError(err.message);
+	}
 }
 
 function jaffleDocumentToJs(inputYaml: string): string {
@@ -239,8 +228,9 @@ function jaffleDocumentToJs(inputYaml: string): string {
 	if (tune instanceof Object && !(tune instanceof Array)) {
 		const { Init: initArray, ...main } = tune;
 		if (initArray !== undefined) {
-			outputJs += jaffleInitListToJs(checkJaffleList(initArray));
+			outputJs += jaffleInitBlockToJs(checkJaffleList(initArray));
 		}
+		checkJaffleMainFunction(main);
 		outputJs += `return ${jaffleFunctionToJs(main)};`;
 	} else {
 		throw new errors.BadDocumentJaffleError(`Document root must be a dictionary, not ${typeof tune}`);
@@ -255,7 +245,7 @@ export const testing = {
 	isJaffleChainedFunc,
 	jaffleStringToJs,
 	jaffleAnyToJs,
-	jaffleInitListToJs,
+	jaffleInitBlockToJs,
 	jaffleFunctionToJs,
 	checkJaffleFunction,
 	checkJaffleList,

@@ -44,7 +44,7 @@ export class BadListJaffleError extends JaffleError {
 
 export class BadInitBlockJaffleError extends JaffleError {
 	constructor(message: string) {
-		super(message);
+		super(`bad init block: ${message}`);
 		this.name = BadInitBlockJaffleError.name;
 	}
 }
