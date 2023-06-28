@@ -41,7 +41,7 @@ Note:
     - off:
       - =1/8
       - Set:
-        - add: .2,4
+        - add: _2,4
         - off:
           - =1/8
           - Set:
@@ -54,13 +54,13 @@ Note:
 - n: 0
 - gain: .3
 - cutoff:
-  - Sine-:
+  - Sine.:
     - slow: 7
     - range: [ 200, 4000 ]
 - resonance: 10
 # hcutoff: 400
 - clip: 1
 - stack:
-  - S: .bd:1*2,~ sd:0,[~ hh:0]*2
-# - pianoroll^: # FIXME: "too many function names: pianoroll^, vertical"
-#   vertical: 1
+  - S: _bd:1*2,~ sd:0,[~ hh:0]*2
+- pianoroll^:
+    vertical: 1

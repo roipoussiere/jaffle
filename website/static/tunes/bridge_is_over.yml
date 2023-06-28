@@ -3,28 +3,31 @@
 # @by Felix Roos, bassline by BDP - The Bridge Is Over
 
 Init:
-- samples^:
+- Samples^:
     mad: https://freesound.org/data/previews/22/22274_109943-lq.mp3
 
 Stack:
 - Stack:
-  - c3*2 [[c3@1.4 bb2] ab2] gb2*2 <[[gb2@1.4 ab2] bb2] gb2>
+  - M:
+    - c3*2 [[c3@1.4 bb2] ab2] gb2*2 <[[gb2@1.4 ab2] bb2] gb2>
     - legato:
-      - .5 1
+      - _5 1
       - fast: 2
     - velocity: .8
-  - 0 ~
-    - scale: :c4 whole tone
+  - M:
+    - 0 ~
+    - scale: c4 whole tone
     - euclidLegato: [ 3, 8 ]
     - slow: 2
-    - mask: x ~
+    - mask: _x ~
     - stutWith:
       - 8
       - =1/16
-      - Set2:
+      - Set:
+        - a
         - scaleTranspose: =a
-        # - velocity: =.7^a
-    - scaleTranspose: <0 1 2 3 4 3 2 1>
+        - velocity: =.7**a
+    - scaleTranspose: _<0 1 2 3 4 3 2 1>
     - fast: 2
     - velocity: .7
     - legato: .5

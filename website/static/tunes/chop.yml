@@ -6,7 +6,8 @@ Init:
 - Samples^:
     p: https://cdn.freesound.org/previews/648/648433_11943129-lq.mp3
 
-S: p
+S:
+- M: p
 - loopAt: 32
 - chop: 128
 - jux:
