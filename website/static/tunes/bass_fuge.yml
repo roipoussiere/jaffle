@@ -3,7 +3,7 @@
 # @by Felix Roos
 
 Init:
-- Samples^: #FIXME: don't load because transpiled into samples([ {'flbass':...}, 'github..' ])
+- Samples^:
   - flbass:
     - 00_c2_finger_long_neck.wav
     - 01_c2_finger_short_neck.wav
@@ -47,8 +47,8 @@ Note:
           - Set:
             - add: 5
             - echo: [ 4, .125, .5 ]
-  - slow: 2
-- scale: A1 minor
+    - slow: 2
+  - scale: A1 minor
 
 - s: flbass
 - n: 0

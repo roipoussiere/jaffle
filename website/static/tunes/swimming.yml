@@ -61,4 +61,5 @@ Stack:
   - color: /#0077C9
 - note:
 - slow: 51
-- pianoroll^: { fold: 1 }
+- pianoroll^:
+    fold: 1

@@ -1,7 +1,7 @@
 # "Sample drums"
 
 Init:
-- Samples^1: # FIXME: "bad init block: too many function names: bd, sn, hh"
+- Samples^1:
   - bd: bd/BT0A0D0.wav
     sn: sn/ST0T0S3.wav
     hh: hh/000_hh3closedhh.wav
@@ -18,5 +18,5 @@ Stack:
   - ~ <sn!3 sn(3,4,2)>
   - color: /#4CAF50
 - s:
-- pianoroll:
+- pianoroll^:
     fold: 1

@@ -2,7 +2,7 @@
 # @by John Coltrane
 
 Init:
-- SetVoicingRange: # FIXME: transpiled as setVoicingRange('lefthand', 'E3', 'G4')
+- SetVoicingRange:
   - lefthand
   - [ E3, G4 ]
 
@@ -28,5 +28,5 @@ Stack:
   - color: /#00B8D4
 - slow: 20
 - note:
-- pianoroll^: # FIXME: "too many function names: pianoroll^, fold"
+- pianoroll^:
     fold: 1
