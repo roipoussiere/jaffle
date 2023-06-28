@@ -115,11 +115,11 @@ Return the parameters found in an array.
 - `[add: 2, N: 'b3e6']` throws an error;
 */
 function getJaffleFuncParams(thing: JaffleAny, serializedParamId = -1): Array<JaffleAny> {
-	if (!(thing instanceof Array)) {
+	if (!(thing instanceof Object)) {
 		return [thing];
 	}
-
-	const paramsId = thing
+	const list = thing instanceof Array ? thing : [thing];
+	const paramsId = list
 		.map((item, id) => (
 			[id, -2].includes(serializedParamId) || isJaffleFuncParameter(item) ? id : -1
 		)).filter((id) => id !== -1);
@@ -133,15 +133,16 @@ function getJaffleFuncParams(thing: JaffleAny, serializedParamId = -1): Array<Ja
 		throw new errors.BadFunctionJaffleError('Parameters must be defined before the chain.');
 	}
 
-	return thing.filter((_item, id) => paramsId.includes(id));
+	return list.filter((_item, id) => paramsId.includes(id));
 }
 
 function getJaffleFuncChain(thing: JaffleAny, serializedParamId = -1): Array<JaffleFunction> {
-	if (!(thing instanceof Array)) {
+	if (!(thing instanceof Object)) {
 		return [];
 	}
+	const list = thing instanceof Array ? thing : [thing];
 
-	return thing
+	return list
 		.filter((item, id) => ![id, -2].includes(serializedParamId) && isJaffleChainedFunc(item))
 		.map((item) => checkJaffleFunction(item));
 }

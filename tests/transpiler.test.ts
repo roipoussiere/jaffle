@@ -39,7 +39,7 @@ describe('Testing getJaffleFuncParams()', () => {
 		expect(t.getJaffleFuncParams('foo')).toEqual(['foo']);
 		expect(t.getJaffleFuncParams(42)).toEqual([42]);
 		expect(t.getJaffleFuncParams(null)).toEqual([null]);
-		expect(t.getJaffleFuncParams({ foo: 42 })).toEqual([{ foo: 42 }]);
+		expect(t.getJaffleFuncParams({ foo: 42 })).toEqual([]);
 	});
 
 	test('Function parameters of empty list is an empty list', () => {
@@ -212,12 +212,21 @@ describe('Testing jaffleFunctionToJs()', () => {
 		expect(t.jaffleFunctionToJs({ Fo: [{ Ba: [1, 2] }, 3, 'b'] })).toBe("fo(ba(1, 2), 3, 'b')");
 	});
 
-	test('function named M are transpiled into a call to mini()', () => {
+	test('aliases functions are transpiled into a call to their alias', () => {
 		expect(t.jaffleFunctionToJs({ M: 'foo' })).toBe("mini('foo')");
 	});
 
-	test('chained functions are transpiled into a function call', () => {
-		expect(t.jaffleFunctionToJs({ foo: 42 })).toBe('foo(42)');
+	test('chained functions are transpiled into chained function calls', () => {
+		expect(t.jaffleFunctionToJs({ A: [1, { b: 2 }] })).toBe('a(1).b(2)');
+		expect(t.jaffleFunctionToJs({ A: { b: 1 } })).toBe('a().b(1)');
+		expect(t.jaffleFunctionToJs({ A: [{ b: 1 }, { c: 2 }] })).toBe('a().b(1).c(2)');
+		expect(t.jaffleFunctionToJs({ A: [1, 2, { b: 3 }, { c: 4 }] })).toBe('a(1, 2).b(3).c(4)');
+
+		expect(t.jaffleFunctionToJs({ A: [{ B: 1 }, { c: 2 }] })).toBe('a(b(1)).c(2)');
+		expect(t.jaffleFunctionToJs({ A: [1, { b: { C: 2 } }] })).toBe('a(1).b(c(2))');
+		expect(t.jaffleFunctionToJs({ A: [{ b: [{ C: 1 }, { d: 2 }] }] })).toBe('a().b(c(1)).d(2)');
+		expect(t.jaffleFunctionToJs({ A: [{ b: [{ C: 1 }, { d: 2 }] }, { e: 3 }] }))
+			.toBe('a().b(c(1)).d(2).e(3)'); // syntax issue here: d and c are on same level
 	});
 
 	test('serialized functions are transpiled into a function call with serialized param', () => {
