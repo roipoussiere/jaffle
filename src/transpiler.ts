@@ -29,7 +29,7 @@ function jaffleStringToJs(_str: string): string {
 
 function jaffleAnyToJs(thing: JaffleAny): string {
 	if (thing instanceof Array) {
-		return thing.map((item) => jaffleAnyToJs(item)).join(', ');
+		return `[${thing.map((item) => jaffleAnyToJs(item)).join(', ')}]`;
 	}
 	if (thing instanceof Object) {
 		// eslint-disable-next-line no-use-before-define

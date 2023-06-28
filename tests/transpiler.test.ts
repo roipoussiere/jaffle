@@ -162,9 +162,9 @@ describe('Testing jaffleAnyToJs()', () => {
 	});
 
 	test('Lists transpile into lists', () => {
-		expect(t.jaffleAnyToJs([])).toBe('');
-		expect(t.jaffleAnyToJs([1, 2, 3])).toBe('1, 2, 3');
-		expect(t.jaffleAnyToJs([42, null, 'foo'])).toBe("42, null, 'foo'");
+		expect(t.jaffleAnyToJs([])).toBe('[]');
+		expect(t.jaffleAnyToJs([1, 2, 3])).toBe('[1, 2, 3]');
+		expect(t.jaffleAnyToJs([42, null, 'foo'])).toBe("[42, null, 'foo']");
 	});
 
 	test('Main functions transpile into function calls', () => {
@@ -175,7 +175,7 @@ describe('Testing jaffleAnyToJs()', () => {
 	});
 
 	test('Functions list transpile into list of function calls', () => {
-		expect(t.jaffleAnyToJs([{ Foo: 42 }, { bar: 'baz' }])).toBe("foo(42), bar('baz')");
+		expect(t.jaffleAnyToJs([{ Foo: 42 }, { bar: 'baz' }])).toBe("[foo(42), bar('baz')]");
 	});
 
 	test('Trying to transpile bad functions fails', () => {
@@ -207,6 +207,7 @@ describe('Testing jaffleFunctionToJs()', () => {
 		expect(t.jaffleFunctionToJs({ Foo: null })).toBe('foo()');
 		expect(t.jaffleFunctionToJs({ 'Foo.': null })).toBe('foo');
 		expect(t.jaffleFunctionToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
+		expect(t.jaffleFunctionToJs({ Foo: [1, [2, 3]] })).toBe('foo(1, [2, 3])');
 		expect(t.jaffleFunctionToJs({ Foo: { Bar: 42 } })).toBe('foo(bar(42))');
 		expect(t.jaffleFunctionToJs({ Fo: [{ Ba: [1, 2] }, 3, 'b'] })).toBe("fo(ba(1, 2), 3, 'b')");
 	});
