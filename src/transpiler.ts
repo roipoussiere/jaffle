@@ -114,8 +114,9 @@ function getJaffleFuncParams(thing: JaffleAny, serializedParamId = -1): Array<Ja
 	}
 
 	const paramsId = thing
-		.map((item, id) => (id === serializedParamId || isJaffleFuncParameter(item) ? id : -1))
-		.filter((id) => id !== -1);
+		.map((item, id) => (
+			[id, -2].includes(serializedParamId) || isJaffleFuncParameter(item) ? id : -1
+		)).filter((id) => id !== -1);
 
 	if (paramsId.length === 0) {
 		return [];
@@ -153,25 +154,23 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 		? 'mini'
 		: newFuncName[0].toLowerCase() + newFuncName.substring(1);
 
-	let serializedParamId = -1;
-	if (serializeSuffix !== undefined) {
-		if (serializeSuffix === '') {
-			return `${newFuncName}(${serialize(func[funcName])})`;
-		}
-		serializedParamId = parseInt(serializeSuffix, 10) - 1;
-	}
-
 	if (funcName.slice(-1) === NO_PAREN_FUNC_SUFFIX) {
 		js = newFuncName.substring(0, newFuncName.length - 1);
 	} else {
+		let serializedParamId = -1;
+		if (serializeSuffix !== undefined) {
+			serializedParamId = serializeSuffix === '' ? -2 : parseInt(serializeSuffix, 10) - 1;
+		}
+
 		const params = getJaffleFuncParams(func[funcName], serializedParamId);
+
 		if (params.length === 0 || (params.length === 1 && params[0] === null)) {
 			js = funcName === 'Set' ? 'x => x' : `${newFuncName}()`;
 		} else if (funcName === 'Set') {
 			js = `(x, ${(<string>params[0]).split('').join(', ')}) => x`;
 		} else {
 			const newParams = params.map((param, id) => (
-				id === serializedParamId ? serialize(param) : jaffleAnyToJs(param)
+				[id, -2].includes(serializedParamId) ? serialize(param) : jaffleAnyToJs(param)
 			));
 			js = `${newFuncName}(${newParams.join(', ')})`;
 		}

@@ -222,6 +222,9 @@ describe('Testing jaffleFunctionToJs()', () => {
 
 	test('serialized functions are transpiled into a function call with serialized param', () => {
 		expect(t.jaffleFunctionToJs({ 'foo^': 'bar' })).toBe("foo('bar')");
+		expect(t.jaffleFunctionToJs({ 'foo^': ['bar', 'baz'] })).toBe("foo('bar', 'baz')");
+		expect(t.jaffleFunctionToJs({ 'foo^': ['bar', [1, 2]] })).toBe("foo('bar', [1,2])");
+		expect(t.jaffleFunctionToJs({ 'foo^': ['bar', { Baz: 3 }] })).toBe("foo('bar', {'Baz':3})");
 		expect(t.jaffleFunctionToJs({ 'fo^': { Ba: { be: 42 } } })).toBe("fo({'Ba':{'be':42}})");
 		expect(t.jaffleFunctionToJs({ 'fo^1': [{ Ba: { be: 42 } }, { Bi: 42 }, { bo: 24 }] }))
 			.toBe("fo({'Ba':{'be':42}}, bi(42)).bo(24)");
