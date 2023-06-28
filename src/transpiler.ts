@@ -14,6 +14,12 @@ const OPTIONAL_STRING_PREFIX = '/';
 const MINI_STRING_PREFIX = '_';
 const EXPRESSION_STRING_PREFIX = '=';
 
+const LAMBDA_NAME = 'Set';
+const LAMBDA_VAR = 'x';
+const ALIASES: { [alias: string]: string } = {
+	M: 'mini',
+};
+
 function jaffleStringToJs(_str: string): string {
 	const str = _str.trim();
 	const quote = str.includes('\n') ? '`' : "'";
@@ -150,8 +156,8 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	let [newFuncName] = funcNameAndSuffix;
 	let js: string;
 
-	newFuncName = newFuncName === 'M'
-		? 'mini'
+	newFuncName = newFuncName in ALIASES
+		? ALIASES[newFuncName]
 		: newFuncName[0].toLowerCase() + newFuncName.substring(1);
 
 	if (funcName.slice(-1) === NO_PAREN_FUNC_SUFFIX) {
@@ -165,9 +171,9 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 		const params = getJaffleFuncParams(func[funcName], serializedParamId);
 
 		if (params.length === 0 || (params.length === 1 && params[0] === null)) {
-			js = funcName === 'Set' ? 'x => x' : `${newFuncName}()`;
-		} else if (funcName === 'Set') {
-			js = `(x, ${(<string>params[0]).split('').join(', ')}) => x`;
+			js = funcName === LAMBDA_NAME ? `${LAMBDA_VAR} => ${LAMBDA_VAR}` : `${newFuncName}()`;
+		} else if (funcName === LAMBDA_NAME) {
+			js = `(${LAMBDA_VAR}, ${(<string>params[0]).split('').join(', ')}) => ${LAMBDA_VAR}`;
 		} else {
 			const newParams = params.map((param, id) => (
 				[id, -2].includes(serializedParamId) ? serialize(param) : jaffleAnyToJs(param)
