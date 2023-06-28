@@ -115,16 +115,16 @@ describe('Testing checkJaffleList()', () => {
 
 describe('Testing jaffleStringToJs()', () => {
 	test('Simple strings are transpiled to the string', () => {
-		expect(t.jaffleStringToJs('foo')).toBe('`foo`');
-		expect(t.jaffleStringToJs(' foo bar baz ')).toBe('` foo bar baz `');
-		expect(t.jaffleStringToJs('\nfoo\nbar\nbaz\n')).toBe('`\nfoo\nbar\nbaz\n`');
+		expect(t.jaffleStringToJs('foo')).toBe("'foo'");
+		expect(t.jaffleStringToJs(' foo bar baz ')).toBe("'foo bar baz'");
+		expect(t.jaffleStringToJs('\nfoo\nbar\nbaz\n')).toBe('`foo\nbar\nbaz`');
 	});
 
 	test('Strings with optional prefix are transpiled into the string without the prefix', () => {
-		expect(t.jaffleStringToJs('_foo')).toBe('`foo`');
-		expect(t.jaffleStringToJs('_foo bar\nbaz')).toBe('`foo bar\nbaz`');
-		expect(t.jaffleStringToJs('_=foo')).toBe('`=foo`');
-		expect(t.jaffleStringToJs('_.foo')).toBe('`.foo`');
+		expect(t.jaffleStringToJs('/foo')).toBe("'foo'");
+		expect(t.jaffleStringToJs('/foo bar\nbaz')).toBe('`foo bar\nbaz`');
+		expect(t.jaffleStringToJs('/=foo')).toBe("'=foo'");
+		expect(t.jaffleStringToJs('/.foo')).toBe("'.foo'");
 	});
 
 	test('Expression strings are transpiled into expressions', () => {
@@ -149,8 +149,8 @@ describe('Testing jaffleStringToJs()', () => {
 	});
 
 	test('Mini-notation strings are transpiled into a call to mini', () => {
-		expect(t.jaffleStringToJs('.foo')).toBe('mini(`foo`)');
-		expect(t.jaffleStringToJs('.foo bar\nbaz')).toBe('mini(`foo bar\nbaz`)');
+		expect(t.jaffleStringToJs('_foo')).toBe("mini('foo')");
+		expect(t.jaffleStringToJs('_foo bar\nbaz')).toBe('mini(`foo bar\nbaz`)');
 	});
 });
 
@@ -158,24 +158,24 @@ describe('Testing jaffleAnyToJs()', () => {
 	test('Literals transpile into literals', () => {
 		expect(t.jaffleAnyToJs(null)).toBe('null');
 		expect(t.jaffleAnyToJs(42)).toBe('42');
-		expect(t.jaffleAnyToJs('bar')).toBe('`bar`');
+		expect(t.jaffleAnyToJs('bar')).toBe("'bar'");
 	});
 
 	test('Lists transpile into lists', () => {
 		expect(t.jaffleAnyToJs([])).toBe('');
 		expect(t.jaffleAnyToJs([1, 2, 3])).toBe('1, 2, 3');
-		expect(t.jaffleAnyToJs([42, null, 'foo'])).toBe('42, null, `foo`');
+		expect(t.jaffleAnyToJs([42, null, 'foo'])).toBe("42, null, 'foo'");
 	});
 
 	test('Main functions transpile into function calls', () => {
 		expect(t.jaffleAnyToJs({ Foo: 42 })).toBe('foo(42)');
 		expect(t.jaffleAnyToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
 		expect(t.jaffleAnyToJs({ Foo: null })).toBe('foo()');
-		expect(t.jaffleAnyToJs({ 'Foo-': null })).toBe('foo');
+		expect(t.jaffleAnyToJs({ 'Foo.': null })).toBe('foo');
 	});
 
 	test('Functions list transpile into list of function calls', () => {
-		expect(t.jaffleAnyToJs([{ Foo: 42 }, { bar: 'baz' }])).toBe('foo(42), bar(`baz`)');
+		expect(t.jaffleAnyToJs([{ Foo: 42 }, { bar: 'baz' }])).toBe("foo(42), bar('baz')");
 	});
 
 	test('Trying to transpile bad functions fails', () => {
@@ -203,16 +203,16 @@ describe('Testing jaffleFunctionToJs()', () => {
 
 	test('main functions are transpiled into main function call', () => {
 		expect(t.jaffleFunctionToJs({ Foo: 42 })).toBe('foo(42)');
-		expect(t.jaffleFunctionToJs({ Foo: 'bar' })).toBe('foo(`bar`)');
+		expect(t.jaffleFunctionToJs({ Foo: 'bar' })).toBe("foo('bar')");
 		expect(t.jaffleFunctionToJs({ Foo: null })).toBe('foo()');
-		expect(t.jaffleFunctionToJs({ 'Foo-': null })).toBe('foo');
+		expect(t.jaffleFunctionToJs({ 'Foo.': null })).toBe('foo');
 		expect(t.jaffleFunctionToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
 		expect(t.jaffleFunctionToJs({ Foo: { Bar: 42 } })).toBe('foo(bar(42))');
-		expect(t.jaffleFunctionToJs({ Fo: [{ Ba: [1, 2] }, 3, 'b'] })).toBe('fo(ba(1, 2), 3, `b`)');
+		expect(t.jaffleFunctionToJs({ Fo: [{ Ba: [1, 2] }, 3, 'b'] })).toBe("fo(ba(1, 2), 3, 'b')");
 	});
 
 	test('function named M are transpiled into a call to mini()', () => {
-		expect(t.jaffleFunctionToJs({ M: 'foo' })).toBe('mini(`foo`)');
+		expect(t.jaffleFunctionToJs({ M: 'foo' })).toBe("mini('foo')");
 	});
 
 	test('chained functions are transpiled into a function call', () => {
@@ -241,9 +241,9 @@ describe('Testing jaffleInitBlockToJs()', () => {
 
 	test('Functions in init block are transpiled into code calling the functions', () => {
 		expect(t.jaffleInitBlockToJs([{ Foo: 42 }])).toBe('foo(42);\n');
-		expect(t.jaffleInitBlockToJs([{ Foo: 'bar' }])).toBe('foo(`bar`);\n');
+		expect(t.jaffleInitBlockToJs([{ Foo: 'bar' }])).toBe("foo('bar');\n");
 		expect(t.jaffleInitBlockToJs([{ Foo: null }])).toBe('foo();\n');
-		expect(t.jaffleInitBlockToJs([{ Foo: ['bar', 42] }])).toBe('foo(`bar`, 42);\n');
+		expect(t.jaffleInitBlockToJs([{ Foo: ['bar', 42] }])).toBe("foo('bar', 42);\n");
 		expect(t.jaffleInitBlockToJs([{ Foo: { Bar: 42 } }])).toBe('foo(bar(42));\n');
 	});
 
@@ -289,7 +289,7 @@ note:
 
 	test('Yaml document with valid functions are transpiled into valid code', () => {
 		expect(t.jaffleDocumentToJs('{Foo: 42}')).toBe('return foo(42);');
-		expect(t.jaffleDocumentToJs('{Foo: bar}')).toBe('return foo(`bar`);');
+		expect(t.jaffleDocumentToJs('{Foo: bar}')).toBe("return foo('bar');");
 		expect(t.jaffleDocumentToJs('{Foo: }')).toBe('return foo();');
 	});
 

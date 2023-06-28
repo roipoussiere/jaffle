@@ -7,21 +7,24 @@ type JaffleAny = JaffleLiteral | JaffleFunction | JaffleList
 type JaffleList = Array<JaffleAny>
 type JaffleFunction = { [funcName: string]: JaffleAny }
 
-const NO_PAREN_FUNC_SUFFIX = '-';
+const NO_PAREN_FUNC_SUFFIX = '.';
 const SERIALIZE_FUNC_SUFFIX = '^';
 
-const OPTIONAL_STRING_PREFIX = '_';
-const MINI_STRING_PREFIX = '.';
+const OPTIONAL_STRING_PREFIX = '/';
+const MINI_STRING_PREFIX = '_';
 const EXPRESSION_STRING_PREFIX = '=';
 
-function jaffleStringToJs(str: string): string {
+function jaffleStringToJs(_str: string): string {
+	const str = _str.trim();
+	const quote = str.includes('\n') ? '`' : "'";
+
 	if (str[0] === MINI_STRING_PREFIX) {
-		return `mini('${str.substring(1)}')`;
+		return `mini(${quote}${str.substring(1)}${quote})`;
 	}
 	if (str[0] === EXPRESSION_STRING_PREFIX) {
 		return str.substring(1).replace(/[^a-z0-9.+\-*/() ]|[a-z]{2,}/g, '');
 	}
-	return `'${str[0] === OPTIONAL_STRING_PREFIX ? str.substring(1) : str}'`;
+	return `${quote}${str[0] === OPTIONAL_STRING_PREFIX ? str.substring(1) : str}${quote}`;
 }
 
 function jaffleAnyToJs(thing: JaffleAny): string {
