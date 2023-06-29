@@ -57,70 +57,50 @@ function toJaffleList(thing: JaffleAny): JaffleList {
 	return <JaffleList>thing;
 }
 
-function isJaffleFuncParameter(thing: JaffleAny): boolean {
-	if (isJaffleFunction(thing)) {
-		const funcName = getJaffleFuncName(toJaffleFunction(thing));
-		return funcName[0] !== CHAINED_FUNC_PREFIX;
-	}
-	return true;
+function isJaffleMainFunc(func: JaffleFunction): boolean {
+	return getJaffleFuncName(func)[0] !== CHAINED_FUNC_PREFIX;
 }
 
-function isJaffleChainedFunc(thing: JaffleAny): boolean {
-	if (isJaffleFunction(thing)) {
-		const funcName = getJaffleFuncName(toJaffleFunction(thing));
-		return funcName[0] === CHAINED_FUNC_PREFIX;
-	}
-	return false;
-}
-
-function checkJaffleMainFunction(thing: JaffleAny): JaffleFunction {
-	const funcName = getJaffleFuncName(toJaffleFunction(thing));
-	if (funcName[0] === '.') {
-		throw new errors.BadFunctionJaffleError('expecting a main function');
-	}
-
-	return <JaffleFunction>thing;
-}
-
-function getJaffleFuncChain(thing: JaffleAny, serializedParamId = -1): Array<JaffleFunction> {
-	if (!(thing instanceof Object)) {
-		return [];
-	}
-	const list = thing instanceof Array ? thing : [thing];
-
-	return list
-		.filter((item, id) => ![id, -2].includes(serializedParamId) && isJaffleChainedFunc(item))
-		.map((item) => toJaffleFunction(item));
-}
-
-/**
-Return the parameters found in an array.
-- `['b3e6', {N: 'b6'}, {add: 2}]` returns `[ 'b3e6', {N: 'b6'} ]`;
-- `[n: 'b3e6', add: 2]` returns `[]`;
-- `{foo: 42}` returns `[{foo: 42}]`;
-- `42` returns `[42]`;
-- `[add: 2, N: 'b3e6']` throws an error;
-*/
-function getJaffleFuncParams(thing: JaffleAny, serializedParamId = -1): Array<JaffleAny> {
+function getJaffleFuncParams(thing: JaffleAny): Array<JaffleAny> {
 	if (!(thing instanceof Object)) {
 		return [thing];
 	}
-	const list = thing instanceof Array ? thing : [thing];
-	const paramsId = list
-		.map((item, id) => (
-			[id, -2].includes(serializedParamId) || isJaffleFuncParameter(item) ? id : -1
-		)).filter((id) => id !== -1);
+	return thing instanceof Array ? thing : [thing];
+}
 
-	if (paramsId.length === 0) {
-		return [];
+function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<JaffleList> {
+	if (list.length === 0) {
+		throw new errors.BadFunctionJaffleError('group of params is empty');
 	}
+	const groups: Array<JaffleList> = [];
+	let onMainFunc = false;
 
-	const lastParamId = paramsId[paramsId.length - 1];
-	if (lastParamId >= paramsId.length) {
-		throw new errors.BadFunctionJaffleError('Parameters must be defined before the chain.');
-	}
+	list.forEach((item) => {
+		if ([groups.length, -2].includes(serializedParamId)) {
+			groups.push([item]);
+		} else if (isJaffleFunction(item)) {
+			const func = toJaffleFunction(item);
+			if (isJaffleMainFunc(func)) {
+				groups.push([item]);
+				onMainFunc = true;
+			} else {
+				if (groups.length === 0) {
+					throw new errors.BadFunctionJaffleError('chained function as first entry');
+				}
+				if (!onMainFunc) {
+					throw new errors.BadFunctionJaffleError(
+						'chained function outside function context',
+					);
+				}
+				groups[groups.length - 1].push(item);
+			}
+		} else {
+			groups.push([item]);
+			onMainFunc = false;
+		}
+	});
 
-	return list.filter((_item, id) => paramsId.includes(id));
+	return groups;
 }
 
 function jaffleStringToJs(_str: string): string {
@@ -148,7 +128,7 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	let js: string;
 
 	newFuncName = newFuncName in ALIASES ? ALIASES[newFuncName] : newFuncName;
-	newFuncName = newFuncName[0] === '.' ? newFuncName.substring(1) : newFuncName;
+	newFuncName = newFuncName[0] === CHAINED_FUNC_PREFIX ? newFuncName.substring(1) : newFuncName;
 
 	let serializedParamId = -1;
 	if (serializeSuffix !== undefined) {
@@ -158,45 +138,49 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	if (newFuncName[0] === newFuncName[0].toUpperCase()) {
 		js = newFuncName[0].toLowerCase() + newFuncName.substring(1);
 	} else {
-		const params = getJaffleFuncParams(func[funcName], serializedParamId);
+		const params = getJaffleFuncParams(func[funcName]);
+		const paramGroups = groupJaffleFuncParams(params, serializedParamId);
 
 		if (params.length === 0 || (params.length === 1 && params[0] === null)) {
 			js = funcName === LAMBDA_NAME ? `${LAMBDA_VAR} => ${LAMBDA_VAR}` : `${newFuncName}()`;
 		} else if (funcName === LAMBDA_NAME) {
 			js = `(${LAMBDA_VAR}, ${(<string>params[0]).split('').join(', ')}) => ${LAMBDA_VAR}`;
 		} else {
-			const newParams = params.map((param, id) => (
-				// eslint-disable-next-line no-use-before-define
-				[id, -2].includes(serializedParamId) ? serialize(param) : jaffleAnyToJs(param)
-			));
-			js = `${newFuncName}(${newParams.join(', ')})`;
+			const groupsJs = paramGroups
+				.map((group, id) => (
+					group
+						.map((param) => (
+							[id, -2].includes(serializedParamId)
+								? serialize(param)
+								// eslint-disable-next-line no-use-before-define
+								: jaffleParamToJs(param)
+						))
+						.join('.')
+				));
+			js = `${newFuncName}(${groupsJs.join(', ')})`;
 		}
 	}
-
-	js += getJaffleFuncChain(func[funcName], serializedParamId)
-		.map((chainedFunc) => `.${jaffleFunctionToJs(chainedFunc)}`)
-		.join('');
 
 	return js;
 }
 
 function jaffleListToJs(list: JaffleList): string {
 	// eslint-disable-next-line no-use-before-define
-	return `[${list.map((item) => jaffleAnyToJs(item)).join(', ')}]`;
+	return `[${list.map((item) => jaffleParamToJs(item)).join(', ')}]`;
 }
 
-function jaffleAnyToJs(thing: JaffleAny): string {
-	if (thing instanceof Array) {
-		return jaffleListToJs(thing);
+function jaffleParamToJs(param: JaffleAny): string {
+	if (param instanceof Array) {
+		return jaffleListToJs(param);
 	}
-	if (thing instanceof Object) {
-		return jaffleFunctionToJs(thing);
+	if (param instanceof Object) {
+		return jaffleFunctionToJs(param);
 	}
-	if (typeof thing === 'string') {
-		return jaffleStringToJs(thing);
+	if (typeof param === 'string') {
+		return jaffleStringToJs(param);
 	}
-	if (typeof thing === 'number') {
-		return `${thing}`;
+	if (typeof param === 'number') {
+		return `${param}`;
 	}
 	return 'null';
 }
@@ -204,7 +188,7 @@ function jaffleAnyToJs(thing: JaffleAny): string {
 function jaffleInitBlockToJs(initBlock: JaffleList): string {
 	try {
 		return initBlock
-			.map((item) => checkJaffleMainFunction(item))
+			.map((item) => toJaffleFunction(item))
 			.map((item) => `${jaffleFunctionToJs(item)};\n`)
 			.join('');
 	} catch (err) {
@@ -227,7 +211,7 @@ function jaffleDocumentToJs(inputYaml: string): string {
 		if (initArray !== undefined) {
 			outputJs += jaffleInitBlockToJs(toJaffleList(initArray));
 		}
-		checkJaffleMainFunction(main);
+		// checkJaffleMainFunction(main);
 		outputJs += `return ${jaffleFunctionToJs(main)};`;
 	} else {
 		throw new errors.BadDocumentJaffleError(
@@ -245,15 +229,13 @@ export const testing = {
 	toJaffleFunction,
 	isJaffleList,
 	toJaffleList,
-	isJaffleFuncParameter,
-	isJaffleChainedFunc,
-	checkJaffleMainFunction,
-	getJaffleFuncChain,
+	isJaffleMainFunc,
 	getJaffleFuncParams,
+	groupJaffleFuncParams,
 	jaffleStringToJs,
-	jaffleListToJs,
 	jaffleFunctionToJs,
-	jaffleAnyToJs,
+	jaffleListToJs,
+	jaffleParamToJs,
 	jaffleInitBlockToJs,
 	jaffleDocumentToJs,
 };
