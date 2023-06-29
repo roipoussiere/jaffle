@@ -7,6 +7,7 @@ describe('Testing getJaffleFuncName()', () => {
 	test('The name of a function is the function name', () => {
 		expect(t.getJaffleFuncName({ foo: 42 })).toBe('foo');
 		expect(t.getJaffleFuncName({ Foo: 42 })).toBe('Foo');
+		expect(t.getJaffleFuncName({ '.foo': 42 })).toBe('.foo');
 	});
 
 	test('Trying to get the function name of a non-function fails', () => {
@@ -21,11 +22,11 @@ describe('Testing isJaffleChainedFunc()', () => {
 		expect(t.isJaffleChainedFunc('foo')).toBeFalsy();
 		expect(t.isJaffleChainedFunc(null)).toBeFalsy();
 		expect(t.isJaffleChainedFunc([1, 2, 3])).toBeFalsy();
-		expect(t.isJaffleChainedFunc({ Foo: 42 })).toBeFalsy();
+		expect(t.isJaffleChainedFunc({ foo: 42 })).toBeFalsy();
 	});
 
 	test('Chained functions are chained functions', () => {
-		expect(t.isJaffleChainedFunc({ foo: 42 })).toBeTruthy();
+		expect(t.isJaffleChainedFunc({ '.foo': 42 })).toBeTruthy();
 	});
 
 	test('Trying to check if a bad function is chained function fails', () => {
@@ -39,7 +40,7 @@ describe('Testing getJaffleFuncParams()', () => {
 		expect(t.getJaffleFuncParams('foo')).toEqual(['foo']);
 		expect(t.getJaffleFuncParams(42)).toEqual([42]);
 		expect(t.getJaffleFuncParams(null)).toEqual([null]);
-		expect(t.getJaffleFuncParams({ foo: 42 })).toEqual([]);
+		expect(t.getJaffleFuncParams({ '.foo': 42 })).toEqual([]);
 	});
 
 	test('Function parameters of empty list is an empty list', () => {
@@ -59,40 +60,43 @@ describe('Testing getJaffleFuncParams()', () => {
 	});
 
 	test('Function parameters of functions are the functions', () => {
-		expect(t.getJaffleFuncParams([{ Foo: 42 }])).toStrictEqual([{ Foo: 42 }]);
-		expect(t.getJaffleFuncParams([{ Foo: 'bar' }])).toStrictEqual([{ Foo: 'bar' }]);
-		expect(t.getJaffleFuncParams([{ Foo: null }])).toStrictEqual([{ Foo: null }]);
-		expect(t.getJaffleFuncParams([{ Foo: [1, 2, 3] }])).toStrictEqual([{ Foo: [1, 2, 3] }]);
-		expect(t.getJaffleFuncParams([{ F: 42 }, { B: 24 }])).toStrictEqual([{ F: 42 }, { B: 24 }]);
+		expect(t.getJaffleFuncParams([{ foo: 42 }])).toStrictEqual([{ foo: 42 }]);
+		expect(t.getJaffleFuncParams([{ foo: 'bar' }])).toStrictEqual([{ foo: 'bar' }]);
+		expect(t.getJaffleFuncParams([{ foo: null }])).toStrictEqual([{ foo: null }]);
+		expect(t.getJaffleFuncParams([{ foo: [1, 2, 3] }])).toStrictEqual([{ foo: [1, 2, 3] }]);
+		expect(t.getJaffleFuncParams([{ f: 42 }, { b: 24 }])).toStrictEqual([{ f: 42 }, { b: 24 }]);
 	});
 
 	test('Trying to get function parameters of a bad function fails', () => {
-		expect(() => t.getJaffleFuncParams([{ Foo: 1, Bar: 2 }])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.getJaffleFuncParams([{ foo: 1, bar: 2 }])).toThrow(e.BadFunctionJaffleError);
 	});
 
 	test('Function parameters with chained function are the parameters without the chain', () => {
-		expect(t.getJaffleFuncParams([{ bar: 24 }])).toStrictEqual([]);
-		expect(t.getJaffleFuncParams([42, { bar: 24 }])).toStrictEqual([42]);
-		expect(t.getJaffleFuncParams([null, { bar: 24 }])).toStrictEqual([null]);
-		expect(t.getJaffleFuncParams([[1, 2, 3], { bar: 24 }])).toStrictEqual([[1, 2, 3]]);
-		expect(t.getJaffleFuncParams([{ Foo: 42 }, { bar: 24 }])).toStrictEqual([{ Foo: 42 }]);
+		expect(t.getJaffleFuncParams([{ '.bar': 24 }])).toStrictEqual([]);
+		expect(t.getJaffleFuncParams([42, { '.bar': 24 }])).toStrictEqual([42]);
+		expect(t.getJaffleFuncParams([null, { '.bar': 24 }])).toStrictEqual([null]);
+		expect(t.getJaffleFuncParams([[1, 2, 3], { '.bar': 24 }])).toStrictEqual([[1, 2, 3]]);
+		expect(t.getJaffleFuncParams([{ foo: 42 }, { '.bar': 24 }])).toStrictEqual([{ foo: 42 }]);
 	});
 
 	test('Trying to get function parameters of parameters defined after the chain fails', () => {
-		expect(() => t.getJaffleFuncParams([{ b: 1 }, { F: 2 }])).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.getJaffleFuncParams([{ foo: 1 }, 'bar'])).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.getJaffleFuncParams([{ foo: 42 }, 24])).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.getJaffleFuncParams([{ foo: 1 }, null])).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.getJaffleFuncParams([{ foo: 1 }, [2, 3]])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.getJaffleFuncParams([{ '.fo': 1 }, 'ba'])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.getJaffleFuncParams([{ '.foo': 42 }, 24])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.getJaffleFuncParams([{ '.fo': 1 }, null])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.getJaffleFuncParams([{ '.fo': 1 }, [2]])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.getJaffleFuncParams([{ '.b': 1 }, { f: 2 }]))
+			.toThrow(e.BadFunctionJaffleError);
 	});
 });
 
 describe('Testing isJaffleFunction()', () => {
 	test('An object is a jaffle function', () => {
 		expect(t.isJaffleFunction({ foo: 42 })).toBeTruthy();
+		expect(t.isJaffleFunction({ Foo: 42 })).toBeTruthy();
+		expect(t.isJaffleFunction({ '.foo': 42 })).toBeTruthy();
 	});
 
-	test('Non-objects are not jaffle functions', () => {
+	test('Literals and arrays are not jaffle functions', () => {
 		expect(t.isJaffleFunction(42)).toBeFalsy();
 		expect(t.isJaffleFunction('foo')).toBeFalsy();
 		expect(t.isJaffleFunction(null)).toBeFalsy();
@@ -188,14 +192,21 @@ describe('Testing jaffleAnyToJs()', () => {
 	});
 
 	test('Main functions transpile into function calls', () => {
-		expect(t.jaffleAnyToJs({ Foo: 42 })).toBe('foo(42)');
-		expect(t.jaffleAnyToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
-		expect(t.jaffleAnyToJs({ Foo: null })).toBe('foo()');
-		expect(t.jaffleAnyToJs({ 'Foo.': null })).toBe('foo');
+		expect(t.jaffleAnyToJs({ foo: 42 })).toBe('foo(42)');
+		expect(t.jaffleAnyToJs({ foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
+		expect(t.jaffleAnyToJs({ foo: null })).toBe('foo()');
+		expect(t.jaffleAnyToJs({ Foo: null })).toBe('foo');
+	});
+
+	test('Chained functions transpile into function calls', () => {
+		expect(t.jaffleAnyToJs({ '.foo': 42 })).toBe('foo(42)');
+		expect(t.jaffleAnyToJs({ '.foo': [1, 2, 3] })).toBe('foo(1, 2, 3)');
+		expect(t.jaffleAnyToJs({ '.foo': null })).toBe('foo()');
+		expect(t.jaffleAnyToJs({ '.Foo': null })).toBe('foo');
 	});
 
 	test('Functions list transpile into list of function calls', () => {
-		expect(t.jaffleAnyToJs([{ Foo: 42 }, { bar: 'baz' }])).toBe("[foo(42), bar('baz')]");
+		expect(t.jaffleAnyToJs([{ foo: 42 }, { '.bar': 'baz' }])).toBe("[foo(42), bar('baz')]");
 	});
 
 	test('Trying to transpile bad functions fails', () => {
@@ -222,49 +233,51 @@ describe('Testing jaffleFunctionToJs()', () => {
 	});
 
 	test('main functions are transpiled into main function call', () => {
-		expect(t.jaffleFunctionToJs({ Foo: 42 })).toBe('foo(42)');
-		expect(t.jaffleFunctionToJs({ Foo: 'bar' })).toBe("foo('bar')");
-		expect(t.jaffleFunctionToJs({ Foo: null })).toBe('foo()');
-		expect(t.jaffleFunctionToJs({ 'Foo.': null })).toBe('foo');
-		expect(t.jaffleFunctionToJs({ Foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
-		expect(t.jaffleFunctionToJs({ Foo: [1, [2, 3]] })).toBe('foo(1, [2, 3])');
-		expect(t.jaffleFunctionToJs({ Foo: { Bar: 42 } })).toBe('foo(bar(42))');
-		expect(t.jaffleFunctionToJs({ Fo: [{ Ba: [1, 2] }, 3, 'b'] })).toBe("fo(ba(1, 2), 3, 'b')");
+		expect(t.jaffleFunctionToJs({ foo: 42 })).toBe('foo(42)');
+		expect(t.jaffleFunctionToJs({ foo: 'bar' })).toBe("foo('bar')");
+		expect(t.jaffleFunctionToJs({ foo: null })).toBe('foo()');
+		expect(t.jaffleFunctionToJs({ Foo: null })).toBe('foo');
+		expect(t.jaffleFunctionToJs({ foo: [1, 2, 3] })).toBe('foo(1, 2, 3)');
+		expect(t.jaffleFunctionToJs({ foo: [1, [2, 3]] })).toBe('foo(1, [2, 3])');
+		expect(t.jaffleFunctionToJs({ foo: { bar: 42 } })).toBe('foo(bar(42))');
+		expect(t.jaffleFunctionToJs({ fo: [{ ba: [1, 2] }, 3, 'b'] })).toBe("fo(ba(1, 2), 3, 'b')");
 	});
 
 	test('aliases functions are transpiled into a call to their alias', () => {
-		expect(t.jaffleFunctionToJs({ M: 'foo' })).toBe("mini('foo')");
+		expect(t.jaffleFunctionToJs({ m: 'foo' })).toBe("mini('foo')");
 	});
 
 	test('chained functions are transpiled into chained function calls', () => {
-		expect(t.jaffleFunctionToJs({ A: [1, { b: 2 }] })).toBe('a(1).b(2)');
-		expect(t.jaffleFunctionToJs({ A: { b: 1 } })).toBe('a().b(1)');
-		expect(t.jaffleFunctionToJs({ A: [{ b: 1 }, { c: 2 }] })).toBe('a().b(1).c(2)');
-		expect(t.jaffleFunctionToJs({ A: [1, 2, { b: 3 }, { c: 4 }] })).toBe('a(1, 2).b(3).c(4)');
+		expect(t.jaffleFunctionToJs({ a: [1, { '.b': 2 }] })).toBe('a(1).b(2)');
+		expect(t.jaffleFunctionToJs({ a: { '.b': 1 } })).toBe('a().b(1)');
+		expect(t.jaffleFunctionToJs({ a: [{ '.b': 1 }, { '.c': 2 }] })).toBe('a().b(1).c(2)');
+		expect(t.jaffleFunctionToJs({ a: [1, 2, { '.b': 3 }, { '.c': 4 }] }))
+			.toBe('a(1, 2).b(3).c(4)');
 
-		expect(t.jaffleFunctionToJs({ A: [{ B: 1 }, { c: 2 }] })).toBe('a(b(1)).c(2)');
-		expect(t.jaffleFunctionToJs({ A: [1, { b: { C: 2 } }] })).toBe('a(1).b(c(2))');
-		expect(t.jaffleFunctionToJs({ A: [{ b: [{ C: 1 }, { d: 2 }] }] })).toBe('a().b(c(1)).d(2)');
-		expect(t.jaffleFunctionToJs({ A: [{ b: [{ C: 1 }, { d: 2 }] }, { e: 3 }] }))
+		expect(t.jaffleFunctionToJs({ a: [{ b: 1 }, { '.c': 2 }] })).toBe('a(b(1)).c(2)');
+		expect(t.jaffleFunctionToJs({ a: [1, { '.b': { c: 2 } }] })).toBe('a(1).b(c(2))');
+		expect(t.jaffleFunctionToJs({ a: [{ '.b': [{ c: 1 }, { '.d': 2 }] }] }))
+			.toBe('a().b(c(1)).d(2)');
+		expect(t.jaffleFunctionToJs({ a: [{ '.b': [{ c: 1 }, { '.d': 2 }] }, { '.e': 3 }] }))
 			.toBe('a().b(c(1)).d(2).e(3)'); // syntax issue here: d and c are on same level
 	});
 
 	test('serialized functions are transpiled into a function call with serialized param', () => {
-		expect(t.jaffleFunctionToJs({ 'foo^': 'bar' })).toBe("foo('bar')");
-		expect(t.jaffleFunctionToJs({ 'foo^': ['bar', 'baz'] })).toBe("foo('bar', 'baz')");
-		expect(t.jaffleFunctionToJs({ 'foo^': ['bar', [1, 2]] })).toBe("foo('bar', [1,2])");
-		expect(t.jaffleFunctionToJs({ 'foo^': ['bar', { Baz: 3 }] })).toBe("foo('bar', {'Baz':3})");
-		expect(t.jaffleFunctionToJs({ 'f^': ['b', { a: 1, b: 2 }] })).toBe("f('b', {'a':1,'b':2})");
-		expect(t.jaffleFunctionToJs({ 'fo^': { Ba: { be: 42 } } })).toBe("fo({'Ba':{'be':42}})");
-		expect(t.jaffleFunctionToJs({ 'fo^1': [{ Ba: { be: 42 } }, { Bi: 42 }, { bo: 24 }] }))
-			.toBe("fo({'Ba':{'be':42}}, bi(42)).bo(24)");
+		expect(t.jaffleFunctionToJs({ 'a^': 1 })).toBe('a(1)');
+		expect(t.jaffleFunctionToJs({ 'a^': ['b', 'c'] })).toBe("a('b', 'c')");
+		expect(t.jaffleFunctionToJs({ 'a^': ['b', [1, 2]] })).toBe("a('b', [1,2])");
+		expect(t.jaffleFunctionToJs({ 'a^': ['b', { c: 3 }] })).toBe("a('b', {'c':3})");
+		expect(t.jaffleFunctionToJs({ 'a^': ['b', { c: 1, d: 2 }] })).toBe("a('b', {'c':1,'d':2})");
+		expect(t.jaffleFunctionToJs({ 'a^': { b: { c: 42 } } })).toBe("a({'b':{'c':42}})");
+		expect(t.jaffleFunctionToJs({ 'a^1': [{ b: { '.c': 1 } }, { d: 2 }, { '.e': 3 }] }))
+			.toBe("a({'b':{'.c':1}}, d(2)).e(3)");
 	});
 
 	test('Lambda functions are transpiled into lambda function calls', () => {
-		expect(t.jaffleFunctionToJs({ Set: [{ foo: 42 }] })).toBe('x => x.foo(42)');
-		expect(t.jaffleFunctionToJs({ Set: ['n', { foo: '=n-1' }] })).toBe('(x, n) => x.foo(n-1)');
-		expect(t.jaffleFunctionToJs({ Set: ['nm', { foo: '=n' }, { bar: '=m' }] }))
-			.toBe('(x, n, m) => x.foo(n).bar(m)');
+		expect(t.jaffleFunctionToJs({ set: [{ '.foo': 42 }] })).toBe('x => x.foo(42)');
+		expect(t.jaffleFunctionToJs({ set: ['n', { '.fo': '=n-1' }] })).toBe('(x, n) => x.fo(n-1)');
+		expect(t.jaffleFunctionToJs({ set: ['nm', { '.fo': '=n' }, { '.ba': '=m' }] }))
+			.toBe('(x, n, m) => x.fo(n).ba(m)');
 	});
 });
 
@@ -274,26 +287,26 @@ describe('Testing jaffleInitBlockToJs()', () => {
 	});
 
 	test('Functions in init block are transpiled into code calling the functions', () => {
-		expect(t.jaffleInitBlockToJs([{ Foo: 42 }])).toBe('foo(42);\n');
-		expect(t.jaffleInitBlockToJs([{ Foo: 'bar' }])).toBe("foo('bar');\n");
-		expect(t.jaffleInitBlockToJs([{ Foo: null }])).toBe('foo();\n');
-		expect(t.jaffleInitBlockToJs([{ Foo: ['bar', 42] }])).toBe("foo('bar', 42);\n");
-		expect(t.jaffleInitBlockToJs([{ Foo: { Bar: 42 } }])).toBe('foo(bar(42));\n');
+		expect(t.jaffleInitBlockToJs([{ foo: 42 }])).toBe('foo(42);\n');
+		expect(t.jaffleInitBlockToJs([{ foo: 'bar' }])).toBe("foo('bar');\n");
+		expect(t.jaffleInitBlockToJs([{ foo: null }])).toBe('foo();\n');
+		expect(t.jaffleInitBlockToJs([{ foo: ['bar', 42] }])).toBe("foo('bar', 42);\n");
+		expect(t.jaffleInitBlockToJs([{ foo: { bar: 42 } }])).toBe('foo(bar(42));\n');
 	});
 
 	test('Several functions in init block is transpiled into code calling those functions', () => {
-		expect(t.jaffleInitBlockToJs([{ Foo: 42 }, { Bar: 24 }])).toBe('foo(42);\nbar(24);\n');
+		expect(t.jaffleInitBlockToJs([{ foo: 42 }, { bar: 24 }])).toBe('foo(42);\nbar(24);\n');
 	});
 
 	test('Chained functions in init block are transpiled into code calling the chain', () => {
-		expect(t.jaffleInitBlockToJs([{ Fo: [{ Ba: 1 }, { be: 2 }] }])).toBe('fo(ba(1)).be(2);\n');
+		expect(t.jaffleInitBlockToJs([{ a: [{ b: 1 }, { '.c': 2 }] }])).toBe('a(b(1)).c(2);\n');
 	});
 
 	test('Trying to transpile non-valid init block fails', () => {
 		expect(() => t.jaffleInitBlockToJs([{}])).toThrow(e.BadInitBlockJaffleError);
-		expect(() => t.jaffleInitBlockToJs([{ foo: 42 }])).toThrow(e.BadInitBlockJaffleError);
 		expect(() => t.jaffleInitBlockToJs([{ fo: 1, ba: 2 }])).toThrow(e.BadInitBlockJaffleError);
-		expect(() => t.jaffleInitBlockToJs([{ f: 1 }, { B: 2 }]))
+		expect(() => t.jaffleInitBlockToJs([{ '.foo': 42 }])).toThrow(e.BadInitBlockJaffleError);
+		expect(() => t.jaffleInitBlockToJs([{ '.foo': 1 }, { bar: 2 }]))
 			.toThrow(e.BadInitBlockJaffleError);
 	});
 });
@@ -314,21 +327,19 @@ note:
 	});
 
 	test('Trying to transpile a yaml document without valid functions fails', () => {
-		expect(() => t.jaffleDocumentToJs('{foo: 42}')).toThrow(e.BadFunctionJaffleError);
 		expect(() => t.jaffleDocumentToJs('{foo: 42, bar: 24}')).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.jaffleDocumentToJs('{Foo: 42, bar: 24}')).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.jaffleDocumentToJs('{foo: 42, Bar: 24}')).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.jaffleDocumentToJs('{Foo: 42, Bar: 24}')).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.jaffleDocumentToJs('{.foo: 42}')).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.jaffleDocumentToJs('[{.b: 42}, {a: 24}]')).toThrow(e.BadDocumentJaffleError);
 	});
 
 	test('Yaml document with valid functions are transpiled into valid code', () => {
-		expect(t.jaffleDocumentToJs('{Foo: 42}')).toBe('return foo(42);');
-		expect(t.jaffleDocumentToJs('{Foo: bar}')).toBe("return foo('bar');");
-		expect(t.jaffleDocumentToJs('{Foo: }')).toBe('return foo();');
+		expect(t.jaffleDocumentToJs('{foo: 42}')).toBe('return foo(42);');
+		expect(t.jaffleDocumentToJs('{foo: bar}')).toBe("return foo('bar');");
+		expect(t.jaffleDocumentToJs('{foo: }')).toBe('return foo();');
 	});
 
 	test('Yaml document with init block are transpiled into valid code', () => {
-		expect(t.jaffleDocumentToJs('{Init: [], Foo: 42}')).toBe('return foo(42);');
+		expect(t.jaffleDocumentToJs('{init: [], foo: 42}')).toBe('return foo(42);');
 	});
 });
 

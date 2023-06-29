@@ -7,17 +7,17 @@ type JaffleAny = JaffleLiteral | JaffleFunction | JaffleList
 type JaffleList = Array<JaffleAny>
 type JaffleFunction = { [funcName: string]: JaffleAny }
 
-const NO_PAREN_FUNC_SUFFIX = '.';
+const CHAINED_FUNC_PREFIX = '.';
 const SERIALIZE_FUNC_SUFFIX = '^';
 
 const OPTIONAL_STRING_PREFIX = '/';
 const MINI_STRING_PREFIX = '_';
 const EXPRESSION_STRING_PREFIX = '=';
 
-const LAMBDA_NAME = 'Set';
+const LAMBDA_NAME = 'set';
 const LAMBDA_VAR = 'x';
 const ALIASES: { [alias: string]: string } = {
-	M: 'mini',
+	m: 'mini',
 };
 
 function jaffleStringToJs(_str: string): string {
@@ -89,7 +89,7 @@ function getJaffleFuncName(func: JaffleFunction) {
 
 function checkJaffleMainFunction(thing: JaffleAny): JaffleFunction {
 	const funcName = getJaffleFuncName(toJaffleFunction(thing));
-	if (funcName[0] !== funcName[0].toUpperCase()) {
+	if (funcName[0] === '.') {
 		throw new errors.BadFunctionJaffleError('expecting a main function');
 	}
 
@@ -99,7 +99,7 @@ function checkJaffleMainFunction(thing: JaffleAny): JaffleFunction {
 function isJaffleFuncParameter(thing: JaffleAny): boolean {
 	if (isJaffleFunction(thing)) {
 		const funcName = getJaffleFuncName(toJaffleFunction(thing));
-		return funcName[0] === funcName[0].toUpperCase();
+		return funcName[0] !== CHAINED_FUNC_PREFIX;
 	}
 	return true;
 }
@@ -107,7 +107,7 @@ function isJaffleFuncParameter(thing: JaffleAny): boolean {
 function isJaffleChainedFunc(thing: JaffleAny): boolean {
 	if (isJaffleFunction(thing)) {
 		const funcName = getJaffleFuncName(toJaffleFunction(thing));
-		return funcName[0] === funcName[0].toLowerCase();
+		return funcName[0] === CHAINED_FUNC_PREFIX;
 	}
 	return false;
 }
@@ -164,17 +164,16 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	let [newFuncName] = funcNameAndSuffix;
 	let js: string;
 
-	newFuncName = newFuncName in ALIASES
-		? ALIASES[newFuncName]
-		: newFuncName[0].toLowerCase() + newFuncName.substring(1);
+	newFuncName = newFuncName in ALIASES ? ALIASES[newFuncName] : newFuncName;
+	newFuncName = newFuncName[0] === '.' ? newFuncName.substring(1) : newFuncName;
 
 	let serializedParamId = -1;
 	if (serializeSuffix !== undefined) {
 		serializedParamId = serializeSuffix === '' ? -2 : parseInt(serializeSuffix, 10) - 1;
 	}
 
-	if (funcName.slice(-1) === NO_PAREN_FUNC_SUFFIX) {
-		js = newFuncName.substring(0, newFuncName.length - 1);
+	if (newFuncName[0] === newFuncName[0].toUpperCase()) {
+		js = newFuncName[0].toLowerCase() + newFuncName.substring(1);
 	} else {
 		const params = getJaffleFuncParams(func[funcName], serializedParamId);
 
@@ -219,7 +218,7 @@ function jaffleDocumentToJs(inputYaml: string): string {
 	}
 
 	if (tune instanceof Object && !(tune instanceof Array)) {
-		const { Init: initArray, ...main } = tune;
+		const { init: initArray, ...main } = tune;
 		if (initArray !== undefined) {
 			outputJs += jaffleInitBlockToJs(toJaffleList(initArray));
 		}
