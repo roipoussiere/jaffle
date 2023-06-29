@@ -206,16 +206,12 @@ function jaffleDocumentToJs(inputYaml: string): string {
 		throw new errors.BadYamlJaffleError(err.message);
 	}
 
-	if (tune instanceof Object && !(tune instanceof Array)) {
-		const { init: initArray, ...main } = tune;
-		if (initArray !== undefined) {
-			outputJs += jaffleInitBlockToJs(toJaffleList(initArray));
-		}
+	if (tune instanceof Array) {
 		// checkJaffleMainFunction(main);
-		outputJs += `return ${jaffleFunctionToJs(main)};`;
+		outputJs += `return ${jaffleFunctionToJs({ stack: <Array<JaffleAny>>tune })};`;
 	} else {
 		throw new errors.BadDocumentJaffleError(
-			`Document root must be a dictionary, not ${typeof tune}`,
+			`Document root must be an array, not ${typeof tune}`,
 		);
 	}
 
