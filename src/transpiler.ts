@@ -16,9 +16,6 @@ const EXPRESSION_STRING_PREFIX = '=';
 
 const LAMBDA_NAME = 'set';
 const LAMBDA_VAR = 'x';
-const ALIASES: { [alias: string]: string } = {
-	m: 'mini',
-};
 
 function serialize(thing: JaffleAny): string {
 	return JSON.stringify(thing).replace(/"/g, "'");
@@ -36,14 +33,18 @@ function getJaffleFuncName(func: JaffleFunction) {
 }
 
 function isJaffleFunction(thing: JaffleAny): boolean {
-	return thing instanceof Object && !(thing instanceof Array);
+	return (typeof thing === 'string' && thing[0] === MINI_STRING_PREFIX)
+		|| (thing instanceof Object && !(thing instanceof Array));
 }
 
 function toJaffleFunction(thing: JaffleAny): JaffleFunction {
-	if (!isJaffleFunction(thing)) {
-		throw new errors.BadFunctionJaffleError('Not a function');
+	if (typeof thing === 'string' && thing[0] === MINI_STRING_PREFIX) {
+		return { mini: thing.substring(1) };
 	}
-	return <JaffleFunction>thing;
+	if (isJaffleFunction(thing)) {
+		return <JaffleFunction>thing;
+	}
+	throw new errors.BadFunctionJaffleError('Not a function');
 }
 
 function isJaffleList(thing: JaffleAny): boolean {
@@ -127,7 +128,6 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	let [newFuncName] = funcNameAndSuffix;
 	let js: string;
 
-	newFuncName = newFuncName in ALIASES ? ALIASES[newFuncName] : newFuncName;
 	newFuncName = newFuncName[0] === CHAINED_FUNC_PREFIX ? newFuncName.substring(1) : newFuncName;
 
 	let serializedParamId = -1;

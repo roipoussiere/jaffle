@@ -175,7 +175,7 @@ describe('Testing jaffleFunctionToJs()', () => {
 	});
 
 	test('aliases functions are transpiled into a call to their alias', () => {
-		expect(t.jaffleFunctionToJs({ m: 'foo' })).toBe("mini('foo')");
+		expect(t.jaffleFunctionToJs({ a: '_foo' })).toBe("a(mini('foo'))");
 	});
 
 	test('chained functions are transpiled into chained function calls', () => {
@@ -189,7 +189,7 @@ describe('Testing jaffleFunctionToJs()', () => {
 			.toBe('a(b(1).c(2).d(3))');
 		expect(t.jaffleFunctionToJs({ a: [{ b: 1 }, { '.c': { d: 2 } }, { '.e': 3 }] }))
 			.toBe('a(b(1).c(d(2)).e(3))');
-		// expect(t.jaffleFunctionToJs({ a: ['_b', { '.c': 42 }] })).toBe("a(mini('b').c(42))");
+		expect(t.jaffleFunctionToJs({ a: ['_b', { '.c': 42 }] })).toBe("a(mini('b').c(42))");
 	});
 
 	test('trying to transpile bad chained functions fails', () => {
