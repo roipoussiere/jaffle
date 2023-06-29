@@ -2,13 +2,12 @@
 # @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
 # @by Felix Roos
 
-Stack:
-- S:
-  - M: bd <sd cp>
-  - delay: _<0 .5>
-  - delaytime: _.16 | .33
-  - delayfeedback: _.6 | .8
+- stack:
+  - s: bd <sd cp>
+  - .delay: _<0 .5>
+  - .delaytime: _.16 | .33
+  - .delayfeedback: _.6 | .8
 
-- sometimes:
-  - Set:
-    - speed: -1
+- .sometimes:
+  - set:
+  - .speed: -1
