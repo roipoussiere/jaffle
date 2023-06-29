@@ -87,29 +87,49 @@ describe('Testing getJaffleFuncParams()', () => {
 	});
 });
 
-describe('Testing checkJaffleFunction()', () => {
-	test('Checking a generic function do not fail', () => {
-		expect(t.checkJaffleFunction({ foo: 42 }));
+describe('Testing isJaffleFunction()', () => {
+	test('An object is a jaffle function', () => {
+		expect(t.isJaffleFunction({ foo: 42 })).toBeTruthy();
 	});
 
-	test('Trying to check a non-function fails', () => {
-		expect(() => t.checkJaffleFunction(42)).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.checkJaffleFunction('foo')).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.checkJaffleFunction(null)).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.checkJaffleFunction([1, 2, 3])).toThrow(e.BadFunctionJaffleError);
+	test('Non-objects are not jaffle functions', () => {
+		expect(t.isJaffleFunction(42)).toBeFalsy();
+		expect(t.isJaffleFunction('foo')).toBeFalsy();
+		expect(t.isJaffleFunction(null)).toBeFalsy();
+		expect(t.isJaffleFunction([1, 2, 3])).toBeFalsy();
 	});
 });
 
-describe('Testing checkJaffleList()', () => {
-	test('Checking a list do not fail', () => {
-		expect(t.checkJaffleList([1, 2, 3]));
+describe('Testing isJaffleList()', () => {
+	test('An array is a jaffle list', () => {
+		expect(t.isJaffleList([1, 2, 3])).toBeTruthy();
 	});
 
-	test('Trying to check a non-list fails', () => {
-		expect(() => t.checkJaffleList(42)).toThrow(e.BadListJaffleError);
-		expect(() => t.checkJaffleList('foo')).toThrow(e.BadListJaffleError);
-		expect(() => t.checkJaffleList(null)).toThrow(e.BadListJaffleError);
-		expect(() => t.checkJaffleList({ foo: 42 })).toThrow(e.BadListJaffleError);
+	test('Non-arrays are not jaffle lists', () => {
+		expect(t.isJaffleList(42)).toBeFalsy();
+		expect(t.isJaffleList('foo')).toBeFalsy();
+		expect(t.isJaffleList(null)).toBeFalsy();
+		expect(t.isJaffleList({ foo: 42 })).toBeFalsy();
+	});
+});
+
+describe('Testing toJaffleFunction()', () => {
+	test('Converting an object to a jaffle function does not fail', () => {
+		expect(t.toJaffleFunction({ foo: 42 }));
+	});
+
+	test('Converting a non-object to a jaffle function fails', () => {
+		expect(() => t.toJaffleFunction(42)).toThrow(e.BadFunctionJaffleError);
+	});
+});
+
+describe('Testing toJaffleList()', () => {
+	test('Converting an array to a jaffle list does not fail', () => {
+		expect(t.toJaffleList([1, 2, 3]));
+	});
+
+	test('Converting an array to a jaffle list fails', () => {
+		expect(() => t.toJaffleList(42)).toThrow(e.BadListJaffleError);
 	});
 });
 

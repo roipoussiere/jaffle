@@ -54,23 +54,29 @@ function serialize(thing: JaffleAny): string {
 	return JSON.stringify(thing).replace(/"/g, "'");
 }
 
-function checkJaffleFunction(thing: JaffleAny): JaffleFunction {
-	if (!(thing instanceof Object) || thing instanceof Array) {
+function isJaffleFunction(thing: JaffleAny): boolean {
+	return thing instanceof Object && !(thing instanceof Array);
+}
+
+function toJaffleFunction(thing: JaffleAny): JaffleFunction {
+	if (!isJaffleFunction(thing)) {
 		throw new errors.BadFunctionJaffleError('Not a function');
 	}
 	return <JaffleFunction>thing;
 }
 
-function checkJaffleList(thing: JaffleAny): JaffleList {
-	if (!(thing instanceof Array)) {
+function isJaffleList(thing: JaffleAny): boolean {
+	return thing instanceof Array;
+}
+
+function toJaffleList(thing: JaffleAny): JaffleList {
+	if (!isJaffleList(thing)) {
 		throw new errors.BadListJaffleError('Not a list');
 	}
 	return <JaffleList>thing;
 }
 
 function getJaffleFuncName(func: JaffleFunction) {
-	checkJaffleFunction(func);
-
 	const keys = Object.keys(func);
 	if (keys.length === 0) {
 		throw new errors.BadFunctionJaffleError('could not find function name');
@@ -82,7 +88,7 @@ function getJaffleFuncName(func: JaffleFunction) {
 }
 
 function checkJaffleMainFunction(thing: JaffleAny): JaffleFunction {
-	const funcName = getJaffleFuncName(checkJaffleFunction(thing));
+	const funcName = getJaffleFuncName(toJaffleFunction(thing));
 	if (funcName[0] !== funcName[0].toUpperCase()) {
 		throw new errors.BadFunctionJaffleError('expecting a main function');
 	}
@@ -91,17 +97,17 @@ function checkJaffleMainFunction(thing: JaffleAny): JaffleFunction {
 }
 
 function isJaffleFuncParameter(thing: JaffleAny): boolean {
-	if (thing instanceof Object && !(thing instanceof Array)) {
-		const funcName = getJaffleFuncName(thing);
+	if (isJaffleFunction(thing)) {
+		const funcName = getJaffleFuncName(toJaffleFunction(thing));
 		return funcName[0] === funcName[0].toUpperCase();
 	}
 	return true;
 }
 
 function isJaffleChainedFunc(thing: JaffleAny): boolean {
-	if (thing instanceof Object && !(thing instanceof Array)) {
-		const item = getJaffleFuncName(thing);
-		return item[0] === item[0].toLowerCase();
+	if (isJaffleFunction(thing)) {
+		const funcName = getJaffleFuncName(toJaffleFunction(thing));
+		return funcName[0] === funcName[0].toLowerCase();
 	}
 	return false;
 }
@@ -144,7 +150,7 @@ function getJaffleFuncChain(thing: JaffleAny, serializedParamId = -1): Array<Jaf
 
 	return list
 		.filter((item, id) => ![id, -2].includes(serializedParamId) && isJaffleChainedFunc(item))
-		.map((item) => checkJaffleFunction(item));
+		.map((item) => toJaffleFunction(item));
 }
 
 function jaffleFunctionToJs(func: JaffleFunction): string {
@@ -193,7 +199,7 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 
 function jaffleInitBlockToJs(initBlock: JaffleList): string {
 	try {
-		return checkJaffleList(initBlock)
+		return initBlock
 			.map((item) => checkJaffleMainFunction(item))
 			.map((item) => `${jaffleFunctionToJs(item)};\n`)
 			.join('');
@@ -215,7 +221,7 @@ function jaffleDocumentToJs(inputYaml: string): string {
 	if (tune instanceof Object && !(tune instanceof Array)) {
 		const { Init: initArray, ...main } = tune;
 		if (initArray !== undefined) {
-			outputJs += jaffleInitBlockToJs(checkJaffleList(initArray));
+			outputJs += jaffleInitBlockToJs(toJaffleList(initArray));
 		}
 		checkJaffleMainFunction(main);
 		outputJs += `return ${jaffleFunctionToJs(main)};`;
@@ -237,8 +243,10 @@ export const testing = {
 	jaffleAnyToJs,
 	jaffleInitBlockToJs,
 	jaffleFunctionToJs,
-	checkJaffleFunction,
-	checkJaffleList,
+	isJaffleFunction,
+	toJaffleFunction,
+	isJaffleList,
+	toJaffleList,
 	jaffleDocumentToJs,
 };
 
