@@ -19,7 +19,7 @@ function loadTune(tuneName: string): void {
 		.then((response) => response.text())
 		.then((data) => {
 			editor.setText(data);
-			console.log('Tune loaded.');
+			console.log(`Tune loaded (${Math.round((data.length / 1024) * 100) / 100}kB)`);
 		});
 	domSelectTune.value = tuneName;
 	window.location.hash = `#${tuneName}`;
@@ -41,8 +41,9 @@ function fillTunesList(): void {
 strudel.transpiler = (tune) => transpiler(tune);
 strudel.init();
 editor.onPlay = () => {
-	console.log(transpiler(editor.getText()));
-	strudel.play(editor.getText());
+	const tune = editor.getText();
+	// console.log(transpiler(tune));
+	strudel.play(tune);
 };
 editor.onStop = () => strudel.stop();
 
