@@ -160,7 +160,7 @@ function jaffleLambdaToJs(params: JaffleList): string {
 	return `(${LAMBDA_VAR}, ${(<string>params[0]).split('').join(', ')}) => ${LAMBDA_VAR}`;
 }
 
-function jaffleFunctionToJs(func: JaffleFunction): string {
+function jaffleFuncToJs(func: JaffleFunction): string {
 	if (Object.keys(func).length === 0) {
 		throw new errors.BadFunctionJaffleError('Function is empty');
 	}
@@ -200,7 +200,7 @@ function jaffleParamToJs(param: JaffleAny): string {
 		return jaffleListToJs(param);
 	}
 	if (param instanceof Object) {
-		return jaffleFunctionToJs(param);
+		return jaffleFuncToJs(param);
 	}
 	if (typeof param === 'string') {
 		return jaffleStringToJs(param);
@@ -255,7 +255,7 @@ export const testing = {
 	jaffleStringToJs,
 	jaffleParamsToJsGroups,
 	jaffleLambdaToJs,
-	jaffleFunctionToJs,
+	jaffleFuncToJs,
 	jaffleListToJs,
 	jaffleParamToJs,
 	jaffleDocumentToJs,
