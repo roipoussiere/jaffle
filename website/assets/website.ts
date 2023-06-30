@@ -4,8 +4,10 @@ import { transpiler, JaffleEditor, Strudel } from './jaffle';
 
 const TUNES_PATH = './tunes/';
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'bridge_is_over',
-	'chop', 'delay', 'giant_steps', 'sample_drums', 'swimming', 'zelda_rescue',
-	'ws2_stack', 'ws3_dub_tune', 'ws3_stack_in_stack', 'ws4_add_stack'];
+	'chop', 'delay', 'dino_funk', 'echo_piano', 'festival_of_fingers3', 'flat_rave',
+	'giant_steps', 'holy_flute', 'jux_und_tollerei', /* 'lounge_sponge', */ 'melting_submarine',
+	'orbit', 'outro_music', 'random_bells', 'sample_demo', 'sample_drums', 'sml1', 'swimming',
+	'zelda_rescue', 'ws2_stack', 'ws3_dub_tune', 'ws3_stack_in_stack', 'ws4_add_stack'];
 	// 'blippy_rhodes', 'caverave', 'csound_demo', 'festival_of_fingers', 'wavy_kalimba' ];
 
 const DEFAULT_TUNE = 'ws2_stack';
