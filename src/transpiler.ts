@@ -22,7 +22,10 @@ function serialize(thing: JaffleAny): string {
 	return JSON.stringify(thing).replace(/"/g, "'");
 }
 
-function getJaffleFuncName(func: JaffleFunction) {
+function getJaffleFuncName(func: JaffleFunction | string) {
+	if (typeof func === 'string' && func[0] === MINI_STRING_PREFIX) {
+		return 'mini';
+	}
 	const keys = Object.keys(func);
 	if (keys.length === 0) {
 		throw new errors.BadFunctionJaffleError('could not find function name');

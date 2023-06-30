@@ -292,6 +292,7 @@ describe('Testing jaffleDocumentToJs()', () => {
 		expect(t.jaffleDocumentToJs('[{ foo: 42 }]')).toBe('return foo(42);');
 		expect(t.jaffleDocumentToJs('[{ foo: bar }]')).toBe("return foo('bar');");
 		expect(t.jaffleDocumentToJs('[{ foo: }]')).toBe('return foo();');
+		expect(t.jaffleDocumentToJs("['_abc']")).toBe("return mini('abc');");
 		expect(t.jaffleDocumentToJs('[{ _foo: 1 }, { bar: 2 }]')).toBe('foo(1);\nreturn bar(2);');
 		expect(t.jaffleDocumentToJs('[{ _a: 1 }, { _b: 2 }, { c: 3 }]'))
 			.toBe('a(1);\nb(2);\nreturn c(3);');
