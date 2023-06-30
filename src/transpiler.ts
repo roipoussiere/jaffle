@@ -9,6 +9,7 @@ type JaffleFunction = { [funcName: string]: JaffleAny }
 
 const CHAINED_FUNC_PREFIX = '.';
 const SERIALIZE_FUNC_SUFFIX = '^';
+const INIT_FUNC_PREFIX = '_';
 
 const OPTIONAL_STRING_PREFIX = '/';
 const MINI_STRING_PREFIX = '_';
@@ -58,8 +59,16 @@ function toJaffleList(thing: JaffleAny): JaffleList {
 	return <JaffleList>thing;
 }
 
-function isJaffleMainFunc(func: JaffleFunction): boolean {
-	return getJaffleFuncName(func)[0] !== CHAINED_FUNC_PREFIX;
+function extractJaffleInitBlock(params: JaffleList): [JaffleList, JaffleList] {
+	const initBlock: JaffleList = [];
+	const mainBlock: JaffleList = [];
+
+	params.forEach((param) => {
+		const isBlock = isJaffleFunction(param)
+			&& getJaffleFuncName(<JaffleFunction>param)[0] === INIT_FUNC_PREFIX;
+		(isBlock ? initBlock : mainBlock).push(param);
+	});
+	return [initBlock, mainBlock];
 }
 
 function getJaffleFuncParams(thing: JaffleAny): JaffleList {
@@ -87,7 +96,7 @@ function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<
 			groups.push([item]);
 		} else if (isJaffleFunction(item)) {
 			const func = toJaffleFunction(item);
-			if (isJaffleMainFunc(func)) {
+			if (getJaffleFuncName(func)[0] !== CHAINED_FUNC_PREFIX) {
 				groups.push([item]);
 				onMainFunc = true;
 			} else {
@@ -95,9 +104,7 @@ function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<
 					throw new errors.BadFunctionJaffleError('chained function as first entry');
 				}
 				if (!onMainFunc) {
-					throw new errors.BadFunctionJaffleError(
-						'chained function outside function context',
-					);
+					throw new errors.BadFunctionJaffleError('orphan chained function');
 				}
 				groups[groups.length - 1].push(item);
 			}
@@ -124,6 +131,10 @@ function jaffleStringToJs(_str: string): string {
 }
 
 function jaffleParamsToJsGroups(params: JaffleList, serializeSuffix?: string): Array<string> {
+	if (params.length === 0) {
+		return [];
+	}
+
 	let serializedParamId = -1;
 	if (serializeSuffix !== undefined) {
 		serializedParamId = serializeSuffix === '' ? -2 : parseInt(serializeSuffix, 10) - 1;
@@ -156,7 +167,8 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 	let [newFuncName] = fNameAndSuffix;
 	let js: string;
 
-	newFuncName = newFuncName[0] === CHAINED_FUNC_PREFIX ? newFuncName.substring(1) : newFuncName;
+	newFuncName = [CHAINED_FUNC_PREFIX, INIT_FUNC_PREFIX].includes(newFuncName[0])
+		? newFuncName.substring(1) : newFuncName;
 
 	if (newFuncName[0] === newFuncName[0].toUpperCase()) {
 		js = newFuncName[0].toLowerCase() + newFuncName.substring(1);
@@ -196,33 +208,28 @@ function jaffleParamToJs(param: JaffleAny): string {
 	return 'null';
 }
 
-function jaffleInitBlockToJs(initBlock: JaffleList): string {
-	try {
-		return initBlock
-			.map((item) => toJaffleFunction(item))
-			.map((item) => `${jaffleFunctionToJs(item)};\n`)
-			.join('');
-	} catch (err) {
-		throw new errors.BadInitBlockJaffleError(err.message);
-	}
-}
-
 function jaffleDocumentToJs(inputYaml: string): string {
-	let tune: JaffleFunction;
+	let tune: JaffleAny;
+	let initBlock: JaffleList;
 	let outputJs = '';
 
 	try {
-		tune = <JaffleFunction> loadYaml(inputYaml);
+		tune = <JaffleList> loadYaml(inputYaml);
 	} catch (err) {
 		throw new errors.BadYamlJaffleError(err.message);
 	}
 
 	if (tune instanceof Array) {
-		const groups = jaffleParamsToJsGroups(<Array<JaffleAny>>tune);
+		[initBlock, tune] = extractJaffleInitBlock(<JaffleList>tune);
+
+		outputJs += jaffleParamsToJsGroups(initBlock).join(';\n');
+		outputJs += outputJs === '' ? '' : ';\n';
+
+		const groups = jaffleParamsToJsGroups(tune);
 		if (groups.length !== 1) {
 			throw new errors.BadDocumentJaffleError('document root must contain one main function');
 		}
-		outputJs += `return ${groups.join(', ')};`;
+		outputJs += `return ${groups[0]};`;
 	} else {
 		throw new errors.BadDocumentJaffleError(
 			`Document root must be an array, not ${typeof tune}`,
@@ -239,14 +246,15 @@ export const testing = {
 	toJaffleFunction,
 	isJaffleList,
 	toJaffleList,
-	isJaffleMainFunc,
+	extractJaffleInitBlock,
 	getJaffleFuncParams,
 	groupJaffleFuncParams,
 	jaffleStringToJs,
+	jaffleParamsToJsGroups,
+	jaffleLambdaToJs,
 	jaffleFunctionToJs,
 	jaffleListToJs,
 	jaffleParamToJs,
-	jaffleInitBlockToJs,
 	jaffleDocumentToJs,
 };
 

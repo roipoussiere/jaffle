@@ -77,7 +77,7 @@ describe('Testing toJaffleList()', () => {
 	});
 });
 
-// describe('Testing isJaffleMainFunc()', () => {...});
+// describe('Testing extractJaffleInitBlock()', () => {...});
 
 // describe('Testing getJaffleFuncParams()', () => {...});
 
@@ -157,6 +157,10 @@ describe('Testing jaffleStringToJs()', () => {
 		expect(t.jaffleStringToJs('_foo bar\nbaz')).toBe('mini(`foo bar\nbaz`)');
 	});
 });
+
+// describe('Testing jaffleParamsToJsGroups()', () => {...});
+
+// describe('Testing jaffleLambdaToJs()', () => {...});
 
 describe('Testing jaffleFunctionToJs()', () => {
 	test('trying to transpile an empty function fails', () => {
@@ -266,36 +270,6 @@ describe('Testing jaffleParamToJs()', () => {
 	});
 });
 
-describe('Testing jaffleInitBlockToJs()', () => {
-	test('Empty init block is transpiled into an empty string', () => {
-		expect(t.jaffleInitBlockToJs([])).toBe('');
-	});
-
-	test('Functions in init block are transpiled into code calling the functions', () => {
-		expect(t.jaffleInitBlockToJs([{ foo: 42 }])).toBe('foo(42);\n');
-		expect(t.jaffleInitBlockToJs([{ foo: 'bar' }])).toBe("foo('bar');\n");
-		expect(t.jaffleInitBlockToJs([{ foo: null }])).toBe('foo();\n');
-		expect(t.jaffleInitBlockToJs([{ foo: ['bar', 42] }])).toBe("foo('bar', 42);\n");
-		expect(t.jaffleInitBlockToJs([{ foo: { bar: 42 } }])).toBe('foo(bar(42));\n');
-	});
-
-	test('Several functions in init block is transpiled into code calling those functions', () => {
-		expect(t.jaffleInitBlockToJs([{ foo: 42 }, { bar: 24 }])).toBe('foo(42);\nbar(24);\n');
-	});
-
-	test('Chained functions in init block are transpiled into code calling the chain', () => {
-		expect(t.jaffleInitBlockToJs([{ a: [{ b: 1 }, { '.c': 2 }] }])).toBe('a(b(1).c(2));\n');
-	});
-
-	test('Trying to transpile non-valid init block fails', () => {
-		expect(() => t.jaffleInitBlockToJs([{}])).toThrow(e.BadInitBlockJaffleError);
-		expect(() => t.jaffleInitBlockToJs([{ fo: 1, ba: 2 }])).toThrow(e.BadInitBlockJaffleError);
-		// expect(() => t.jaffleInitBlockToJs([{ '.foo': 42 }])).toThrow(e.BadInitBlockJaffleError);
-		// expect(() => t.jaffleInitBlockToJs([{ '.foo': 1 }, { bar: 2 }]))
-		// 	.toThrow(e.BadInitBlockJaffleError);
-	});
-});
-
 describe('Testing jaffleDocumentToJs()', () => {
 	test('Trying to transpile non-valid yaml fails', () => {
 		expect(() => t.jaffleDocumentToJs('[foo}')).toThrow(e.BadYamlJaffleError);
@@ -311,12 +285,15 @@ describe('Testing jaffleDocumentToJs()', () => {
 	test('Trying to transpile a yaml document containing a bad array on root fails', () => {
 		expect(() => t.jaffleDocumentToJs('[{.b: 1}, {a: 2}]')).toThrow(e.BadFunctionJaffleError);
 		expect(() => t.jaffleDocumentToJs('[{a: 1}, {b: 2}]')).toThrow(e.BadDocumentJaffleError);
-		expect(() => t.jaffleDocumentToJs('[]')).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.jaffleDocumentToJs('[]')).toThrow(e.BadDocumentJaffleError);
 	});
 
 	test('Yaml documents containing an array of valid functions are transpiled into code', () => {
 		expect(t.jaffleDocumentToJs('[{ foo: 42 }]')).toBe('return foo(42);');
 		expect(t.jaffleDocumentToJs('[{ foo: bar }]')).toBe("return foo('bar');");
 		expect(t.jaffleDocumentToJs('[{ foo: }]')).toBe('return foo();');
+		expect(t.jaffleDocumentToJs('[{ _foo: 1 }, { bar: 2 }]')).toBe('foo(1);\nreturn bar(2);');
+		expect(t.jaffleDocumentToJs('[{ _a: 1 }, { _b: 2 }, { c: 3 }]'))
+			.toBe('a(1);\nb(2);\nreturn c(3);');
 	});
 });
