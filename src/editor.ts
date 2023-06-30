@@ -28,7 +28,7 @@ class JaffleEditor {
 	}
 
 	public getText(): string {
-		return this.editor.contentDOM.innerText;
+		return this.editor.state.doc.toString();
 	}
 
 	public setText(text: string): void {

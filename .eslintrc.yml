@@ -13,6 +13,7 @@ rules:
   no-tabs: off
   no-underscore-dangle: off
   import/extensions: [ error, never ]
+  max-len: [ warn, 100 ]
 
 settings:
   import/resolver:

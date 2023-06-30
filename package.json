@@ -33,16 +33,17 @@
 		"build_website": "hugo -s website",
 		"watch_website": "npm run build_website -- server",
 		"lint": "eslint src/*",
-		"test": "jest --passWithNoTests"
+		"test": "jest"
 	},
 	"devDependencies": {
-		"@types/jest": "^29.5.2",
+		"@jest/globals": "^29.5.0",
 		"@typescript-eslint/eslint-plugin": "^5.60.0",
 		"@typescript-eslint/parser": "^5.60.0",
 		"esbuild": "^0.18.4",
 		"eslint": "^8.43.0",
 		"eslint-config-airbnb": "^19.0.4",
 		"jest": "^29.5.0",
+		"jest-environment-jsdom": "^29.5.0",
 		"ts-jest": "^29.1.0"
 	},
 	"dependencies": {
