@@ -3,7 +3,7 @@
 # @by Felix Roos
 
 - stack:
-  - s: bd <sd cp>
+  - s: _bd <sd cp>
   - .delay: _<0 .5>
   - .delaytime: _.16 | .33
   - .delayfeedback: _.6 | .8

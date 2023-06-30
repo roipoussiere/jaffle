@@ -2,41 +2,31 @@
 # @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
 # @by Felix Roos, bassline by BDP - The Bridge Is Over
 
-Init:
-- Samples^:
+- _samples^:
     mad: https://freesound.org/data/previews/22/22274_109943-lq.mp3
 
-Stack:
-- Stack:
-  - M:
-    - c3*2 [[c3@1.4 bb2] ab2] gb2*2 <[[gb2@1.4 ab2] bb2] gb2>
-    - legato:
-      - _5 1
-      - fast: 2
-    - velocity: .8
-  - M:
-    - 0 ~
-    - scale: c4 whole tone
-    - euclidLegato: [ 3, 8 ]
-    - slow: 2
-    - mask: _x ~
-    - stutWith:
+- stack:
+  - stack:
+    - note: _c3*2 [[c3@1.4 bb2] ab2] gb2*2 <[[gb2@1.4 ab2] bb2] gb2>
+    - .gain: .8
+    - .clip: _[.5 1]*2
+
+    - n: _<0 1 2 3 4 3 2 1>
+    - .clip: .5
+    - .echoWith:
       - 8
-      - =1/16
-      - Set:
-        - a
-        - scaleTranspose: =a
-        - velocity: =.7**a
-    - scaleTranspose: _<0 1 2 3 4 3 2 1>
-    - fast: 2
-    - velocity: .7
-    - legato: .5
-    - stut: [ 3, .5, =1/8 ]
-  - transpose: -1
-  - note:
-  # - piano:
+      - =1/32
+      - set: i
+      - .add:
+        - n: =i
+      - .velocity: =.7**i
+    - .scale: c4 whole tone
+    - .echo: [ 3, =1/8, .5 ]
+  # - .piano: # bug: "piano is not a function"
+
   - s: mad
-  - slow: 2
-- cpm: 78
-- slow: 4
-- pianoroll:
+  - .slow: 2
+
+- .cpm: 78
+- .slow: 4
+- .pianoroll:

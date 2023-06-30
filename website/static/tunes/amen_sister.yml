@@ -7,7 +7,7 @@
 - stack:
 
 # amen
-  - n: 0 1 2 3 4 5 6 7
+  - n: _0 1 2 3 4 5 6 7
   - .sometimes:
     - set:
     - .ply: 2
@@ -50,7 +50,7 @@
 
 # chord
   - note:
-    - Bb3,D4
+    - _Bb3,D4
     - .superimpose:
       - set: 
       - .add: .2
@@ -71,7 +71,7 @@
   - .rev:
   - .mask: _<x ~@7>
 
-  - n: 0 1
+  - n: _0 1
   - .s: east
   - .delay: .5
   - .degradeBy: .8

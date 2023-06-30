@@ -3,7 +3,7 @@
 # @by Felix Roos
 
 - _samples^:
-  p: https://cdn.freesound.org/previews/648/648433_11943129-lq.mp3
+    p: https://cdn.freesound.org/previews/648/648433_11943129-lq.mp3
 
 - s: p
 - .loopAt: 32
