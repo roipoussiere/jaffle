@@ -298,10 +298,7 @@ describe('Testing jaffleInitBlockToJs()', () => {
 
 describe('Testing jaffleDocumentToJs()', () => {
 	test('Trying to transpile non-valid yaml fails', () => {
-		expect(() => t.jaffleDocumentToJs(`
-- c@3 eb
-note:
-		`)).toThrow(e.BadYamlJaffleError);
+		expect(() => t.jaffleDocumentToJs('[foo}')).toThrow(e.BadYamlJaffleError);
 	});
 
 	test('Trying to transpile a yaml document without an array on root fails', () => {
@@ -311,13 +308,15 @@ note:
 		expect(() => t.jaffleDocumentToJs('{ foo: bar }')).toThrow(e.BadDocumentJaffleError);
 	});
 
-	test('Trying to transpile a yaml document without valid functions fails', () => {
-		expect(() => t.jaffleDocumentToJs('[{.b: 42}, {a: 24}]')).toThrow(e.BadFunctionJaffleError);
+	test('Trying to transpile a yaml document containing a bad array on root fails', () => {
+		expect(() => t.jaffleDocumentToJs('[{.b: 1}, {a: 2}]')).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.jaffleDocumentToJs('[{a: 1}, {b: 2}]')).toThrow(e.BadDocumentJaffleError);
+		expect(() => t.jaffleDocumentToJs('[]')).toThrow(e.BadFunctionJaffleError);
 	});
 
-	test('Yaml document with valid functions are transpiled into valid code', () => {
-		expect(t.jaffleDocumentToJs('[{ foo: 42 }]')).toBe('return stack(foo(42));');
-		expect(t.jaffleDocumentToJs('[{ foo: bar }]')).toBe("return stack(foo('bar'));");
-		expect(t.jaffleDocumentToJs('[{ foo: }]')).toBe('return stack(foo());');
+	test('Yaml documents containing an array of valid functions are transpiled into code', () => {
+		expect(t.jaffleDocumentToJs('[{ foo: 42 }]')).toBe('return foo(42);');
+		expect(t.jaffleDocumentToJs('[{ foo: bar }]')).toBe("return foo('bar');");
+		expect(t.jaffleDocumentToJs('[{ foo: }]')).toBe('return foo();');
 	});
 });

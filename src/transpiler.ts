@@ -123,7 +123,7 @@ function jaffleStringToJs(_str: string): string {
 	return `${quote}${str[0] === OPTIONAL_STRING_PREFIX ? str.substring(1) : str}${quote}`;
 }
 
-function jaffleParamsToJs(params: JaffleList, serializeSuffix: string): string {
+function jaffleParamsToJsGroups(params: JaffleList, serializeSuffix?: string): Array<string> {
 	let serializedParamId = -1;
 	if (serializeSuffix !== undefined) {
 		serializedParamId = serializeSuffix === '' ? -2 : parseInt(serializeSuffix, 10) - 1;
@@ -136,8 +136,7 @@ function jaffleParamsToJs(params: JaffleList, serializeSuffix: string): string {
 				[id, -2].includes(serializedParamId) ? serialize(param) : jaffleParamToJs(param)
 			))
 			.join('.')
-		))
-		.join(', ');
+		));
 }
 
 function jaffleLambdaToJs(params: JaffleList): string {
@@ -167,7 +166,8 @@ function jaffleFunctionToJs(func: JaffleFunction): string {
 		if (funcName === LAMBDA_NAME) {
 			js = jaffleLambdaToJs(params);
 		} else {
-			const paramsJs = params.length === 0 ? '' : jaffleParamsToJs(params, fNameAndSuffix[1]);
+			const paramsJs = params.length === 0 ? ''
+				: jaffleParamsToJsGroups(params, fNameAndSuffix[1]).join(', ');
 			js = `${newFuncName}(${paramsJs})`;
 		}
 	}
@@ -218,8 +218,11 @@ function jaffleDocumentToJs(inputYaml: string): string {
 	}
 
 	if (tune instanceof Array) {
-		// checkJaffleMainFunction(main);
-		outputJs += `return ${jaffleFunctionToJs({ stack: <Array<JaffleAny>>tune })};`;
+		const groups = jaffleParamsToJsGroups(<Array<JaffleAny>>tune);
+		if (groups.length !== 1) {
+			throw new errors.BadDocumentJaffleError('document root must contain one main function');
+		}
+		outputJs += `return ${groups.join(', ')};`;
 	} else {
 		throw new errors.BadDocumentJaffleError(
 			`Document root must be an array, not ${typeof tune}`,
