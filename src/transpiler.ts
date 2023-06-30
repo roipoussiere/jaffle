@@ -62,11 +62,17 @@ function isJaffleMainFunc(func: JaffleFunction): boolean {
 	return getJaffleFuncName(func)[0] !== CHAINED_FUNC_PREFIX;
 }
 
-function getJaffleFuncParams(thing: JaffleAny): Array<JaffleAny> {
+function getJaffleFuncParams(thing: JaffleAny): JaffleList {
+	let params: JaffleList;
 	if (!(thing instanceof Object)) {
-		return [thing];
+		params = [thing];
+	} else {
+		params = thing instanceof Array ? thing : [thing];
 	}
-	return thing instanceof Array ? thing : [thing];
+	if (params.length === 1 && params[0] === null) {
+		params = [];
+	}
+	return params;
 }
 
 function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<JaffleList> {
@@ -117,47 +123,52 @@ function jaffleStringToJs(_str: string): string {
 	return `${quote}${str[0] === OPTIONAL_STRING_PREFIX ? str.substring(1) : str}${quote}`;
 }
 
+function jaffleParamsToJs(params: JaffleList, serializeSuffix: string): string {
+	let serializedParamId = -1;
+	if (serializeSuffix !== undefined) {
+		serializedParamId = serializeSuffix === '' ? -2 : parseInt(serializeSuffix, 10) - 1;
+	}
+
+	return groupJaffleFuncParams(params, serializedParamId)
+		.map((group, id) => (group
+			.map((param) => (
+				// eslint-disable-next-line no-use-before-define
+				[id, -2].includes(serializedParamId) ? serialize(param) : jaffleParamToJs(param)
+			))
+			.join('.')
+		))
+		.join(', ');
+}
+
+function jaffleLambdaToJs(params: JaffleList): string {
+	if (params.length === 0) {
+		return `${LAMBDA_VAR} => ${LAMBDA_VAR}`;
+	}
+	return `(${LAMBDA_VAR}, ${(<string>params[0]).split('').join(', ')}) => ${LAMBDA_VAR}`;
+}
+
 function jaffleFunctionToJs(func: JaffleFunction): string {
 	if (Object.keys(func).length === 0) {
 		throw new errors.BadFunctionJaffleError('Function is empty');
 	}
 
 	const funcName = getJaffleFuncName(func);
-	const funcNameAndSuffix = funcName.split(SERIALIZE_FUNC_SUFFIX);
-	const serializeSuffix = funcNameAndSuffix[1];
-	let [newFuncName] = funcNameAndSuffix;
+	const fNameAndSuffix = funcName.split(SERIALIZE_FUNC_SUFFIX);
+	let [newFuncName] = fNameAndSuffix;
 	let js: string;
 
 	newFuncName = newFuncName[0] === CHAINED_FUNC_PREFIX ? newFuncName.substring(1) : newFuncName;
-
-	let serializedParamId = -1;
-	if (serializeSuffix !== undefined) {
-		serializedParamId = serializeSuffix === '' ? -2 : parseInt(serializeSuffix, 10) - 1;
-	}
 
 	if (newFuncName[0] === newFuncName[0].toUpperCase()) {
 		js = newFuncName[0].toLowerCase() + newFuncName.substring(1);
 	} else {
 		const params = getJaffleFuncParams(func[funcName]);
-		const paramGroups = groupJaffleFuncParams(params, serializedParamId);
 
-		if (params.length === 0 || (params.length === 1 && params[0] === null)) {
-			js = funcName === LAMBDA_NAME ? `${LAMBDA_VAR} => ${LAMBDA_VAR}` : `${newFuncName}()`;
-		} else if (funcName === LAMBDA_NAME) {
-			js = `(${LAMBDA_VAR}, ${(<string>params[0]).split('').join(', ')}) => ${LAMBDA_VAR}`;
+		if (funcName === LAMBDA_NAME) {
+			js = jaffleLambdaToJs(params);
 		} else {
-			const groupsJs = paramGroups
-				.map((group, id) => (
-					group
-						.map((param) => (
-							[id, -2].includes(serializedParamId)
-								? serialize(param)
-								// eslint-disable-next-line no-use-before-define
-								: jaffleParamToJs(param)
-						))
-						.join('.')
-				));
-			js = `${newFuncName}(${groupsJs.join(', ')})`;
+			const paramsJs = params.length === 0 ? '' : jaffleParamsToJs(params, fNameAndSuffix[1]);
+			js = `${newFuncName}(${paramsJs})`;
 		}
 	}
 
