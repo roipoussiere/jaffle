@@ -18,15 +18,20 @@ const EXPR_STR_PREFIX = '=';
 
 const VAR_NAME_PREFIX = '_';
 const LAMBDA_NAME = 'set';
-const LAMBDA_VAR = 'x';
+const LAMBDA_VAR = '_x';
 
 function serialize(thing: JaffleAny): string {
 	return JSON.stringify(thing).replace(/"/g, "'");
 }
 
-function getJaffleFuncName(func: JaffleFunction | string) {
-	if (typeof func === 'string' && func[0] === MINI_STR_PREFIX) {
-		return 'mini';
+function isJaffleFunction(thing: JaffleAny): boolean {
+	// return (typeof thing === 'string' && [MINI_STR_PREFIX, EXPR_STR_PREFIX].includes(thing[0]))
+	return thing instanceof Object && !(thing instanceof Array);
+}
+
+function getJaffleFuncName(func: JaffleFunction) {
+	if (!isJaffleFunction(func)) {
+		throw new errors.BadFunctionJaffleError('Not a function');
 	}
 	const keys = Object.keys(func);
 	if (keys.length === 0) {
@@ -38,14 +43,14 @@ function getJaffleFuncName(func: JaffleFunction | string) {
 	return keys[0];
 }
 
-function isJaffleFunction(thing: JaffleAny): boolean {
-	return (typeof thing === 'string' && thing[0] === MINI_STR_PREFIX)
-		|| (thing instanceof Object && !(thing instanceof Array));
-}
-
 function toJaffleFunction(thing: JaffleAny): JaffleFunction {
-	if (typeof thing === 'string' && thing[0] === MINI_STR_PREFIX) {
-		return { mini: thing.substring(1) };
+	if (typeof thing === 'string') {
+		if (thing[0] === MINI_STR_PREFIX) {
+			return { mini: thing.substring(1) };
+		}
+		if (thing[0] === EXPR_STR_PREFIX) {
+			return { expr: thing.substring(1) };
+		}
 	}
 	if (isJaffleFunction(thing)) {
 		return <JaffleFunction>thing;
@@ -69,7 +74,8 @@ function extractJaffleInitBlock(params: JaffleList): [JaffleList, JaffleList] {
 	const mainBlock: JaffleList = [];
 
 	params.forEach((param) => {
-		const funcName = isJaffleFunction(param) ? getJaffleFuncName(<JaffleFunction>param) : '';
+		const func = toJaffleFunction(param);
+		const funcName = getJaffleFuncName(func);
 		const isInitBlock = [INIT_FUNC_PREFIX, VAR_FUNC_PREFIX].includes(funcName[0]);
 		(isInitBlock ? initBlock : mainBlock).push(param);
 	});
@@ -95,27 +101,34 @@ function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<
 	}
 	const groups: Array<JaffleList> = [];
 	let onMainFunc = false;
+	let func: JaffleFunction;
 
 	list.forEach((item) => {
 		if ([groups.length, -2].includes(serializedParamId)) {
 			groups.push([item]);
-		} else if (isJaffleFunction(item)) {
-			const func = toJaffleFunction(item);
-			if (getJaffleFuncName(func)[0] !== CHAINED_FUNC_PREFIX) {
-				groups.push([item]);
-				onMainFunc = true;
-			} else {
-				if (groups.length === 0) {
-					throw new errors.BadFunctionJaffleError('chained function as first entry');
-				}
-				if (!onMainFunc) {
-					throw new errors.BadFunctionJaffleError('orphan chained function');
-				}
-				groups[groups.length - 1].push(item);
-			}
-		} else {
+			return;
+		}
+
+		try {
+			func = toJaffleFunction(item);
+		} catch {
 			groups.push([item]);
 			onMainFunc = false;
+			return;
+		}
+
+		const funcName = getJaffleFuncName(func);
+		if (funcName[0] === CHAINED_FUNC_PREFIX) {
+			if (groups.length === 0) {
+				throw new errors.BadFunctionJaffleError('chained function as first entry');
+			}
+			if (!onMainFunc) {
+				throw new errors.BadFunctionJaffleError('orphan chained function');
+			}
+			groups[groups.length - 1].push(item);
+		} else {
+			groups.push([item]);
+			onMainFunc = true;
 		}
 	});
 
@@ -164,7 +177,8 @@ function jaffleLambdaToJs(params: JaffleList): string {
 	if (params.length === 0) {
 		return `${LAMBDA_VAR} => ${LAMBDA_VAR}`;
 	}
-	return `(${LAMBDA_VAR}, ${(<string>params[0]).split('').join(', ')}) => ${LAMBDA_VAR}`;
+	const varsJs = params.map((varName) => VAR_NAME_PREFIX + varName).join(', ');
+	return `(${LAMBDA_VAR}, ${varsJs}) => ${LAMBDA_VAR}`;
 }
 
 function jaffleFuncToJs(func: JaffleFunction): string {
@@ -213,7 +227,7 @@ function jaffleParamToJs(param: JaffleAny): string {
 		return jaffleListToJs(param);
 	}
 	if (param instanceof Object) {
-		return jaffleFuncToJs(param);
+		return jaffleFuncToJs(toJaffleFunction(param));
 	}
 	if (typeof param === 'string') {
 		return jaffleStringToJs(param);
