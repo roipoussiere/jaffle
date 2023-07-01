@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 
-import { transpiler, JaffleEditor, Strudel } from './jaffle';
+import { transpiler, JaffleEditor } from './jaffle';
+import StrudelRepl from './strudel_repl';
 
 const TUNES_PATH = './tunes/';
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
@@ -14,7 +15,7 @@ const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub',
 const DEFAULT_TUNE = 'ws2_stack';
 const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune');
 const editor = new JaffleEditor();
-const strudel = new Strudel();
+const strudel = new StrudelRepl();
 
 function loadTune(tuneName: string): void {
 	console.log(`Loading tune ${tuneName}...`);
