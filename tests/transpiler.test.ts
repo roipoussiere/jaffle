@@ -4,28 +4,20 @@ import * as e from '../src/errors';
 import * as t from '../src/transpiler';
 
 describe('Testing serialize()', () => {
-	test('objects are correctly serialized', () => {
-		expect(t.serialize(42)).toBe('42');
+	test('literals and arrays are correctly serialized', () => {
 		expect(t.serialize(null)).toBe('null');
-		expect(t.serialize('bar')).toBe("'bar'");
+		expect(t.serialize(42)).toBe('42');
+		expect(t.serialize('foo')).toBe("'foo'");
 		expect(t.serialize([1, 2, 3])).toBe('[1,2,3]');
+	});
+
+	test('Objects are correctly serialized', () => {
 		expect(t.serialize({ foo: 42 })).toBe("{'foo':42}");
 		expect(t.serialize({ foo: 'bar' })).toBe("{'foo':'bar'}");
 		expect(t.serialize({ foo: [1, 2, 3] })).toBe("{'foo':[1,2,3]}");
 		expect(t.serialize({ foo: { bar: 42 } })).toBe("{'foo':{'bar':42}}");
-	});
-});
-
-describe('Testing getJaffleFuncName()', () => {
-	test('The name of a function is the function name', () => {
-		expect(t.getJaffleFuncName({ foo: 42 })).toBe('foo');
-		expect(t.getJaffleFuncName({ Foo: 42 })).toBe('Foo');
-		expect(t.getJaffleFuncName({ '.foo': 42 })).toBe('.foo');
-	});
-
-	test('Trying to get the function name of a non-function fails', () => {
-		expect(() => t.getJaffleFuncName({})).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.getJaffleFuncName({ foo: 42, bar: 24 })).toThrow(e.BadFunctionJaffleError);
+		expect(t.serialize({ '.foo': 1, _bar: 2, $baz: 3 })).toBe("{'.foo':1,'_bar':2,'$baz':3}");
+		expect(t.serialize({ a: '/1', b: '_2', c: '=3' })).toBe("{'a':'/1','b':'_2','c':'=3'}");
 	});
 });
 
@@ -41,22 +33,81 @@ describe('Testing isJaffleFunction()', () => {
 		expect(t.isJaffleFunction('foo')).toBeFalsy();
 		expect(t.isJaffleFunction(null)).toBeFalsy();
 		expect(t.isJaffleFunction([1, 2, 3])).toBeFalsy();
+		expect(t.isJaffleFunction('_foo')).toBeFalsy();
+		expect(t.isJaffleFunction('=foo')).toBeFalsy();
+	});
+});
+
+describe('Testing getJaffleFuncName()', () => {
+	test('The name of a function is the function name', () => {
+		expect(t.getJaffleFuncName({ foo: 42 })).toBe('foo');
+		expect(t.getJaffleFuncName({ Foo: 42 })).toBe('Foo');
+		expect(t.getJaffleFuncName({ '.foo': 42 })).toBe('.foo');
+		expect(t.getJaffleFuncName({ $foo: 42 })).toBe('$foo');
+		expect(t.getJaffleFuncName({ _foo: 42 })).toBe('_foo');
+	});
+
+	test('Trying to get the function name of a non-function fails', () => {
+		expect(() => t.getJaffleFuncName({})).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.getJaffleFuncName({ foo: 42, bar: 24 })).toThrow(e.BadFunctionJaffleError);
 	});
 });
 
 describe('Testing toJaffleFunction()', () => {
-	test('Converting an object to a jaffle function does not fail', () => {
-		expect(t.toJaffleFunction({ foo: 42 }));
+	test('An object converted to a Jaffle function is the Jaffle function of the object', () => {
+		expect(t.toJaffleFunction({ foo: 42 }).foo).toBe(42);
+		expect(t.toJaffleFunction('_foo').mini).toBe('foo');
+		expect(t.toJaffleFunction('=foo').expr).toBe('foo');
 	});
 
 	test('Converting a non-object to a jaffle function fails', () => {
+		expect(() => t.toJaffleFunction(null)).toThrow(e.BadFunctionJaffleError);
 		expect(() => t.toJaffleFunction(42)).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.toJaffleFunction('foo')).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.toJaffleFunction([1, 2, 3])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.toJaffleFunction({})).toThrow(e.BadFunctionJaffleError);
 	});
 });
 
-// describe('Testing extractJaffleInitBlock()', () => {...});
+describe('Testing extractJaffleInitBlock()', () => {
+	test('List of init or main functions can be split into one of those functions block', () => {
+		expect(t.extractJaffleInitBlock([{ foo: 42 }])).toEqual([[], [{ foo: 42 }]]);
+		expect(t.extractJaffleInitBlock([{ _foo: 42 }])).toEqual([[{ _foo: 42 }], []]);
+		expect(t.extractJaffleInitBlock([{ $foo: 42 }])).toEqual([[{ $foo: 42 }], []]);
+	});
 
-// describe('Testing getJaffleFuncParams()', () => {...});
+	test('List of mixed functions can be split into an init block and a main block', () => {
+		expect(t.extractJaffleInitBlock([{ _a: 1 }, { b: 2 }])).toEqual([[{ _a: 1 }], [{ b: 2 }]]);
+		expect(t.extractJaffleInitBlock([{ b: 2 }, { _a: 1 }])).toEqual([[{ _a: 1 }], [{ b: 2 }]]);
+		expect(t.extractJaffleInitBlock([{ _a: 1 }, { $b: 2 }, { c: 3 }, { d: 4 }]))
+			.toEqual([[{ _a: 1 }, { $b: 2 }], [{ c: 3 }, { d: 4 }]]);
+		expect(t.extractJaffleInitBlock([{ c: 3 }, { _a: 1 }, { d: 4 }, { $b: 2 }]))
+			.toEqual([[{ _a: 1 }, { $b: 2 }], [{ c: 3 }, { d: 4 }]]);
+	});
+});
+
+describe('Testing getJaffleFuncParams()', () => {
+	test('Null value passed in Jaffle function parameters is an empty array', () => {
+		expect(t.getJaffleFuncParams(null)).toEqual([]);
+	});
+
+	test('Literals passed in Jaffle function parameters are an array of one literal', () => {
+		expect(t.getJaffleFuncParams(null)).toEqual([]);
+		expect(t.getJaffleFuncParams(42)).toEqual([42]);
+		expect(t.getJaffleFuncParams('foo')).toEqual(['foo']);
+	});
+
+	test('Object passed in Jaffle function parameters are an array of one object', () => {
+		expect(t.getJaffleFuncParams({ a: null, b: 42, c: 'foo' }))
+			.toEqual([{ a: null, b: 42, c: 'foo' }]);
+	});
+
+	test('Arrays passed in Jaffle function parameters are an array', () => {
+		expect(t.getJaffleFuncParams([null, 42, 'foo'])).toEqual([null, 42, 'foo']);
+		expect(t.getJaffleFuncParams([])).toEqual([]);
+		expect(t.getJaffleFuncParams([null])).toEqual([]);
+	});
+});
 
 describe('Testing groupJaffleFuncParams()', () => {
 	test('lists of one item are grouped into one group of one item', () => {
@@ -77,19 +128,35 @@ describe('Testing groupJaffleFuncParams()', () => {
 
 	test('lists of main/chain functions mix are grouped into groups of main functions', () => {
 		expect(t.groupJaffleFuncParams([{ a: 1 }, { '.b': 2 }])).toEqual([[{ a: 1 }, { '.b': 2 }]]);
-		expect(t.groupJaffleFuncParams([{ a: 1 }, { '.b': 2 }, 42]))
-			.toEqual([[{ a: 1 }, { '.b': 2 }], [42]]);
+		expect(t.groupJaffleFuncParams([{ a: 1 }, { '.b': 2 }, 3, 'c', null]))
+			.toEqual([[{ a: 1 }, { '.b': 2 }], [3], ['c'], [null]]);
+		expect(t.groupJaffleFuncParams([{ a: 1 }, { '.b': 'c' }, { '.d': null }, { '.e': [1, 2] }]))
+			.toEqual([[{ a: 1 }, { '.b': 'c' }, { '.d': null }, { '.e': [1, 2] }]]);
+		expect(t.groupJaffleFuncParams([{ a: 1 }, { '.b': 2 }, { c: 3 }, { '.d': 'e' }]))
+			.toEqual([[{ a: 1 }, { '.b': 2 }], [{ c: 3 }, { '.d': 'e' }]]);
+		expect(t.groupJaffleFuncParams(['_a', { '.b': 1 }])).toEqual([['_a', { '.b': 1 }]]);
+		expect(t.groupJaffleFuncParams(['=a', { '.b': 1 }])).toEqual([['=a', { '.b': 1 }]]);
+	});
+
+	test('serialized parameters are grouped into groups of serialized parameters', () => {
+		expect(t.groupJaffleFuncParams([{ a: 1 }, { '.b': 2 }, { _c: 3 }], -2))
+			.toEqual([[{ a: 1 }], [{ '.b': 2 }], [{ _c: 3 }]]);
+		expect(t.groupJaffleFuncParams([{ a: 1 }, { '.b': 2 }, { _c: 3 }], -1))
+			.toEqual([[{ a: 1 }, { '.b': 2 }], [{ _c: 3 }]]);
+		expect(t.groupJaffleFuncParams([{ a: 1 }, { '.b': 2 }], 1))
+			.toEqual([[{ a: 1 }], [{ '.b': 2 }]]);
 	});
 
 	test('Trying to group bad groups fails', () => {
 		expect(() => t.groupJaffleFuncParams([])).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.groupJaffleFuncParams([{ '.a': 42 }])).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.groupJaffleFuncParams([{ '.a': 42 }, { b: 24 }]))
+		expect(() => t.groupJaffleFuncParams([{ '.a': 1 }])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.groupJaffleFuncParams([{ '.a': 1 }, { b: 2 }]))
 			.toThrow(e.BadFunctionJaffleError);
-		expect(() => t.groupJaffleFuncParams([24, { '.a': 42 }])).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.groupJaffleFuncParams(['foo', { '.a': 42 }]))
+		expect(() => t.groupJaffleFuncParams([null, { '.a': 2 }]))
 			.toThrow(e.BadFunctionJaffleError);
-		expect(() => t.groupJaffleFuncParams([[1, 2, 3], { '.a': 42 }]))
+		expect(() => t.groupJaffleFuncParams([1, { '.a': 2 }])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.groupJaffleFuncParams(['a', { '.b': 1 }])).toThrow(e.BadFunctionJaffleError);
+		expect(() => t.groupJaffleFuncParams([[1, 2], { '.a': 1 }]))
 			.toThrow(e.BadFunctionJaffleError);
 	});
 });
@@ -108,11 +175,8 @@ describe('Testing jaffleStringToJs()', () => {
 		expect(t.jaffleStringToJs('/.foo')).toBe("'.foo'");
 	});
 
-	test('Variable definition strings are transpiled into variable definitions', () => {
-		expect(t.jaffleStringToJs('=foo')).toBe('_foo');
-	});
-
 	test('Expression strings are transpiled into expressions', () => {
+		expect(t.jaffleStringToJs('=foo')).toBe('_foo');
 		expect(t.jaffleStringToJs('=2+3')).toBe('2+3');
 		expect(t.jaffleStringToJs('=2-3')).toBe('2-3');
 		expect(t.jaffleStringToJs('=2*3')).toBe('2*3');
@@ -139,7 +203,12 @@ describe('Testing jaffleStringToJs()', () => {
 	});
 });
 
-// describe('Testing jaffleParamsToJsGroups()', () => {...});
+describe('Testing jaffleParamsToJsGroups()', () => {
+	test('Empty params are trnaspiled into empty groups', () => {
+		expect(t.jaffleParamsToJsGroups([])).toEqual([]);
+	});
+	// ...
+});
 
 // describe('Testing jaffleLambdaToJs()', () => {...});
 

@@ -8,9 +8,9 @@ type JaffleList = Array<JaffleAny>
 type JaffleFunction = { [funcName: string]: JaffleAny }
 
 const CHAINED_FUNC_PREFIX = '.';
-const SERIALIZE_FUNC_SUFFIX = '^';
 const INIT_FUNC_PREFIX = '_';
 const VAR_FUNC_PREFIX = '$';
+const SERIALIZE_FUNC_SUFFIX = '^';
 
 const OPTIONAL_STR_PREFIX = '/';
 const MINI_STR_PREFIX = '_';
@@ -35,7 +35,6 @@ export function serialize(thing: JaffleAny): string {
  * @returns true if the object is a Jaffle function, false otherwise
  */
 export function isJaffleFunction(thing: JaffleAny): boolean {
-	// return (typeof thing === 'string' && [MINI_STR_PREFIX, EXPR_STR_PREFIX].includes(thing[0]))
 	return thing instanceof Object && !(thing instanceof Array);
 }
 
@@ -45,9 +44,6 @@ export function isJaffleFunction(thing: JaffleAny): boolean {
  * @returns the name of the function
  */
 export function getJaffleFuncName(func: JaffleFunction): string {
-	if (!isJaffleFunction(func)) {
-		throw new errors.BadFunctionJaffleError('Not a function');
-	}
 	const keys = Object.keys(func);
 	if (keys.length === 0) {
 		throw new errors.BadFunctionJaffleError('could not find function name');
@@ -73,7 +69,11 @@ export function toJaffleFunction(thing: JaffleAny): JaffleFunction {
 		}
 	}
 	if (isJaffleFunction(thing)) {
-		return <JaffleFunction>thing;
+		const func = <JaffleFunction>thing;
+		if (Object.keys(func).length === 0) {
+			throw new errors.BadFunctionJaffleError('function is empty');
+		}
+		return func;
 	}
 	throw new errors.BadFunctionJaffleError('Not a function');
 }
