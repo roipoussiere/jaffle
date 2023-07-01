@@ -12,7 +12,6 @@ const SERIALIZE_FUNC_SUFFIX = '^';
 const INIT_FUNC_PREFIX = '_';
 const VAR_FUNC_PREFIX = '$';
 
-const VAR_STRING_PREFIX = '$';
 const OPTIONAL_STRING_PREFIX = '/';
 const MINI_STRING_PREFIX = '_';
 const EXPRESSION_STRING_PREFIX = '=';
@@ -130,11 +129,10 @@ function jaffleStringToJs(_str: string): string {
 	if (str[0] === MINI_STRING_PREFIX) {
 		return `mini(${quote}${str.substring(1)}${quote})`;
 	}
-	if (str[0] === VAR_STRING_PREFIX) {
-		return VAR_NAME_PREFIX + str.substring(1).replace(/[^a-zA-Z_]/g, '');
-	}
 	if (str[0] === EXPRESSION_STRING_PREFIX) {
-		return str.substring(1).replace(/[^a-z0-9.+\-*/() ]|[a-z]{2,}/g, '');
+		return str.substring(1)
+			.replace(/[^a-zA-Z0-9.+\-*/() ]/g, '')
+			.replace(/[a-z][a-zA-Z0-9]+/g, `${VAR_NAME_PREFIX}$&`);
 	}
 	return `${quote}${str[0] === OPTIONAL_STRING_PREFIX ? str.substring(1) : str}${quote}`;
 }
