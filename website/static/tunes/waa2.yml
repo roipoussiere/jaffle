@@ -9,22 +9,24 @@
     - .slow: 2
   - .off:
     - =1/4
+    - set:
     - .add: 7
   - .off:
     - =1/8
     - set:
     - .add: 12
-  - .slow: 2
-  - .legato:
-    - Sine:
-    - .range: [ 0.3, 2 ]
-    - .slow: 28
-  - .s:
-    - _sawtooth square
-    - .fast: 2
-  - .cutoff:
-    - Cosine:
-    - .range: [ 500, 4000 ]
-    - .slow: 16
+
+- .slow: 2
+- .clip:
+  - Sine:
+  - .range: [ 0.3, 2 ]
+  - .slow: 28
+- .s:
+  - _sawtooth square
+  - .fast: 2
+- .cutoff:
+  - Cosine:
+  - .range: [ 500, 4000 ]
+  - .slow: 16
 - .gain: .5
 - .room: .5
