@@ -12,9 +12,9 @@ const SERIALIZE_FUNC_SUFFIX = '^';
 const INIT_FUNC_PREFIX = '_';
 const VAR_FUNC_PREFIX = '$';
 
-const OPTIONAL_STRING_PREFIX = '/';
-const MINI_STRING_PREFIX = '_';
-const EXPRESSION_STRING_PREFIX = '=';
+const OPTIONAL_STR_PREFIX = '/';
+const MINI_STR_PREFIX = '_';
+const EXPR_STR_PREFIX = '=';
 
 const VAR_NAME_PREFIX = '_';
 const LAMBDA_NAME = 'set';
@@ -25,7 +25,7 @@ function serialize(thing: JaffleAny): string {
 }
 
 function getJaffleFuncName(func: JaffleFunction | string) {
-	if (typeof func === 'string' && func[0] === MINI_STRING_PREFIX) {
+	if (typeof func === 'string' && func[0] === MINI_STR_PREFIX) {
 		return 'mini';
 	}
 	const keys = Object.keys(func);
@@ -39,12 +39,12 @@ function getJaffleFuncName(func: JaffleFunction | string) {
 }
 
 function isJaffleFunction(thing: JaffleAny): boolean {
-	return (typeof thing === 'string' && thing[0] === MINI_STRING_PREFIX)
+	return (typeof thing === 'string' && thing[0] === MINI_STR_PREFIX)
 		|| (thing instanceof Object && !(thing instanceof Array));
 }
 
 function toJaffleFunction(thing: JaffleAny): JaffleFunction {
-	if (typeof thing === 'string' && thing[0] === MINI_STRING_PREFIX) {
+	if (typeof thing === 'string' && thing[0] === MINI_STR_PREFIX) {
 		return { mini: thing.substring(1) };
 	}
 	if (isJaffleFunction(thing)) {
@@ -122,19 +122,22 @@ function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<
 	return groups;
 }
 
-function jaffleStringToJs(_str: string): string {
-	const str = _str.trim();
-	const quote = str.includes('\n') ? '`' : "'";
+function jaffleStringToJs(str: string): string {
+	const isPrefixed = [MINI_STR_PREFIX, EXPR_STR_PREFIX, OPTIONAL_STR_PREFIX].includes(str[0]);
+	const newStr = (isPrefixed ? str.substring(1) : str).trim();
+	const quote = newStr.includes('\n') ? '`' : "'";
+	let js: string;
 
-	if (str[0] === MINI_STRING_PREFIX) {
-		return `mini(${quote}${str.substring(1)}${quote})`;
+	if (str[0] === EXPR_STR_PREFIX) {
+		if (newStr.match(/[^a-zA-Z0-9.+\-*/() ]/g)) {
+			throw new errors.BadStringJaffleError(`Not a valid expression string: ${newStr}`);
+		}
+		js = newStr.replace(/[a-z][a-zA-Z0-9]*/g, `${VAR_NAME_PREFIX}$&`);
+	} else {
+		js = `${quote}${newStr}${quote}`;
+		js = str[0] === MINI_STR_PREFIX ? `mini(${js})` : js;
 	}
-	if (str[0] === EXPRESSION_STRING_PREFIX) {
-		return str.substring(1)
-			.replace(/[^a-zA-Z0-9.+\-*/() ]/g, '')
-			.replace(/[a-z][a-zA-Z0-9]+/g, `${VAR_NAME_PREFIX}$&`);
-	}
-	return `${quote}${str[0] === OPTIONAL_STRING_PREFIX ? str.substring(1) : str}${quote}`;
+	return js;
 }
 
 function jaffleParamsToJsGroups(params: JaffleList, serializeSuffix?: string): Array<string> {

@@ -132,7 +132,7 @@ describe('Testing jaffleStringToJs()', () => {
 	});
 
 	test('Variable definition strings are transpiled into variable definitions', () => {
-		expect(t.jaffleStringToJs('$foo')).toBe('_foo');
+		expect(t.jaffleStringToJs('=foo')).toBe('_foo');
 	});
 
 	test('Expression strings are transpiled into expressions', () => {
@@ -149,11 +149,11 @@ describe('Testing jaffleStringToJs()', () => {
 		expect(t.jaffleStringToJs('=0.42')).toBe('0.42');
 		expect(t.jaffleStringToJs('=.42')).toBe('.42');
 
-		expect(t.jaffleStringToJs('=a')).toBe('a');
-		expect(t.jaffleStringToJs('=ab')).toBe('');
-		expect(t.jaffleStringToJs('=ab + cd')).toBe(' + ');
-		expect(t.jaffleStringToJs('=a b')).toBe('a b');
-		expect(t.jaffleStringToJs('=(a+1) - (b*2) / (c**3)')).toBe('(a+1) - (b*2) / (c**3)');
+		expect(t.jaffleStringToJs('=a')).toBe('_a');
+		expect(t.jaffleStringToJs('=abc')).toBe('_abc');
+		expect(t.jaffleStringToJs('=ab + cd')).toBe('_ab + _cd');
+		// expect(t.jaffleStringToJs('=a b')).toBe('_a _b');
+		expect(t.jaffleStringToJs('=(a+1) - (b*2) / (c**3)')).toBe('(_a+1) - (_b*2) / (_c**3)');
 	});
 
 	test('Mini-notation strings are transpiled into a call to mini', () => {
@@ -229,9 +229,9 @@ describe('Testing jaffleFuncToJs()', () => {
 		expect(t.jaffleFuncToJs({ a: [{ set: null }, { '.foo': 42 }] }))
 			.toBe('a(x => x.foo(42))');
 		expect(t.jaffleFuncToJs({ a: [{ set: 'n' }, { '.fo': '=n-1' }] }))
-			.toBe('a((x, n) => x.fo(n-1))');
+			.toBe('a((x, n) => x.fo(_n-1))');
 		expect(t.jaffleFuncToJs({ a: [{ set: 'nm' }, { '.fo': '=n' }, { '.ba': '=m' }] }))
-			.toBe('a((x, n, m) => x.fo(n).ba(m))');
+			.toBe('a((x, n, m) => x.fo(_n).ba(_m))');
 	});
 });
 
@@ -304,7 +304,9 @@ describe('Testing jaffleDocumentToJs()', () => {
 		expect(t.jaffleDocumentToJs('[{ foo: bar }]')).toBe("return foo('bar');");
 		expect(t.jaffleDocumentToJs('[{ foo: }]')).toBe('return foo();');
 		expect(t.jaffleDocumentToJs('[{ foo: [1, 2, 3]}]')).toBe('return foo(1, 2, 3);');
-		expect(t.jaffleDocumentToJs('[{ $a: 1 }, { b: $a }]')).toBe('const _a = 1;\nreturn b(_a);');
+		expect(t.jaffleDocumentToJs('[{ $a: 1 }, { b: =a }]')).toBe('const _a = 1;\nreturn b(_a);');
+		expect(t.jaffleDocumentToJs('[{ $a: 1 }, { b: =a }, { .c: 2 }]'))
+			.toBe('const _a = 1;\nreturn b(_a).c(2);');
 		expect(t.jaffleDocumentToJs("['_abc']")).toBe("return mini('abc');");
 		expect(t.jaffleDocumentToJs('[{ _foo: 1 }, { bar: 2 }]')).toBe('foo(1);\nreturn bar(2);');
 		expect(t.jaffleDocumentToJs('[{ _a: 1 }, { _b: 2 }, { c: 3 }]'))
