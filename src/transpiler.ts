@@ -20,16 +20,16 @@ const VAR_NAME_PREFIX = '_';
 const LAMBDA_NAME = 'set';
 const LAMBDA_VAR = '_x';
 
-function serialize(thing: JaffleAny): string {
+export function serialize(thing: JaffleAny): string {
 	return JSON.stringify(thing).replace(/"/g, "'");
 }
 
-function isJaffleFunction(thing: JaffleAny): boolean {
+export function isJaffleFunction(thing: JaffleAny): boolean {
 	// return (typeof thing === 'string' && [MINI_STR_PREFIX, EXPR_STR_PREFIX].includes(thing[0]))
 	return thing instanceof Object && !(thing instanceof Array);
 }
 
-function getJaffleFuncName(func: JaffleFunction) {
+export function getJaffleFuncName(func: JaffleFunction) {
 	if (!isJaffleFunction(func)) {
 		throw new errors.BadFunctionJaffleError('Not a function');
 	}
@@ -43,7 +43,7 @@ function getJaffleFuncName(func: JaffleFunction) {
 	return keys[0];
 }
 
-function toJaffleFunction(thing: JaffleAny): JaffleFunction {
+export function toJaffleFunction(thing: JaffleAny): JaffleFunction {
 	if (typeof thing === 'string') {
 		if (thing[0] === MINI_STR_PREFIX) {
 			return { mini: thing.substring(1) };
@@ -58,18 +58,18 @@ function toJaffleFunction(thing: JaffleAny): JaffleFunction {
 	throw new errors.BadFunctionJaffleError('Not a function');
 }
 
-function isJaffleList(thing: JaffleAny): boolean {
+export function isJaffleList(thing: JaffleAny): boolean {
 	return thing instanceof Array;
 }
 
-function toJaffleList(thing: JaffleAny): JaffleList {
+export function toJaffleList(thing: JaffleAny): JaffleList {
 	if (!isJaffleList(thing)) {
 		throw new errors.BadListJaffleError('Not a list');
 	}
 	return <JaffleList>thing;
 }
 
-function extractJaffleInitBlock(params: JaffleList): [JaffleList, JaffleList] {
+export function extractJaffleInitBlock(params: JaffleList): [JaffleList, JaffleList] {
 	const initBlock: JaffleList = [];
 	const mainBlock: JaffleList = [];
 
@@ -82,7 +82,7 @@ function extractJaffleInitBlock(params: JaffleList): [JaffleList, JaffleList] {
 	return [initBlock, mainBlock];
 }
 
-function getJaffleFuncParams(thing: JaffleAny): JaffleList {
+export function getJaffleFuncParams(thing: JaffleAny): JaffleList {
 	let params: JaffleList;
 	if (!(thing instanceof Object)) {
 		params = [thing];
@@ -95,7 +95,7 @@ function getJaffleFuncParams(thing: JaffleAny): JaffleList {
 	return params;
 }
 
-function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<JaffleList> {
+export function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<JaffleList> {
 	if (list.length === 0) {
 		throw new errors.BadFunctionJaffleError('group of params is empty');
 	}
@@ -135,7 +135,7 @@ function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<
 	return groups;
 }
 
-function jaffleStringToJs(str: string): string {
+export function jaffleStringToJs(str: string): string {
 	const isPrefixed = [MINI_STR_PREFIX, EXPR_STR_PREFIX, OPTIONAL_STR_PREFIX].includes(str[0]);
 	const newStr = (isPrefixed ? str.substring(1) : str).trim();
 	const quote = newStr.includes('\n') ? '`' : "'";
@@ -153,14 +153,14 @@ function jaffleStringToJs(str: string): string {
 	return js;
 }
 
-function jaffleParamsToJsGroups(params: JaffleList, serializeSuffix?: string): Array<string> {
+export function jaffleParamsToJsGroups(params: JaffleList, serializSuffix?: string): Array<string> {
 	if (params.length === 0) {
 		return [];
 	}
 
 	let serializedParamId = -1;
-	if (serializeSuffix !== undefined) {
-		serializedParamId = serializeSuffix === '' ? -2 : parseInt(serializeSuffix, 10) - 1;
+	if (serializSuffix !== undefined) {
+		serializedParamId = serializSuffix === '' ? -2 : parseInt(serializSuffix, 10) - 1;
 	}
 
 	return groupJaffleFuncParams(params, serializedParamId)
@@ -173,7 +173,7 @@ function jaffleParamsToJsGroups(params: JaffleList, serializeSuffix?: string): A
 		));
 }
 
-function jaffleLambdaToJs(params: JaffleList): string {
+export function jaffleLambdaToJs(params: JaffleList): string {
 	if (params.length === 0) {
 		return `${LAMBDA_VAR} => ${LAMBDA_VAR}`;
 	}
@@ -181,7 +181,7 @@ function jaffleLambdaToJs(params: JaffleList): string {
 	return `(${LAMBDA_VAR}, ${varsJs}) => ${LAMBDA_VAR}`;
 }
 
-function jaffleFuncToJs(func: JaffleFunction): string {
+export function jaffleFuncToJs(func: JaffleFunction): string {
 	if (Object.keys(func).length === 0) {
 		throw new errors.BadFunctionJaffleError('Function is empty');
 	}
@@ -217,12 +217,12 @@ function jaffleFuncToJs(func: JaffleFunction): string {
 	return js;
 }
 
-function jaffleListToJs(list: JaffleList): string {
+export function jaffleListToJs(list: JaffleList): string {
 	// eslint-disable-next-line no-use-before-define
 	return `[${list.map((item) => jaffleParamToJs(item)).join(', ')}]`;
 }
 
-function jaffleParamToJs(param: JaffleAny): string {
+export function jaffleParamToJs(param: JaffleAny): string {
 	if (param instanceof Array) {
 		return jaffleListToJs(param);
 	}
@@ -238,7 +238,7 @@ function jaffleParamToJs(param: JaffleAny): string {
 	return 'null';
 }
 
-function jaffleDocumentToJs(inputYaml: string): string {
+export function jaffleDocumentToJs(inputYaml: string): string {
 	let tune: JaffleAny;
 	let initBlock: JaffleList;
 	let outputJs = '';
@@ -268,24 +268,3 @@ function jaffleDocumentToJs(inputYaml: string): string {
 
 	return outputJs;
 }
-
-export const testing = {
-	serialize,
-	getJaffleFuncName,
-	isJaffleFunction,
-	toJaffleFunction,
-	isJaffleList,
-	toJaffleList,
-	extractJaffleInitBlock,
-	getJaffleFuncParams,
-	groupJaffleFuncParams,
-	jaffleStringToJs,
-	jaffleParamsToJsGroups,
-	jaffleLambdaToJs,
-	jaffleFuncToJs,
-	jaffleListToJs,
-	jaffleParamToJs,
-	jaffleDocumentToJs,
-};
-
-export default jaffleDocumentToJs;
