@@ -58,17 +58,6 @@ export function toJaffleFunction(thing: JaffleAny): JaffleFunction {
 	throw new errors.BadFunctionJaffleError('Not a function');
 }
 
-export function isJaffleList(thing: JaffleAny): boolean {
-	return thing instanceof Array;
-}
-
-export function toJaffleList(thing: JaffleAny): JaffleList {
-	if (!isJaffleList(thing)) {
-		throw new errors.BadListJaffleError('Not a list');
-	}
-	return <JaffleList>thing;
-}
-
 export function extractJaffleInitBlock(params: JaffleList): [JaffleList, JaffleList] {
 	const initBlock: JaffleList = [];
 	const mainBlock: JaffleList = [];

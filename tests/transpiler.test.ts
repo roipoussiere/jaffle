@@ -54,29 +54,6 @@ describe('Testing toJaffleFunction()', () => {
 	});
 });
 
-describe('Testing isJaffleList()', () => {
-	test('An array is a jaffle list', () => {
-		expect(t.isJaffleList([1, 2, 3])).toBeTruthy();
-	});
-
-	test('Non-arrays are not jaffle lists', () => {
-		expect(t.isJaffleList(42)).toBeFalsy();
-		expect(t.isJaffleList('foo')).toBeFalsy();
-		expect(t.isJaffleList(null)).toBeFalsy();
-		expect(t.isJaffleList({ foo: 42 })).toBeFalsy();
-	});
-});
-
-describe('Testing toJaffleList()', () => {
-	test('Converting an array to a jaffle list does not fail', () => {
-		expect(t.toJaffleList([1, 2, 3]));
-	});
-
-	test('Converting an array to a jaffle list fails', () => {
-		expect(() => t.toJaffleList(42)).toThrow(e.BadListJaffleError);
-	});
-});
-
 // describe('Testing extractJaffleInitBlock()', () => {...});
 
 // describe('Testing getJaffleFuncParams()', () => {...});
