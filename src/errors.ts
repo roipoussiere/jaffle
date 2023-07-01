@@ -21,10 +21,10 @@ export class BadYamlJaffleError extends JaffleError {
 	}
 }
 
-export class BadTypeJaffleError extends JaffleError {
-	constructor(expecting: string, got: string) {
-		super(`expecting ${expecting} but got ${got}`);
-		this.name = BadTypeJaffleError.name;
+export class BadStringJaffleError extends JaffleError {
+	constructor(message: string) {
+		super(message);
+		this.name = BadStringJaffleError.name;
 	}
 }
 
