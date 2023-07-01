@@ -51,6 +51,7 @@
 		"@codemirror/legacy-modes": "^6.3.2",
 		"@codemirror/view": "^6.13.2",
 		"@strudel.cycles/core": "^0.8.1",
+		"@strudel.cycles/csound": "^0.7.1",
 		"@strudel.cycles/mini": "^0.8.1",
 		"@strudel.cycles/soundfonts": "^0.8.1",
 		"@strudel.cycles/tonal": "^0.8.1",
