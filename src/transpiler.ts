@@ -10,11 +10,14 @@ type JaffleFunction = { [funcName: string]: JaffleAny }
 const CHAINED_FUNC_PREFIX = '.';
 const SERIALIZE_FUNC_SUFFIX = '^';
 const INIT_FUNC_PREFIX = '_';
+const VAR_FUNC_PREFIX = '$';
 
+const VAR_STRING_PREFIX = '$';
 const OPTIONAL_STRING_PREFIX = '/';
 const MINI_STRING_PREFIX = '_';
 const EXPRESSION_STRING_PREFIX = '=';
 
+const VAR_NAME_PREFIX = '_';
 const LAMBDA_NAME = 'set';
 const LAMBDA_VAR = 'x';
 
@@ -67,9 +70,9 @@ function extractJaffleInitBlock(params: JaffleList): [JaffleList, JaffleList] {
 	const mainBlock: JaffleList = [];
 
 	params.forEach((param) => {
-		const isBlock = isJaffleFunction(param)
-			&& getJaffleFuncName(<JaffleFunction>param)[0] === INIT_FUNC_PREFIX;
-		(isBlock ? initBlock : mainBlock).push(param);
+		const funcName = isJaffleFunction(param) ? getJaffleFuncName(<JaffleFunction>param) : '';
+		const isInitBlock = [INIT_FUNC_PREFIX, VAR_FUNC_PREFIX].includes(funcName[0]);
+		(isInitBlock ? initBlock : mainBlock).push(param);
 	});
 	return [initBlock, mainBlock];
 }
@@ -127,6 +130,9 @@ function jaffleStringToJs(_str: string): string {
 	if (str[0] === MINI_STRING_PREFIX) {
 		return `mini(${quote}${str.substring(1)}${quote})`;
 	}
+	if (str[0] === VAR_STRING_PREFIX) {
+		return VAR_NAME_PREFIX + str.substring(1).replace(/[^a-zA-Z_]/g, '');
+	}
 	if (str[0] === EXPRESSION_STRING_PREFIX) {
 		return str.substring(1).replace(/[^a-z0-9.+\-*/() ]|[a-z]{2,}/g, '');
 	}
@@ -169,8 +175,9 @@ function jaffleFuncToJs(func: JaffleFunction): string {
 	const fNameAndSuffix = funcName.split(SERIALIZE_FUNC_SUFFIX);
 	let [newFuncName] = fNameAndSuffix;
 	let js: string;
+	const isVarDef = newFuncName[0] === VAR_FUNC_PREFIX;
 
-	newFuncName = [CHAINED_FUNC_PREFIX, INIT_FUNC_PREFIX].includes(newFuncName[0])
+	newFuncName = [CHAINED_FUNC_PREFIX, INIT_FUNC_PREFIX, VAR_FUNC_PREFIX].includes(newFuncName[0])
 		? newFuncName.substring(1) : newFuncName;
 
 	if (newFuncName[0] === newFuncName[0].toUpperCase()) {
@@ -180,10 +187,15 @@ function jaffleFuncToJs(func: JaffleFunction): string {
 
 		if (funcName === LAMBDA_NAME) {
 			js = jaffleLambdaToJs(params);
+		} else if (params.length === 0) {
+			js = `${newFuncName}()`;
 		} else {
-			const paramsJs = params.length === 0 ? ''
-				: jaffleParamsToJsGroups(params, fNameAndSuffix[1]).join(', ');
-			js = `${newFuncName}(${paramsJs})`;
+			const paramsJs = jaffleParamsToJsGroups(params, fNameAndSuffix[1]).join(', ');
+			if (isVarDef) {
+				js = `const ${VAR_NAME_PREFIX}${newFuncName} = ${paramsJs}`;
+			} else {
+				js = `${newFuncName}(${paramsJs})`;
+			}
 		}
 	}
 

@@ -131,6 +131,10 @@ describe('Testing jaffleStringToJs()', () => {
 		expect(t.jaffleStringToJs('/.foo')).toBe("'.foo'");
 	});
 
+	test('Variable definition strings are transpiled into variable definitions', () => {
+		expect(t.jaffleStringToJs('$foo')).toBe('_foo');
+	});
+
 	test('Expression strings are transpiled into expressions', () => {
 		expect(t.jaffleStringToJs('=2+3')).toBe('2+3');
 		expect(t.jaffleStringToJs('=2-3')).toBe('2-3');
@@ -176,6 +180,11 @@ describe('Testing jaffleFuncToJs()', () => {
 		expect(t.jaffleFuncToJs({ foo: [1, [2, 3]] })).toBe('foo(1, [2, 3])');
 		expect(t.jaffleFuncToJs({ foo: { bar: 42 } })).toBe('foo(bar(42))');
 		expect(t.jaffleFuncToJs({ fo: [{ ba: [1, 2] }, 3, 'b'] })).toBe("fo(ba(1, 2), 3, 'b')");
+	});
+
+	test('init functions are transpiled into a call to init functions', () => {
+		expect(t.jaffleFuncToJs({ _a: 42 })).toBe('a(42)');
+		expect(t.jaffleFuncToJs({ $a: 42 })).toBe('const _a = 42');
 	});
 
 	test('aliases functions are transpiled into a call to their alias', () => {
@@ -294,6 +303,8 @@ describe('Testing jaffleDocumentToJs()', () => {
 		expect(t.jaffleDocumentToJs('[{ foo: 42 }]')).toBe('return foo(42);');
 		expect(t.jaffleDocumentToJs('[{ foo: bar }]')).toBe("return foo('bar');");
 		expect(t.jaffleDocumentToJs('[{ foo: }]')).toBe('return foo();');
+		expect(t.jaffleDocumentToJs('[{ foo: [1, 2, 3]}]')).toBe('return foo(1, 2, 3);');
+		expect(t.jaffleDocumentToJs('[{ $a: 1 }, { b: $a }]')).toBe('const _a = 1;\nreturn b(_a);');
 		expect(t.jaffleDocumentToJs("['_abc']")).toBe("return mini('abc');");
 		expect(t.jaffleDocumentToJs('[{ _foo: 1 }, { bar: 2 }]')).toBe('foo(1);\nreturn bar(2);');
 		expect(t.jaffleDocumentToJs('[{ _a: 1 }, { _b: 2 }, { c: 3 }]'))
