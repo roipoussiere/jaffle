@@ -20,16 +20,31 @@ const VAR_NAME_PREFIX = '_';
 const LAMBDA_NAME = 'set';
 const LAMBDA_VAR = '_x';
 
+/**
+ * Serialise an object to JSON.
+ * @param thing the object to serialize
+ * @returns a string reprensenting the object in JSON, but with simple quotes
+ */
 export function serialize(thing: JaffleAny): string {
 	return JSON.stringify(thing).replace(/"/g, "'");
 }
 
+/**
+ * Check if the passed object is a Jaffle function.
+ * @param thing the object to test
+ * @returns true if the object is a Jaffle function, false otherwise
+ */
 export function isJaffleFunction(thing: JaffleAny): boolean {
 	// return (typeof thing === 'string' && [MINI_STR_PREFIX, EXPR_STR_PREFIX].includes(thing[0]))
 	return thing instanceof Object && !(thing instanceof Array);
 }
 
-export function getJaffleFuncName(func: JaffleFunction) {
+/**
+ * Returns the Jaffle function name.
+ * @param func the function whose name to get
+ * @returns the name of the function
+ */
+export function getJaffleFuncName(func: JaffleFunction): string {
 	if (!isJaffleFunction(func)) {
 		throw new errors.BadFunctionJaffleError('Not a function');
 	}
@@ -43,6 +58,11 @@ export function getJaffleFuncName(func: JaffleFunction) {
 	return keys[0];
 }
 
+/**
+ * Convert an object to a Jaffle function.
+ * @param thing the object to convert
+ * @returns the object converted into a function
+ */
 export function toJaffleFunction(thing: JaffleAny): JaffleFunction {
 	if (typeof thing === 'string') {
 		if (thing[0] === MINI_STR_PREFIX) {
@@ -58,11 +78,16 @@ export function toJaffleFunction(thing: JaffleAny): JaffleFunction {
 	throw new errors.BadFunctionJaffleError('Not a function');
 }
 
-export function extractJaffleInitBlock(params: JaffleList): [JaffleList, JaffleList] {
+/**
+ * Extract initialization functions (those prefixed with `_` or `$`) declared in document root.
+ * @param root the document root
+ * @returns an array of two elements: init block and main block, both containing a list of functions
+ */
+export function extractJaffleInitBlock(root: JaffleList): [JaffleList, JaffleList] {
 	const initBlock: JaffleList = [];
 	const mainBlock: JaffleList = [];
 
-	params.forEach((param) => {
+	root.forEach((param) => {
 		const func = toJaffleFunction(param);
 		const funcName = getJaffleFuncName(func);
 		const isInitBlock = [INIT_FUNC_PREFIX, VAR_FUNC_PREFIX].includes(funcName[0]);
@@ -71,6 +96,11 @@ export function extractJaffleInitBlock(params: JaffleList): [JaffleList, JaffleL
 	return [initBlock, mainBlock];
 }
 
+/**
+ * Return the parameters of an object, supposed to come from a Jaffle function.
+ * @param thing the object whose parameters to get
+ * @returns a list of parameters from the object
+ */
 export function getJaffleFuncParams(thing: JaffleAny): JaffleList {
 	let params: JaffleList;
 	if (!(thing instanceof Object)) {
@@ -84,6 +114,14 @@ export function getJaffleFuncParams(thing: JaffleAny): JaffleList {
 	return params;
 }
 
+/**
+ * Split a list of functions into several groups, each containing one main function and eventually
+ * one or more chained functions.
+ * @param list the list of functions to group
+ * @param serializedParamId the id of a parameter to serialize
+ * (-1 to disable serialization, -2 to serialize all parameters)
+ * @returns an array of lists of functions
+ */
 export function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<JaffleList> {
 	if (list.length === 0) {
 		throw new errors.BadFunctionJaffleError('group of params is empty');
@@ -124,6 +162,11 @@ export function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1):
 	return groups;
 }
 
+/**
+ * Convert a Jaffle string into JavaScript code, handling prefixes (`_`, `=`, `/`).
+ * @param str the string to convert
+ * @returns a string of Javascript code coming from the string
+ */
 export function jaffleStringToJs(str: string): string {
 	const isPrefixed = [MINI_STR_PREFIX, EXPR_STR_PREFIX, OPTIONAL_STR_PREFIX].includes(str[0]);
 	const newStr = (isPrefixed ? str.substring(1) : str).trim();
@@ -142,6 +185,13 @@ export function jaffleStringToJs(str: string): string {
 	return js;
 }
 
+/**
+ * convert Jaffle function parameters into several groups, converted into Javascript code.
+ * @param params a list of Jaffle function parameters
+ * @param serializSuffix the serialization suffix, coming after the `^` sign,
+ * which can be undefined, an empty string, or a string representing the parameter id
+ * @returns a list of strings of Javascript code, each for one group, which list their parameters.
+ */
 export function jaffleParamsToJsGroups(params: JaffleList, serializSuffix?: string): Array<string> {
 	if (params.length === 0) {
 		return [];
@@ -162,6 +212,11 @@ export function jaffleParamsToJsGroups(params: JaffleList, serializSuffix?: stri
 		));
 }
 
+/**
+ * Convert a list of Jaffle lambda function parameters into Javascript code.
+ * @param params the Jaffle function parameters coming from a lambda expression
+ * @returns a string of Javascript code which lists the parameters
+ */
 export function jaffleLambdaToJs(params: JaffleList): string {
 	if (params.length === 0) {
 		return `${LAMBDA_VAR} => ${LAMBDA_VAR}`;
@@ -170,6 +225,11 @@ export function jaffleLambdaToJs(params: JaffleList): string {
 	return `(${LAMBDA_VAR}, ${varsJs}) => ${LAMBDA_VAR}`;
 }
 
+/**
+ * Convert a Jaffle function into Javascript code.
+ * @param func The Jaffle function to convert
+ * @returns a string of JavaScript code which calls the function
+ */
 export function jaffleFuncToJs(func: JaffleFunction): string {
 	if (Object.keys(func).length === 0) {
 		throw new errors.BadFunctionJaffleError('Function is empty');
@@ -206,6 +266,11 @@ export function jaffleFuncToJs(func: JaffleFunction): string {
 	return js;
 }
 
+/**
+ * Convert a Jaffle list into JavaScript code.
+ * @param list the list to convert
+ * @returns a string of JavaScript code which declares an array containing the list elements
+ */
 export function jaffleListToJs(list: JaffleList): string {
 	// eslint-disable-next-line no-use-before-define
 	return `[${list.map((item) => jaffleParamToJs(item)).join(', ')}]`;
@@ -227,6 +292,11 @@ export function jaffleParamToJs(param: JaffleAny): string {
 	return 'null';
 }
 
+/**
+ * Converts a Yaml document reprensenting a tune in Jaffle syntax into Javascript code.
+ * @param inputYaml a string containing the yaml document
+ * @returns a string of Javascript code that can be used by Strudel to play the tune
+ */
 export function jaffleDocumentToJs(inputYaml: string): string {
 	let tune: JaffleAny;
 	let initBlock: JaffleList;
