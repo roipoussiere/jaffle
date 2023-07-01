@@ -4,12 +4,12 @@ import { transpiler, JaffleEditor, Strudel } from './jaffle';
 
 const TUNES_PATH = './tunes/';
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
-	'bridge_is_over', 'caverave', 'chop', /* 'csound_demo' */ 'delay', 'dino_funk', 'echo_piano',
+	'bridge_is_over', 'caverave', 'chop', 'csound_demo', 'delay', 'dino_funk', 'echo_piano',
 	'festival_of_fingers', 'festival_of_fingers_3', 'flat_rave', 'giant_steps', 'good_times',
 	'holy_flute', 'hyperpop', 'jux_und_tollerei', 'lounge_sponge', 'melting_submarine',
 	'orbit', 'outro_music', 'random_bells', 'sample_demo', 'sample_drums', 'sml1', 'swimming',
 	'underground_plumber', 'waa2', 'wavy_kalimba', 'zelda_rescue',
-	'ws2_stack', 'ws3_dub_tune', 'ws3_stack_in_stack', 'ws4_add_stack'];
+	'ws2_stack', 'ws3_stack_in_stack', 'ws3_dub_tune', 'ws4_add_stack'];
 
 const DEFAULT_TUNE = 'ws2_stack';
 const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune');

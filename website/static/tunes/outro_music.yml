@@ -48,10 +48,10 @@
   - .speed:
     - Perlin:
     - .range: [ .9, 1.1 ]
-    - .n: 3
-    - .color: gray
+  - .n: 3
+  - .color: gray
 - .slow: =3/2
-- .pianoroll^:
-    autorange: 1
-    vertical: 1
-    fold: 0
+# - .pianoroll^:
+#     autorange: 1
+#     vertical: 1
+#     fold: 0

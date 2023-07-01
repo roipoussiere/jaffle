@@ -50,7 +50,7 @@
   - .gain: .16 # turn down
   - .cutoff: 500 # fixed cutoff
   - .attack: 1 # slowly fade in
-  - .hush:
+  # - .hush:
 
   - _a4 c5 <e6 a6>
   - .struct: _x(5,8,-1)
@@ -72,6 +72,6 @@
     - .125
     - set: n
     - .gain: =.15*1/(n+1)
-  - .hush:
+  # - .hush:
 
 - .slow: =3/2
