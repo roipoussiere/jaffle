@@ -18,7 +18,7 @@ const EXPR_STR_PREFIX = '=';
 
 const VAR_NAME_PREFIX = '_';
 const LAMBDA_NAME = 'set';
-const LAMBDA_VAR = '_x';
+const LAMBDA_VAR = '_x_';
 
 /**
  * Serialise an object to JSON.
@@ -202,7 +202,12 @@ export function jaffleParamsToJsGroups(params: JaffleList, serializSuffix?: stri
 		serializedParamId = serializSuffix === '' ? -2 : parseInt(serializSuffix, 10) - 1;
 	}
 
-	return groupJaffleFuncParams(params, serializedParamId)
+	const groups = groupJaffleFuncParams(params, serializedParamId);
+	if (serializedParamId >= groups.length) {
+		throw new errors.BadFunctionJaffleError('param identifier out of range');
+	}
+
+	return groups
 		.map((group, id) => (group
 			.map((param) => (
 				// eslint-disable-next-line no-use-before-define
@@ -213,11 +218,20 @@ export function jaffleParamsToJsGroups(params: JaffleList, serializSuffix?: stri
 }
 
 /**
- * Convert a list of Jaffle lambda function parameters into Javascript code.
- * @param params the Jaffle function parameters coming from a lambda expression
- * @returns a string of Javascript code which lists the parameters
+ * Convert a list of Jaffle lambda function parameter names into Javascript code (ie. "x => x").
+ * @param params the parameter names coming from a Jaffle lambda function
+ * @returns a string of Javascript code used to prefix a call to a lambda function
  */
-export function jaffleLambdaToJs(params: JaffleList): string {
+export function jaffleLambdaToJs(params: Array<string>): string {
+	params.forEach((param) => {
+		if (typeof param !== 'string') {
+			throw new errors.BadFunctionJaffleError('lambda parameters must be strings');
+		}
+		if (param.match(/^[a-z][a-zA-Z0-9_]*$/g) === null) {
+			throw new errors.BadFunctionJaffleError('invalid lambda parameter name');
+		}
+	});
+
 	if (params.length === 0) {
 		return `${LAMBDA_VAR} => ${LAMBDA_VAR}`;
 	}
@@ -250,7 +264,7 @@ export function jaffleFuncToJs(func: JaffleFunction): string {
 		const params = getJaffleFuncParams(func[funcName]);
 
 		if (funcName === LAMBDA_NAME) {
-			js = jaffleLambdaToJs(params);
+			js = jaffleLambdaToJs(<Array<string>>params);
 		} else if (params.length === 0) {
 			js = `${newFuncName}()`;
 		} else {
