@@ -102,14 +102,12 @@ a:hover {
 	margin: 0;
 }
 
-#select {
-	text-align: center;
+code {
+	background-color: khaki;
 }
 
-.center {
-	text-align: center;
-}
-
-.spacing {
-	margin: 2em;
+pre {
+	margin: 0px;
+	padding: 5px;
+	font-size: 15px;
 }

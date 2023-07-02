@@ -1,0 +1,14 @@
+{{ if eq (.Get 0) "h" }}
+<table class="js_vs_yml" style="width: 100%">
+	<td>Strudel</td>
+	<td>Jaffle</td>
+	<tr>
+		<td style="width: 50%">
+{{ else if eq (.Get 0) "m" }}
+		</td>
+		<td>
+{{ else if eq (.Get 0) "f" }}
+		</td>
+	</tr>
+</table>
+{{ end }}
