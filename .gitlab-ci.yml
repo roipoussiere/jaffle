@@ -5,6 +5,7 @@ build:
   script:
   - npm install
   artifacts:
+    expire_in: 1 day
     paths:
       - node_modules
 
@@ -22,5 +23,6 @@ pages:
   script:
   - hugo -s website
   artifacts:
+    expire_in: 1 day
     paths:
     - public
