@@ -53,14 +53,29 @@ header li a:hover {
 	text-shadow: 1px 1px 5px black;
 }
 
-h2 {
+h1 {
 	color: whitesmoke;
 	text-align: center;
 	font-size: 2em;
 }
 
-h3 {
+h2 {
 	text-align: center;
+}
+
+.subtitle {
+	text-align: center;
+	font-weight: bold;
+}
+
+.description {
+	text-align: center;
+	margin: 2em;
+}
+
+.logo {
+	text-align: center;
+	margin: 1.5em;
 }
 
 a {
@@ -79,7 +94,7 @@ a:hover {
 }
 
 #jaffle_editor.large {
-    height: 90vh;
+	height: 90vh;
 	width: 100vw;
 	position: absolute;
 	top: 60px;
