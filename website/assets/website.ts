@@ -55,7 +55,7 @@ editor.onPlay = () => {
 editor.onStop = () => strudel.stop();
 
 window.addEventListener('DOMContentLoaded', () => {
-	editor.build(<HTMLInputElement> document.getElementById('jaffle'));
+	editor.build(<HTMLInputElement> document.getElementById('jaffle_editor'));
 	fillTunesList();
 	loadTune(window.location.hash.substring(1) || DEFAULT_TUNE);
 });

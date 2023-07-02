@@ -3,11 +3,23 @@ disableKinds: [ section, taxonomy, term, RSS, robotsTXT ]
 defaultContentLanguage: en
 title: Jaffle
 publishDir: ../public
+canonifyURLs: true
 
 params:
   description: Music live coding in Yaml
   favicon: images/jaffle_icon_32.png
   stylesheet: css/website.css
-  links:
-  - name: Source code
+  menu:
+  - name: Jaffle
+    url: /
+  - name: Syntax
+    url: /syntax
+  - name: Source code ↗️
     url: https://framagit.org/roipoussiere/jaffle
+
+markup:
+  goldmark:
+    parser:
+      attribute:
+        block: true
+        title: true

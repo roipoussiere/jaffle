@@ -1,14 +1,13 @@
 {{ define "header" }}
 
-<h1>
-    {{ .Site.Title }}
-    <img src='{{ "images/jaffle_icon_32.png" | absURL }}'>
-</h1>
+<img src='{{ "/images/jaffle_icon_32.png" }}'>
 
-<h2>A yaml-based syntax for
-    <a href="https://tidalcycles.org/">Tidal-cycles</a>,
-    based on
-    <a href="https://strudel.tidalcycles.org">Strudel</a>.
-</h2>
+<ul>
+	{{ range .Site.Params.menu }}
+	<li>
+		<a href="{{ .url }}">{{ .name }}</a>
+	</li>
+	{{ end }}
+</ul>
 
 {{ end }}

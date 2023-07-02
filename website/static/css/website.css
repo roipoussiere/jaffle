@@ -1,6 +1,20 @@
 body {
 	background-color: mediumseagreen;
 	font-family: Arial, Helvetica, sans-serif;
+	margin: 0px;
+}
+
+header {
+	position: sticky;
+	height: 60px;
+	background-color: darkseagreen;
+	margin: 0px;
+	margin-bottom: 1em;
+}
+
+main {
+	max-width: 600px;
+	margin: auto;
 }
 
 #select_tune {
@@ -9,22 +23,50 @@ body {
 	height: 2em;
 }
 
-#jaffle {
-	max-width: 600px;
+#jaffle_editor {
 	height: 400px;
-	margin: auto;
 	box-shadow: 0 0 10px black;
+	margin-bottom: 10px;
 }
 
-h1 {
-	text-align: center;
-	margin-bottom: 0.5em;
+header img {
+	margin: 13px;
+}
+
+header ul {
+	margin: 0;
+	padding-left: 0;
+	display: inline-block;
+}
+
+header li {
+	margin: 0;
+	padding: 15px;
+	margin-bottom: 0;
+	float: left;
+	list-style: none;
+	margin-right: 15px;
+	font-size: 20px;
+	/* font-weight: bold; */
+}
+
+header li a {
+	color: cornsilk;
+}
+
+header li a:hover {
+	color: white;
+	text-shadow: 1px 1px 5px black;
 }
 
 h2 {
+	color: whitesmoke;
 	text-align: center;
-	font-size: 16px;
-	margin-bottom: 1.3em;
+	font-size: 2em;
+}
+
+h3 {
+	text-align: center;
 }
 
 a {
@@ -40,10 +82,10 @@ a:hover {
 	text-align: center;
 }
 
-footer {
-	position: absolute;
-	right: 10px; 
-	bottom: 10px;
-	text-shadow: 1px 1px 2px black;
-	font-weight: bold;
+.center {
+	text-align: center;
+}
+
+.spacing {
+	margin: 2em;
 }
