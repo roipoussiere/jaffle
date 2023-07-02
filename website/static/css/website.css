@@ -23,12 +23,6 @@ main {
 	height: 2em;
 }
 
-#jaffle_editor {
-	height: 400px;
-	box-shadow: 0 0 10px black;
-	margin-bottom: 10px;
-}
-
 header img {
 	margin: 13px;
 }
@@ -76,6 +70,21 @@ a {
 
 a:hover {
 	color: whitesmoke;
+}
+
+#jaffle_editor {
+	height: 400px;
+	box-shadow: 0 0 10px black;
+	margin-bottom: 10px;
+}
+
+#jaffle_editor.large {
+    height: 90vh;
+	width: 100vw;
+	position: absolute;
+	top: 60px;
+	left: 0;
+	margin: 0;
 }
 
 #select {

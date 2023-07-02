@@ -3,7 +3,6 @@
 import { transpiler, JaffleEditor } from './jaffle';
 import StrudelRepl from './strudel_repl';
 
-const TUNES_PATH = './tunes/';
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
 	'bridge_is_over', 'caverave', 'chop', 'csound_demo', 'delay', 'dino_funk', 'echo_piano',
 	'festival_of_fingers', 'festival_of_fingers_3', 'flat_rave', 'giant_steps', 'good_times',
@@ -19,17 +18,20 @@ const strudel = new StrudelRepl(
 	(error) => editor.setError(error.message),
 	() => editor.setError(),
 );
+let tunesPath = '../tunes/';
 
 function loadTune(tuneName: string): void {
 	console.log(`Loading tune ${tuneName}...`);
-	fetch(`${TUNES_PATH}${tuneName}.yml`)
+	fetch(`${tunesPath}${tuneName}.yml`)
 		.then((response) => response.text())
 		.then((data) => {
 			editor.setText(data);
 			console.log(`Tune loaded (${Math.round((data.length / 1024) * 100) / 100}kB)`);
 		});
-	domSelectTune.value = tuneName;
-	window.location.hash = `#${tuneName}`;
+	if (domSelectTune !== null) {
+		domSelectTune.value = tuneName;
+		window.location.hash = `#${tuneName}`;
+	}
 }
 
 // function getRandomTune(): string {
@@ -56,10 +58,13 @@ editor.onStop = () => strudel.stop();
 
 window.addEventListener('DOMContentLoaded', () => {
 	editor.build(<HTMLInputElement> document.getElementById('jaffle_editor'));
-	fillTunesList();
+	if (domSelectTune !== null) {
+		fillTunesList();
+		tunesPath = 'tunes/';
+	}
 	loadTune(window.location.hash.substring(1) || DEFAULT_TUNE);
 });
 
-domSelectTune.addEventListener('change', (event) => {
+domSelectTune?.addEventListener('change', (event) => {
 	loadTune((<HTMLSelectElement> event.target).value);
 });

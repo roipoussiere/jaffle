@@ -12,7 +12,7 @@ title: "Home page"
 Jaffle aims to make algorithmic music more accessible for people who are not familiar with programming languages.
 {.center .spacing}
 
-You can start to discover some tunes below (translated from the [Strudel examples](https://strudel.tidalcycles.org/examples/)), then take a look at the syntax page for more details.
+You can start to discover some tunes below (translated from the [Strudel examples](https://strudel.tidalcycles.org/examples/)), then take a look at the [syntax page](/syntax) for more details and play with the [larger editor](editor/).
 
 Select tune: {{< select_tune >}}
 

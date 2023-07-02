@@ -55,7 +55,7 @@ class JaffleEditor {
 
 	public build(container: HTMLElement) {
 		this.container = container;
-		this.container.className = 'jaffle_container';
+		this.container.classList.add('jaffle_container');
 		this.buildEditor();
 		this.buildTopBar();
 		this.buildErrorBar();
