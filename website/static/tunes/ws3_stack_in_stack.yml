@@ -1,6 +1,5 @@
 # "Strudel workshop, first effects: stacks within stacks"
 # @by Felix Roos
-
 - stack:
   - stack:
     - sound: _hh*8

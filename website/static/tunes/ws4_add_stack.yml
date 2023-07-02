@@ -1,6 +1,5 @@
 # "Strudel workshop, pattern effects: time to stack"
 # @by Felix Roos
-
 - stack:
   - n:
     - _<0 [2 4] <3 5> [~ <4 1>]>*2
