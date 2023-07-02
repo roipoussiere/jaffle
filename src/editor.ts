@@ -25,7 +25,7 @@ class JaffleEditor {
 		this.container = container;
 		this.container.className = 'jaffle_container';
 		this.buildEditor();
-		this.buildButtons();
+		this.buildTopBar();
 		this.buildErrorBar();
 		this.buildStyleSheet();
 	}
@@ -86,7 +86,11 @@ class JaffleEditor {
 		this.container.appendChild(this.domErrorBar);
 	}
 
-	private buildButtons(): void {
+	private buildTopBar(): void {
+		const domTitle = document.createElement('p');
+		domTitle.id = 'jaffle_title';
+		domTitle.innerText = 'Jaffle - live coding in Yaml';
+
 		const domBtnStart = document.createElement('button');
 		domBtnStart.id = 'jaffle_play';
 		domBtnStart.className = 'jaffle_btn';
@@ -101,12 +105,13 @@ class JaffleEditor {
 		domBtnStop.innerText = 'Stop';
 		domBtnStop.addEventListener('click', this.onStop);
 
-		const domButtons = document.createElement('div');
-		domButtons.id = 'jaffle_buttons';
-		domButtons.appendChild(domBtnStop);
-		domButtons.appendChild(domBtnStart);
+		const domTopBar = document.createElement('div');
+		domTopBar.id = 'jaffle_topbar';
+		domTopBar.appendChild(domTitle);
+		domTopBar.appendChild(domBtnStop);
+		domTopBar.appendChild(domBtnStart);
 
-		this.container.appendChild(domButtons);
+		this.container.appendChild(domTopBar);
 	}
 
 	private buildStyleSheet() {
@@ -116,18 +121,43 @@ class JaffleEditor {
 			position: relative;
 		}
 
-		#jaffle_buttons {
+		#jaffle_topbar {
 			position: absolute;
-			top: 10px;
-			right: 10px;
+			width: 100%;
+			top: 0px;
+			background-color: #0A813F;
 			z-index: 6;
+			height: 35px;
+		}
+
+		#jaffle_title {
+			position: absolute;
+			color: white;
+			margin: 9px;
+		}
+
+		.jaffle_btn {
+			margin: 0;
+			margin-left: 5px;
+			cursor: pointer;
+			width: 4em;
+			height: 35px;
+			float: right;
+			background-color: #B43C7E;
+			border: none;
+			color: white;
+			text-shadow: 1px 1px 2px black;
+		}
+
+		.jaffle_btn:hover {
+			background-color: #961E60;
+			font-weight: bold;
 		}
 
 		#jaffle_error {
 			display: block;
 			position: absolute;
 			bottom: 0;
-			left: 0;
 			width: 92%;
 			margin: 2%;
 			padding: 2%;
@@ -138,23 +168,8 @@ class JaffleEditor {
 			box-shadow: 0 0 7px black;
 		}
 
-		.jaffle_btn {
-			margin: 5px;
-			cursor: pointer;
-			width: 4em;
-			height: 3em;
-			float: right;
-			border-radius: 5px;
-			background-color: darkolivegreen;
-			border: none;
-			color: white;
-		}
-
-		.jaffle_btn:hover {
-			background-color: darkcyan;
-		}
-
 		.cm-editor {
+			padding-top: 35px;
 			height: 100%
 		}
 
