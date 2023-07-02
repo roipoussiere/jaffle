@@ -2,15 +2,7 @@ body {
 	background-color: mediumseagreen;
 	font-family: Arial, Helvetica, sans-serif;
 	margin: 0px;
-	margin-bottom: 10px;
-}
-
-header {
-	position: sticky;
-	height: 60px;
-	background-color: darkseagreen;
-	margin: 0px;
-	margin-bottom: 1em;
+	margin-bottom: 30px;
 }
 
 main {
@@ -18,10 +10,13 @@ main {
 	margin: auto;
 }
 
-#select_tune {
-	margin: 5px;
-	display: inline-block;
-	height: 2em;
+header {
+	position: sticky;
+	height: 60px;
+	top: 0px;
+	background-color: darkseagreen;
+	margin: 0px;
+	margin-bottom: 1em;
 }
 
 header img {
@@ -88,6 +83,12 @@ a:hover {
 	color: whitesmoke;
 }
 
+#select_tune {
+	margin: 5px;
+	display: inline-block;
+	height: 2em;
+}
+
 #jaffle_editor {
 	height: 400px;
 	box-shadow: 0 0 10px black;
@@ -103,7 +104,7 @@ a:hover {
 }
 
 code {
-	background-color: khaki;
+	background-color: burlywood;
 }
 
 pre {
