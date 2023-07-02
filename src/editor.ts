@@ -19,11 +19,14 @@ class JaffleEditor {
 
 	private style: CSSStyleSheet;
 
+	private domErrorBar: HTMLParagraphElement;
+
 	public build(container: HTMLElement) {
 		this.container = container;
 		this.container.className = 'jaffle_container';
 		this.buildEditor();
 		this.buildButtons();
+		this.buildErrorBar();
 		this.buildStyleSheet();
 	}
 
@@ -39,6 +42,16 @@ class JaffleEditor {
 				insert: text,
 			},
 		});
+	}
+
+	public setError(text?: string): void {
+		if (text === undefined) {
+			this.domErrorBar.innerText = '';
+			this.domErrorBar.style.display = 'none';
+		} else {
+			this.domErrorBar.innerText = text;
+			this.domErrorBar.style.display = 'block';
+		}
 	}
 
 	private buildEditor(): void {
@@ -63,6 +76,14 @@ class JaffleEditor {
 			],
 			parent: this.container,
 		});
+	}
+
+	private buildErrorBar(): void {
+		this.domErrorBar = document.createElement('p');
+		this.domErrorBar.id = 'jaffle_error';
+		this.domErrorBar.style.display = 'none';
+
+		this.container.appendChild(this.domErrorBar);
 	}
 
 	private buildButtons(): void {
@@ -101,7 +122,22 @@ class JaffleEditor {
 			right: 10px;
 			z-index: 6;
 		}
-		
+
+		#jaffle_error {
+			display: block;
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			width: 92%;
+			margin: 2%;
+			padding: 2%;
+			overflow: auto;
+			max-height: 33%;
+			background-color: darksalmon;
+			border-radius: 3px;
+			box-shadow: 0 0 7px black;
+		}
+
 		.jaffle_btn {
 			margin: 5px;
 			cursor: pointer;
@@ -117,11 +153,11 @@ class JaffleEditor {
 		.jaffle_btn:hover {
 			background-color: darkcyan;
 		}
-		
+
 		.cm-editor {
 			height: 100%
 		}
-		
+
 		.cm-content {
 			font-size: 15.5px;
 		}

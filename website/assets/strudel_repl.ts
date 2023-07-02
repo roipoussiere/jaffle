@@ -6,6 +6,8 @@ import * as csound from '@strudel.cycles/csound';
 import { registerSoundfonts } from '@strudel.cycles/soundfonts';
 
 type Transpiler = (input: string) => string;
+type OnError = (error: Error) => void;
+type OnSuccess = (error: Error) => void;
 
 const maxPan = core.noteToMidi('C8');
 const panwidth = (pan, width) => pan * width + (1 - width) / 2;
@@ -29,8 +31,14 @@ class Strudel {
 
 	private repl: core.Repl;
 
-	constructor() {
+	private onError: OnError;
+
+	private onSuccess: OnSuccess;
+
+	constructor(onError: OnError, onSuccess: OnSuccess) {
 		this.transpiler = (input) => input;
+		this.onError = onError;
+		this.onSuccess = onSuccess;
 	}
 
 	public init(): void {
@@ -39,6 +47,9 @@ class Strudel {
 			defaultOutput: webaudio.webaudioOutput,
 			getTime: () => this.ctx.currentTime,
 			transpiler: this.transpiler,
+			onSchedulerError: this.onError,
+			onEvalError: this.onError,
+			afterEval: this.onSuccess,
 		});
 		Strudel.loadDefaultSamples();
 	}

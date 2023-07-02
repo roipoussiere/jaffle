@@ -15,7 +15,10 @@ const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub',
 const DEFAULT_TUNE = 'ws2_stack';
 const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune');
 const editor = new JaffleEditor();
-const strudel = new StrudelRepl();
+const strudel = new StrudelRepl(
+	(error) => editor.setError(error.message),
+	() => editor.setError(),
+);
 
 function loadTune(tuneName: string): void {
 	console.log(`Loading tune ${tuneName}...`);
