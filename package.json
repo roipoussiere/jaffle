@@ -53,8 +53,11 @@
 		"ts-jest": "^29.1.0"
 	},
 	"dependencies": {
+		"@codemirror/autocomplete": "^6.8.1",
+		"@codemirror/commands": "^6.2.4",
 		"@codemirror/language": "^6.8.0",
 		"@codemirror/legacy-modes": "^6.3.2",
+		"@codemirror/state": "^6.2.1",
 		"@codemirror/view": "^6.13.2",
 		"@types/codemirror": "^5.60.8",
 		"@types/js-yaml": "^4.0.5",

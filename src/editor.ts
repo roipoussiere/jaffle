@@ -1,9 +1,12 @@
-import { EditorView, keymap } from '@codemirror/view';
+import {
+	EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine,
+} from '@codemirror/view';
 import { solarizedDark } from '@uiw/codemirror-theme-solarized';
 import { yaml as yamlMode } from '@codemirror/legacy-modes/mode/yaml';
-import { StreamLanguage, LanguageSupport } from '@codemirror/language';
-
-const yamlLang = new LanguageSupport(StreamLanguage.define(yamlMode));
+import { StreamLanguage, LanguageSupport, bracketMatching } from '@codemirror/language';
+import { closeBrackets } from '@codemirror/autocomplete';
+import { Extension } from '@codemirror/state';
+import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
 type OnPlay = () => void
 type OnStop = () => void
@@ -20,6 +23,35 @@ class JaffleEditor {
 	private style: CSSStyleSheet;
 
 	private domErrorBar: HTMLParagraphElement;
+
+	private extensions: Extension = (() => [
+		solarizedDark,
+		new LanguageSupport(StreamLanguage.define(yamlMode)),
+		history(),
+		lineNumbers(),
+		drawSelection(),
+		// indentOnInput(), // not working with yamlLang
+		bracketMatching(),
+		closeBrackets(),
+		highlightActiveLine(),
+		keymap.of([
+			indentWithTab,
+			...historyKeymap,
+			{
+				key: 'Ctrl-Enter',
+				run: () => {
+					this.onPlay();
+					return false;
+				},
+			}, {
+				key: 'Ctrl-.',
+				run: () => {
+					this.onStop();
+					return false;
+				},
+			},
+		]),
+	])();
 
 	public build(container: HTMLElement) {
 		this.container = container;
@@ -56,24 +88,7 @@ class JaffleEditor {
 
 	private buildEditor(): void {
 		this.editor = new EditorView({
-			extensions: [
-				solarizedDark,
-				yamlLang,
-				keymap.of([{
-					key: 'Ctrl-Enter',
-					run: () => {
-						this.onPlay();
-						return false;
-					},
-				}, {
-					key: 'Ctrl-.',
-					run: () => {
-						this.onStop();
-						return false;
-					},
-				},
-				]),
-			],
+			extensions: this.extensions,
 			parent: this.container,
 		});
 	}
@@ -132,8 +147,9 @@ class JaffleEditor {
 
 		#jaffle_title {
 			position: absolute;
-			color: white;
+			color: darkseagreen;
 			margin: 9px;
+			font-weight: bold;
 		}
 
 		.jaffle_btn {
@@ -143,15 +159,15 @@ class JaffleEditor {
 			width: 4em;
 			height: 35px;
 			float: right;
-			background-color: #B43C7E;
+			background-color: darkseagreen;
 			border: none;
 			color: white;
 			text-shadow: 1px 1px 2px black;
+			font-weight: bold;
 		}
 
 		.jaffle_btn:hover {
-			background-color: #961E60;
-			font-weight: bold;
+			background-color: cadetblue;
 		}
 
 		#jaffle_error {
