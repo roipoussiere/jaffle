@@ -216,9 +216,9 @@ saw
 {{< code "m" >}}
 ```yml
 - Saw:
-  .range: [ 50, 80 ]
-  .segment: 24
-  .note:
+- .range: [ 50, 80 ]
+- .segment: 24
+- .note:
 ```
 {{< code "f" >}}
 
