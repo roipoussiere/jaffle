@@ -14,6 +14,8 @@ Jaffle is a yaml-based syntax for [Tidal-cycles](https://tidalcycles.org/), base
 
 It aims to make algorithmic music more accessible for people who are not familiar with programming languages.
 
+![](images/editor.png)
+
 Under the hood, Jaffle is a transpiler generating JavaScript code, which is then interpreted by Strudel.
 
 ## Syntax
