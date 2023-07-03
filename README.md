@@ -2,9 +2,7 @@
 
 **J**ust **a**nother **f**lat **f**ile **l**ivecoding **e**nvironment.
 
-<p style="text-align: center;">
-<img src="./website/static/images/jaffle_logo_128.png"/>
-</p>
+<img style="display: block; margin: auto;" src="./website/static/images/jaffle_logo_128.png"/>
 
 Check out the [demo website](https://roipoussiere.frama.io)!
 
@@ -17,6 +15,25 @@ It aims to make algorithmic music more accessible for people who are not familia
 ![](images/editor.png)
 
 Under the hood, Jaffle is a transpiler generating JavaScript code, which is then interpreted by Strudel.
+
+## Features
+
+- easy to read syntax (albeit more verbose than Strudel);
+- use lambda functions, expressions, variable definitions, [and more](https://roipoussiere.frama.io/jaffle/syntax/);
+- all Strudel examples has been successfully converted to Jaffle;
+- extensive [unit tests](tests/transpiler.test.ts)
+
+## Roadmap
+
+I plan to create a visual interface for Jaffle.
+
+The whole point of this project is not actually to define a tune in Yaml, it's to define a tune in structured data. Since this part is now done, I would like to work on an alternative Yaml editor with a visual interface, in order to make this process even more user-friendly. This one could be made of boxes linked with wires (such as in [jsonvis](https://zuramai.github.io/jsonvis/) but more compact).
+
+Additional planned features:
+
+- better syntax highlighting;
+- code completion;
+- own documentation.
 
 ## Syntax
 
