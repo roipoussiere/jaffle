@@ -8,6 +8,8 @@ This chapter aims to provide an overview of the Jaffle syntax, for people alread
 
 If necessary, read the [Strudel documentation](https://strudel.tidalcycles.org/learn).
 
+Also, if you have some suggestions about this syntax or simply want to talk about it, see the [contribution guide](https://github.com/roipoussiere/jaffle/blob/main/CONTRIBUTING.md). ;)
+
 ## Yaml basics
 
 Jaffle uses the Yaml syntax. Here is the basic usage:

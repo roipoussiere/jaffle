@@ -28,7 +28,7 @@
 		"build": "esbuild ./src/index.ts --bundle --outfile=./dist/jaffle.js --target=es2022",
 		"watch": "npm run build -- --watch",
 		"build_website": "hugo -s website",
-		"watch_website": "npm run build_website -- server",
+		"dev": "npm run build_website -- server",
 		"lint": "eslint src/*",
 		"test": "jest"
 	},
