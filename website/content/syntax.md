@@ -38,7 +38,7 @@ Jaffle uses the Yaml syntax. Here is the basic usage:
 
 ## Mini-notation
 
-Mini-notations are prefixed with the `_` sign:
+Mini-notation strings are prefixed with `_`:
 
 {{< code "h" >}}
 ```js
@@ -49,6 +49,28 @@ note("c@3 eb")
 - note: _c@3 eb
 ```
 {{< code "f" >}}
+
+## Chained functions
+
+Chained functions are array items following the first function, prefixed with `.`:
+
+{{< code "h" >}}
+```js
+note("c@3 eb")
+  .lpf(600)
+  .delay(.5)
+  .gain(2)
+```
+{{< code "m" >}}
+```yml
+- note: _c@3 eb
+- .lpf: 600
+- .delay: .5
+- .gain: 2
+```
+{{< code "f" >}}
+
+You can consider that this prefix visually acts as a small indentation character. ;)
 
 ## Function parameters
 
@@ -70,58 +92,6 @@ stack(
 
 Note that the yaml root element must also be an array (hence the first `-`).
 
-## Chained functions
-
-Chained functions are array items following the first function, prefixed with the `.` sign:
-
-{{< code "h" >}}
-```js
-note("c@3 eb")
-  .lpf(600)
-  .delay(.5)
-  .gain(2)
-```
-{{< code "m" >}}
-```yml
-- note: _c@3 eb
-- .lpf: 600
-- .delay: .5
-- .gain: 2
-```
-{{< code "f" >}}
-
-You can consider that this prefix visually acts as a small indentation character. ;)
-
-## List of chained functions
-
-When functions chains follow other ones, all of them are on the same level:
-
-{{< code "h" >}}
-```js
-stack(
-    note("c@3 eb")
-      .lpf(600)
-      .delay(.5),
-    sound("bd hh sd oh")
-      .gain(0.5)
-      .slow(2)
-)
-```
-{{< code "m" >}}
-```yml
-- stack:
-  - note: _c@3 eb
-  - .lpf: 600
-  - .delay: .5
-
-  - sound: _bd hh sd oh
-  - .gain: 0.5
-  - .slow: 2
-```
-{{< code "f" >}}
-
-In this case it is suggested to split function chains with a blank line.
-
 ### Functions without parameters
 
 It is safe to have a yaml attribute without value (just don't forget the `:` sign):
@@ -140,9 +110,39 @@ note("c@3 eb")
 ```
 {{< code "f" >}}
 
+## List of chained functions
+
+When functions chains follow each other, they are still on the same level:
+
+{{< code "h" >}}
+```js
+stack(
+    note("c@3 eb")
+      .lpf(600)
+      .delay(.5),
+
+    sound("bd hh sd oh")
+      .gain(0.5)
+      .slow(2))
+```
+{{< code "m" >}}
+```yml
+- stack:
+  - note: _c@3 eb
+  - .lpf: 600
+  - .delay: .5
+
+  - sound: _bd hh sd oh
+  - .gain: 0.5
+  - .slow: 2
+```
+{{< code "f" >}}
+
+In this case it is suggested to split function chains with a blank line.
+
 ## Data serialization
 
-To pass structured data in a function parameter, you must append the `^` sign to the attribute name.
+To pass structured data in a parameter, you must add `^` after the attribute name:
 
 {{< code "h" >}}
 ```js
@@ -162,11 +162,11 @@ s("sd oh*2 hh")
 ```
 {{< code "f" >}}
 
-You may want to serialize data on a specific argument by adding its index next to `^`, starting from 1 (ie. `myFunc^1:`).
+To serialize data on a specific argument, add its index next to `^`, starting from 1 (ie. `foo^1:`).
 
-### Out of scope functions
+## Out of scope functions
 
-Some functions like `samples` are not part of the main music structure like `stack` or `cat`. You must prepend their name with the `_` sign:
+Some functions like `samples` are not part of the main music structure like `stack` or `cat`, you must prepend their name with `_`:
 
 {{< code "h" >}}
 ```js
@@ -202,9 +202,9 @@ s("<bd:0 bd:1>,~ <sd:0 sd:1>,[hh:0 hh:1]*2")
 
 Not the both use of the prefix `_` and the suffix `^` to serialize the parameters.
 
-### Signals
+## Signals
 
-Signals (and other eventual keywords without parenthesis) are written with a capital on the first letter:
+Keywords without parenthesis like signals are written with a capital on the first letter:
 
 {{< code "h" >}}
 ```js
@@ -222,11 +222,9 @@ saw
 ```
 {{< code "f" >}}
 
-Note the clever use of the inline array in the `range` function to avoid line returns.
+## Expressions
 
-### Expressions
-
-If you want to put an expression in a parameter, prepend it by the `=` sign:
+To put an expression in a parameter, prepend it by the `=` sign:
 
 {{< code "h" >}}
 ```js
@@ -244,9 +242,9 @@ If you want to put an expression in a parameter, prepend it by the `=` sign:
 
 Such expressions are limited to simple mathematics (`+`, `=`, `*`, `/`, `**`).
 
-### Function in parameter
+## Functions in parameters
 
-Use the `set` keyword to pass a function as parameter, such as in accumulation modifiers (here with an inline dictionnary):
+To pass a function in a parameter such as in accumulation modifiers, use the `set` keyword (here with an inline dictionnary):
 
 {{< code "h" >}}
 ```js
@@ -286,17 +284,17 @@ Variables can be defined using the `$` prefix and accessed in expressions (`=`):
 
 {{< code "h" >}}
 ```js
-const melody = note("c@3 eb")
+const melody =
+  note("c@3 eb")
     .lpf(600)
     .delay(.5)
-
-const drums = sound("bd hh sd oh")
+const drums =
+  sound("bd hh sd oh")
     .gain(0.5)
-
 stack(
     melody,
-    drums.slow(2)
-)
+    drums
+      .slow(2))
 ```
 {{< code "m" >}}
 ```yml
