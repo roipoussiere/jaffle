@@ -202,7 +202,7 @@ s("<bd:0 bd:1>,~ <sd:0 sd:1>,[hh:0 hh:1]*2")
 ```
 {{< code "f" >}}
 
-Not the both use of the prefix `_` and the suffix `^` to serialize the parameters.
+Note the both use of the prefix `_`, and the suffix `^` to serialize the parameters.
 
 ## Signals
 
@@ -242,11 +242,11 @@ To put an expression in a parameter, prepend it by the `=` sign:
 ```
 {{< code "f" >}}
 
-Such expressions are limited to simple mathematics (`+`, `=`, `*`, `/`, `**`).
+Such expressions are limited to simple mathematics (`+`, `-`, `*`, `/`, `**`).
 
 ## Functions in parameters
 
-To pass a function in a parameter such as in accumulation modifiers, use the `set` keyword (here with an inline dictionnary):
+To pass a function in a parameter such as in accumulation modifiers, use `set` (here with an inline dictionnary):
 
 {{< code "h" >}}
 ```js
@@ -278,7 +278,7 @@ If necessary, additional parameters can be passed in the `set` value:
 ```
 {{< code "f" >}}
 
-More parameters could be added using an array (ie. `- set: [ n, m ]`).
+More parameters could be added using an array (ie. `set: [ n, m ]`).
 
 ## Using variables
 

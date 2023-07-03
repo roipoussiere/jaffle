@@ -47,7 +47,12 @@ function fillTunesList(): void {
 	});
 }
 
-strudel.transpiler = (tune) => transpiler(tune);
+strudel.transpiler = (tuneYml) => {
+	const tuneJs = transpiler(tuneYml);
+	console.log(tuneJs);
+	return tuneJs;
+};
+
 strudel.init();
 editor.onPlay = () => {
 	const tune = editor.getText();
