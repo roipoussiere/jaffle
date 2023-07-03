@@ -17,7 +17,7 @@ params:
   - name: Editor
     url: /editor
   - name: Source code ↗️
-    url: https://framagit.org/roipoussiere/jaffle
+    url: https://github.com/roipoussiere/jaffle
 
 markup:
   goldmark:

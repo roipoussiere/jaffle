@@ -11,7 +11,7 @@
 		"algorave"
 	],
 	"homepage": "https://roipoussiere.frama.io/jaffle",
-	"bugs": "https://framagit.org/roipoussiere/jaffle/-/issues",
+	"bugs": "https://github.com/roipoussiere/jaffle/issues",
 	"license": "AGPL-3.0-or-later",
 	"author": "Nathanaël Jourdane",
 	"funding": {
@@ -22,10 +22,7 @@
 		"src",
 		"dist"
 	],
-	"repository": {
-		"type": "git",
-		"url": "https://roipoussiere.frama.io/jaffle.git"
-	},
+	"repository": "https://github.com/roipoussiere/jaffle.git",
 	"browser": "src/index.ts",
 	"scripts": {
 		"build": "esbuild ./src/index.ts --bundle --outfile=./dist/jaffle.js --target=es2022",
