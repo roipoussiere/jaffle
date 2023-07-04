@@ -34,6 +34,6 @@
 - .legato: 1
 - .slow: 2
 - .note:
-# - .piano:
+- .piano:
 # - .pianoroll:
 #     maxMidi: 160

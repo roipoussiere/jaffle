@@ -22,7 +22,7 @@
       - .velocity: =.7**i
     - .scale: c4 whole tone
     - .echo: [ 3, =1/8, .5 ]
-  # - .piano: # bug: "piano is not a function"
+    - .piano:
 
   - s: mad
   - .slow: 2

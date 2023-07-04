@@ -14,11 +14,11 @@
     - .round:
     - .slow: 16
   - .euclidLegato: [ 3, 8 ]
-  # - .csound: FM1
+  - .csound: FM1
 
   - note: _<C2 A1 D2 F2>/2
   - .ply: 8
-  # - .csound: Bass
+  - .csound: Bass
   - .gain: _1 4 1 4
 
   - note:
@@ -30,7 +30,7 @@
     - .slow: 2
     - .scale: A4 minor
   - .legato: .25
-  # - .csound: SynHarp
+  - .csound: SynHarp
 
   - s: _bd*2,[~ hh]*2,~ cp
   - .bank: RolandTR909

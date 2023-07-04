@@ -33,7 +33,7 @@
   - .fast: 4
 - .add:
   - note: 4
-# - .piano:
+- .piano:
 - .clip: 2
 - .velocity: .8
 - .slow: 2

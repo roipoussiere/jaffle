@@ -12,12 +12,12 @@
   - note:
     - _c2 [eb3,g3]
     - .add: _<0 <1 -1>>
-  # - .adsr: _[.1 0]:.2:[1 0] # bug: adsr is not a function
+  - .adsr: _[.1 0]:.2:[1 0]
   - .sound: gm_acoustic_bass
   - .room: .5
 
   - n: _0 1 [2 3] 2
-  # - .sound: jazz # bug: sound not found
+  - .sound: jazz
   - .jux:
     - Rev:
   - .slow: 2
