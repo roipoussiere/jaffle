@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import * as core from '@strudel.cycles/core';
 import * as mini from '@strudel.cycles/mini';
 import * as webaudio from '@strudel.cycles/webaudio';
@@ -13,7 +14,7 @@ const maxPan = core.noteToMidi('C8');
 const panwidth = (pan, width) => pan * width + (1 - width) / 2;
 
 core.Pattern.prototype.piano = function () {
-	this.clip(1)
+	return this.clip(1)
 		.s('piano')
 		.release(0.1)
 		.fmap((value) => {
