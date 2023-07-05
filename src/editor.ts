@@ -10,17 +10,20 @@ import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
 type OnPlay = () => void
 type OnStop = () => void
+type OnUpdate = (text: string) => void
 
 class JaffleEditor {
 	public onPlay: OnPlay;
 
 	public onStop: OnStop;
 
-	private container: HTMLElement;
+	public onUpdate: OnUpdate;
 
-	private editor: EditorView;
+	private editorView: EditorView;
 
 	private style: CSSStyleSheet;
+
+	private domContainer: HTMLElement;
 
 	private domErrorBar: HTMLParagraphElement;
 
@@ -34,6 +37,11 @@ class JaffleEditor {
 		bracketMatching(),
 		closeBrackets(),
 		highlightActiveLine(),
+		EditorView.updateListener.of((update) => {
+			if (update.docChanged) {
+				this.onUpdate(update.state.doc.toString());
+			}
+		}),
 		keymap.of([
 			indentWithTab,
 			...historyKeymap,
@@ -54,8 +62,8 @@ class JaffleEditor {
 	])();
 
 	public build(container: HTMLElement) {
-		this.container = container;
-		this.container.classList.add('jaffle_container');
+		this.domContainer = container;
+		this.domContainer.classList.add('jaffle_container');
 		this.buildEditor();
 		this.buildTopBar();
 		this.buildErrorBar();
@@ -63,14 +71,14 @@ class JaffleEditor {
 	}
 
 	public getText(): string {
-		return this.editor.state.doc.toString();
+		return this.editorView.state.doc.toString();
 	}
 
 	public setText(text: string): void {
-		this.editor.dispatch({
+		this.editorView.dispatch({
 			changes: {
 				from: 0,
-				to: this.editor.state.doc.length,
+				to: this.editorView.state.doc.length,
 				insert: text,
 			},
 		});
@@ -87,9 +95,9 @@ class JaffleEditor {
 	}
 
 	private buildEditor(): void {
-		this.editor = new EditorView({
+		this.editorView = new EditorView({
 			extensions: this.extensions,
-			parent: this.container,
+			parent: this.domContainer,
 		});
 	}
 
@@ -98,7 +106,7 @@ class JaffleEditor {
 		this.domErrorBar.id = 'jaffle_error';
 		this.domErrorBar.style.display = 'none';
 
-		this.container.appendChild(this.domErrorBar);
+		this.domContainer.appendChild(this.domErrorBar);
 	}
 
 	private buildTopBar(): void {
@@ -126,7 +134,7 @@ class JaffleEditor {
 		domTopBar.appendChild(domBtnStop);
 		domTopBar.appendChild(domBtnStart);
 
-		this.container.appendChild(domTopBar);
+		this.domContainer.appendChild(domTopBar);
 	}
 
 	private buildStyleSheet() {
@@ -186,7 +194,7 @@ class JaffleEditor {
 
 		.cm-editor {
 			padding-top: 35px;
-			height: 100%
+			height: 100%;
 		}
 
 		.cm-content {

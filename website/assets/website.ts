@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { transpiler, JaffleEditor } from './jaffle';
+import { transpiler, JaffleEditor, JaffleGraph } from './jaffle';
 import StrudelRepl from './strudel_repl';
 
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
@@ -14,6 +14,7 @@ const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub',
 const DEFAULT_TUNE = 'ws2_stack';
 const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune');
 const editor = new JaffleEditor();
+const graph = new JaffleGraph();
 const strudel = new StrudelRepl(
 	(error) => editor.setError(error.message),
 	() => editor.setError(),
@@ -60,6 +61,10 @@ editor.onPlay = () => {
 	strudel.play(tune);
 };
 editor.onStop = () => strudel.stop();
+editor.onUpdate = (tuneYml) => {
+	graph.load(tuneYml);
+	console.log(graph.rawData);
+};
 
 window.addEventListener('DOMContentLoaded', () => {
 	editor.build(<HTMLInputElement> document.getElementById('jaffle_editor'));
