@@ -21,6 +21,8 @@ const strudel = new StrudelRepl(
 );
 let tunesPath = '../tunes/';
 
+const getContainer = () => <HTMLDivElement> document.getElementById('jaffle_editor');
+
 function loadTune(tuneName: string): void {
 	console.log(`Loading tune ${tuneName}...`);
 	fetch(`${tunesPath}${tuneName}.yml`)
@@ -64,10 +66,12 @@ editor.onStop = () => strudel.stop();
 editor.onUpdate = (tuneYml) => {
 	graph.load(tuneYml);
 	console.log(graph.rawData);
+	graph.draw();
+	getContainer().appendChild(graph.svg);
 };
 
 window.addEventListener('DOMContentLoaded', () => {
-	editor.build(<HTMLInputElement> document.getElementById('jaffle_editor'));
+	editor.build(getContainer());
 	if (domSelectTune !== null) {
 		fillTunesList();
 		tunesPath = 'tunes/';
