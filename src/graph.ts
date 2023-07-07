@@ -28,62 +28,51 @@ class JaffleGraph {
 	}
 
 	public draw(): void {
-		// based on https://observablehq.com/@d3/tree/2
-		const width = 400;
-		const root = d3.hierarchy(this.data);
-		const dx = 10;
-		const dy = width / (root.height + 1);
-		const tree = d3.tree().nodeSize([dx, dy]);
-		// console.log(root.links());
-
-		root.sort((a, b) => d3.ascending(a.data.name, b.data.name));
-		tree(root);
-
-		let x0 = Infinity;
-		let x1 = -x0;
-		root.each((d) => {
-			if (d.x > x1) x1 = d.x;
-			if (d.x < x0) x0 = d.x;
-		});
-
-		const height = x1 - x0 + dx * 2;
+		const width = 800;
+		const height = 400;
+		const boxWidth = 8;
+		const boxSpacing = 10;
+		const root = d3.hierarchy(this.data, (d: any) => d.children); // TODO: add more logic
 
 		const svg = d3.create('svg')
 			.attr('width', width)
 			.attr('height', height)
-			.attr('viewBox', [-dy / 3, x0 - dx, width, height])
-			.attr('style', 'max-width: 100%; height: auto; font: 10px sans-serif;');
+			.attr('viewBox', [0, 0, 40, 20])
+			.attr('style', 'max-width: 100%; height: auto; font: 0.8px mono;');
 
 		svg.append('g') // link
 			.attr('fill', 'none')
 			.attr('stroke', 'black')
-			.attr('stroke-opacity', 0.4)
-			.attr('stroke-width', 1.5)
+			.attr('stroke-opacity', 0.5)
+			.attr('stroke-width', 0.1)
 			.selectAll()
-			.data(root.links())
+			.data(root.links()
+				.filter((d: any) => d.source.depth >= 1 && d.target.data.name[0] !== '.'))
 			.join('path')
-			.attr('d', d3.linkHorizontal().x((d) => d.y).y((d) => d.x));
+			.attr('d', d3.linkHorizontal()
+				.x((d: any) => (d.depth - 1) * boxSpacing)
+				.y((d: any) => d.data.y));
+		// .attr('transform', (d: any) => `scale(${0.5})`);
 
 		const node = svg.append('g')
 			.attr('stroke-linejoin', 'round')
-			.attr('stroke-width', 3)
+			.attr('stroke-width', 0.2)
 			.selectAll()
-			.data(root.descendants())
+			.data(root.descendants().filter((d: any) => d.depth >= 1))
 			.join('g')
-			.attr('transform', (d) => `translate(${d.y},${d.x})`);
+			.attr('transform', (d: any) => `translate(${(d.depth - 1) * boxSpacing},${d.data.y})`);
 
-		node.append('circle')
-			.attr('fill', (d) => (d.children ? '#555' : '#999'))
-			.attr('r', 2.5);
+		node.append('rect')
+			.attr('width', boxWidth)
+			.attr('height', 1)
+			.attr('y', -0.5)
+			.attr('rx', 0.2)
+			.attr('ry', 0.2)
+			.attr('fill', '#ccc');
 
 		node.append('text')
-			.attr('dy', '0.31em')
-			.attr('x', (d) => (d.children ? -6 : 6))
-			.attr('text-anchor', (d) => (d.children ? 'end' : 'start'))
-			.text((d) => `${d.data.name}: ${d.data.value ? d.data.value : ''}`)
-			.clone(true)
-			.lower()
-			.attr('stroke', 'white');
+			.attr('y', 0.3)
+			.text((d: any) => `${d.data.name}: ${d.data.value || ''}`);
 
 		this.svg = <SVGElement>svg.node();
 	}
