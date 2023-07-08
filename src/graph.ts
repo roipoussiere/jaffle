@@ -39,7 +39,7 @@ class JaffleGraph {
 
 	public draw(): void {
 		const width = 800;
-		const height = 400;
+		// const height = 400;
 		const fontSize = 14;
 		const boxGap = 3;
 		const boxMaxWidth = 20;
@@ -51,19 +51,30 @@ class JaffleGraph {
 
 		let boxWidth = (Math.floor(width / charWidth) / root.height) - boxGap;
 		boxWidth = boxWidth > boxMaxWidth ? boxMaxWidth : boxWidth;
-		const boxSpacing = boxWidth + boxGap;
+
+		const cellWidth = (boxWidth + boxGap) * charWidth;
+		const cellHeight = charHeight;
 
 		const tree = d3.tree()
-			.nodeSize([charHeight, boxSpacing * charWidth])
+			.nodeSize([cellHeight, cellWidth])
 			.separation((a: any, b: any) => JaffleGraph.getNodesGap(a, b));
 
 		tree(root);
+
+		let x0 = Infinity;
+		let x1 = -Infinity;
+		root.each((d: any) => {
+			x1 = d.x > x1 ? d.x : x1;
+			x0 = d.x < x0 ? d.x : x0;
+		});
+
+		const height = x1 - x0 + cellHeight * 2;
 
 		const svg = d3.create('svg')
 			.attr('class', 'jaffle_graph')
 			.attr('width', width)
 			.attr('height', height)
-			.attr('viewBox', [14 * charWidth, -10 * charHeight, width, height])
+			.attr('viewBox', [cellWidth, x0 - cellHeight, width, height])
 			.style('font', `${fontSize}px mono`);
 
 		svg.append('g') // link
