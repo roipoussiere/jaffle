@@ -98,8 +98,11 @@ class JaffleGraph {
 
 	private static getNodesGap(a: any, b: any): number {
 		const nameA = JaffleGraph.getName(a.data);
-		const isSmallGap = nameA[0] === '.' && a.parent === b.parent;
-		return isSmallGap ? 1 : 2;
+		const nameB = JaffleGraph.getName(b.data);
+
+		const isStacked = (nameA[0] === '.' && a.parent === b.parent)
+			|| (nameA === '' && nameB === '');
+		return isStacked ? 1 : 2;
 	}
 
 	private static getNodeText(d: any): string {
