@@ -12,28 +12,24 @@ Jaffle is a yaml-based syntax for [Tidal-cycles](https://tidalcycles.org/), base
 
 It aims to make algorithmic music more accessible for people who are not familiar with programming languages.
 
-![](images/editor.png)
+![](images/editor_and_graph.png)
 
 Under the hood, Jaffle is a transpiler generating JavaScript code, which is then interpreted by Strudel.
 
 ## Features
 
-- easy to read syntax (albeit more verbose than Strudel);
-- use lambda functions, expressions, variable definitions, [and more](https://roipoussiere.frama.io/jaffle/syntax/);
-- all Strudel examples has been successfully converted to Jaffle;
+- tune visualization with a graph
+- easy to read syntax (albeit more verbose than Strudel)
+- use lambda functions, expressions, variable definitions, [and more](https://roipoussiere.frama.io/jaffle/syntax/)
+- includes all Strudel examples converted to Jaffle
 - extensive [unit tests](tests/transpiler.test.ts)
 
 ## Roadmap
 
-I plan to create a visual interface for Jaffle.
-
-The whole point of this project is not actually to define a tune in Yaml, it's to define a tune in structured data. Since this part is now done, I would like to work on an alternative Yaml editor with a visual interface, in order to make this process even more user-friendly. This one could be made of boxes linked with wires (such as in [jsonvis](https://zuramai.github.io/jsonvis/) but more compact).
-
-Additional planned features:
-
-- better syntax highlighting;
-- code completion;
-- own documentation.
+- allow to use the grah as an editor and switch between text and graph to edit a tune
+- better syntax highlighting
+- code completion
+- own documentation
 
 ## Syntax
 
