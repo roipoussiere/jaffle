@@ -91,42 +91,46 @@ class JaffleGraph {
 
 		node.append('text')
 			.attr('y', 0.27 * charHeight)
-			.text((d: any) => JaffleGraph.getNodeText(d));
+			.text((d: any) => JaffleGraph.getNodeText(d.data));
 
 		this.svg = <SVGElement>svg.node();
 	}
 
-	private static getNodesGap(a: any, b: any): number {
-		const nameA = JaffleGraph.getName(a.data);
-		const nameB = JaffleGraph.getName(b.data);
+	private static getNodesGap(nodeA: any, nodeB: any): number {
+		const nameA = JaffleGraph.getName(nodeA.data);
+		const nameB = JaffleGraph.getName(nodeB.data);
 
-		const isStacked = (nameA[0] === '.' && a.parent === b.parent)
+		const isStacked = (nameA[0] === '.' && nodeA.parent === nodeB.parent)
 			|| (nameA === '' && nameB === '');
 		return isStacked ? 1 : 2;
 	}
 
-	private static getNodeText(d: any): string {
-		const name = JaffleGraph.getName(d.data);
-		const value = JaffleGraph.getValue(d.data);
-		const sep = name === '' ? '' : ': ';
-		return name + sep + value;
-	}
-
-	private static getName(d: any): string {
-		return (d instanceof Object && !(d instanceof Array)) ? Object.keys(d)[0] : '';
-	}
-
-	private static getChildren(d: any): Array<any> {
-		const name = JaffleGraph.getName(d);
-		return (name !== '' && d[name] instanceof Array) ? d[name] : [];
-	}
-
-	private static getValue(d: any): string {
-		if (!(d instanceof Object)) {
-			return `${d}`;
+	private static getNodeText(data: any): string {
+		if (JaffleGraph.isDict(data)) {
+			const funcName = Object.keys(data)[0];
+			const funcParam = data[funcName];
+			return (funcParam === null || JaffleGraph.isList(funcParam))
+				? funcName
+				: `${funcName}: ${funcParam}`;
 		}
-		const name = JaffleGraph.getName(d);
-		return d[name] instanceof Array ? '' : `${d[name]}`;
+		return `${data}`;
+	}
+
+	private static isDict(data: any): boolean {
+		return data instanceof Object && !(data instanceof Array);
+	}
+
+	private static isList(data: any): boolean {
+		return data instanceof Array;
+	}
+
+	private static getName(data: any): string {
+		return JaffleGraph.isDict(data) ? Object.keys(data)[0] : '';
+	}
+
+	private static getChildren(data: any): Array<any> {
+		const name = JaffleGraph.getName(data);
+		return (name !== '' && data[name] instanceof Array) ? data[name] : [];
 	}
 }
 
