@@ -41,14 +41,18 @@ class JaffleGraph {
 		const width = 800;
 		const height = 400;
 		const fontSize = 14;
-		const boxWidth = 20;
 		const boxGap = 3;
+		const boxMaxWidth = 20;
 
 		const charWidth = fontSize * 0.6;
 		const charHeight = fontSize * 1.4;
-		const boxSpacing = boxWidth + boxGap;
 
 		const root = d3.hierarchy({ root: this.tune }, (d: any) => JaffleGraph.getChildren(d));
+
+		let boxWidth = (Math.floor(width / charWidth) / root.height) - boxGap;
+		boxWidth = boxWidth > boxMaxWidth ? boxMaxWidth : boxWidth;
+		const boxSpacing = boxWidth + boxGap;
+
 		const tree = d3.tree()
 			.nodeSize([charHeight, boxSpacing * charWidth])
 			.separation((a: any, b: any) => JaffleGraph.getNodesGap(a, b));
@@ -59,7 +63,7 @@ class JaffleGraph {
 			.attr('class', 'jaffle_graph')
 			.attr('width', width)
 			.attr('height', height)
-			.attr('viewBox', [22 * charWidth, -10 * charHeight, width, height])
+			.attr('viewBox', [14 * charWidth, -10 * charHeight, width, height])
 			.style('font', `${fontSize}px mono`);
 
 		svg.append('g') // link
