@@ -48,20 +48,10 @@ class JaffleGraph {
 		const charHeight = fontSize * 1.4;
 		const boxSpacing = boxWidth + boxGap;
 
-		const getName = (d: any) => Object.keys(d)[0];
-		const getChildren = (d: any) => {
-			const val = d[getName(d)];
-			return val instanceof Array ? val : null;
-		};
-		const getValue = (d: any) => {
-			const val = d[getName(d)];
-			return val instanceof Array ? null : val;
-		};
-
-		const root = d3.hierarchy({ root: this.tune }, (d: any) => getChildren(d));
+		const root = d3.hierarchy({ root: this.tune }, (d: any) => JaffleGraph.getChildren(d));
 		const tree = d3.tree()
 			.nodeSize([charHeight, boxSpacing * charWidth])
-			.separation((a: any) => (getName(a.data)[0] === '.' ? 1 : 2));
+			.separation((a: any) => (JaffleGraph.getName(a.data)[0] === '.' ? 1 : 2));
 
 		tree(root);
 
@@ -69,7 +59,7 @@ class JaffleGraph {
 			.attr('class', 'jaffle_graph')
 			.attr('width', width)
 			.attr('height', height)
-			.attr('viewBox', [22 * charWidth, -7 * charHeight, width, height])
+			.attr('viewBox', [22 * charWidth, -10 * charHeight, width, height])
 			.style('font', `${fontSize}px mono`);
 
 		svg.append('g') // link
@@ -77,8 +67,9 @@ class JaffleGraph {
 			.attr('stroke', '#333')
 			.attr('stroke-width', 2)
 			.selectAll()
-			.data(root.links()
-				.filter((d: any) => d.source.depth >= 1 && getName(d.target.data)[0] !== '.'))
+			.data(root.links().filter((d: any) => (
+				d.source.depth >= 1 && JaffleGraph.getName(d.target.data)[0] !== '.'
+			)))
 			.join('path')
 			.attr('d', (link: any) => d3.linkHorizontal()
 				.x((d: any) => (d.y === link.source.y ? d.y + boxWidth * charWidth : d.y))
@@ -100,9 +91,33 @@ class JaffleGraph {
 
 		node.append('text')
 			.attr('y', 0.27 * charHeight)
-			.text((d: any) => `${getName(d.data)}: ${getValue(d.data) || ''}`);
+			.text((d: any) => JaffleGraph.getNodeText(d));
 
 		this.svg = <SVGElement>svg.node();
+	}
+
+	private static getNodeText(d: any): string {
+		const name = JaffleGraph.getName(d.data);
+		const value = JaffleGraph.getValue(d.data);
+		const sep = name === '' ? '' : ': ';
+		return name + sep + value;
+	}
+
+	private static getName(d: any): string {
+		return (d instanceof Object && !(d instanceof Array)) ? Object.keys(d)[0] : '';
+	}
+
+	private static getChildren(d: any): Array<any> {
+		const name = JaffleGraph.getName(d);
+		return (name !== '' && d[name] instanceof Array) ? d[name] : [];
+	}
+
+	private static getValue(d: any): string {
+		if (!(d instanceof Object)) {
+			return `${d}`;
+		}
+		const name = JaffleGraph.getName(d);
+		return d[name] instanceof Array ? '' : `${d[name]}`;
 	}
 }
 
