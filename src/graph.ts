@@ -107,7 +107,13 @@ class JaffleGraph {
 
 		node.append('text')
 			.attr('y', 0.27 * charHeight)
-			.text((d: any) => JaffleGraph.getNodeText(d.data));
+			.text((d: any) => JaffleGraph.getFuncName(d.data));
+
+		node.append('text')
+			.attr('y', 0.27 * charHeight)
+			.attr('x', boxWidth * charWidth)
+			.attr('text-anchor', 'end')
+			.text((d: any) => JaffleGraph.getFuncParam(d.data));
 
 		this.svg = <SVGElement>svg.node();
 	}
@@ -121,13 +127,15 @@ class JaffleGraph {
 		return isStacked ? 1 : 2;
 	}
 
-	private static getNodeText(data: any): string {
+	private static getFuncName(data: any): string {
+		return JaffleGraph.isDict(data) ? Object.keys(data)[0] : '';
+	}
+
+	private static getFuncParam(data: any): string {
 		if (JaffleGraph.isDict(data)) {
 			const funcName = Object.keys(data)[0];
 			const funcParam = data[funcName];
-			return (funcParam === null || JaffleGraph.isList(funcParam))
-				? funcName
-				: `${funcName}: ${funcParam}`;
+			return (funcParam === null || JaffleGraph.isList(funcParam)) ? '' : funcParam;
 		}
 		return `${data}`;
 	}
