@@ -63,15 +63,11 @@ editor.onPlay = () => {
 	strudel.play(tune);
 };
 editor.onStop = () => strudel.stop();
-editor.onUpdate = (tuneYml) => {
-	graph.load(tuneYml);
-	console.log(graph.rawData);
-	graph.draw();
-	getContainer().appendChild(graph.svg);
-};
+editor.onUpdate = (tuneYml) => graph.update(tuneYml);
 
 window.addEventListener('DOMContentLoaded', () => {
 	editor.build(getContainer());
+	graph.init(getContainer());
 	if (domSelectTune !== null) {
 		fillTunesList();
 		tunesPath = 'tunes/';

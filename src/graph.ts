@@ -3,26 +3,38 @@ import * as d3 from 'd3';
 
 import { load as loadYaml } from 'js-yaml';
 import * as errors from './errors';
-import tuneData from './tune.json';
 
 class JaffleGraph {
-	public yaml = '';
+	public tuneYaml = '';
 
-	public rawData: any;
+	public tune: any;
 
 	public data: any;
 
+	public container: HTMLElement;
+
 	public svg: SVGElement;
 
-	public load(inputYaml: string): void {
-		this.yaml = inputYaml;
+	public init(container: HTMLElement): void {
+		this.container = container;
+	}
+
+	public update(tuneYaml: string): void {
+		this.tuneYaml = tuneYaml;
+		this.loadYaml();
+		this.svg?.remove();
+		this.draw();
+		this.container.appendChild(this.svg);
+	}
+
+	public loadYaml(): void {
 		let tune: any;
 		try {
-			tune = loadYaml(inputYaml);
+			tune = loadYaml(this.tuneYaml);
 		} catch (err) {
 			throw new errors.BadYamlJaffleError(err.message);
 		}
-		this.rawData = tune;
+		this.tune = tune;
 	}
 
 	public draw(): void {
@@ -46,7 +58,7 @@ class JaffleGraph {
 			return val instanceof Array ? null : val;
 		};
 
-		const root = d3.hierarchy({ root: tuneData }, (d: any) => getChildren(d));
+		const root = d3.hierarchy({ root: this.tune }, (d: any) => getChildren(d));
 		const tree = d3.tree()
 			.nodeSize([charHeight, boxSpacing * charWidth])
 			.separation((a: any) => (getName(a.data)[0] === '.' ? 1 : 2));

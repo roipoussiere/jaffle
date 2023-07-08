@@ -15,6 +15,8 @@ Jaffle aims to make algorithmic music more accessible for people who are not fam
 
 You can start to discover some tunes below (translated from the [Strudel examples](https://strudel.tidalcycles.org/examples/)), then take a look at the [syntax page](/syntax) for more details and play with the [larger editor](editor/).
 
+The graph below the editor represents the tune and is currently an experimental feature.
+
 Select tune: {{< select_tune >}}
 
 {{< jaffle_editor >}}
