@@ -49,7 +49,8 @@ class JaffleGraph {
 
 		const root = d3.hierarchy({ root: this.tune }, (d: any) => JaffleGraph.getChildren(d));
 
-		let boxWidth = (Math.floor(width / charWidth) / root.height) - boxGap;
+		const nbcWidth = Math.floor(width / charWidth);
+		let boxWidth = ((nbcWidth + boxGap) / root.height) - boxGap;
 		boxWidth = boxWidth > boxMaxWidth ? boxMaxWidth : boxWidth;
 
 		const cellWidth = (boxWidth + boxGap) * charWidth;
