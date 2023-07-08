@@ -36,11 +36,20 @@ class JaffleGraph {
 		const charHeight = fontSize * 1.4;
 		const boxSpacing = boxWidth + boxGap;
 
-		// TODO: convert rawData to data
-		const root = d3.hierarchy(tuneData, (d: any) => d.children);
+		const getName = (d: any) => Object.keys(d)[0];
+		const getChildren = (d: any) => {
+			const val = d[getName(d)];
+			return val instanceof Array ? val : null;
+		};
+		const getValue = (d: any) => {
+			const val = d[getName(d)];
+			return val instanceof Array ? null : val;
+		};
+
+		const root = d3.hierarchy({ root: tuneData }, (d: any) => getChildren(d));
 		const tree = d3.tree()
 			.nodeSize([charHeight, boxSpacing * charWidth])
-			.separation((a: any) => (a.data.name[0] === '.' ? 1 : 2));
+			.separation((a: any) => (getName(a.data)[0] === '.' ? 1 : 2));
 
 		tree(root);
 
@@ -57,7 +66,7 @@ class JaffleGraph {
 			.attr('stroke-width', 2)
 			.selectAll()
 			.data(root.links()
-				.filter((d: any) => d.source.depth >= 1 && d.target.data.name[0] !== '.'))
+				.filter((d: any) => d.source.depth >= 1 && getName(d.target.data)[0] !== '.'))
 			.join('path')
 			.attr('d', (link: any) => d3.linkHorizontal()
 				.x((d: any) => (d.y === link.source.y ? d.y + boxWidth * charWidth : d.y))
@@ -79,7 +88,7 @@ class JaffleGraph {
 
 		node.append('text')
 			.attr('y', 0.27 * charHeight)
-			.text((d: any) => `${d.data.name}: ${d.data.value || ''}`);
+			.text((d: any) => `${getName(d.data)}: ${getValue(d.data) || ''}`);
 
 		this.svg = <SVGElement>svg.node();
 	}
