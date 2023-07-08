@@ -51,7 +51,7 @@ class JaffleGraph {
 		const root = d3.hierarchy({ root: this.tune }, (d: any) => JaffleGraph.getChildren(d));
 		const tree = d3.tree()
 			.nodeSize([charHeight, boxSpacing * charWidth])
-			.separation((a: any) => (JaffleGraph.getName(a.data)[0] === '.' ? 1 : 2));
+			.separation((a: any, b: any) => JaffleGraph.getNodesGap(a, b));
 
 		tree(root);
 
@@ -94,6 +94,12 @@ class JaffleGraph {
 			.text((d: any) => JaffleGraph.getNodeText(d));
 
 		this.svg = <SVGElement>svg.node();
+	}
+
+	private static getNodesGap(a: any, b: any): number {
+		const nameA = JaffleGraph.getName(a.data);
+		const isSmallGap = nameA[0] === '.' && a.parent === b.parent;
+		return isSmallGap ? 1 : 2;
 	}
 
 	private static getNodeText(d: any): string {
