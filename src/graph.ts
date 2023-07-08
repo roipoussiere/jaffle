@@ -113,7 +113,14 @@ class JaffleGraph {
 			.attr('y', 0.27 * charHeight)
 			.attr('x', boxWidth * charWidth)
 			.attr('text-anchor', 'end')
-			.text((d: any) => JaffleGraph.getFuncParam(d.data));
+			.text((d: any) => {
+				const name = JaffleGraph.getFuncName(d.data);
+				const value = JaffleGraph.getFuncParam(d.data);
+				const textLength = name.length + value.length + 1;
+				return textLength < boxWidth
+					? value
+					: `${value.substring(0, boxWidth - (name.length > 0 ? name.length : -1) - 2)}…`;
+			});
 
 		this.svg = <SVGElement>svg.node();
 	}
@@ -132,12 +139,18 @@ class JaffleGraph {
 	}
 
 	private static getFuncParam(data: any): string {
+		let funcParam: any;
+
 		if (JaffleGraph.isDict(data)) {
 			const funcName = Object.keys(data)[0];
-			const funcParam = data[funcName];
-			return (funcParam === null || JaffleGraph.isList(funcParam)) ? '' : funcParam;
+			funcParam = data[funcName];
+			if (funcParam === null || JaffleGraph.isList(funcParam)) {
+				return '';
+			}
+		} else {
+			funcParam = data;
 		}
-		return `${data}`;
+		return `${funcParam}`;
 	}
 
 	private static isDict(data: any): boolean {
