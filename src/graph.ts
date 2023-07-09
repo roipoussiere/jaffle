@@ -107,6 +107,7 @@ class JaffleGraph {
 
 		node.append('text')
 			.attr('y', 0.27 * charHeight)
+			.style('fill', (d: any) => JaffleGraph.getFuncNameColor(d.data))
 			.style('font-weight', (d: any) => (
 				JaffleGraph.getFuncName(d.data)[0] === '.' ? 'normal' : 'bold'
 			))
@@ -116,7 +117,7 @@ class JaffleGraph {
 			.attr('y', 0.27 * charHeight)
 			.attr('x', boxWidth * charWidth)
 			.attr('text-anchor', 'end')
-			.style('fill', (d: any) => JaffleGraph.getColor(d.data))
+			.style('fill', (d: any) => JaffleGraph.getFuncParamColor(d.data))
 			.text((d: any) => {
 				const name = JaffleGraph.getFuncName(d.data);
 				const value = `${JaffleGraph.getFuncParam(d.data)}`;
@@ -154,16 +155,33 @@ class JaffleGraph {
 		return data;
 	}
 
-	private static getColor(data: any): string {
+	private static getFuncParamColor(data: any): string {
 		const param = JaffleGraph.getFuncParam(data);
-
+		let color = 'gray';
 		if (typeof param === 'string') {
-			return param[0] === '_' ? 'blue' : 'green';
+			if (param[0] === '_') {
+				color = 'green';
+			} else if (param[0] === '=') {
+				color = 'blue';
+			} else {
+				color = 'darkSlateGray';
+			}
 		}
 		if (typeof param === 'number') {
-			return 'darkRed';
+			color = 'darkRed';
 		}
-		return 'gray';
+		return color;
+	}
+
+	private static getFuncNameColor(data: any): string {
+		const funcName = JaffleGraph.getFuncName(data);
+		let color = 'black';
+		if (funcName[0] === '$') {
+			color = 'green';
+		} else if (funcName[0] === '^') {
+			color = 'blue';
+		}
+		return color;
 	}
 
 	private static isDict(data: any): boolean {
