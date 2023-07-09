@@ -12,7 +12,6 @@ const INIT_FUNC_PREFIX = '_';
 const VAR_FUNC_PREFIX = '$';
 const SERIALIZE_FUNC_SUFFIX = '^';
 
-const OPTIONAL_STR_PREFIX = '/';
 const MINI_STR_PREFIX = '_';
 const EXPR_STR_PREFIX = '=';
 
@@ -168,7 +167,7 @@ export function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1):
  * @returns a string of Javascript code coming from the string
  */
 export function jaffleStringToJs(str: string): string {
-	const isPrefixed = [MINI_STR_PREFIX, EXPR_STR_PREFIX, OPTIONAL_STR_PREFIX].includes(str[0]);
+	const isPrefixed = [MINI_STR_PREFIX, EXPR_STR_PREFIX].includes(str[0]);
 	const newStr = (isPrefixed ? str.substring(1) : str).trim();
 	const quote = newStr.includes('\n') ? '`' : "'";
 	let js: string;

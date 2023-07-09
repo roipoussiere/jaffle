@@ -8,13 +8,13 @@
 
 - stack:
   - _<bd!3 bd(3,4,3)>
-  - .color: /#F5A623
+  - .color: '#F5A623'
 
   - _hh*4
-  - .color: /#673AB7
+  - .color: '#673AB7'
 
   - _~ <sn!3 sn(3,4,2)>
-  - .color: /#4CAF50
+  - .color: '#4CAF50'
 
 - .s:
 - .pianoroll^:

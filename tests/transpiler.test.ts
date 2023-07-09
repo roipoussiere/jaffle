@@ -168,13 +168,6 @@ describe('Testing jaffleStringToJs()', () => {
 		expect(t.jaffleStringToJs('\nfoo\nbar\nbaz\n')).toBe('`foo\nbar\nbaz`');
 	});
 
-	test('Strings with optional prefix are transpiled into the string without the prefix', () => {
-		expect(t.jaffleStringToJs('/foo')).toBe("'foo'");
-		expect(t.jaffleStringToJs('/foo bar\nbaz')).toBe('`foo bar\nbaz`');
-		expect(t.jaffleStringToJs('/=foo')).toBe("'=foo'");
-		expect(t.jaffleStringToJs('/.foo')).toBe("'.foo'");
-	});
-
 	test('Expression strings are transpiled into expressions', () => {
 		expect(t.jaffleStringToJs('=foo')).toBe('_foo');
 		expect(t.jaffleStringToJs('=2+3')).toBe('2+3');
