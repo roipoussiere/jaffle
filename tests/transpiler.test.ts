@@ -7,17 +7,17 @@ describe('Testing serialize()', () => {
 	test('literals and arrays are correctly serialized', () => {
 		expect(t.serialize(null)).toBe('null');
 		expect(t.serialize(42)).toBe('42');
-		expect(t.serialize('foo')).toBe("'foo'");
+		expect(t.serialize('foo')).toBe('"foo"');
 		expect(t.serialize([1, 2, 3])).toBe('[1,2,3]');
 	});
 
 	test('Objects are correctly serialized', () => {
-		expect(t.serialize({ foo: 42 })).toBe("{'foo':42}");
-		expect(t.serialize({ foo: 'bar' })).toBe("{'foo':'bar'}");
-		expect(t.serialize({ foo: [1, 2, 3] })).toBe("{'foo':[1,2,3]}");
-		expect(t.serialize({ foo: { bar: 42 } })).toBe("{'foo':{'bar':42}}");
-		expect(t.serialize({ '.foo': 1, _bar: 2, $baz: 3 })).toBe("{'.foo':1,'_bar':2,'$baz':3}");
-		expect(t.serialize({ a: '/1', b: '_2', c: '=3' })).toBe("{'a':'/1','b':'_2','c':'=3'}");
+		expect(t.serialize({ foo: 42 })).toBe('{"foo":42}');
+		expect(t.serialize({ foo: 'bar' })).toBe('{"foo":"bar"}');
+		expect(t.serialize({ foo: [1, 2, 3] })).toBe('{"foo":[1,2,3]}');
+		expect(t.serialize({ foo: { bar: 42 } })).toBe('{"foo":{"bar":42}}');
+		expect(t.serialize({ '.foo': 1, _bar: 2, $baz: 3 })).toBe('{".foo":1,"_bar":2,"$baz":3}');
+		expect(t.serialize({ a: '/1', b: '_2', c: '=3' })).toBe('{"a":"/1","b":"_2","c":"=3"}');
 	});
 });
 
@@ -224,9 +224,9 @@ describe('Testing jaffleParamsToJsGroups()', () => {
 
 	test('Serialized params are transpiled into serialized groups', () => {
 		expect(t.jaffleParamsToJsGroups([{ a: 1 }, { '.b': 2 }, { c: [{ d: 3 }] }], ''))
-			.toEqual(["{'a':1}", "{'.b':2}", "{'c':[{'d':3}]}"]);
+			.toEqual(['{"a":1}', '{".b":2}', '{"c":[{"d":3}]}']);
 		expect(t.jaffleParamsToJsGroups([{ a: 1 }, { '.b': 2 }, { c: [{ d: 3 }] }], '2'))
-			.toEqual(['a(1)', "{'.b':2}", 'c(d(3))']);
+			.toEqual(['a(1)', '{".b":2}', 'c(d(3))']);
 	});
 
 	test('Trying to serialize bad groups fails', () => {
@@ -295,13 +295,13 @@ describe('Testing jaffleFuncToJs()', () => {
 
 	test('serialized functions are transpiled into a function call with serialized param', () => {
 		expect(t.jaffleFuncToJs({ 'a^': 1 })).toBe('a(1)');
-		expect(t.jaffleFuncToJs({ 'a^': ['b', 'c'] })).toBe("a('b', 'c')");
-		expect(t.jaffleFuncToJs({ 'a^': ['b', [1, 2]] })).toBe("a('b', [1,2])");
-		expect(t.jaffleFuncToJs({ 'a^': ['b', { c: 3 }] })).toBe("a('b', {'c':3})");
-		expect(t.jaffleFuncToJs({ 'a^': ['b', { c: 1, d: 2 }] })).toBe("a('b', {'c':1,'d':2})");
-		expect(t.jaffleFuncToJs({ 'a^': { b: { c: 42 } } })).toBe("a({'b':{'c':42}})");
+		expect(t.jaffleFuncToJs({ 'a^': ['b', 'c'] })).toBe('a("b", "c")');
+		expect(t.jaffleFuncToJs({ 'a^': ['b', [1, 2]] })).toBe('a("b", [1,2])');
+		expect(t.jaffleFuncToJs({ 'a^': ['b', { c: 3 }] })).toBe('a("b", {"c":3})');
+		expect(t.jaffleFuncToJs({ 'a^': ['b', { c: 1, d: 2 }] })).toBe('a("b", {"c":1,"d":2})');
+		expect(t.jaffleFuncToJs({ 'a^': { b: { c: 42 } } })).toBe('a({"b":{"c":42}})');
 		expect(t.jaffleFuncToJs({ 'a^1': [{ b: { '.c': 1 } }, { d: 2 }, { '.e': 3 }] }))
-			.toBe("a({'b':{'.c':1}}, d(2).e(3))");
+			.toBe('a({"b":{".c":1}}, d(2).e(3))');
 	});
 
 	test('Lambda functions are transpiled into lambda function calls', () => {

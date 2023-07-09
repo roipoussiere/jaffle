@@ -23,10 +23,10 @@ const LAMBDA_VAR = '_x_';
 /**
  * Serialise an object to JSON.
  * @param thing the object to serialize
- * @returns a string reprensenting the object in JSON, but with simple quotes
+ * @returns a string reprensenting the object in JSON
  */
 export function serialize(thing: JaffleAny): string {
-	return JSON.stringify(thing).replace(/"/g, "'");
+	return JSON.stringify(thing);
 }
 
 /**
