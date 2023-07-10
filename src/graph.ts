@@ -158,7 +158,7 @@ class JaffleGraph {
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
-			.style('fill', (d: any) => JaffleGraph.getFuncNameColor(d.data))
+			.style('fill', (d: any) => JaffleGraph.getFuncNameColor(d))
 			.style('font-weight', (d: any) => (d.boxName[0] === '.' ? 'normal' : 'bold'))
 			.text((d: any) => d.boxName);
 
@@ -166,7 +166,7 @@ class JaffleGraph {
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', this.boxWidth * this.charWidth)
 			.attr('text-anchor', 'end')
-			.style('fill', (d: any) => JaffleGraph.getFuncParamColor(d.data))
+			.style('fill', (d: any) => JaffleGraph.getFuncParamColor(d))
 			.style('font-weight', (d: any) => (
 				d.boxName === '' && d.boxValue[0] === '_' ? 'bold' : 'normal'
 			))
@@ -200,30 +200,28 @@ class JaffleGraph {
 		return data;
 	}
 
-	private static getFuncParamColor(data: any): string {
-		const param = JaffleGraph.getBoxValue(data);
+	private static getFuncParamColor(d: any): string {
 		let color = 'gray';
-		if (typeof param === 'string') {
-			if (param[0] === '_') {
+		if (typeof d.boxValue === 'string') {
+			if (d.boxValue[0] === '_') {
 				color = 'green';
-			} else if (param[0] === '=') {
+			} else if (d.boxValue[0] === '=') {
 				color = 'blue';
 			} else {
 				color = 'darkSlateGray';
 			}
 		}
-		if (typeof param === 'number') {
+		if (typeof d.boxValue === 'number') {
 			color = 'darkRed';
 		}
 		return color;
 	}
 
-	private static getFuncNameColor(data: any): string {
-		const funcName = JaffleGraph.getBoxName(data);
+	private static getFuncNameColor(d: any): string {
 		let color = 'black';
-		if (funcName[0] === '$') {
+		if (d.boxName[0] === '$') {
 			color = 'green';
-		} else if (funcName[0] === '^') {
+		} else if (d.boxName[0] === '^') {
 			color = 'blue';
 		}
 		return color;
