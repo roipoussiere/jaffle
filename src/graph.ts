@@ -4,18 +4,16 @@ import * as d3 from 'd3';
 import { load as loadYaml } from 'js-yaml';
 import * as errors from './errors';
 
-type TreeNode = d3.HierarchyNode<any> & {
-	boxName: string,
-	boxValue: string
-}
-
 enum BoxNameType {
-	Normal,
+	None,
+	Main,
+	Chained,
 	Constant,
 	Serialized
 }
 
 enum BoxValueType {
+	None,
 	StringMininotation,
 	StringExpression,
 	StringClassic,
@@ -23,8 +21,15 @@ enum BoxValueType {
 	Other
 }
 
+type TreeNode = d3.HierarchyNode<any> & {
+	boxName: string,
+	boxValue: string,
+	boxNameType: BoxNameType,
+	boxNameValue: BoxValueType,
+}
+
 const BOX_NAME_COLORS = {
-	[BoxNameType.Normal]: 'black',
+	[BoxNameType.Main]: 'black',
 	[BoxNameType.Constant]: 'green',
 	[BoxNameType.Serialized]: 'blue',
 };
@@ -168,7 +173,7 @@ class JaffleGraph {
 			.attr('stroke-width', 2)
 			.selectAll()
 			.data(this.rootNode.links().filter((d: any) => (
-				d.source.depth >= 1 && d.target.boxName[0] !== '.'
+				d.source.depth >= 1 && d.target.boxNameType !== BoxNameType.Chained
 			)))
 			.join('path')
 			.attr('d', (link: any) => d3.linkHorizontal()
@@ -194,7 +199,9 @@ class JaffleGraph {
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.style('fill', (d: any) => BOX_NAME_COLORS[d.boxNameType])
-			.style('font-weight', (d: any) => (d.boxName[0] === '.' ? 'normal' : 'bold'))
+			.style('font-weight', (d: any) => (
+				d.boxNameType === BoxNameType.Chained ? 'normal' : 'bold'
+			))
 			.text((d: any) => d.boxName);
 
 		const textParam = box.append('text')
@@ -203,53 +210,64 @@ class JaffleGraph {
 			.attr('text-anchor', 'end')
 			.style('fill', (d: any) => BOX_VALUE_COLORS[d.boxValueType])
 			.style('font-weight', (d: any) => (
-				d.boxName === '' && d.boxValue[0] === '_' ? 'bold' : 'normal'
+				d.boxNameType === BoxNameType.None
+					&& d.boxValueType === BoxValueType.StringMininotation ? 'bold' : 'normal'
 			))
-			.text((d: any) => this.getBoxTruncatedValue(d));
+			.text((d: any) => this.getBoxDisplayedValue(d));
 
 		textParam.append('title')
 			.text((d: any) => d.boxValue);
 	}
 
-	private getBoxTruncatedValue(node: TreeNode): string {
-		const value = `${node.boxValue}`;
+	private getBoxDisplayedValue(node: TreeNode): string {
+		const value = node.boxValue === null ? '' : `${node.boxValue}`;
 		const textLength = node.boxName.length + value.length + 1;
 		const cutAt = this.boxWidth - (node.boxName.length > 0 ? node.boxName.length : -1) - 2;
 		return textLength < this.boxWidth ? value : `${value.substring(0, cutAt)}…`;
 	}
 
 	private static getNodesGap(nodeA: TreeNode, nodeB: TreeNode): number {
+		const bothAreNone = nodeA.boxNameType === BoxNameType.None
+			&& nodeB.boxNameType === BoxNameType.None;
 		const isStacked = nodeA.parent === nodeB.parent
-			&& (nodeA.boxName[0] === '.' || (nodeA.boxName === '' && nodeB.boxName === ''));
+			&& (nodeA.boxNameType === BoxNameType.Chained || bothAreNone);
 
 		return isStacked ? 1 : 2;
 	}
 
 	private static getBoxNameType(node: TreeNode): BoxNameType {
-		let type = BoxNameType.Normal;
-		if (node.boxName[0] === '$') {
-			type = BoxNameType.Constant;
-		} else if (node.boxName[0] === '^') {
-			type = BoxNameType.Serialized;
+		if (node.boxName === '') {
+			return BoxNameType.None;
 		}
-		return type;
+		if (node.boxName[0] === '.') {
+			return BoxNameType.Chained;
+		}
+		if (node.boxName[0] === '$') {
+			return BoxNameType.Constant;
+		}
+		if (node.boxName[0] === '^') {
+			return BoxNameType.Serialized;
+		}
+		return BoxNameType.Main;
 	}
 
 	private static getBoxValueType(node: TreeNode): BoxValueType {
-		let color = BoxValueType.Other;
+		if (node.boxValue === null) {
+			return BoxValueType.None;
+		}
 		if (typeof node.boxValue === 'string') {
 			if (node.boxValue[0] === '_') {
-				color = BoxValueType.StringMininotation;
-			} else if (node.boxValue[0] === '=') {
-				color = BoxValueType.StringExpression;
-			} else {
-				color = BoxValueType.StringClassic;
+				return BoxValueType.StringMininotation;
 			}
+			if (node.boxValue[0] === '=') {
+				return BoxValueType.StringExpression;
+			}
+			return BoxValueType.StringClassic;
 		}
 		if (typeof node.boxValue === 'number') {
-			color = BoxValueType.Number;
+			return BoxValueType.Number;
 		}
-		return color;
+		return BoxValueType.Other;
 	}
 
 	private static isDict(data: any): boolean {
@@ -263,7 +281,7 @@ class JaffleGraph {
 	private static getFuncParam(data: any): any {
 		if (JaffleGraph.isDict(data)) {
 			const funcParam = data[Object.keys(data)[0]];
-			return funcParam === null || funcParam instanceof Object ? '' : funcParam;
+			return funcParam === null || funcParam instanceof Object ? null : funcParam;
 		}
 		return data;
 	}
