@@ -14,6 +14,8 @@ rules:
   no-underscore-dangle: off
   import/extensions: [ error, never ]
   max-len: [ warn, 100 ]
+  no-shadow: off
+  '@typescript-eslint/no-shadow': error
 
 settings:
   import/resolver:

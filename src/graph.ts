@@ -9,6 +9,34 @@ type TreeNode = d3.HierarchyNode<any> & {
 	boxValue: string
 }
 
+enum BoxNameType {
+	Normal,
+	Constant,
+	Serialized
+}
+
+enum BoxValueType {
+	StringMininotation,
+	StringExpression,
+	StringClassic,
+	Number,
+	Other
+}
+
+const BOX_NAME_COLORS = {
+	[BoxNameType.Normal]: 'black',
+	[BoxNameType.Constant]: 'green',
+	[BoxNameType.Serialized]: 'blue',
+};
+
+const BOX_VALUE_COLORS = {
+	[BoxValueType.StringClassic]: 'darkSlateGray',
+	[BoxValueType.StringMininotation]: 'green',
+	[BoxValueType.StringExpression]: 'blue',
+	[BoxValueType.Number]: 'darkRed',
+	[BoxValueType.Other]: 'red',
+};
+
 class JaffleGraph {
 	public tuneYaml = '';
 
@@ -113,6 +141,8 @@ class JaffleGraph {
 			/* eslint-disable no-param-reassign */
 			d.boxName = JaffleGraph.getFuncName(d.data);
 			d.boxValue = JaffleGraph.getFuncParam(d.data);
+			d.boxNameType = JaffleGraph.getBoxNameType(d);
+			d.boxValueType = JaffleGraph.getBoxValueType(d);
 			/* eslint-enable no-param-reassign */
 		});
 	}
@@ -163,7 +193,7 @@ class JaffleGraph {
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
-			.style('fill', (d: any) => JaffleGraph.getBoxNameColor(d))
+			.style('fill', (d: any) => BOX_NAME_COLORS[d.boxNameType])
 			.style('font-weight', (d: any) => (d.boxName[0] === '.' ? 'normal' : 'bold'))
 			.text((d: any) => d.boxName);
 
@@ -171,7 +201,7 @@ class JaffleGraph {
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', this.boxWidth * this.charWidth)
 			.attr('text-anchor', 'end')
-			.style('fill', (d: any) => JaffleGraph.getBoxValueColor(d))
+			.style('fill', (d: any) => BOX_VALUE_COLORS[d.boxValueType])
 			.style('font-weight', (d: any) => (
 				d.boxName === '' && d.boxValue[0] === '_' ? 'bold' : 'normal'
 			))
@@ -193,29 +223,29 @@ class JaffleGraph {
 		return isStacked ? 1 : 2;
 	}
 
-	private static getBoxNameColor(node: TreeNode): string {
-		let color = 'black';
+	private static getBoxNameType(node: TreeNode): BoxNameType {
+		let type = BoxNameType.Normal;
 		if (node.boxName[0] === '$') {
-			color = 'green';
+			type = BoxNameType.Constant;
 		} else if (node.boxName[0] === '^') {
-			color = 'blue';
+			type = BoxNameType.Serialized;
 		}
-		return color;
+		return type;
 	}
 
-	private static getBoxValueColor(node: TreeNode): string {
-		let color = 'gray';
+	private static getBoxValueType(node: TreeNode): BoxValueType {
+		let color = BoxValueType.Other;
 		if (typeof node.boxValue === 'string') {
 			if (node.boxValue[0] === '_') {
-				color = 'green';
+				color = BoxValueType.StringMininotation;
 			} else if (node.boxValue[0] === '=') {
-				color = 'blue';
+				color = BoxValueType.StringExpression;
 			} else {
-				color = 'darkSlateGray';
+				color = BoxValueType.StringClassic;
 			}
 		}
 		if (typeof node.boxValue === 'number') {
-			color = 'darkRed';
+			color = BoxValueType.Number;
 		}
 		return color;
 	}
