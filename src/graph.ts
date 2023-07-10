@@ -13,7 +13,35 @@ class JaffleGraph {
 
 	public container: HTMLElement;
 
-	public svg: SVGElement;
+	public domSvg: SVGElement;
+
+	public width = 800;
+
+	public height: number;
+
+	public fontSize = 14;
+
+	public boxGap = 3;
+
+	public boxMaxWidth = 20;
+
+	public charWidth = this.fontSize * 0.6;
+
+	public charHeight = this.fontSize * 1.4;
+
+	public boxWidth: number;
+
+	public boxStepX: number;
+
+	public boxStepY: number;
+
+	public minNodeY: number;
+
+	public maxNodeY: number;
+
+	private svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
+
+	private rootNode: d3.HierarchyNode<any>;
 
 	public init(container: HTMLElement): void {
 		this.container = container;
@@ -22,9 +50,13 @@ class JaffleGraph {
 	public update(tuneYaml: string): void {
 		this.tuneYaml = tuneYaml;
 		this.loadYaml();
-		this.svg?.remove();
-		this.draw();
-		this.container.appendChild(this.svg);
+
+		this.domSvg?.remove();
+		this.initTree();
+		this.drawSvg();
+		this.domSvg = <SVGElement> this.svg.node();
+
+		this.container.appendChild(this.domSvg);
 	}
 
 	public loadYaml(): void {
@@ -37,85 +69,91 @@ class JaffleGraph {
 		this.tune = tune;
 	}
 
-	public draw(): void {
-		const width = 800;
-		// const height = 400;
-		const fontSize = 14;
-		const boxGap = 3;
-		const boxMaxWidth = 20;
+	private initTree(): void {
+		this.rootNode = d3.hierarchy({ root: this.tune }, (d: any) => JaffleGraph.getChildren(d));
 
-		const charWidth = fontSize * 0.6;
-		const charHeight = fontSize * 1.4;
+		const nbcWidth = Math.floor(this.width / this.charWidth);
+		this.boxWidth = ((nbcWidth + this.boxGap) / this.rootNode.height) - this.boxGap;
+		this.boxWidth = this.boxWidth > this.boxMaxWidth ? this.boxMaxWidth : this.boxWidth;
 
-		const root = d3.hierarchy({ root: this.tune }, (d: any) => JaffleGraph.getChildren(d));
-
-		const nbcWidth = Math.floor(width / charWidth);
-		let boxWidth = ((nbcWidth + boxGap) / root.height) - boxGap;
-		boxWidth = boxWidth > boxMaxWidth ? boxMaxWidth : boxWidth;
-
-		const cellWidth = (boxWidth + boxGap) * charWidth;
-		const cellHeight = charHeight;
+		this.boxStepX = (this.boxWidth + this.boxGap) * this.charWidth;
+		this.boxStepY = this.charHeight;
 
 		const tree = d3.tree()
-			.nodeSize([cellHeight, cellWidth])
+			.nodeSize([this.boxStepY, this.boxStepX])
 			.separation((a: any, b: any) => JaffleGraph.getNodesGap(a, b));
 
-		tree(root);
+		tree(this.rootNode);
 
-		let x0 = Infinity;
-		let x1 = -Infinity;
-		root.each((d: any) => {
-			x1 = d.x > x1 ? d.x : x1;
-			x0 = d.x < x0 ? d.x : x0;
+		this.minNodeY = Infinity;
+		this.maxNodeY = -Infinity;
+		this.rootNode.each((d: any) => {
+			if (d.x > this.maxNodeY) {
+				this.maxNodeY = d.x;
+			}
+			if (d.x < this.minNodeY) {
+				this.minNodeY = d.x;
+			}
 		});
 
-		const height = x1 - x0 + cellHeight * 2;
+		this.height = this.maxNodeY - this.minNodeY + this.boxStepY * 2;
+	}
 
-		const svg = d3.create('svg')
+	private drawSvg() {
+		this.svg = d3.create('svg')
 			.attr('class', 'jaffle_graph')
-			.attr('width', width)
-			.attr('height', height)
-			.attr('viewBox', [cellWidth, x0 - cellHeight, width, height])
-			.style('font', `${fontSize}px mono`);
+			.attr('width', this.width)
+			.attr('height', this.height)
+			.attr('viewBox', [
+				this.boxStepX, this.minNodeY - this.boxStepY,
+				this.width, this.height])
+			.style('font', `${this.fontSize}px mono`);
 
-		svg.append('g') // link
+		this.drawLinks();
+		this.drawBoxes();
+	}
+
+	private drawLinks() {
+		this.svg.append('g')
 			.attr('fill', 'none')
 			.attr('stroke', '#333')
 			.attr('stroke-width', 2)
 			.selectAll()
-			.data(root.links().filter((d: any) => (
+			.data(this.rootNode.links().filter((d: any) => (
 				d.source.depth >= 1 && JaffleGraph.getFuncName(d.target.data)[0] !== '.'
 			)))
 			.join('path')
 			.attr('d', (link: any) => d3.linkHorizontal()
-				.x((d: any) => (d.y === link.source.y ? d.y + boxWidth * charWidth : d.y))
+				.x((d: any) => (d.y === link.source.y ? d.y + this.boxWidth * this.charWidth : d.y))
 				.y((d: any) => d.x)(link));
+	}
 
-		const node = svg.append('g')
+	private drawBoxes() {
+		const box = this.svg.append('g')
 			.selectAll()
-			.data(root.descendants().filter((d: any) => d.depth >= 1))
+			.data(this.rootNode.descendants().filter((d: any) => d.depth >= 1))
 			.join('g')
 			.attr('transform', (d: any) => `translate(${d.y},${d.x})`);
 
-		node.append('rect')
-			.attr('width', boxWidth * charWidth)
-			.attr('height', 1 * charHeight)
-			.attr('y', -0.5 * charHeight)
+		box.append('rect')
+			.attr('width', this.boxWidth * this.charWidth)
+			.attr('height', 1 * this.charHeight)
+			.attr('y', -0.5 * this.charHeight)
 			.attr('rx', 3)
 			.attr('ry', 3)
 			.attr('fill', '#ccc');
 
-		node.append('text')
-			.attr('y', 0.27 * charHeight)
+		box.append('text')
+			.attr('y', 0.27 * this.charHeight)
 			.style('fill', (d: any) => JaffleGraph.getFuncNameColor(d.data))
 			.style('font-weight', (d: any) => (
 				JaffleGraph.getFuncName(d.data)[0] === '.' ? 'normal' : 'bold'
 			))
 			.text((d: any) => JaffleGraph.getFuncName(d.data));
 
-		const textParam = node.append('text')
-			.attr('y', 0.27 * charHeight)
-			.attr('x', boxWidth * charWidth)
+		const textParam = box.append('text')
+			.attr('y', 0.27 * this.charHeight)
+			.attr('x', this.boxWidth * this.charWidth)
 			.attr('text-anchor', 'end')
 			.style('fill', (d: any) => JaffleGraph.getFuncParamColor(d.data))
 			.style('font-weight', (d: any) => (
@@ -127,15 +165,14 @@ class JaffleGraph {
 				const name = JaffleGraph.getFuncName(d.data);
 				const value = `${JaffleGraph.getFuncParam(d.data)}`;
 				const textLength = name.length + value.length + 1;
-				return textLength < boxWidth
+				const truncateAt = this.boxWidth - (name.length > 0 ? name.length : -1) - 2;
+				return textLength < this.boxWidth
 					? value
-					: `${value.substring(0, boxWidth - (name.length > 0 ? name.length : -1) - 2)}…`;
+					: `${value.substring(0, truncateAt)}…`;
 			});
 
 		textParam.append('title')
 			.text((d: any) => JaffleGraph.getFuncParam(d.data));
-
-		this.svg = <SVGElement>svg.node();
 	}
 
 	private static getNodesGap(nodeA: any, nodeB: any): number {
