@@ -7,7 +7,7 @@ title: "Home page"
 
 # Jaffle
 
-A yaml-based syntax for [Tidal-cycles](https://tidalcycles.org/), based on [Strudel](https://strudel.tidalcycles.org).
+An hybrid yaml/node editor for [Tidal-cycles](https://tidalcycles.org/), based on [Strudel](https://strudel.tidalcycles.org).
 {.subtitle}
 
 Jaffle aims to make algorithmic music more accessible for people who are not familiar with programming languages.
@@ -15,7 +15,7 @@ Jaffle aims to make algorithmic music more accessible for people who are not fam
 
 You can start to discover some tunes below (translated from the [Strudel examples](https://strudel.tidalcycles.org/examples/)), then take a look at the [syntax page](/syntax) for more details and play with the [larger editor](editor/).
 
-The graph below the editor represents the tune and is currently an experimental feature.
+The node editor is not editable and only acts as tune visualization for now. Soon it will be possible to switch between yaml and node editor.
 
 Select tune: {{< select_tune >}}
 

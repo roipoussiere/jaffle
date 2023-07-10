@@ -27,7 +27,7 @@ git clone https://github.com/roipoussiere/jaffle.git
 cd jaffle
 ```
 
-### Install dependencies ([npm](https://www.npmjs.com/))
+### Install dependencies
 
 ```
 npm install
@@ -35,13 +35,13 @@ npm install
 
 Or use Yarn or Pnpm if you prefer.
 
-### Start the website ([Hugo](https://gohugo.io/))
+### Start the website
 
 ```
 npm run dev
 ```
 
-### Run tests ([Jest](https://jestjs.io))
+### Run tests
 
 ```
 npm test
@@ -49,7 +49,7 @@ npm test
 
 If you use VSCode, you may want to install the [Jest extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest).
 
-### Run linter ([ESLint](https://eslint.org/))
+### Run linter
 
 ```
 npm run lint

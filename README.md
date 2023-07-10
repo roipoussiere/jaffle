@@ -8,7 +8,7 @@ Check out the [demo website](https://roipoussiere.frama.io)!
 
 ## Introduction
 
-Jaffle is a yaml-based syntax for [Tidal-cycles](https://tidalcycles.org/), based on [Strudel](https://strudel.tidalcycles.org).
+Jaffle is an hybrid yaml/node editor for [Tidal-cycles](https://tidalcycles.org/), based on [Strudel](https://strudel.tidalcycles.org).
 
 It aims to make algorithmic music more accessible for people who are not familiar with programming languages.
 
@@ -18,16 +18,18 @@ Under the hood, Jaffle is a transpiler generating JavaScript code, which is then
 
 ## Features
 
-- tune visualization with a graph
-- easy to read syntax (albeit more verbose than Strudel)
+- tune visualization
+- easy to read yaml syntax (albeit ususally a bit more verbose than Strudel, because less compact)
 - use lambda functions, expressions, variable definitions, [and more](https://roipoussiere.frama.io/jaffle/syntax/)
-- includes all Strudel examples converted to Jaffle
+- includes all Strudel examples converted into Jaffle syntax
 - extensive [unit tests](tests/transpiler.test.ts)
 
 ## Roadmap
 
-- allow to use the grah as an editor and switch between text and graph to edit a tune
-- better syntax highlighting
+- make the graph editable and allow to switch between yaml and node editor
+- improve node editor layout
+- allow to import strudel tune
+- create a desktop app
 - code completion
 - own documentation
 
@@ -35,13 +37,24 @@ Under the hood, Jaffle is a transpiler generating JavaScript code, which is then
 
 Go to the [syntax section](https://roipoussiere.frama.io/jaffle/syntax) in the Jaffle website (or alternatively read [its source](./website/content/syntax.md) if necessary).
 
+## Technical stack
+
+Jaffle stands on the shoulders of giants:
+
+- music code interpreter: [Strudel](https://strudel.tidalcycles.org/)
+- graph renderer: [D3](https://d3js.org/)
+- text editor: [CodeMirror](https://codemirror.net/)
+- website generator: [Hugo](https://gohugo.io/)
+- unit tests framework: [Jest](https://jestjs.io)
+- linter: [ESLint](https://eslint.org/)
+
 ## Contributing
 
 See the [contribution guide](./CONTRIBUTING.md)!
 
 ## Authorship
 
-### Jaffle transpiler and demo website
+### Jaffle transpiler and website
 
 - credits: Nathanaël Jourdane and contributors
 - license: [AGPL-3.0](./LICENSE)
