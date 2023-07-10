@@ -70,7 +70,11 @@ class JaffleGraph {
 	}
 
 	private initTree(): void {
-		this.rootNode = d3.hierarchy({ root: this.tune }, (d: any) => JaffleGraph.getChildren(d));
+		this.rootNode = d3.hierarchy(
+			{ root: this.tune },
+			(data: any) => JaffleGraph.getChildren(data),
+		);
+		this.computeTree();
 
 		const nbcWidth = Math.floor(this.width / this.charWidth);
 		this.boxWidth = ((nbcWidth + this.boxGap) / this.rootNode.height) - this.boxGap;
@@ -99,6 +103,15 @@ class JaffleGraph {
 		this.height = this.maxNodeY - this.minNodeY + this.boxStepY * 2;
 	}
 
+	private computeTree() {
+		this.rootNode.each((d: any) => {
+			/* eslint-disable no-param-reassign */
+			d.boxName = JaffleGraph.getBoxName(d.data);
+			d.boxValue = JaffleGraph.getBoxValue(d.data);
+			/* eslint-enable no-param-reassign */
+		});
+	}
+
 	private drawSvg() {
 		this.svg = d3.create('svg')
 			.attr('class', 'jaffle_graph')
@@ -120,7 +133,7 @@ class JaffleGraph {
 			.attr('stroke-width', 2)
 			.selectAll()
 			.data(this.rootNode.links().filter((d: any) => (
-				d.source.depth >= 1 && JaffleGraph.getFuncName(d.target.data)[0] !== '.'
+				d.source.depth >= 1 && d.target.boxName[0] !== '.'
 			)))
 			.join('path')
 			.attr('d', (link: any) => d3.linkHorizontal()
@@ -146,10 +159,8 @@ class JaffleGraph {
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.style('fill', (d: any) => JaffleGraph.getFuncNameColor(d.data))
-			.style('font-weight', (d: any) => (
-				JaffleGraph.getFuncName(d.data)[0] === '.' ? 'normal' : 'bold'
-			))
-			.text((d: any) => JaffleGraph.getFuncName(d.data));
+			.style('font-weight', (d: any) => (d.boxName[0] === '.' ? 'normal' : 'bold'))
+			.text((d: any) => d.boxName);
 
 		const textParam = box.append('text')
 			.attr('y', 0.27 * this.charHeight)
@@ -157,39 +168,31 @@ class JaffleGraph {
 			.attr('text-anchor', 'end')
 			.style('fill', (d: any) => JaffleGraph.getFuncParamColor(d.data))
 			.style('font-weight', (d: any) => (
-				JaffleGraph.getFuncName(d.data) === ''
-					&& JaffleGraph.getFuncParam(d.data)[0] === '_'
-					? 'bold' : 'normal'
+				d.boxName === '' && d.boxValue[0] === '_' ? 'bold' : 'normal'
 			))
 			.text((d: any) => {
-				const name = JaffleGraph.getFuncName(d.data);
-				const value = `${JaffleGraph.getFuncParam(d.data)}`;
-				const textLength = name.length + value.length + 1;
-				const truncateAt = this.boxWidth - (name.length > 0 ? name.length : -1) - 2;
-				return textLength < this.boxWidth
-					? value
-					: `${value.substring(0, truncateAt)}…`;
+				const value = `${d.boxValue}`;
+				const textLength = d.boxName.length + value.length + 1;
+				const cutAt = this.boxWidth - (d.boxName.length > 0 ? d.boxName.length : -1) - 2;
+				return textLength < this.boxWidth ? value : `${value.substring(0, cutAt)}…`;
 			});
 
 		textParam.append('title')
-			.text((d: any) => JaffleGraph.getFuncParam(d.data));
+			.text((d: any) => d.boxValue);
 	}
 
 	private static getNodesGap(nodeA: any, nodeB: any): number {
-		const nameA = JaffleGraph.getFuncName(nodeA.data);
-		const nameB = JaffleGraph.getFuncName(nodeB.data);
-
 		const isStacked = nodeA.parent === nodeB.parent
-			&& (nameA[0] === '.' || (nameA === '' && nameB === ''));
+			&& (nodeA.boxName[0] === '.' || (nodeA.boxName === '' && nodeB.boxName === ''));
 
 		return isStacked ? 1 : 2;
 	}
 
-	private static getFuncName(data: any): string {
+	private static getBoxName(data: any): string {
 		return JaffleGraph.isDict(data) ? Object.keys(data)[0] : '';
 	}
 
-	private static getFuncParam(data: any): any {
+	private static getBoxValue(data: any): any {
 		if (JaffleGraph.isDict(data)) {
 			const funcParam = data[Object.keys(data)[0]];
 			return funcParam === null || funcParam instanceof Object ? '' : funcParam;
@@ -198,7 +201,7 @@ class JaffleGraph {
 	}
 
 	private static getFuncParamColor(data: any): string {
-		const param = JaffleGraph.getFuncParam(data);
+		const param = JaffleGraph.getBoxValue(data);
 		let color = 'gray';
 		if (typeof param === 'string') {
 			if (param[0] === '_') {
@@ -216,7 +219,7 @@ class JaffleGraph {
 	}
 
 	private static getFuncNameColor(data: any): string {
-		const funcName = JaffleGraph.getFuncName(data);
+		const funcName = JaffleGraph.getBoxName(data);
 		let color = 'black';
 		if (funcName[0] === '$') {
 			color = 'green';
@@ -231,7 +234,7 @@ class JaffleGraph {
 	}
 
 	private static getChildren(data: any): Array<any> {
-		const name = JaffleGraph.getFuncName(data);
+		const name = JaffleGraph.getBoxName(data);
 		if (name !== '') {
 			if (data[name] instanceof Array) {
 				return data[name];
