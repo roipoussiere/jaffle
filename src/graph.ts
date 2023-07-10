@@ -84,7 +84,7 @@ class JaffleGraph {
 			.attr('stroke-width', 2)
 			.selectAll()
 			.data(root.links().filter((d: any) => (
-				d.source.depth >= 1 && JaffleGraph.getName(d.target.data)[0] !== '.'
+				d.source.depth >= 1 && JaffleGraph.getFuncName(d.target.data)[0] !== '.'
 			)))
 			.join('path')
 			.attr('d', (link: any) => d3.linkHorizontal()
@@ -131,8 +131,8 @@ class JaffleGraph {
 	}
 
 	private static getNodesGap(nodeA: any, nodeB: any): number {
-		const nameA = JaffleGraph.getName(nodeA.data);
-		const nameB = JaffleGraph.getName(nodeB.data);
+		const nameA = JaffleGraph.getFuncName(nodeA.data);
+		const nameB = JaffleGraph.getFuncName(nodeB.data);
 
 		const isStacked = nodeA.parent === nodeB.parent
 			&& (nameA[0] === '.' || (nameA === '' && nameB === ''));
@@ -146,12 +146,8 @@ class JaffleGraph {
 
 	private static getFuncParam(data: any): any {
 		if (JaffleGraph.isDict(data)) {
-			const funcName = Object.keys(data)[0];
-			const funcParam = data[funcName];
-			if (funcParam === null || JaffleGraph.isList(funcParam)) {
-				return '';
-			}
-			return funcParam;
+			const funcParam = data[Object.keys(data)[0]];
+			return funcParam === null || funcParam instanceof Object ? '' : funcParam;
 		}
 		return data;
 	}
@@ -189,17 +185,17 @@ class JaffleGraph {
 		return data instanceof Object && !(data instanceof Array);
 	}
 
-	private static isList(data: any): boolean {
-		return data instanceof Array;
-	}
-
-	private static getName(data: any): string {
-		return JaffleGraph.isDict(data) ? Object.keys(data)[0] : '';
-	}
-
 	private static getChildren(data: any): Array<any> {
-		const name = JaffleGraph.getName(data);
-		return (name !== '' && data[name] instanceof Array) ? data[name] : [];
+		const name = JaffleGraph.getFuncName(data);
+		if (name !== '') {
+			if (data[name] instanceof Array) {
+				return data[name];
+			}
+			if (data[name] instanceof Object) {
+				return [data[name]];
+			}
+		}
+		return [];
 	}
 }
 
