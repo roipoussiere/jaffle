@@ -113,7 +113,7 @@ class JaffleGraph {
 			))
 			.text((d: any) => JaffleGraph.getFuncName(d.data));
 
-		node.append('text')
+		const textParam = node.append('text')
 			.attr('y', 0.27 * charHeight)
 			.attr('x', boxWidth * charWidth)
 			.attr('text-anchor', 'end')
@@ -131,6 +131,9 @@ class JaffleGraph {
 					? value
 					: `${value.substring(0, boxWidth - (name.length > 0 ? name.length : -1) - 2)}…`;
 			});
+
+		textParam.append('title')
+			.text((d: any) => JaffleGraph.getFuncParam(d.data));
 
 		this.svg = <SVGElement>svg.node();
 	}
