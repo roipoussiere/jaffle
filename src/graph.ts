@@ -118,6 +118,11 @@ class JaffleGraph {
 			.attr('x', boxWidth * charWidth)
 			.attr('text-anchor', 'end')
 			.style('fill', (d: any) => JaffleGraph.getFuncParamColor(d.data))
+			.style('font-weight', (d: any) => (
+				JaffleGraph.getFuncName(d.data) === ''
+					&& JaffleGraph.getFuncParam(d.data)[0] === '_'
+					? 'bold' : 'normal'
+			))
 			.text((d: any) => {
 				const name = JaffleGraph.getFuncName(d.data);
 				const value = `${JaffleGraph.getFuncParam(d.data)}`;
