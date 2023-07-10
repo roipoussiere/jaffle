@@ -134,8 +134,9 @@ class JaffleGraph {
 		const nameA = JaffleGraph.getName(nodeA.data);
 		const nameB = JaffleGraph.getName(nodeB.data);
 
-		const isStacked = (nameA[0] === '.' && nodeA.parent === nodeB.parent)
-			|| (nameA === '' && nameB === '');
+		const isStacked = nodeA.parent === nodeB.parent
+			&& (nameA[0] === '.' || (nameA === '' && nameB === ''));
+
 		return isStacked ? 1 : 2;
 	}
 
