@@ -11,8 +11,6 @@ describe('Testing errors', () => {
 		expect(() => { throw new e.BadStringJaffleError(''); }).toThrow(e.BadStringJaffleError);
 		expect(() => { throw new e.BadFunctionJaffleError(''); }).toThrow(e.BadFunctionJaffleError);
 		expect(() => { throw new e.BadListJaffleError(''); }).toThrow(e.BadListJaffleError);
-		expect(() => { throw new e.BadInitBlockJaffleError(''); })
-			.toThrow(e.BadInitBlockJaffleError);
 		expect(() => { throw new e.BadDocumentJaffleError(''); }).toThrow(e.BadDocumentJaffleError);
 	});
 });

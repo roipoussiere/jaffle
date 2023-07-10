@@ -2,7 +2,7 @@
 # @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
 # @by Felix Roos
 
-- _samples^:
+- samples^:
   - flbass:
     - 00_c2_finger_long_neck.wav
     - 01_c2_finger_short_neck.wav
@@ -12,7 +12,7 @@
     - 05_c2_pick_short.wav
     - 06_c2_palm_mute.wav
   - github:cleary/samples-flbass/main/
-- _samples^:
+- samples^:
   - bd:
     - bd/BT0AADA.wav
     - bd/BT0AAD0.wav

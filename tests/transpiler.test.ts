@@ -69,23 +69,6 @@ describe('Testing toJaffleFunction()', () => {
 	});
 });
 
-describe('Testing extractJaffleInitBlock()', () => {
-	test('List of init or main functions can be split into one of those functions block', () => {
-		expect(t.extractJaffleInitBlock([{ foo: 42 }])).toEqual([[], [{ foo: 42 }]]);
-		expect(t.extractJaffleInitBlock([{ _foo: 42 }])).toEqual([[{ _foo: 42 }], []]);
-		expect(t.extractJaffleInitBlock([{ $foo: 42 }])).toEqual([[{ $foo: 42 }], []]);
-	});
-
-	test('List of mixed functions can be split into an init block and a main block', () => {
-		expect(t.extractJaffleInitBlock([{ _a: 1 }, { b: 2 }])).toEqual([[{ _a: 1 }], [{ b: 2 }]]);
-		expect(t.extractJaffleInitBlock([{ b: 2 }, { _a: 1 }])).toEqual([[{ _a: 1 }], [{ b: 2 }]]);
-		expect(t.extractJaffleInitBlock([{ _a: 1 }, { $b: 2 }, { c: 3 }, { d: 4 }]))
-			.toEqual([[{ _a: 1 }, { $b: 2 }], [{ c: 3 }, { d: 4 }]]);
-		expect(t.extractJaffleInitBlock([{ c: 3 }, { _a: 1 }, { d: 4 }, { $b: 2 }]))
-			.toEqual([[{ _a: 1 }, { $b: 2 }], [{ c: 3 }, { d: 4 }]]);
-	});
-});
-
 describe('Testing getJaffleFuncParams()', () => {
 	test('Null value passed in Jaffle function parameters is an empty array', () => {
 		expect(t.getJaffleFuncParams(null)).toEqual([]);
@@ -267,8 +250,7 @@ describe('Testing jaffleFuncToJs()', () => {
 		expect(t.jaffleFuncToJs({ a: '_foo' })).toBe("a(mini('foo'))");
 	});
 
-	test('init functions are transpiled into a call to init functions', () => {
-		expect(t.jaffleFuncToJs({ _a: 42 })).toBe('a(42)');
+	test('constant definitions are transpiled into code containing constant definitions', () => {
 		expect(t.jaffleFuncToJs({ $a: 42 })).toBe('const _a = 42');
 	});
 
@@ -369,6 +351,7 @@ describe('Testing jaffleParamToJs()', () => {
 describe('Testing jaffleDocumentToJs()', () => {
 	test('Yaml documents containing an array of valid functions are transpiled into code', () => {
 		expect(t.jaffleDocumentToJs('[{ foo: 42 }]')).toBe('return foo(42);');
+		expect(t.jaffleDocumentToJs('[{ a: 1 }, { b: 2 }]')).toBe('a(1);\nreturn b(2);');
 		expect(t.jaffleDocumentToJs('[{ foo: bar }]')).toBe("return foo('bar');");
 		expect(t.jaffleDocumentToJs('[{ foo: }]')).toBe('return foo();');
 		expect(t.jaffleDocumentToJs('[{ foo: [1, 2, 3]}]')).toBe('return foo(1, 2, 3);');
@@ -378,8 +361,7 @@ describe('Testing jaffleDocumentToJs()', () => {
 		expect(t.jaffleDocumentToJs("[{ $a: 1 }, { b: [ '=a', { .c: 2 }] }]"))
 			.toBe('const _a = 1;\nreturn b(_a.c(2));');
 		expect(t.jaffleDocumentToJs("['_abc']")).toBe("return mini('abc');");
-		expect(t.jaffleDocumentToJs('[{ _foo: 1 }, { bar: 2 }]')).toBe('foo(1);\nreturn bar(2);');
-		expect(t.jaffleDocumentToJs('[{ _a: 1 }, { _b: 2 }, { c: 3 }]'))
+		expect(t.jaffleDocumentToJs('[{ a: 1 }, { b: 2 }, { c: 3 }]'))
 			.toBe('a(1);\nb(2);\nreturn c(3);');
 	});
 
@@ -396,7 +378,6 @@ describe('Testing jaffleDocumentToJs()', () => {
 
 	test('Trying to transpile a yaml document containing a bad array on root fails', () => {
 		expect(() => t.jaffleDocumentToJs('[{.b: 1}, {a: 2}]')).toThrow(e.BadFunctionJaffleError);
-		expect(() => t.jaffleDocumentToJs('[{a: 1}, {b: 2}]')).toThrow(e.BadDocumentJaffleError);
 		expect(() => t.jaffleDocumentToJs('[]')).toThrow(e.BadDocumentJaffleError);
 	});
 });

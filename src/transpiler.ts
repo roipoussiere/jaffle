@@ -8,7 +8,6 @@ type JaffleList = Array<JaffleAny>
 type JaffleFunction = { [funcName: string]: JaffleAny }
 
 const CHAINED_FUNC_PREFIX = '.';
-const INIT_FUNC_PREFIX = '_';
 const VAR_FUNC_PREFIX = '$';
 const SERIALIZE_FUNC_SUFFIX = '^';
 
@@ -75,24 +74,6 @@ export function toJaffleFunction(thing: JaffleAny): JaffleFunction {
 		return func;
 	}
 	throw new errors.BadFunctionJaffleError('Not a function');
-}
-
-/**
- * Extract initialization functions (those prefixed with `_` or `$`) declared in document root.
- * @param root the document root
- * @returns an array of two elements: init block and main block, both containing a list of functions
- */
-export function extractJaffleInitBlock(root: JaffleList): [JaffleList, JaffleList] {
-	const initBlock: JaffleList = [];
-	const mainBlock: JaffleList = [];
-
-	root.forEach((param) => {
-		const func = toJaffleFunction(param);
-		const funcName = getJaffleFuncName(func);
-		const isInitBlock = [INIT_FUNC_PREFIX, VAR_FUNC_PREFIX].includes(funcName[0]);
-		(isInitBlock ? initBlock : mainBlock).push(param);
-	});
-	return [initBlock, mainBlock];
 }
 
 /**
@@ -254,7 +235,7 @@ export function jaffleFuncToJs(func: JaffleFunction): string {
 	let js: string;
 	const isVarDef = newFuncName[0] === VAR_FUNC_PREFIX;
 
-	newFuncName = [CHAINED_FUNC_PREFIX, INIT_FUNC_PREFIX, VAR_FUNC_PREFIX].includes(newFuncName[0])
+	newFuncName = [CHAINED_FUNC_PREFIX, VAR_FUNC_PREFIX].includes(newFuncName[0])
 		? newFuncName.substring(1) : newFuncName;
 
 	if (newFuncName[0] === newFuncName[0].toUpperCase()) {
@@ -312,7 +293,6 @@ export function jaffleParamToJs(param: JaffleAny): string {
  */
 export function jaffleDocumentToJs(inputYaml: string): string {
 	let tune: JaffleAny;
-	let initBlock: JaffleList;
 	let outputJs = '';
 
 	try {
@@ -322,16 +302,15 @@ export function jaffleDocumentToJs(inputYaml: string): string {
 	}
 
 	if (tune instanceof Array) {
-		[initBlock, tune] = extractJaffleInitBlock(<JaffleList>tune);
+		const tuneGroups = jaffleParamsToJsGroups(tune);
 
-		outputJs += jaffleParamsToJsGroups(initBlock).join(';\n');
-		outputJs += outputJs === '' ? '' : ';\n';
-
-		const groups = jaffleParamsToJsGroups(tune);
-		if (groups.length !== 1) {
-			throw new errors.BadDocumentJaffleError('document root must contain one main function');
+		if (tuneGroups.length === 0) {
+			throw new errors.BadDocumentJaffleError('document must contain at least one function');
 		}
-		outputJs += `return ${groups[0]};`;
+
+		const tuneMain = tuneGroups.pop();
+		outputJs += tuneGroups.map((group) => `${group};\n`).join('');
+		outputJs += `return ${tuneMain};`;
 	} else {
 		throw new errors.BadDocumentJaffleError(
 			`Document root must be an array, not ${typeof tune}`,

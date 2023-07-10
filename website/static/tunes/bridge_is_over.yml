@@ -2,7 +2,7 @@
 # @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
 # @by Felix Roos, bassline by BDP - The Bridge Is Over
 
-- _samples^:
+- samples^:
     mad: https://freesound.org/data/previews/22/22274_109943-lq.mp3
 
 - stack:

@@ -148,30 +148,6 @@ To pass structured data in a parameter, you must add `^` after the attribute nam
 
 {{< code "h" >}}
 ```js
-s("sd oh*2 hh")
-  .pianoroll({
-    autorange: 1,
-    vertical: 1,
-    fold: 0 })
-```
-{{< code "m" >}}
-```yml
-- s: sd oh*2 hh
-- pianoroll^:
-    autorange: 1
-    vertical: 1
-    fold: 0
-```
-{{< code "f" >}}
-
-To serialize data on a specific argument, add its index next to `^`, starting from 1 (ie. `foo^1:`).
-
-## Out of scope functions
-
-Some functions like `samples` are not part of the main music structure like `stack` or `cat`, you must prepend their name with `_`:
-
-{{< code "h" >}}
-```js
 samples({
   bd: [
     'bd/BT0AADA.wav',
@@ -187,7 +163,7 @@ s("<bd:0 bd:1>,~ <sd:0 sd:1>,[hh:0 hh:1]*2")
 ```
 {{< code "m" >}}
 ```yml
-- _samples^:
+- samples^:
   - bd:
     - bd/BT0AADA.wav
     - bd/BT0AAD0.wav
@@ -202,7 +178,7 @@ s("<bd:0 bd:1>,~ <sd:0 sd:1>,[hh:0 hh:1]*2")
 ```
 {{< code "f" >}}
 
-Note the both use of the prefix `_`, and the suffix `^` to serialize the parameters.
+To serialize data on a specific argument, add its index next to `^`, starting from 1 (ie. `foo^1:`).
 
 ## Signals
 

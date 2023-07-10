@@ -24,7 +24,7 @@
   - cat: [ D3 major, G3 major ]
   - .slow: 8
 
-- _samples^:
+- samples^:
   - bd: 344/344757_1676145-lq.mp3
     sn: 387/387186_7255534-lq.mp3
     hh: 561/561241_12517458-lq.mp3

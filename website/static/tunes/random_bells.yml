@@ -2,7 +2,7 @@
 # @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
 # @by Felix Roos
 
-- _samples^:
+- samples^:
     bell:
       c6: https://freesound.org/data/previews/411/411089_5121236-lq.mp3
     bass:
