@@ -4,6 +4,11 @@ import * as d3 from 'd3';
 import { load as loadYaml } from 'js-yaml';
 import * as errors from './errors';
 
+type TreeNode = d3.HierarchyNode<any> & {
+	boxName: string,
+	boxValue: string
+}
+
 class JaffleGraph {
 	public tuneYaml = '';
 
@@ -181,7 +186,7 @@ class JaffleGraph {
 			.text((d: any) => d.boxValue);
 	}
 
-	private static getNodesGap(nodeA: any, nodeB: any): number {
+	private static getNodesGap(nodeA: TreeNode, nodeB: TreeNode): number {
 		const isStacked = nodeA.parent === nodeB.parent
 			&& (nodeA.boxName[0] === '.' || (nodeA.boxName === '' && nodeB.boxName === ''));
 
@@ -200,7 +205,7 @@ class JaffleGraph {
 		return data;
 	}
 
-	private static getFuncParamColor(d: any): string {
+	private static getFuncParamColor(d: TreeNode): string {
 		let color = 'gray';
 		if (typeof d.boxValue === 'string') {
 			if (d.boxValue[0] === '_') {
@@ -217,7 +222,7 @@ class JaffleGraph {
 		return color;
 	}
 
-	private static getFuncNameColor(d: any): string {
+	private static getFuncNameColor(d: TreeNode): string {
 		let color = 'black';
 		if (d.boxName[0] === '$') {
 			color = 'green';
