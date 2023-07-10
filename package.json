@@ -1,14 +1,14 @@
 {
 	"name": "jaffle",
-	"version": "0.2.0",
-	"description": "A yaml-based syntax for Tidal-cycles, based on Strudel.",
+	"version": "0.3.0",
+	"description": "An hybrid yaml/node editor for Tidal Cycles, based on Strudel.",
 	"keywords": [
-		"yaml",
-		"strudel",
-		"tidal",
 		"music",
-		"livecoding",
-		"algorave"
+		"node-editor",
+		"yaml",
+		"live-coding",
+		"algorave",
+		"tidal-cycles"
 	],
 	"homepage": "https://roipoussiere.frama.io/jaffle",
 	"bugs": "https://github.com/roipoussiere/jaffle/issues",
