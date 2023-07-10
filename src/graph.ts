@@ -7,6 +7,7 @@ import * as errors from './errors';
 enum BoxNameType {
 	None,
 	Main,
+	MainMini,
 	Chained,
 	Constant,
 	Serialized
@@ -25,7 +26,7 @@ type TreeNode = d3.HierarchyNode<any> & {
 	boxName: string,
 	boxValue: string,
 	boxNameType: BoxNameType,
-	boxNameValue: BoxValueType,
+	boxValueType: BoxValueType,
 }
 
 const BOX_NAME_COLORS = {
@@ -146,8 +147,8 @@ class JaffleGraph {
 			/* eslint-disable no-param-reassign */
 			d.boxName = JaffleGraph.getFuncName(d.data);
 			d.boxValue = JaffleGraph.getFuncParam(d.data);
-			d.boxNameType = JaffleGraph.getBoxNameType(d);
 			d.boxValueType = JaffleGraph.getBoxValueType(d);
+			d.boxNameType = JaffleGraph.getBoxNameType(d);
 			/* eslint-enable no-param-reassign */
 		});
 	}
@@ -206,12 +207,15 @@ class JaffleGraph {
 
 		const textParam = box.append('text')
 			.attr('y', 0.27 * this.charHeight)
-			.attr('x', this.boxWidth * this.charWidth)
-			.attr('text-anchor', 'end')
+			.attr('x', (d: any) => (
+				d.boxNameType === BoxNameType.MainMini ? 0 : this.boxWidth * this.charWidth
+			))
+			.attr('text-anchor', (d: any) => (
+				d.boxNameType === BoxNameType.MainMini ? 'start' : 'end'
+			))
 			.style('fill', (d: any) => BOX_VALUE_COLORS[d.boxValueType])
 			.style('font-weight', (d: any) => (
-				d.boxNameType === BoxNameType.None
-					&& d.boxValueType === BoxValueType.StringMininotation ? 'bold' : 'normal'
+				d.boxNameType === BoxNameType.MainMini ? 'bold' : 'normal'
 			))
 			.text((d: any) => this.getBoxDisplayedValue(d));
 
@@ -237,6 +241,9 @@ class JaffleGraph {
 
 	private static getBoxNameType(node: TreeNode): BoxNameType {
 		if (node.boxName === '') {
+			if (node.boxValueType === BoxValueType.StringMininotation) {
+				return BoxNameType.MainMini;
+			}
 			return BoxNameType.None;
 		}
 		if (node.boxName[0] === '.') {
