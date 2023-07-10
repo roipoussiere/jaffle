@@ -77,7 +77,7 @@ class JaffleGraph {
 	private initTree(): void {
 		this.rootNode = d3.hierarchy(
 			{ root: this.tune },
-			(data: any) => JaffleGraph.getChildren(data),
+			(data: any) => JaffleGraph.getFuncParams(data),
 		);
 		this.computeTree();
 
@@ -111,8 +111,8 @@ class JaffleGraph {
 	private computeTree() {
 		this.rootNode.each((d: any) => {
 			/* eslint-disable no-param-reassign */
-			d.boxName = JaffleGraph.getBoxName(d.data);
-			d.boxValue = JaffleGraph.getBoxValue(d.data);
+			d.boxName = JaffleGraph.getFuncName(d.data);
+			d.boxValue = JaffleGraph.getFuncParam(d.data);
 			/* eslint-enable no-param-reassign */
 		});
 	}
@@ -163,7 +163,7 @@ class JaffleGraph {
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
-			.style('fill', (d: any) => JaffleGraph.getFuncNameColor(d))
+			.style('fill', (d: any) => JaffleGraph.getBoxNameColor(d))
 			.style('font-weight', (d: any) => (d.boxName[0] === '.' ? 'normal' : 'bold'))
 			.text((d: any) => d.boxName);
 
@@ -171,7 +171,7 @@ class JaffleGraph {
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', this.boxWidth * this.charWidth)
 			.attr('text-anchor', 'end')
-			.style('fill', (d: any) => JaffleGraph.getFuncParamColor(d))
+			.style('fill', (d: any) => JaffleGraph.getBoxValueColor(d))
 			.style('font-weight', (d: any) => (
 				d.boxName === '' && d.boxValue[0] === '_' ? 'bold' : 'normal'
 			))
@@ -193,41 +193,29 @@ class JaffleGraph {
 		return isStacked ? 1 : 2;
 	}
 
-	private static getBoxName(data: any): string {
-		return JaffleGraph.isDict(data) ? Object.keys(data)[0] : '';
-	}
-
-	private static getBoxValue(data: any): any {
-		if (JaffleGraph.isDict(data)) {
-			const funcParam = data[Object.keys(data)[0]];
-			return funcParam === null || funcParam instanceof Object ? '' : funcParam;
+	private static getBoxNameColor(node: TreeNode): string {
+		let color = 'black';
+		if (node.boxName[0] === '$') {
+			color = 'green';
+		} else if (node.boxName[0] === '^') {
+			color = 'blue';
 		}
-		return data;
+		return color;
 	}
 
-	private static getFuncParamColor(d: TreeNode): string {
+	private static getBoxValueColor(node: TreeNode): string {
 		let color = 'gray';
-		if (typeof d.boxValue === 'string') {
-			if (d.boxValue[0] === '_') {
+		if (typeof node.boxValue === 'string') {
+			if (node.boxValue[0] === '_') {
 				color = 'green';
-			} else if (d.boxValue[0] === '=') {
+			} else if (node.boxValue[0] === '=') {
 				color = 'blue';
 			} else {
 				color = 'darkSlateGray';
 			}
 		}
-		if (typeof d.boxValue === 'number') {
+		if (typeof node.boxValue === 'number') {
 			color = 'darkRed';
-		}
-		return color;
-	}
-
-	private static getFuncNameColor(d: TreeNode): string {
-		let color = 'black';
-		if (d.boxName[0] === '$') {
-			color = 'green';
-		} else if (d.boxName[0] === '^') {
-			color = 'blue';
 		}
 		return color;
 	}
@@ -236,8 +224,20 @@ class JaffleGraph {
 		return data instanceof Object && !(data instanceof Array);
 	}
 
-	private static getChildren(data: any): Array<any> {
-		const name = JaffleGraph.getBoxName(data);
+	private static getFuncName(data: any): string {
+		return JaffleGraph.isDict(data) ? Object.keys(data)[0] : '';
+	}
+
+	private static getFuncParam(data: any): any {
+		if (JaffleGraph.isDict(data)) {
+			const funcParam = data[Object.keys(data)[0]];
+			return funcParam === null || funcParam instanceof Object ? '' : funcParam;
+		}
+		return data;
+	}
+
+	private static getFuncParams(data: any): Array<any> {
+		const name = JaffleGraph.getFuncName(data);
 		if (name !== '') {
 			if (data[name] instanceof Array) {
 				return data[name];
