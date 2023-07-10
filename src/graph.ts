@@ -205,15 +205,17 @@ class JaffleGraph {
 			.style('font-weight', (d: any) => (
 				d.boxName === '' && d.boxValue[0] === '_' ? 'bold' : 'normal'
 			))
-			.text((d: any) => {
-				const value = `${d.boxValue}`;
-				const textLength = d.boxName.length + value.length + 1;
-				const cutAt = this.boxWidth - (d.boxName.length > 0 ? d.boxName.length : -1) - 2;
-				return textLength < this.boxWidth ? value : `${value.substring(0, cutAt)}…`;
-			});
+			.text((d: any) => this.getBoxTruncatedValue(d));
 
 		textParam.append('title')
 			.text((d: any) => d.boxValue);
+	}
+
+	private getBoxTruncatedValue(node: TreeNode): string {
+		const value = `${node.boxValue}`;
+		const textLength = node.boxName.length + value.length + 1;
+		const cutAt = this.boxWidth - (node.boxName.length > 0 ? node.boxName.length : -1) - 2;
+		return textLength < this.boxWidth ? value : `${value.substring(0, cutAt)}…`;
 	}
 
 	private static getNodesGap(nodeA: TreeNode, nodeB: TreeNode): number {
