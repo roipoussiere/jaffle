@@ -36,7 +36,8 @@ type TreeNode = d3.HierarchyNode<any> & {
 
 const BOX_NAME_COLORS = {
 	[BoxNameType.Main]: 'black',
-	[BoxNameType.Constant]: 'green',
+	[BoxNameType.MainMini]: 'green',
+	[BoxNameType.Constant]: 'darkRed',
 	[BoxNameType.Serialized]: 'blue',
 };
 
@@ -214,19 +215,14 @@ class JaffleGraph {
 			))
 			.text((d: any) => d.boxName);
 
-		const textParam = box.append('text')
+		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
-			.attr('x', (d: any) => (
-				d.boxNameType === BoxNameType.MainMini ? 0 : d.boxPadding * this.charWidth
-			))
+			.attr('x', (d: any) => d.boxPadding * this.charWidth)
 			.style('fill', (d: any) => BOX_VALUE_COLORS[d.boxValueType])
-			.style('font-weight', (d: any) => (
-				d.boxNameType === BoxNameType.MainMini ? 'bold' : 'normal'
-			))
 			.text((d: any) => (d.boxValue === null ? '' : `${d.boxValue}`));
 
-		textParam.append('title')
-			.text((d: any) => d.boxValue);
+		// textParam.append('title')
+		// 	.text((d: any) => d.boxValue);
 	}
 
 	private static getNodesGap(nodeA: TreeNode, nodeB: TreeNode): number {
@@ -240,10 +236,10 @@ class JaffleGraph {
 
 	private static getBoxNameType(node: TreeNode): BoxNameType {
 		if (node.boxName === '') {
-			if (node.boxValueType === BoxValueType.StringMininotation) {
-				return BoxNameType.MainMini;
-			}
 			return BoxNameType.None;
+		}
+		if (node.boxName[0] === '_') {
+			return BoxNameType.MainMini;
 		}
 		if (node.boxName[0] === '.') {
 			return BoxNameType.Chained;
@@ -304,8 +300,10 @@ class JaffleGraph {
 		if (group === undefined) {
 			return node.contentWidth;
 		}
-		return Math.max(...group.map((child: any) => child.boxName.length))
-			+ (node.boxName === '' ? 0 : 1);
+		return Math.max(...group
+			.filter((child: any) => child.boxNameType !== BoxNameType.MainMini)
+			.map((child: any) => child.boxName.length))
+			+ (node.boxNameType === BoxNameType.None ? 0 : 1);
 	}
 
 	private static getBoxWidth(node: TreeNode): number {
@@ -314,17 +312,27 @@ class JaffleGraph {
 		if (group === undefined) {
 			return node.boxPadding;
 		}
-		return Math.max(...group.map((child: any) => (
-			node.boxPadding + (child.boxValue === null ? 0 : `${child.boxValue}`.length)
-		)));
+		return Math.max(...group
+			.map((child: any) => (
+				child.boxNameType === BoxNameType.MainMini
+					? child.boxName.length
+					: node.boxPadding + (child.boxValue === null ? -1 : `${child.boxValue}`.length)
+			)));
 	}
 
 	private static isDict(data: any): boolean {
 		return data instanceof Object && !(data instanceof Array);
 	}
 
+	private static isMainMini(data: any): boolean {
+		return typeof data === 'string' && data[0] === '_';
+	}
+
 	private static getFuncName(data: any): string {
-		return JaffleGraph.isDict(data) ? Object.keys(data)[0] : '';
+		if (JaffleGraph.isDict(data)) {
+			return Object.keys(data)[0];
+		}
+		return JaffleGraph.isMainMini(data) ? data : '';
 	}
 
 	private static getFuncParam(data: any): any {
@@ -332,7 +340,7 @@ class JaffleGraph {
 			const funcParam = data[Object.keys(data)[0]];
 			return funcParam === null || funcParam instanceof Object ? null : funcParam;
 		}
-		return data;
+		return JaffleGraph.isMainMini(data) ? '' : data;
 	}
 
 	private static getFuncParams(data: any): Array<any> {
