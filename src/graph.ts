@@ -247,7 +247,7 @@ class JaffleGraph {
 		if (node.boxName[0] === '$') {
 			return BoxNameType.Constant;
 		}
-		if (node.boxName[0] === '^') {
+		if (node.boxName.slice(-1) === '^') {
 			return BoxNameType.Serialized;
 		}
 		return BoxNameType.Main;
@@ -284,7 +284,8 @@ class JaffleGraph {
 			if (groupId !== -1) {
 				return;
 			}
-			if ([BoxNameType.Main, BoxNameType.MainMini].includes(child.boxNameType)) {
+			if (child.parent?.boxNameType === BoxNameType.Serialized
+				|| [BoxNameType.Main, BoxNameType.MainMini].includes(child.boxNameType)) {
 				currentGroupId += 1;
 			}
 			if (child.id === node.id) {
