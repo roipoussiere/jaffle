@@ -179,6 +179,7 @@ class JaffleGraph {
 			.style('font', `${this.fontSize}px mono`);
 
 		this.drawLinks();
+		this.drawGroupArea();
 		this.drawBoxes();
 	}
 
@@ -195,6 +196,22 @@ class JaffleGraph {
 			.attr('d', (link: any) => d3.linkHorizontal()
 				.x((d: any) => (d.y === link.source.y ? d.y + d.boxWidth * this.charWidth : d.y))
 				.y((d: any) => d.x)(link));
+	}
+
+	private drawGroupArea() {
+		this.svg.append('g')
+			.selectAll()
+			.data(this.tree.descendants()
+				.filter((d: any) => [BoxNameType.Main, BoxNameType.MainExpr, BoxNameType.MainMini]
+					.includes(d.boxNameType)))
+			.join('rect')
+			.attr('width', (d: any) => (d.boxWidth - 0.5) * this.charWidth)
+			.attr('height', (d: any) => d.last.x - d.x)
+			.attr('x', (d: any) => d.y + 0.25 * this.charWidth)
+			.attr('y', (d: any) => d.x)
+			.attr('rx', 3)
+			.attr('ry', 3)
+			.attr('fill', '#ccc8');
 	}
 
 	private drawBoxes() {
