@@ -9,6 +9,7 @@ enum BoxNameType {
 	None,
 	Main,
 	MainMini,
+	MainExpr,
 	Chained,
 	Constant,
 	Serialized
@@ -37,8 +38,9 @@ type TreeNode = d3.HierarchyNode<any> & {
 const BOX_NAME_COLORS = {
 	[BoxNameType.Main]: 'black',
 	[BoxNameType.MainMini]: 'green',
-	[BoxNameType.Constant]: 'darkRed',
-	[BoxNameType.Serialized]: 'blue',
+	[BoxNameType.MainExpr]: 'blue',
+	[BoxNameType.Constant]: 'blue',
+	[BoxNameType.Serialized]: 'darkRed',
 };
 
 const BOX_VALUE_COLORS = {
@@ -241,6 +243,9 @@ class JaffleGraph {
 		if (node.boxName[0] === '_') {
 			return BoxNameType.MainMini;
 		}
+		if (node.boxName[0] === '=') {
+			return BoxNameType.MainExpr;
+		}
 		if (node.boxName[0] === '.') {
 			return BoxNameType.Chained;
 		}
@@ -284,8 +289,10 @@ class JaffleGraph {
 			if (groupId !== -1) {
 				return;
 			}
-			if (child.parent?.boxNameType === BoxNameType.Serialized
-				|| [BoxNameType.Main, BoxNameType.MainMini].includes(child.boxNameType)) {
+			if (child.boxNameType === BoxNameType.Constant
+				|| child.parent?.boxNameType === BoxNameType.Serialized
+				|| [BoxNameType.Main, BoxNameType.MainMini, BoxNameType.MainExpr]
+					.includes(child.boxNameType)) {
 				currentGroupId += 1;
 			}
 			if (child.id === node.id) {
@@ -302,7 +309,8 @@ class JaffleGraph {
 			return node.contentWidth;
 		}
 		return Math.max(...group
-			.filter((child: any) => child.boxNameType !== BoxNameType.MainMini)
+			.filter((child: any) => ![BoxNameType.MainMini, BoxNameType.MainExpr]
+				.includes(child.boxNameType))
 			.map((child: any) => child.boxName.length))
 			+ (node.boxNameType === BoxNameType.None ? 0 : 1);
 	}
@@ -315,7 +323,7 @@ class JaffleGraph {
 		}
 		return Math.max(...group
 			.map((child: any) => (
-				child.boxNameType === BoxNameType.MainMini
+				[BoxNameType.MainMini, BoxNameType.MainExpr].includes(child.boxNameType)
 					? child.boxName.length
 					: node.boxPadding + (child.boxValue === null ? -1 : `${child.boxValue}`.length)
 			)));
@@ -325,15 +333,15 @@ class JaffleGraph {
 		return data instanceof Object && !(data instanceof Array);
 	}
 
-	private static isMainMini(data: any): boolean {
-		return typeof data === 'string' && data[0] === '_';
+	private static isMainStr(data: any): boolean {
+		return typeof data === 'string' && ['_', '='].includes(data[0]);
 	}
 
 	private static getFuncName(data: any): string {
 		if (JaffleGraph.isDict(data)) {
 			return Object.keys(data)[0];
 		}
-		return JaffleGraph.isMainMini(data) ? data : '';
+		return JaffleGraph.isMainStr(data) ? data : '';
 	}
 
 	private static getFuncParam(data: any): any {
@@ -341,7 +349,7 @@ class JaffleGraph {
 			const funcParam = data[Object.keys(data)[0]];
 			return funcParam === null || funcParam instanceof Object ? null : funcParam;
 		}
-		return JaffleGraph.isMainMini(data) ? '' : data;
+		return JaffleGraph.isMainStr(data) ? '' : data;
 	}
 
 	private static getFuncParams(data: any): Array<any> {
