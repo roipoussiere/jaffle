@@ -215,8 +215,10 @@ class JaffleGraph {
 		const textParam = box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: any) => (
-				[BoxNameType.MainMini, BoxNameType.None].includes(d.boxNameType)
-					? 0 : (1 + d.boxName.length) * this.charWidth
+				d.boxNameType === BoxNameType.MainMini ? 0 : d.boxWidth * this.charWidth
+			))
+			.attr('text-anchor', (d: any) => (
+				d.boxNameType === BoxNameType.MainMini ? 'start' : 'end'
 			))
 			.style('fill', (d: any) => BOX_VALUE_COLORS[d.boxValueType])
 			.style('font-weight', (d: any) => (
@@ -303,7 +305,6 @@ class JaffleGraph {
 		if (group === undefined) {
 			return node.contentWidth;
 		}
-		console.log(node.boxName, group.map((child: any) => child.boxName).join(', '));
 		return Math.max(...group.map((child: any) => child.contentWidth));
 	}
 
