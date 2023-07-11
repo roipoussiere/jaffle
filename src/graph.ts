@@ -26,10 +26,11 @@ enum BoxValueType {
 type TreeNode = d3.HierarchyNode<any> & {
 	boxName: string,
 	boxValue: string,
-	boxNameType: BoxNameType,
 	boxValueType: BoxValueType,
+	boxNameType: BoxNameType,
 	groupId: number,
 	contentWidth: number,
+	boxPadding: number,
 	boxWidth: number,
 }
 
@@ -153,6 +154,7 @@ class JaffleGraph {
 			d.contentWidth = JaffleGraph.getContentWidth(d);
 		});
 		this.tree.each((d: any) => {
+			d.boxPadding = JaffleGraph.getBoxPadding(d);
 			d.boxWidth = JaffleGraph.getBoxWidth(d);
 		});
 		/* eslint-enable no-param-reassign */
@@ -215,10 +217,7 @@ class JaffleGraph {
 		const textParam = box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: any) => (
-				d.boxNameType === BoxNameType.MainMini ? 0 : d.boxWidth * this.charWidth
-			))
-			.attr('text-anchor', (d: any) => (
-				d.boxNameType === BoxNameType.MainMini ? 'start' : 'end'
+				d.boxNameType === BoxNameType.MainMini ? 0 : d.boxPadding * this.charWidth
 			))
 			.style('fill', (d: any) => BOX_VALUE_COLORS[d.boxValueType])
 			.style('font-weight', (d: any) => (
@@ -299,13 +298,25 @@ class JaffleGraph {
 		return groupId;
 	}
 
-	private static getBoxWidth(node: TreeNode): number {
+	private static getBoxPadding(node: TreeNode): number {
 		const group = <Array<d3.HierarchyNode<any>>>node.parent?.children
 			?.filter((child: TreeNode) => child.groupId === node.groupId);
 		if (group === undefined) {
 			return node.contentWidth;
 		}
-		return Math.max(...group.map((child: any) => child.contentWidth));
+		return Math.max(...group.map((child: any) => child.boxName.length))
+			+ (node.boxName === '' ? 0 : 1);
+	}
+
+	private static getBoxWidth(node: TreeNode): number {
+		const group = <Array<d3.HierarchyNode<any>>>node.parent?.children
+			?.filter((child: TreeNode) => child.groupId === node.groupId);
+		if (group === undefined) {
+			return node.boxPadding;
+		}
+		return Math.max(...group.map((child: any) => (
+			node.boxPadding + (child.boxValue === null ? 0 : `${child.boxValue}`.length)
+		)));
 	}
 
 	private static isDict(data: any): boolean {
