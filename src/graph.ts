@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as d3 from 'd3';
+import { flextree } from 'd3-flextree';
 
 import { load as loadYaml } from 'js-yaml';
 import * as errors from './errors';
@@ -80,7 +81,7 @@ class JaffleGraph {
 
 	private svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
 
-	private rootNode: d3.HierarchyNode<any>;
+	private tree: d3.HierarchyNode<any>;
 
 	public init(container: HTMLElement): void {
 		this.container = container;
@@ -109,28 +110,30 @@ class JaffleGraph {
 	}
 
 	private initTree(): void {
-		this.rootNode = d3.hierarchy(
+		this.tree = d3.hierarchy(
 			{ root: this.tune },
 			(data: any) => JaffleGraph.getFuncParams(data),
 		);
-		this.computeTree();
 
-		const nbcWidth = Math.floor(this.width / this.charWidth);
-		this.boxWidth = ((nbcWidth + this.boxGap) / this.rootNode.height) - this.boxGap;
-		this.boxWidth = this.boxWidth > this.boxMaxWidth ? this.boxMaxWidth : this.boxWidth;
+		// const nbcWidth = Math.floor(this.width / this.charWidth);
+		this.boxWidth = this.boxMaxWidth;
 
 		this.boxStepX = (this.boxWidth + this.boxGap) * this.charWidth;
 		this.boxStepY = this.charHeight;
 
-		const tree = d3.tree()
-			.nodeSize([this.boxStepY, this.boxStepX])
-			.separation((a: any, b: any) => JaffleGraph.getNodesGap(a, b));
+		this.computeTree();
 
-		tree(this.rootNode);
+		const layout = flextree()
+			.nodeSize(
+				(node: any) => [this.boxStepY, (node.boxWidth + this.boxGap) * this.charWidth],
+			)
+			.spacing((a: any, b: any) => JaffleGraph.getNodesGap(a, b) * this.charHeight);
+
+		layout(this.tree);
 
 		this.minNodeY = Infinity;
 		this.maxNodeY = -Infinity;
-		this.rootNode.each((d: any) => {
+		this.tree.each((d: any) => {
 			if (d.x > this.maxNodeY) {
 				this.maxNodeY = d.x;
 			}
@@ -143,12 +146,13 @@ class JaffleGraph {
 	}
 
 	private computeTree() {
-		this.rootNode.each((d: any) => {
+		this.tree.each((d: any) => {
 			/* eslint-disable no-param-reassign */
 			d.boxName = JaffleGraph.getFuncName(d.data);
 			d.boxValue = JaffleGraph.getFuncParam(d.data);
 			d.boxValueType = JaffleGraph.getBoxValueType(d);
 			d.boxNameType = JaffleGraph.getBoxNameType(d);
+			d.boxWidth = JaffleGraph.getBoxWidth(d);
 			/* eslint-enable no-param-reassign */
 		});
 	}
@@ -159,7 +163,7 @@ class JaffleGraph {
 			.attr('width', this.width)
 			.attr('height', this.height)
 			.attr('viewBox', [
-				this.boxStepX, this.minNodeY - this.boxStepY,
+				(this.tree.boxWidth + this.boxGap) * this.charWidth, this.minNodeY - this.boxStepY,
 				this.width, this.height])
 			.style('font', `${this.fontSize}px mono`);
 
@@ -173,24 +177,24 @@ class JaffleGraph {
 			.attr('stroke', '#333')
 			.attr('stroke-width', 2)
 			.selectAll()
-			.data(this.rootNode.links().filter((d: any) => (
+			.data(this.tree.links().filter((d: any) => (
 				d.source.depth >= 1 && d.target.boxNameType !== BoxNameType.Chained
 			)))
 			.join('path')
 			.attr('d', (link: any) => d3.linkHorizontal()
-				.x((d: any) => (d.y === link.source.y ? d.y + this.boxWidth * this.charWidth : d.y))
+				.x((d: any) => (d.y === link.source.y ? d.y + d.boxWidth * this.charWidth : d.y))
 				.y((d: any) => d.x)(link));
 	}
 
 	private drawBoxes() {
 		const box = this.svg.append('g')
 			.selectAll()
-			.data(this.rootNode.descendants().filter((d: any) => d.depth >= 1))
+			.data(this.tree.descendants().filter((d: any) => d.depth >= 1))
 			.join('g')
 			.attr('transform', (d: any) => `translate(${d.y},${d.x})`);
 
 		box.append('rect')
-			.attr('width', this.boxWidth * this.charWidth)
+			.attr('width', (d: any) => d.boxWidth * this.charWidth)
 			.attr('height', 1 * this.charHeight)
 			.attr('y', -0.5 * this.charHeight)
 			.attr('rx', 3)
@@ -208,35 +212,26 @@ class JaffleGraph {
 		const textParam = box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: any) => (
-				d.boxNameType === BoxNameType.MainMini ? 0 : this.boxWidth * this.charWidth
-			))
-			.attr('text-anchor', (d: any) => (
-				d.boxNameType === BoxNameType.MainMini ? 'start' : 'end'
+				[BoxNameType.MainMini, BoxNameType.None].includes(d.boxNameType)
+					? 0 : (1 + d.boxName.length) * this.charWidth
 			))
 			.style('fill', (d: any) => BOX_VALUE_COLORS[d.boxValueType])
 			.style('font-weight', (d: any) => (
 				d.boxNameType === BoxNameType.MainMini ? 'bold' : 'normal'
 			))
-			.text((d: any) => this.getBoxDisplayedValue(d));
+			.text((d: any) => (d.boxValue === null ? '' : `${d.boxValue}`));
 
 		textParam.append('title')
 			.text((d: any) => d.boxValue);
-	}
-
-	private getBoxDisplayedValue(node: TreeNode): string {
-		const value = node.boxValue === null ? '' : `${node.boxValue}`;
-		const textLength = node.boxName.length + value.length + 1;
-		const cutAt = this.boxWidth - (node.boxName.length > 0 ? node.boxName.length : -1) - 2;
-		return textLength < this.boxWidth ? value : `${value.substring(0, cutAt)}…`;
 	}
 
 	private static getNodesGap(nodeA: TreeNode, nodeB: TreeNode): number {
 		const bothAreNone = nodeA.boxNameType === BoxNameType.None
 			&& nodeB.boxNameType === BoxNameType.None;
 		const isStacked = nodeA.parent === nodeB.parent
-			&& (nodeA.boxNameType === BoxNameType.Chained || bothAreNone);
+			&& (nodeB.boxNameType === BoxNameType.Chained || bothAreNone);
 
-		return isStacked ? 1 : 2;
+		return isStacked ? 0 : 0.5;
 	}
 
 	private static getBoxNameType(node: TreeNode): BoxNameType {
@@ -275,6 +270,11 @@ class JaffleGraph {
 			return BoxValueType.Number;
 		}
 		return BoxValueType.Other;
+	}
+
+	private static getBoxWidth(node: TreeNode): number {
+		const value = node.boxValue === null ? '' : `${node.boxValue}`;
+		return node.boxName.length + value.length + (value === '' || node.boxName === '' ? 0 : 1);
 	}
 
 	private static isDict(data: any): boolean {
