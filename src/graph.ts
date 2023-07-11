@@ -30,6 +30,8 @@ type TreeNode = d3.HierarchyNode<any> & {
 	boxValueType: BoxValueType,
 	boxNameType: BoxNameType,
 	groupId: number,
+	main: number,
+	last: number,
 	contentWidth: number,
 	boxPadding: number,
 	boxWidth: number,
@@ -156,6 +158,8 @@ class JaffleGraph {
 			d.contentWidth = JaffleGraph.getContentWidth(d);
 		});
 		this.tree.each((d: any) => {
+			d.main = JaffleGraph.getMain(d);
+			d.last = JaffleGraph.getLast(d);
 			d.boxPadding = JaffleGraph.getBoxPadding(d);
 			d.boxWidth = JaffleGraph.getBoxWidth(d);
 		});
@@ -300,9 +304,26 @@ class JaffleGraph {
 		return groupId;
 	}
 
+	private static getGroup(node: TreeNode): Array<TreeNode> {
+		if (node.parent === null || node.parent.children === undefined) {
+			return [node];
+		}
+		const group = node.parent.children
+			.filter((child: TreeNode) => child.groupId === node.groupId);
+		return group;
+	}
+
+	private static getMain(node: TreeNode): TreeNode {
+		return JaffleGraph.getGroup(node)[0];
+	}
+
+	private static getLast(node: TreeNode): TreeNode {
+		const group = JaffleGraph.getGroup(node);
+		return group[group.length - 1];
+	}
+
 	private static getBoxPadding(node: TreeNode): number {
-		const group = <Array<d3.HierarchyNode<any>>>node.parent?.children
-			?.filter((child: TreeNode) => child.groupId === node.groupId);
+		const group = JaffleGraph.getGroup(node);
 		if (group === undefined) {
 			return node.contentWidth;
 		}
@@ -314,8 +335,7 @@ class JaffleGraph {
 	}
 
 	private static getBoxWidth(node: TreeNode): number {
-		const group = <Array<d3.HierarchyNode<any>>>node.parent?.children
-			?.filter((child: TreeNode) => child.groupId === node.groupId);
+		const group = JaffleGraph.getGroup(node);
 		if (group === undefined) {
 			return node.boxPadding;
 		}
