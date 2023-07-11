@@ -28,6 +28,7 @@ type TreeNode = d3.HierarchyNode<any> & {
 	boxValue: string,
 	boxNameType: BoxNameType,
 	boxValueType: BoxValueType,
+	groupId: number,
 	contentWidth: number,
 	boxWidth: number,
 }
@@ -136,12 +137,19 @@ class JaffleGraph {
 	}
 
 	private computeTree() {
+		let id = 0;
+
 		/* eslint-disable no-param-reassign */
 		this.tree.each((d: any) => {
+			d.id = () => {
+				id += 1;
+				return id;
+			};
 			d.boxName = JaffleGraph.getFuncName(d.data);
 			d.boxValue = JaffleGraph.getFuncParam(d.data);
 			d.boxValueType = JaffleGraph.getBoxValueType(d);
 			d.boxNameType = JaffleGraph.getBoxNameType(d);
+			d.groupId = JaffleGraph.getGroupId(d);
 			d.contentWidth = JaffleGraph.getContentWidth(d);
 		});
 		this.tree.each((d: any) => {
@@ -272,13 +280,31 @@ class JaffleGraph {
 		return node.boxName.length + value.length + (value === '' || node.boxName === '' ? 0 : 1);
 	}
 
+	private static getGroupId(node: TreeNode): number {
+		let currentGroupId = 0;
+		let groupId = -1;
+		node.parent?.children?.forEach((child: TreeNode) => {
+			if (groupId !== -1) {
+				return;
+			}
+			if ([BoxNameType.Main, BoxNameType.MainMini].includes(child.boxNameType)) {
+				currentGroupId += 1;
+			}
+			if (child.id === node.id) {
+				groupId = currentGroupId;
+			}
+		});
+		return groupId;
+	}
+
 	private static getBoxWidth(node: TreeNode): number {
-		const siblings = <Array<d3.HierarchyNode<any>>>node.parent?.children;
-		if (siblings === undefined) {
+		const group = <Array<d3.HierarchyNode<any>>>node.parent?.children
+			?.filter((child: TreeNode) => child.groupId === node.groupId);
+		if (group === undefined) {
 			return node.contentWidth;
 		}
-		const siblingsWidth = siblings.map((child: any) => child.contentWidth);
-		return Math.max(...siblingsWidth);
+		console.log(node.boxName, group.map((child: any) => child.boxName).join(', '));
+		return Math.max(...group.map((child: any) => child.contentWidth));
 	}
 
 	private static isDict(data: any): boolean {
