@@ -48,7 +48,6 @@ const BOX_VALUE_COLORS = {
 	[BoxValueType.StringMininotation]: 'green',
 	[BoxValueType.StringExpression]: 'blue',
 	[BoxValueType.Number]: 'darkRed',
-	[BoxValueType.Other]: 'red',
 };
 
 class JaffleGraph {
@@ -269,12 +268,11 @@ class JaffleGraph {
 			if (node.boxValue[0] === '=') {
 				return BoxValueType.StringExpression;
 			}
-			return BoxValueType.StringClassic;
 		}
 		if (typeof node.boxValue === 'number') {
 			return BoxValueType.Number;
 		}
-		return BoxValueType.Other;
+		return BoxValueType.StringClassic;
 	}
 
 	private static getContentWidth(node: TreeNode): number {
