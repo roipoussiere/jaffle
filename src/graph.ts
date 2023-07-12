@@ -93,11 +93,11 @@ class JaffleGraph {
 		this.tuneYaml = tuneYaml;
 		this.loadYaml();
 
-		this.domSvg?.remove();
 		this.initTree();
 		this.drawSvg();
-		this.domSvg = <SVGElement> this.svg.node();
 
+		this.domSvg?.remove();
+		this.domSvg = <SVGElement> this.svg.node();
 		this.container.appendChild(this.domSvg);
 	}
 
@@ -181,6 +181,7 @@ class JaffleGraph {
 		this.drawLinks();
 		this.drawGroupArea();
 		this.drawBoxes();
+		this.drawInput(this.tree.find((d: any) => d.boxNameType === BoxNameType.MainMini));
 	}
 
 	private drawLinks() {
@@ -209,8 +210,6 @@ class JaffleGraph {
 			.attr('height', (d: any) => d.last.x - d.x)
 			.attr('x', (d: any) => d.y + 0.25 * this.charWidth)
 			.attr('y', (d: any) => d.x)
-			.attr('rx', 3)
-			.attr('ry', 3)
 			.attr('fill', '#ccc8');
 	}
 
@@ -245,6 +244,28 @@ class JaffleGraph {
 
 		// textParam.append('title')
 		// 	.text((d: any) => d.boxValue);
+	}
+
+	private drawInput(d: any) {
+		this.svg.append('foreignObject')
+			.attr('y', d.x - 0.5 * this.charHeight)
+			.attr('x', d.y)
+			.attr('width', d.boxWidth * this.charWidth)
+			.attr('height', this.charHeight)
+
+			.append('xhtml:input')
+			.attr('type', 'text')
+			.attr('value', d.boxName)
+
+			.style('width', '100%')
+			.style('padding', '0')
+			.style('font-size', `${this.fontSize}px`)
+			.style('font-family', 'monospace')
+			.style('background-color', '#ccc')
+			.style('color', BOX_NAME_COLORS[d.boxNameType])
+			.style('font-weight', d.boxNameType === BoxNameType.Chained ? 'normal' : 'bold')
+			.style('border', 'none')
+			.style('border-radius', '3px');
 	}
 
 	private static getNodesGap(nodeA: TreeNode, nodeB: TreeNode): number {
