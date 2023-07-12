@@ -107,6 +107,7 @@ class JaffleGraph {
 		this.domSvg?.remove();
 		this.domSvg = <SVGElement> this.svg.node();
 		this.container.appendChild(this.domSvg);
+		document.getElementById('jaffle_node_editor_input')?.focus();
 	}
 
 	public loadYaml(): void {
@@ -274,6 +275,8 @@ class JaffleGraph {
 	}
 
 	private drawInput() {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const self = this;
 		const d = <TreeNode> this.tree.find((node: any) => node.boxId === this.selectedBoxId);
 		if (d === undefined) {
 			return;
@@ -286,6 +289,7 @@ class JaffleGraph {
 			.attr('height', this.charHeight)
 
 			.append('xhtml:input')
+			.attr('id', 'jaffle_node_editor_input')
 			.attr('type', 'text')
 			.attr('value', d.boxName)
 
