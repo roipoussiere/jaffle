@@ -218,7 +218,18 @@ class JaffleGraph {
 			.selectAll()
 			.data(this.tree.descendants().filter((d: any) => d.depth >= 1))
 			.join('g')
-			.attr('transform', (d: any) => `translate(${d.y},${d.x})`);
+			.attr('transform', (d: any) => `translate(${d.y},${d.x})`)
+
+			.on('mouseover', function (d, i) {
+				d3.select(this)
+					.select('rect')
+					.style('stroke', 'black');
+			})
+			.on('mouseout', function (d, i) {
+				d3.select(this)
+					.select('rect')
+					.style('stroke', 'none');
+			});
 
 		box.append('rect')
 			.attr('width', (d: any) => d.boxWidth * this.charWidth)
