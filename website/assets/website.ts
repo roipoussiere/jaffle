@@ -63,7 +63,7 @@ editor.onPlay = () => {
 	strudel.play(tune);
 };
 editor.onStop = () => strudel.stop();
-editor.onUpdate = (tuneYml) => graph.update(tuneYml);
+editor.onUpdate = (tuneYml) => graph.loadYaml(tuneYml).initTree().draw();
 
 window.addEventListener('DOMContentLoaded', () => {
 	editor.build(getContainer());

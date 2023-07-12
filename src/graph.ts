@@ -56,19 +56,11 @@ const BOX_VALUE_COLORS = {
 };
 
 class JaffleGraph {
-	public tuneYaml = '';
-
-	public tune: any;
-
-	public data: any;
-
 	public container: HTMLElement;
 
 	public domSvg: SVGElement;
 
 	public selectedBoxId: number;
-
-	public inputValue = '';
 
 	public inputCursorPos = 0;
 
@@ -79,8 +71,6 @@ class JaffleGraph {
 	public fontSize = 14;
 
 	public boxGap = 3;
-
-	public boxMaxWidth = 20;
 
 	public charWidth = this.fontSize * 0.6;
 
@@ -94,47 +84,28 @@ class JaffleGraph {
 
 	private tree: d3.HierarchyNode<any>;
 
-	public init(container: HTMLElement): void {
+	public init(container: HTMLElement): JaffleGraph {
 		this.container = container;
+		return this;
 	}
 
-	public update(tuneYaml: string): void {
-		this.tuneYaml = tuneYaml;
-		this.loadYaml();
-
-		this.initTree();
-		this.redraw();
-	}
-
-	public redraw() {
-		this.drawSvg();
-		this.domSvg?.remove();
-		this.domSvg = <SVGElement> this.svg.node();
-		this.container.appendChild(this.domSvg);
-		const domInput = <HTMLInputElement>document.getElementById('jaffle_node_editor_input');
-		if (domInput !== null) {
-			domInput.focus();
-			domInput.selectionStart = this.inputCursorPos === -1 ? 0 : this.inputCursorPos;
-			domInput.selectionEnd = this.inputCursorPos === -1 ? 9999 : this.inputCursorPos;
-		}
-	}
-
-	public loadYaml(): void {
+	public loadYaml(tuneYaml: string): JaffleGraph {
 		let tune: any;
 		try {
-			tune = loadYaml(this.tuneYaml);
+			tune = loadYaml(tuneYaml);
 		} catch (err) {
 			throw new errors.BadYamlJaffleError(err.message);
 		}
-		this.tune = tune;
-	}
 
-	private initTree(): void {
 		this.tree = d3.hierarchy(
-			{ root: this.tune },
+			{ root: tune },
 			(data: any) => JaffleGraph.getFuncParams(data),
 		);
 
+		return this;
+	}
+
+	public initTree(): JaffleGraph {
 		this.computeTree();
 
 		const layout = flextree()
@@ -157,14 +128,28 @@ class JaffleGraph {
 		});
 
 		this.height = this.maxNodeY - this.minNodeY + this.charHeight * 2;
+		return this;
+	}
+
+	public draw(): JaffleGraph {
+		this.drawSvg();
+		this.domSvg?.remove();
+		this.domSvg = <SVGElement> this.svg.node();
+		this.container.appendChild(this.domSvg);
+		const domInput = <HTMLInputElement>document.getElementById('jaffle_node_editor_input');
+		if (domInput !== null) {
+			domInput.focus();
+			domInput.selectionStart = this.inputCursorPos === -1 ? 0 : this.inputCursorPos;
+			domInput.selectionEnd = this.inputCursorPos === -1 ? 9999 : this.inputCursorPos;
+		}
+		return this;
 	}
 
 	private computeTree() {
 		/* eslint-disable no-param-reassign */
 		this.tree.each((d: any, id: number) => {
 			d.boxId = id;
-			d.boxName = d.boxId === this.selectedBoxId
-				? this.inputValue : JaffleGraph.getFuncName(d.data);
+			d.boxName = JaffleGraph.getFuncName(d.data);
 			d.boxValue = JaffleGraph.getFuncParam(d.data);
 			d.boxValueType = JaffleGraph.getBoxValueType(d);
 			d.boxNameType = JaffleGraph.getBoxNameType(d);
@@ -251,7 +236,7 @@ class JaffleGraph {
 			.on('click', (d, i) => {
 				self.selectedBoxId = (<TreeNode>i).boxId;
 				self.inputCursorPos = -1;
-				self.redraw();
+				self.draw();
 			});
 
 		box.append('rect')
@@ -300,10 +285,11 @@ class JaffleGraph {
 			.attr('value', d.boxName)
 
 			.on('input', (e) => {
-				this.inputValue = e.target.value;
 				this.inputCursorPos = e.target.selectionStart;
+				(<TreeNode> this.tree.find((node: any) => node.boxId === this.selectedBoxId))
+					.boxName = e.target.value;
 				this.initTree();
-				self.redraw();
+				self.draw();
 			})
 
 			.style('width', '100%')
