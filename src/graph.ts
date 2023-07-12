@@ -68,6 +68,10 @@ class JaffleGraph {
 
 	public selectedBoxId: number;
 
+	public inputValue = '';
+
+	public inputCursorPos = 0;
+
 	public width = 800;
 
 	public height: number;
@@ -107,7 +111,12 @@ class JaffleGraph {
 		this.domSvg?.remove();
 		this.domSvg = <SVGElement> this.svg.node();
 		this.container.appendChild(this.domSvg);
-		document.getElementById('jaffle_node_editor_input')?.focus();
+		const domInput = <HTMLInputElement>document.getElementById('jaffle_node_editor_input');
+		if (domInput !== null) {
+			domInput.focus();
+			domInput.selectionStart = this.inputCursorPos === -1 ? 0 : this.inputCursorPos;
+			domInput.selectionEnd = this.inputCursorPos === -1 ? 9999 : this.inputCursorPos;
+		}
 	}
 
 	public loadYaml(): void {
@@ -154,7 +163,8 @@ class JaffleGraph {
 		/* eslint-disable no-param-reassign */
 		this.tree.each((d: any, id: number) => {
 			d.boxId = id;
-			d.boxName = JaffleGraph.getFuncName(d.data);
+			d.boxName = d.boxId === this.selectedBoxId
+				? this.inputValue : JaffleGraph.getFuncName(d.data);
 			d.boxValue = JaffleGraph.getFuncParam(d.data);
 			d.boxValueType = JaffleGraph.getBoxValueType(d);
 			d.boxNameType = JaffleGraph.getBoxNameType(d);
@@ -240,6 +250,7 @@ class JaffleGraph {
 			})
 			.on('click', (d, i) => {
 				self.selectedBoxId = (<TreeNode>i).boxId;
+				self.inputCursorPos = -1;
 				self.redraw();
 			});
 
@@ -289,7 +300,9 @@ class JaffleGraph {
 			.attr('value', d.boxName)
 
 			.on('input', (e) => {
-				d.boxName = e.target.value;
+				this.inputValue = e.target.value;
+				this.inputCursorPos = e.target.selectionStart;
+				this.initTree();
 				self.redraw();
 			})
 
