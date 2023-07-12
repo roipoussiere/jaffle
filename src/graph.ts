@@ -25,6 +25,9 @@ enum BoxValueType {
 }
 
 type TreeNode = d3.HierarchyNode<any> & {
+	boxId: number,
+	x: number,
+	y: number,
 	boxName: string,
 	boxValue: string,
 	boxValueType: BoxValueType,
@@ -63,6 +66,8 @@ class JaffleGraph {
 
 	public domSvg: SVGElement;
 
+	public selectedBoxId: number;
+
 	public width = 800;
 
 	public height: number;
@@ -94,8 +99,11 @@ class JaffleGraph {
 		this.loadYaml();
 
 		this.initTree();
-		this.drawSvg();
+		this.redraw();
+	}
 
+	public redraw() {
+		this.drawSvg();
 		this.domSvg?.remove();
 		this.domSvg = <SVGElement> this.svg.node();
 		this.container.appendChild(this.domSvg);
@@ -146,7 +154,7 @@ class JaffleGraph {
 
 		/* eslint-disable no-param-reassign */
 		this.tree.each((d: any) => {
-			d.id = () => {
+			d.boxId = () => {
 				id += 1;
 				return id;
 			};
@@ -172,7 +180,7 @@ class JaffleGraph {
 			.attr('width', this.width)
 			.attr('height', this.height)
 			.attr('viewBox', [
-				(this.tree.boxWidth + this.boxGap) * this.charWidth,
+				((<TreeNode> this.tree).boxWidth + this.boxGap) * this.charWidth,
 				this.minNodeY - this.charHeight,
 				this.width,
 				this.height])
@@ -181,7 +189,7 @@ class JaffleGraph {
 		this.drawLinks();
 		this.drawGroupArea();
 		this.drawBoxes();
-		this.drawInput(this.tree.find((d: any) => d.boxNameType === BoxNameType.MainMini));
+		this.drawInput();
 	}
 
 	private drawLinks() {
@@ -214,21 +222,29 @@ class JaffleGraph {
 	}
 
 	private drawBoxes() {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const self = this;
 		const box = this.svg.append('g')
 			.selectAll()
 			.data(this.tree.descendants().filter((d: any) => d.depth >= 1))
 			.join('g')
 			.attr('transform', (d: any) => `translate(${d.y},${d.x})`)
 
-			.on('mouseover', function (d, i) {
+			// eslint-disable-next-line func-names
+			.on('mouseover', function () {
 				d3.select(this)
 					.select('rect')
 					.style('stroke', 'black');
 			})
-			.on('mouseout', function (d, i) {
+			// eslint-disable-next-line func-names
+			.on('mouseout', function () {
 				d3.select(this)
 					.select('rect')
 					.style('stroke', 'none');
+			})
+			.on('click', (d, i) => {
+				self.selectedBoxId = (<TreeNode>i).boxId;
+				self.redraw();
 			});
 
 		box.append('rect')
@@ -257,7 +273,12 @@ class JaffleGraph {
 		// 	.text((d: any) => d.boxValue);
 	}
 
-	private drawInput(d: any) {
+	private drawInput() {
+		const d = <TreeNode> this.tree.find((node: any) => node.boxId === this.selectedBoxId);
+		if (d === undefined) {
+			return;
+		}
+
 		this.svg.append('foreignObject')
 			.attr('y', d.x - 0.5 * this.charHeight)
 			.attr('x', d.y)
@@ -346,7 +367,7 @@ class JaffleGraph {
 					.includes(child.boxNameType)) {
 				currentGroupId += 1;
 			}
-			if (child.id === node.id) {
+			if (child.boxId === node.boxId) {
 				groupId = currentGroupId;
 			}
 		});
