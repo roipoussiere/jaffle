@@ -151,14 +151,9 @@ class JaffleGraph {
 	}
 
 	private computeTree() {
-		let id = 0;
-
 		/* eslint-disable no-param-reassign */
-		this.tree.each((d: any) => {
-			d.boxId = () => {
-				id += 1;
-				return id;
-			};
+		this.tree.each((d: any, id: number) => {
+			d.boxId = id;
 			d.boxName = JaffleGraph.getFuncName(d.data);
 			d.boxValue = JaffleGraph.getFuncParam(d.data);
 			d.boxValueType = JaffleGraph.getBoxValueType(d);
@@ -292,6 +287,11 @@ class JaffleGraph {
 			.attr('id', 'jaffle_node_editor_input')
 			.attr('type', 'text')
 			.attr('value', d.boxName)
+
+			.on('input', (e) => {
+				d.boxName = e.target.value;
+				self.redraw();
+			})
 
 			.style('width', '100%')
 			.style('padding', '0')
