@@ -5,24 +5,7 @@ import { flextree } from 'd3-flextree';
 import { load as loadYaml } from 'js-yaml';
 import * as errors from './errors';
 
-enum BoxNameType {
-	None,
-	Main,
-	MainMini,
-	MainExpr,
-	Chained,
-	Constant,
-	Serialized
-}
-
-enum BoxValueType {
-	None,
-	StringMininotation,
-	StringExpression,
-	StringClassic,
-	Number,
-	Other
-}
+import { FuncType, ValueType } from './composition';
 
 type TreeNode = d3.HierarchyNode<any> & {
 	boxId: number,
@@ -30,8 +13,8 @@ type TreeNode = d3.HierarchyNode<any> & {
 	y: number,
 	boxName: string,
 	boxValue: string,
-	boxValueType: BoxValueType,
-	boxNameType: BoxNameType,
+	boxValueType: ValueType,
+	boxNameType: FuncType,
 	groupId: number,
 	main: number,
 	last: number,
@@ -41,18 +24,18 @@ type TreeNode = d3.HierarchyNode<any> & {
 }
 
 const BOX_NAME_COLORS = {
-	[BoxNameType.Main]: 'black',
-	[BoxNameType.MainMini]: 'green',
-	[BoxNameType.MainExpr]: 'blue',
-	[BoxNameType.Constant]: 'blue',
-	[BoxNameType.Serialized]: 'darkRed',
+	[FuncType.Main]: 'black',
+	[FuncType.Mininotation]: 'green',
+	[FuncType.Expression]: 'blue',
+	[FuncType.Constant]: 'blue',
+	[FuncType.Serialized]: 'darkRed',
 };
 
 const BOX_VALUE_COLORS = {
-	[BoxValueType.StringClassic]: 'darkSlateGray',
-	[BoxValueType.StringMininotation]: 'green',
-	[BoxValueType.StringExpression]: 'blue',
-	[BoxValueType.Number]: 'darkRed',
+	[ValueType.String]: 'darkSlateGray',
+	[ValueType.Mininotation]: 'green',
+	[ValueType.Expression]: 'blue',
+	[ValueType.Number]: 'darkRed',
 };
 
 class JaffleGraph {
@@ -151,8 +134,8 @@ class JaffleGraph {
 			d.boxId = id;
 			d.boxName = JaffleGraph.getFuncName(d.data);
 			d.boxValue = JaffleGraph.getFuncParam(d.data);
-			d.boxValueType = JaffleGraph.getBoxValueType(d);
-			d.boxNameType = JaffleGraph.getBoxNameType(d);
+			d.boxValueType = JaffleGraph.getValueType(d);
+			d.boxNameType = JaffleGraph.getFuncType(d);
 			d.groupId = JaffleGraph.getGroupId(d);
 			d.contentWidth = JaffleGraph.getContentWidth(d);
 		});
@@ -190,7 +173,7 @@ class JaffleGraph {
 			.attr('stroke-width', 2)
 			.selectAll()
 			.data(this.tree.links().filter((d: any) => (
-				d.source.depth >= 1 && d.target.boxNameType !== BoxNameType.Chained
+				d.source.depth >= 1 && d.target.boxNameType !== FuncType.Chained
 			)))
 			.join('path')
 			.attr('d', (link: any) => d3.linkHorizontal()
@@ -202,7 +185,7 @@ class JaffleGraph {
 		this.svg.append('g')
 			.selectAll()
 			.data(this.tree.descendants()
-				.filter((d: any) => [BoxNameType.Main, BoxNameType.MainExpr, BoxNameType.MainMini]
+				.filter((d: any) => [FuncType.Main, FuncType.Expression, FuncType.Mininotation]
 					.includes(d.boxNameType)))
 			.join('rect')
 			.attr('width', (d: any) => (d.boxWidth - 0.5) * this.charWidth)
@@ -251,7 +234,7 @@ class JaffleGraph {
 			.attr('y', 0.27 * this.charHeight)
 			.style('fill', (d: any) => BOX_NAME_COLORS[d.boxNameType])
 			.style('font-weight', (d: any) => (
-				d.boxNameType === BoxNameType.Chained ? 'normal' : 'bold'
+				d.boxNameType === FuncType.Chained ? 'normal' : 'bold'
 			))
 			.text((d: any) => d.boxName);
 
@@ -298,58 +281,58 @@ class JaffleGraph {
 			.style('font-family', 'monospace')
 			.style('background-color', '#ccc')
 			.style('color', BOX_NAME_COLORS[d.boxNameType])
-			.style('font-weight', d.boxNameType === BoxNameType.Chained ? 'normal' : 'bold')
+			.style('font-weight', d.boxNameType === FuncType.Chained ? 'normal' : 'bold')
 			.style('border', 'none')
 			.style('border-radius', '3px');
 	}
 
 	private static getNodesGap(nodeA: TreeNode, nodeB: TreeNode): number {
-		const bothAreNone = nodeA.boxNameType === BoxNameType.None
-			&& nodeB.boxNameType === BoxNameType.None;
+		const bothAreNone = nodeA.boxNameType === FuncType.None
+			&& nodeB.boxNameType === FuncType.None;
 		const isStacked = nodeA.parent === nodeB.parent
-			&& (nodeB.boxNameType === BoxNameType.Chained || bothAreNone);
+			&& (nodeB.boxNameType === FuncType.Chained || bothAreNone);
 
 		return isStacked ? 0 : 0.5;
 	}
 
-	private static getBoxNameType(node: TreeNode): BoxNameType {
+	private static getFuncType(node: TreeNode): FuncType {
 		if (node.boxName === '') {
-			return BoxNameType.None;
+			return FuncType.None;
 		}
 		if (node.boxName[0] === '_') {
-			return BoxNameType.MainMini;
+			return FuncType.Mininotation;
 		}
 		if (node.boxName[0] === '=') {
-			return BoxNameType.MainExpr;
+			return FuncType.Expression;
 		}
 		if (node.boxName[0] === '.') {
-			return BoxNameType.Chained;
+			return FuncType.Chained;
 		}
 		if (node.boxName[0] === '$') {
-			return BoxNameType.Constant;
+			return FuncType.Constant;
 		}
 		if (node.boxName.slice(-1) === '^') {
-			return BoxNameType.Serialized;
+			return FuncType.Serialized;
 		}
-		return BoxNameType.Main;
+		return FuncType.Main;
 	}
 
-	private static getBoxValueType(node: TreeNode): BoxValueType {
+	private static getValueType(node: TreeNode): ValueType {
 		if (node.boxValue === null) {
-			return BoxValueType.None;
+			return ValueType.None;
 		}
 		if (typeof node.boxValue === 'string') {
 			if (node.boxValue[0] === '_') {
-				return BoxValueType.StringMininotation;
+				return ValueType.Mininotation;
 			}
 			if (node.boxValue[0] === '=') {
-				return BoxValueType.StringExpression;
+				return ValueType.Expression;
 			}
 		}
 		if (typeof node.boxValue === 'number') {
-			return BoxValueType.Number;
+			return ValueType.Number;
 		}
-		return BoxValueType.StringClassic;
+		return ValueType.String;
 	}
 
 	private static getContentWidth(node: TreeNode): number {
@@ -364,9 +347,9 @@ class JaffleGraph {
 			if (groupId !== -1) {
 				return;
 			}
-			if (child.boxNameType === BoxNameType.Constant
-				|| child.parent?.boxNameType === BoxNameType.Serialized
-				|| [BoxNameType.Main, BoxNameType.MainMini, BoxNameType.MainExpr]
+			if (child.boxNameType === FuncType.Constant
+				|| child.parent?.boxNameType === FuncType.Serialized
+				|| [FuncType.Main, FuncType.Mininotation, FuncType.Expression]
 					.includes(child.boxNameType)) {
 				currentGroupId += 1;
 			}
@@ -401,10 +384,10 @@ class JaffleGraph {
 			return node.contentWidth;
 		}
 		return Math.max(...group
-			.filter((child: any) => ![BoxNameType.MainMini, BoxNameType.MainExpr]
+			.filter((child: any) => ![FuncType.Mininotation, FuncType.Expression]
 				.includes(child.boxNameType))
 			.map((child: any) => child.boxName.length))
-			+ (node.boxNameType === BoxNameType.None ? 0 : 1);
+			+ (node.boxNameType === FuncType.None ? 0 : 1);
 	}
 
 	private static getBoxWidth(node: TreeNode): number {
@@ -414,7 +397,7 @@ class JaffleGraph {
 		}
 		return Math.max(...group
 			.map((child: any) => (
-				[BoxNameType.MainMini, BoxNameType.MainExpr].includes(child.boxNameType)
+				[FuncType.Mininotation, FuncType.Expression].includes(child.boxNameType)
 					? child.boxName.length
 					: node.boxPadding + (child.boxValue === null ? -1 : `${child.boxValue}`.length)
 			)));
