@@ -41,6 +41,7 @@
 		"@strudel.cycles/tonal": "^0.8.2",
 		"@strudel.cycles/webaudio": "^0.8.2",
 		"@types/d3": "^7.4.0",
+		"@types/d3-flextree": "^2.1.1",
 		"@typescript-eslint/eslint-plugin": "^5.61.0",
 		"@typescript-eslint/parser": "^5.61.0",
 		"esbuild": "^0.18.4",

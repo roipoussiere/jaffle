@@ -91,7 +91,7 @@ class JaffleGraph {
 	public initTree(): JaffleGraph {
 		this.computeTree();
 
-		const layout = flextree()
+		const layout = flextree({})
 			.nodeSize(
 				(node: any) => [this.charHeight, (node.boxWidth + this.boxGap) * this.charWidth],
 			)
