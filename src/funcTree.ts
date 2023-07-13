@@ -31,15 +31,3 @@ export type FuncTree = {
 };
 
 export type Params = Array<FuncTree>;
-
-// export function firstFunc(funcTree: FuncTree) {
-
-// }
-
-// export function lastFunc(funcTree: FuncTree) {
-
-// }
-
-// export function funcGroup(funcTree: FuncTree) {
-
-// }

@@ -1,19 +1,17 @@
 import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
-import { load as loadYaml } from 'js-yaml';
-import * as errors from './errors';
-
 import { FuncTree, FuncType, ValueType } from './funcTree';
 
 type FuncNode = d3.id<FuncTree> & {
-	groupId: number,
-	group: Array<FuncNode>,
-	first: FuncNode,
+	fist: FuncNode,
 	last: FuncNode,
+	group: Array<FuncNode>,
+
 	contentWidth: number,
 	boxPadding: number,
 	boxWidth: number,
+
 	x: number,
 	y: number,
 }
@@ -68,23 +66,11 @@ class JaffleGraph {
 	}
 
 	public load(composition: FuncTree): JaffleGraph {
-		let tune: unknown;
-		try {
-			tune = loadYaml(tuneYaml);
-		} catch (err) {
-			throw new errors.BadYamlJaffleError(err.message);
-		}
-		this.tree = <FuncNode>d3.hierarchy(
-			,
-			(data: FuncTree) => JaffleGraph.getFuncParams(data),
-		);
-
+		this.tree = <FuncNode> d3.hierarchy(composition, (data: FuncTree) => data.params);
 		return this;
 	}
 
 	public initTree(): JaffleGraph {
-		this.computeTreeData();
-
 		const layout = flextree({})
 			.nodeSize((n: FuncNode) => (
 				[this.charHeight, (n.boxWidth + this.boxGap) * this.charWidth]
@@ -94,6 +80,7 @@ class JaffleGraph {
 			));
 
 		layout(this.tree);
+		this.computeTree();
 
 		this.minNodeY = Infinity;
 		this.maxNodeY = -Infinity;
@@ -110,6 +97,19 @@ class JaffleGraph {
 		return this;
 	}
 
+	private computeTree() {
+		/* eslint-disable no-param-reassign */
+		this.tree.each((node: FuncNode) => {
+			node.group = JaffleGraph.getGroup(node);
+			node.fist = JaffleGraph.getFirstFunc(node);
+			node.last = JaffleGraph.getLastFunc(node);
+			node.contentWidth = JaffleGraph.getBoxContentWidth(node);
+			node.boxPadding = JaffleGraph.getBoxPadding(node);
+			node.boxWidth = JaffleGraph.getBoxWidth(node);
+		});
+		/* eslint-enable no-param-reassign */
+	}
+
 	public draw(): JaffleGraph {
 		this.drawSvg();
 		this.domSvg?.remove();
@@ -122,30 +122,6 @@ class JaffleGraph {
 			domInput.selectionEnd = this.inputCursorPos === -1 ? 9999 : this.inputCursorPos;
 		}
 		return this;
-	}
-
-	private computeTreeData() {
-		/* eslint-disable no-param-reassign */
-		this.tree.each((node: FuncNode, id: number) => {
-			console.log(id, node);
-
-			node.data = JaffleGraph.computeData(node.data, id);
-		});
-
-		this.tree.each((node: FuncNode) => {
-			// todo: can this be done in the first iteration?
-			node.groupId = JaffleGraph.getGroupId(node);
-		});
-
-		this.tree.each((node: FuncNode) => {
-			node.group = JaffleGraph.getGroup(node);
-			node.first = JaffleGraph.getFirstFunc(node);
-			node.last = JaffleGraph.getLastFunc(node);
-			node.contentWidth = JaffleGraph.getBoxContentWidth(node);
-			node.boxPadding = JaffleGraph.getBoxPadding(node);
-			node.boxWidth = JaffleGraph.getBoxWidth(node);
-		});
-		/* eslint-enable no-param-reassign */
 	}
 
 	private drawSvg() {
@@ -320,17 +296,16 @@ class JaffleGraph {
 			return [node];
 		}
 		const group = node.parent.children
-			.filter((child: FuncNode) => child.groupId === node.groupId);
+			.filter((child: FuncNode) => child.data.groupId === node.data.groupId);
 		return group;
 	}
 
 	private static getFirstFunc(node: FuncNode): FuncNode {
-		return JaffleGraph.getGroup(node)[0];
+		return node.group[0];
 	}
 
 	private static getLastFunc(node: FuncNode): FuncNode {
-		const group = JaffleGraph.getGroup(node);
-		return group[group.length - 1];
+		return node.group[node.group.length - 1];
 	}
 
 	private static getBoxContentWidth(node: FuncNode): number {
