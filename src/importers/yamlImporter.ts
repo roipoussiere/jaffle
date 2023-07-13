@@ -8,7 +8,7 @@ import * as c from '../constants';
 
 import AbstractImporter from './abstractImporter';
 
-class YamlImporterError extends ImporterError {
+export class YamlImporterError extends ImporterError {
 	constructor(message: string) {
 		super(message);
 		this.name = YamlImporterError.name;
@@ -24,7 +24,7 @@ class YamlImporterError extends ImporterError {
 // };
 // export type PartialParams = Array<PartialFuncTree>;
 
-class YamlImporter extends AbstractImporter {
+export class YamlImporter extends AbstractImporter {
 	public static import(yaml: string): FuncTree {
 		let data: unknown;
 
@@ -39,7 +39,7 @@ class YamlImporter extends AbstractImporter {
 		}
 		const rawComposition = <Array<unknown>> data;
 
-		return {
+		const partialTree = {
 			id: 0,
 			groupId: 0,
 			type: FuncType.Root,
@@ -48,6 +48,15 @@ class YamlImporter extends AbstractImporter {
 			valueText: '',
 			params: YamlImporter.computeParams(rawComposition),
 		};
+		return YamlImporter.upgradeTree(partialTree);
+	}
+
+	private static upgradeTree(tree: FuncTree, funcId = 0, groupId = 0): FuncTree {
+		tree.params.map((func) => {
+			const grouIdIncrement = func.type !== FuncType.Chained ? 1 : 0;
+			return YamlImporter.upgradeTree(tree, funcId + 1, groupId + grouIdIncrement);
+		});
+		return tree;
 	}
 
 	private static computeParams(rawParams: Array<unknown>): Params {
