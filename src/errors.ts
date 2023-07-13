@@ -7,12 +7,35 @@ export class JaffleError extends Error {
 	}
 }
 
-export class NotImplementedJaffleError extends JaffleError {
-	constructor(message: string) {
-		super(message);
-		this.name = NotImplementedJaffleError.name;
+export class NotImplementedError extends JaffleError {
+	constructor(thingName: string) {
+		super(`${thingName} is not implemented`);
+		this.name = NotImplementedError.name;
 	}
 }
+
+export class AbstractClassError extends JaffleError {
+	constructor(message: string) {
+		super(message);
+		this.name = AbstractClassError.name;
+	}
+}
+
+export class ImporterError extends JaffleError {
+	constructor(message: string) {
+		super(message);
+		this.name = ImporterError.name;
+	}
+}
+
+export class ExporterError extends JaffleError {
+	constructor(message: string) {
+		super(message);
+		this.name = ExporterError.name;
+	}
+}
+
+// todo: remove from here
 
 export class BadYamlJaffleError extends JaffleError {
 	constructor(message: string) {
