@@ -190,6 +190,7 @@ describe('Testing YI.computeFunc()', () => {
 			valueType: ValueType.Null,
 			params: [],
 		});
+
 		expect(YI.computeFunc({ a: 1 })).toEqual({
 			id: -1,
 			groupId: -1,
@@ -199,6 +200,7 @@ describe('Testing YI.computeFunc()', () => {
 			valueType: ValueType.Number,
 			params: [],
 		});
+
 		expect(YI.computeFunc({ a: 'b' })).toEqual({
 			id: -1,
 			groupId: -1,
@@ -208,6 +210,7 @@ describe('Testing YI.computeFunc()', () => {
 			valueType: ValueType.String,
 			params: [],
 		});
+
 		expect(YI.computeFunc({ a: '_b' })).toEqual({
 			id: -1,
 			groupId: -1,
@@ -217,6 +220,7 @@ describe('Testing YI.computeFunc()', () => {
 			valueType: ValueType.Mininotation,
 			params: [],
 		});
+
 		expect(YI.computeFunc({ a: '=b' })).toEqual({
 			id: -1,
 			groupId: -1,
@@ -226,6 +230,7 @@ describe('Testing YI.computeFunc()', () => {
 			valueType: ValueType.Expression,
 			params: [],
 		});
+
 		expect(YI.computeFunc({ a: [1, 2] })).toEqual({
 			id: -1,
 			groupId: -1,
@@ -235,22 +240,22 @@ describe('Testing YI.computeFunc()', () => {
 			valueType: ValueType.Tree,
 			params: [
 				{
-					groupId: -1,
 					id: -1,
+					groupId: -1,
 					label: '',
-					params: [],
 					type: FuncType.LiteralValue,
 					valueText: '1',
 					valueType: ValueType.Number,
+					params: [],
 				},
 				{
-					groupId: -1,
 					id: -1,
+					groupId: -1,
 					label: '',
-					params: [],
 					type: FuncType.LiteralValue,
 					valueText: '2',
 					valueType: ValueType.Number,
+					params: [],
 				},
 			],
 		});
@@ -308,5 +313,125 @@ describe('Testing YI.computeList()', () => {
 				params: [],
 			}],
 		});
+	});
+});
+
+describe('Testing YI.computeParams()', () => {
+	test('Literals are well computed', () => {
+		expect(YI.computeParams(['a', 1, null])).toEqual([
+			{
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: 'a',
+				valueType: ValueType.String,
+				params: [],
+			}, {
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: '1',
+				valueType: ValueType.Number,
+				params: [],
+			}, {
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: '∅',
+				valueType: ValueType.Null,
+				params: [],
+			},
+		]);
+	});
+
+	test('Funcs are well computed', () => {
+		expect(YI.computeParams([{ a: 1 }, { '.b': 2 }, { c: 3 }, { '.d': 4 }])).toEqual([{
+			id: -1,
+			groupId: -1,
+			label: 'a',
+			type: FuncType.Main,
+			valueText: '1',
+			valueType: ValueType.Number,
+			params: [],
+		}, {
+			id: -1,
+			groupId: -1,
+			label: '.b',
+			type: FuncType.Chained,
+			valueText: '2',
+			valueType: ValueType.Number,
+			params: [],
+		}, {
+			id: -1,
+			groupId: -1,
+			label: 'c',
+			type: FuncType.Main,
+			valueText: '3',
+			valueType: ValueType.Number,
+			params: [],
+		}, {
+			id: -1,
+			groupId: -1,
+			label: '.d',
+			type: FuncType.Chained,
+			valueText: '4',
+			valueType: ValueType.Number,
+			params: [],
+		}]);
+	});
+
+	test('Lists are well computed', () => {
+		expect(YI.computeParams([[1, 2], [3, 4]])).toEqual([{
+			id: -1,
+			groupId: -1,
+			label: '[]',
+			type: FuncType.List,
+			valueText: '',
+			valueType: ValueType.Tree,
+			params: [{
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: '1',
+				valueType: ValueType.Number,
+				params: [],
+			}, {
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: '2',
+				valueType: ValueType.Number,
+				params: [],
+			}],
+		}, {
+			id: -1,
+			groupId: -1,
+			label: '[]',
+			type: FuncType.List,
+			valueText: '',
+			valueType: ValueType.Tree,
+			params: [{
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: '3',
+				valueType: ValueType.Number,
+				params: [],
+			}, {
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: '4',
+				valueType: ValueType.Number,
+				params: [],
+			}],
+		}]);
 	});
 });

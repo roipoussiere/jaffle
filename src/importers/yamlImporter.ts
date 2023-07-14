@@ -46,7 +46,7 @@ export class YamlImporter extends AbstractImporter {
 		return YamlImporter.upgradeTree(partialTree);
 	}
 
-	private static computeParams(rawParams: Array<unknown>): Params {
+	static computeParams(rawParams: Array<unknown>): Params {
 		const params: Params = [];
 
 		rawParams.forEach((rawParam: unknown) => {
