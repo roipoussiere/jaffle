@@ -80,26 +80,44 @@ export class YamlImporter extends AbstractImporter {
 
 	static computeFunc(rawFunc: Dict<unknown>): FuncTree {
 		const funcName = YamlImporter.getFuncName(rawFunc);
+		const funcType = YamlImporter.getFuncType(funcName);
 		const rawValue = rawFunc[funcName];
 		const valueType = YamlImporter.getValueType(rawValue);
-		const params = YamlImporter.computeParams(rawValue instanceof Array ? rawValue : []);
-		const valueText = rawValue === null ? '∅' : `${rawValue}`;
+
+		let valueText: string;
+		if (valueType === ValueType.Tree) {
+			valueText = '';
+		} else if (rawValue === null) {
+			valueText = '∅';
+		} else {
+			valueText = `${rawValue}`;
+		}
+
+		let params: Params;
+		if (funcType === FuncType.Serialized) {
+			params = [];
+			// params = YamlImporter.serialize(rawValue); // TODO
+		} else if (rawValue instanceof Array) {
+			params = YamlImporter.computeParams(rawValue);
+		} else {
+			params = [];
+		}
 
 		return {
 			id: -1,
 			groupId: -1,
-			type: funcName[0] === c.CHAINED_FUNC_PREFIX ? FuncType.Chained : FuncType.Main,
+			type: funcType,
 			label: funcName,
 			valueType,
-			valueText: valueType === ValueType.Tree ? '' : valueText,
+			valueText,
 			params,
 		};
 	}
 
 	static computeLiteral(rawLiteral: unknown): FuncTree {
 		if (typeof rawLiteral === 'string') {
-			const stringFuncType = YamlImporter.getStringFuncType(rawLiteral);
-			if (stringFuncType !== null) {
+			const stringFuncType = YamlImporter.getFuncType(rawLiteral);
+			if ([FuncType.MainMininotation, FuncType.MainExpression].includes(stringFuncType)) {
 				return {
 					id: -1,
 					groupId: -1,
@@ -153,14 +171,21 @@ export class YamlImporter extends AbstractImporter {
 		return keys[0];
 	}
 
-	static getStringFuncType(funcName: string): FuncType | null {
+	static getFuncType(funcName: string): FuncType {
 		const prefix = funcName[0];
-		const strFuncTypes: Dict<FuncType> = {
+		const funcTypes: Dict<FuncType> = {
+			[c.CHAINED_FUNC_PREFIX]: FuncType.Chained,
 			[c.MINI_STR_PREFIX]: FuncType.MainMininotation,
-			// [c.EXPR_STR_PREFIX]: FuncType.Expression,
+			[c.EXPR_STR_PREFIX]: FuncType.MainExpression,
 			[c.CONST_FUNC_PREFIX]: FuncType.Constant,
 		};
-		return prefix in strFuncTypes ? strFuncTypes[prefix] : null;
+		if (prefix in funcTypes) {
+			return funcTypes[prefix];
+		}
+		if (funcName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
+			return FuncType.Serialized;
+		}
+		return FuncType.Main;
 	}
 
 	static getValueType(rawValue: unknown): ValueType {

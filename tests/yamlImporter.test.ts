@@ -67,15 +67,19 @@ describe('Testing YI.getValueType()', () => {
 	});
 });
 
-describe('Testing YI.getStringFuncType()', () => {
-	test('string func names return string func types', () => {
-		expect(YI.getStringFuncType('_abc')).toBe(FuncType.MainMininotation);
-		expect(YI.getStringFuncType('$abc')).toBe(FuncType.Constant);
+describe('Testing YI.getFuncType()', () => {
+	test('prefixed func names return related func types', () => {
+		expect(YI.getFuncType('_abc')).toBe(FuncType.MainMininotation);
+		expect(YI.getFuncType('$abc')).toBe(FuncType.Constant);
+		expect(YI.getFuncType('.abc')).toBe(FuncType.Chained);
 	});
 
-	test('common strings return null', () => {
-		expect(YI.getStringFuncType('abc')).toBe(null);
-		expect(YI.getStringFuncType('=abc')).toBe(null);
+	test('func names with serialize suffix return serialized func type', () => {
+		expect(YI.getFuncType('abc^')).toBe(FuncType.Serialized);
+	});
+
+	test('common func names return main func type', () => {
+		expect(YI.getFuncType('abc')).toBe(FuncType.Main);
 	});
 });
 
@@ -162,11 +166,11 @@ describe('Testing YI.computeLiteral()', () => {
 			params: [],
 		});
 
-		expect(YI.computeLiteral('$a')).toEqual({
+		expect(YI.computeLiteral('=a')).toEqual({
 			id: -1,
 			groupId: -1,
-			label: '$a',
-			type: FuncType.Constant,
+			label: '=a',
+			type: FuncType.MainExpression,
 			valueText: '',
 			valueType: ValueType.Empty,
 			params: [],
