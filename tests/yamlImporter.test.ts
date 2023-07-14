@@ -38,3 +38,16 @@ describe('Testing getStringFuncType()', () => {
 		expect(YI.getStringFuncType('abc')).toBe(null);
 	});
 });
+
+describe('Testing getFuncName()', () => {
+	test('bad functions fails', () => {
+		expect(() => YI.getFuncName({})).toThrow(YamlImporterError);
+		expect(() => YI.getFuncName({ a: 1, b: 2 })).toThrow(YamlImporterError);
+	});
+
+	test('common functions return function name', () => {
+		expect(YI.getFuncName({ a: 1 })).toBe('a');
+		expect(YI.getFuncName({ _a: 1 })).toBe('_a');
+		expect(YI.getFuncName({ $a: 1 })).toBe('$a');
+	});
+});

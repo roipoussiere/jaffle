@@ -128,7 +128,7 @@ export class YamlImporter extends AbstractImporter {
 		return tree;
 	}
 
-	private static getFuncName(rawFunc: object) {
+	static getFuncName(rawFunc: Dict<unknown>) {
 		const keys = Object.keys(rawFunc);
 		if (keys.length === 0) {
 			throw new YamlImporterError('function must have an attribute');
