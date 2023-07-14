@@ -315,9 +315,8 @@ class JaffleGraph {
 		return Math.max(...group
 			.map((child: FuncNode) => (
 				[FuncType.MainMininotation, FuncType.MainExpression].includes(child.data.type)
-					? child.data.label.length
-					: node.boxPadding + child.data.label.length
-				// : node.boxPadding + (child.boxValue === null ? -1 : `${child.boxValue}`.length)
+					? child.data.label.length : node.boxPadding
+					+ (child.data.valueType === ValueType.Null ? 2 : child.data.valueText.length)
 			)));
 	}
 }
