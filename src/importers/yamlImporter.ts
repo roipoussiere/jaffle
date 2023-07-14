@@ -8,21 +8,16 @@ import * as c from '../constants';
 
 import AbstractImporter from './abstractImporter';
 
+interface Dict<T> {
+	[key: string]: T;
+}
+
 export class YamlImporterError extends ImporterError {
 	constructor(message: string) {
 		super(message);
 		this.name = YamlImporterError.name;
 	}
 }
-
-// export type PartialFuncTree = {
-// 	label: string,
-// 	type: FuncType,
-// 	valueText: string,
-// 	valueType: ValueType,
-// 	params: Array<PartialFuncTree>,
-// };
-// export type PartialParams = Array<PartialFuncTree>;
 
 export class YamlImporter extends AbstractImporter {
 	public static import(yaml: string): FuncTree {
@@ -58,7 +53,7 @@ export class YamlImporter extends AbstractImporter {
 			if (rawParam instanceof Array) {
 				params.push(this.computeList(rawParam));
 			} else if (rawParam instanceof Object) {
-				params.push(this.computeFunc(rawParam));
+				params.push(this.computeFunc(<Dict<unknown>>rawParam));
 			} else {
 				params.push(YamlImporter.computeLiteral(rawParam));
 			}
@@ -81,10 +76,11 @@ export class YamlImporter extends AbstractImporter {
 		};
 	}
 
-	private static computeFunc(rawFunc: object): FuncTree {
+	private static computeFunc(rawFunc: Dict<unknown>): FuncTree {
 		const funcName = YamlImporter.getFuncName(rawFunc);
-		const valueType = YamlImporter.getLiteralValueType(rawFunc[funcName]);
-		const params = YamlImporter.computeParams(rawFunc[funcName]);
+		const rawValue = rawFunc[funcName];
+		const valueType = YamlImporter.getLiteralValueType(rawValue);
+		const params = YamlImporter.computeParams(rawValue instanceof Array ? rawValue : []);
 
 		return {
 			id: 0,
@@ -92,7 +88,7 @@ export class YamlImporter extends AbstractImporter {
 			type: funcName[0] === c.CHAINED_FUNC_PREFIX ? FuncType.Chained : FuncType.Main,
 			label: funcName,
 			valueType,
-			valueText: valueType === ValueType.Object ? '' : rawFunc[funcName],
+			valueText: valueType === ValueType.Object ? '' : `${rawValue}`,
 			params,
 		};
 	}
@@ -145,11 +141,12 @@ export class YamlImporter extends AbstractImporter {
 
 	private static getLiteralValueType(rawValue: unknown): ValueType {
 		if (typeof rawValue === 'string') {
-			const strValueTypes = {
+			const prefix = rawValue[0];
+			const strValueTypes: Dict<ValueType> = {
 				[c.MINI_STR_PREFIX]: ValueType.Mininotation,
 				[c.EXPR_STR_PREFIX]: ValueType.Expression,
 			};
-			return rawValue[0] in strValueTypes ? strValueTypes[rawValue[0]] : ValueType.String;
+			return prefix in strValueTypes ? strValueTypes[prefix] : ValueType.String;
 		}
 		if (typeof rawValue === 'number') {
 			return ValueType.Number;
@@ -160,21 +157,23 @@ export class YamlImporter extends AbstractImporter {
 		throw new YamlImporterError(`unknown literal type of ${rawValue}`);
 	}
 
-	private static getStringFuncType(funcName: string): FuncType | null {
-		const strFuncTypes = {
+	static getStringFuncType(funcName: string): FuncType | null {
+		const prefix = funcName[0];
+		const strFuncTypes: Dict<FuncType> = {
 			[c.MINI_STR_PREFIX]: FuncType.Mininotation,
 			[c.EXPR_STR_PREFIX]: FuncType.Expression,
 			[c.CONST_FUNC_PREFIX]: FuncType.Constant,
 		};
-		return funcName[0] in strFuncTypes ? strFuncTypes[funcName[0]] : null;
+		return prefix in strFuncTypes ? strFuncTypes[prefix] : null;
 	}
 
 	static getFuncValueType(rawValue: unknown): ValueType {
 		if (typeof rawValue === 'string') {
-			if (rawValue[0] === c.MINI_STR_PREFIX) {
+			const prefix = rawValue[0];
+			if (prefix === c.MINI_STR_PREFIX) {
 				return ValueType.Mininotation;
 			}
-			if (rawValue[0] === c.EXPR_STR_PREFIX) {
+			if (prefix === c.EXPR_STR_PREFIX) {
 				return ValueType.Expression;
 			}
 			return ValueType.String;
