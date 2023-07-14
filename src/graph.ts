@@ -4,9 +4,9 @@ import { flextree } from 'd3-flextree';
 import { FuncTree, FuncType, ValueType } from './funcTree';
 
 type FuncNode = d3.id<FuncTree> & {
+	group: Array<FuncNode>,
 	fist: FuncNode,
 	last: FuncNode,
-	group: Array<FuncNode>,
 
 	contentWidth: number,
 	boxPadding: number,
@@ -18,8 +18,8 @@ type FuncNode = d3.id<FuncTree> & {
 
 const BOX_NAME_COLORS = {
 	[FuncType.Main]: 'black',
-	[FuncType.Mininotation]: 'green',
-	[FuncType.Expression]: 'blue',
+	[FuncType.MainMininotation]: 'green',
+	[FuncType.MainExpression]: 'blue',
 	[FuncType.Constant]: 'blue',
 	[FuncType.Serialized]: 'darkRed',
 };
@@ -67,10 +67,12 @@ class JaffleGraph {
 
 	public load(composition: FuncTree): JaffleGraph {
 		this.tree = <FuncNode> d3.hierarchy(composition, (data: FuncTree) => data.params);
+		this.initTree();
 		return this;
 	}
 
 	public initTree(): JaffleGraph {
+		this.computeTree();
 		const layout = flextree({})
 			.nodeSize((n: FuncNode) => (
 				[this.charHeight, (n.boxWidth + this.boxGap) * this.charWidth]
@@ -80,7 +82,6 @@ class JaffleGraph {
 			));
 
 		layout(this.tree);
-		this.computeTree();
 
 		this.minNodeY = Infinity;
 		this.maxNodeY = -Infinity;
@@ -159,11 +160,10 @@ class JaffleGraph {
 	}
 
 	private drawGroupArea() {
+		const mainFuncs = [FuncType.Main, FuncType.MainExpression, FuncType.MainMininotation];
 		this.svg.append('g')
 			.selectAll()
-			.data(this.tree.descendants()
-				.filter((n: FuncNode) => [FuncType.Main, FuncType.Expression, FuncType.Mininotation]
-					.includes(n.data.type)))
+			.data(this.tree.descendants().filter((n: FuncNode) => mainFuncs.includes(n.data.type)))
 			.join('rect')
 			.attr('width', (node: FuncNode) => (node.boxWidth - 0.5) * this.charWidth)
 			.attr('height', (node: FuncNode) => node.last.x - node.x)
@@ -266,29 +266,10 @@ class JaffleGraph {
 	}
 
 	private static shouldStack(nodeA: FuncNode, nodeB: FuncNode): boolean {
-		const bothAreNone = nodeA.data.type === FuncType.Anon
-			&& nodeB.data.type === FuncType.Anon;
+		const bothAreNone = nodeA.data.type === FuncType.LiteralValue
+			&& nodeB.data.type === FuncType.LiteralValue;
 		return nodeA.parent === nodeB.parent
 			&& (nodeB.data.type === FuncType.Chained || bothAreNone);
-	}
-
-	private static getGroupId(node: FuncNode): number {
-		let currentGroupId = 0;
-		let groupId = -1;
-		node.parent?.children?.forEach((child: FuncNode) => {
-			if (groupId !== -1) {
-				return;
-			}
-			if (child.parent?.data.type === FuncType.Serialized
-				|| [FuncType.Constant, FuncType.Main, FuncType.Mininotation, FuncType.Expression]
-					.includes(child.data.type)) {
-				currentGroupId += 1;
-			}
-			if (child.data.id === node.data.id) {
-				groupId = currentGroupId;
-			}
-		});
-		return groupId;
 	}
 
 	private static getGroup(node: FuncNode): Array<FuncNode> {
@@ -309,9 +290,9 @@ class JaffleGraph {
 	}
 
 	private static getBoxContentWidth(node: FuncNode): number {
-		return node.data.label.length
-			+ node.data.valueText.length
-			+ (node.data.type === FuncType.Anon || node.data.valueType === ValueType.None ? 0 : 1);
+		const noSpace = node.data.type === FuncType.LiteralValue
+			|| node.data.valueType === ValueType.Null;
+		return node.data.label.length + node.data.valueText.length + (noSpace ? 0 : 1);
 	}
 
 	private static getBoxPadding(node: FuncNode): number {
@@ -320,10 +301,10 @@ class JaffleGraph {
 			return node.contentWidth;
 		}
 		return Math.max(...group
-			.filter((child: FuncNode) => ![FuncType.Mininotation, FuncType.Expression]
+			.filter((child: FuncNode) => ![FuncType.MainMininotation, FuncType.Constant]
 				.includes(child.data.type))
 			.map((child: FuncNode) => child.data.label.length))
-			+ (node.data.type === FuncType.Anon ? 0 : 1);
+			+ (node.data.type === FuncType.LiteralValue ? 0 : 1);
 	}
 
 	private static getBoxWidth(node: FuncNode): number {
@@ -333,7 +314,7 @@ class JaffleGraph {
 		}
 		return Math.max(...group
 			.map((child: FuncNode) => (
-				[FuncType.Mininotation, FuncType.Expression].includes(child.data.type)
+				[FuncType.MainMininotation, FuncType.MainExpression].includes(child.data.type)
 					? child.data.label.length
 					: node.boxPadding + child.data.label.length
 				// : node.boxPadding + (child.boxValue === null ? -1 : `${child.boxValue}`.length)
