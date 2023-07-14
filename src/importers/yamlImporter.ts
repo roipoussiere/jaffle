@@ -44,19 +44,11 @@ export class YamlImporter extends AbstractImporter {
 			groupId: 0,
 			type: FuncType.Root,
 			label: '',
-			valueType: ValueType.None,
+			valueType: ValueType.Object,
 			valueText: '',
 			params: YamlImporter.computeParams(rawComposition),
 		};
 		return YamlImporter.upgradeTree(partialTree);
-	}
-
-	private static upgradeTree(tree: FuncTree, funcId = 0, groupId = 0): FuncTree {
-		tree.params.map((func) => {
-			const grouIdIncrement = func.type !== FuncType.Chained ? 1 : 0;
-			return YamlImporter.upgradeTree(tree, funcId + 1, groupId + grouIdIncrement);
-		});
-		return tree;
 	}
 
 	private static computeParams(rawParams: Array<unknown>): Params {
@@ -83,7 +75,7 @@ export class YamlImporter extends AbstractImporter {
 			groupId: 0,
 			type: FuncType.List,
 			label: '[]',
-			valueType: ValueType.None,
+			valueType: ValueType.Object,
 			valueText: '',
 			params,
 		};
@@ -100,7 +92,7 @@ export class YamlImporter extends AbstractImporter {
 			type: funcName[0] === c.CHAINED_FUNC_PREFIX ? FuncType.Chained : FuncType.Main,
 			label: funcName,
 			valueType,
-			valueText: valueType === ValueType.Children ? '' : rawFunc[funcName],
+			valueText: valueType === ValueType.Object ? '' : rawFunc[funcName],
 			params,
 		};
 	}
@@ -114,7 +106,7 @@ export class YamlImporter extends AbstractImporter {
 					groupId: 0,
 					type: stringFuncType,
 					label: rawLiteral,
-					valueType: ValueType.None,
+					valueType: ValueType.Object,
 					valueText: '',
 					params: [],
 				};
@@ -130,6 +122,14 @@ export class YamlImporter extends AbstractImporter {
 			valueText: '',
 			params: [],
 		};
+	}
+
+	private static upgradeTree(tree: FuncTree, funcId = 0, groupId = 0): FuncTree {
+		tree.params.map((func) => {
+			const grouIdIncrement = func.type !== FuncType.Chained ? 1 : 0;
+			return YamlImporter.upgradeTree(tree, funcId + 1, groupId + grouIdIncrement);
+		});
+		return tree;
 	}
 
 	private static getFuncName(rawFunc: object) {
@@ -169,22 +169,23 @@ export class YamlImporter extends AbstractImporter {
 		return funcName[0] in strFuncTypes ? strFuncTypes[funcName[0]] : null;
 	}
 
-	private static getFuncValueType(rawData: unknown): ValueType {
-		if (rawData === null) {
-			return ValueType.None;
-		}
-		if (typeof rawData === 'string') {
-			if (rawData[0] === c.MINI_STR_PREFIX) {
+	static getFuncValueType(rawValue: unknown): ValueType {
+		if (typeof rawValue === 'string') {
+			if (rawValue[0] === c.MINI_STR_PREFIX) {
 				return ValueType.Mininotation;
 			}
-			if (rawData[0] === c.EXPR_STR_PREFIX) {
+			if (rawValue[0] === c.EXPR_STR_PREFIX) {
 				return ValueType.Expression;
 			}
+			return ValueType.String;
 		}
-		if (typeof rawData === 'number') {
+		if (typeof rawValue === 'number') {
 			return ValueType.Number;
 		}
-		return ValueType.String;
+		if (rawValue instanceof Object) {
+			return ValueType.Object;
+		}
+		return ValueType.Null;
 	}
 }
 

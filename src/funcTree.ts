@@ -11,13 +11,12 @@ export enum FuncType {
 }
 
 export enum ValueType {
-	None,
-	Children,
+	Null,
+	Number,
+	String,
 	Mininotation,
 	Expression,
-	String,
-	Number,
-	Null,
+	Object,
 }
 
 export type FuncTree = {
