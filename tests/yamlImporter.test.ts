@@ -435,3 +435,72 @@ describe('Testing YI.computeParams()', () => {
 		}]);
 	});
 });
+
+describe('Testing YI.import()', () => {
+	test('Non valid yaml fails', () => {
+		expect(() => YI.import('[')).toThrow(YamlImporterError);
+	});
+
+	test('Yaml with non-array root element fails', () => {
+		expect(() => YI.import('null')).toThrow(YamlImporterError);
+		expect(() => YI.import('1')).toThrow(YamlImporterError);
+		expect(() => YI.import('a')).toThrow(YamlImporterError);
+		expect(() => YI.import('{a: 1}')).toThrow(YamlImporterError);
+	});
+
+	test('Empty yaml is well computed', () => {
+		expect(YI.import('[]')).toEqual({
+			id: 0,
+			groupId: 0,
+			type: FuncType.Root,
+			label: '',
+			valueType: ValueType.Tree,
+			valueText: '',
+			params: [],
+		});
+	});
+
+	test('Non-empty valid yaml is well computed', () => {
+		expect(YI.import('[{a: 1}, {.b: 2}, {c: 3}, {.d: 4}]')).toEqual({
+			id: 0,
+			groupId: 0,
+			type: FuncType.Root,
+			label: '',
+			valueType: ValueType.Tree,
+			valueText: '',
+			params: [{
+				id: 1,
+				groupId: 0,
+				label: 'a',
+				type: FuncType.Main,
+				valueText: '1',
+				valueType: ValueType.Number,
+				params: [],
+			}, {
+				id: 2,
+				groupId: 0,
+				label: '.b',
+				type: FuncType.Chained,
+				valueText: '2',
+				valueType: ValueType.Number,
+				params: [],
+			}, {
+				id: 3,
+				groupId: 1,
+				label: 'c',
+				type: FuncType.Main,
+				valueText: '3',
+				valueType: ValueType.Number,
+				params: [],
+			}, {
+				id: 4,
+				groupId: 1,
+				label: '.d',
+				type: FuncType.Chained,
+				valueText: '4',
+				valueType: ValueType.Number,
+				params: [],
+			}],
+		});
+	});
+});
