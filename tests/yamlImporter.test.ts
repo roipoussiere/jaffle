@@ -26,3 +26,15 @@ describe('Testing getFuncValueType()', () => {
 		expect(YI.getFuncValueType({ a: 1, b: 2 })).toBe(ValueType.Object);
 	});
 });
+
+describe('Testing getStringFuncType()', () => {
+	test('string func names return string func types', () => {
+		expect(YI.getStringFuncType('_abc')).toBe(FuncType.Mininotation);
+		expect(YI.getStringFuncType('=abc')).toBe(FuncType.Expression);
+		expect(YI.getStringFuncType('$abc')).toBe(FuncType.Constant);
+	});
+
+	test('common strings return null', () => {
+		expect(YI.getStringFuncType('abc')).toBe(null);
+	});
+});
