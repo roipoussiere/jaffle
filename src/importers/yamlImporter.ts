@@ -82,6 +82,11 @@ export class YamlImporter extends AbstractImporter {
 		const funcName = YamlImporter.getFuncName(rawFunc);
 		const funcType = YamlImporter.getFuncType(funcName);
 		const rawValue = rawFunc[funcName];
+
+		if (funcType === FuncType.Serialized) {
+			return YamlImporter.serialize(rawFunc);
+		}
+
 		const valueType = YamlImporter.getValueType(rawValue);
 
 		let valueText: string;
@@ -93,16 +98,6 @@ export class YamlImporter extends AbstractImporter {
 			valueText = `${rawValue}`;
 		}
 
-		let params: Params;
-		if (funcType === FuncType.Serialized) {
-			params = [];
-			// params = YamlImporter.serialize(rawValue); // TODO
-		} else if (rawValue instanceof Array) {
-			params = YamlImporter.computeParams(rawValue);
-		} else {
-			params = [];
-		}
-
 		return {
 			id: -1,
 			groupId: -1,
@@ -110,7 +105,7 @@ export class YamlImporter extends AbstractImporter {
 			label: funcName,
 			valueType,
 			valueText,
-			params,
+			params: rawValue instanceof Array ? YamlImporter.computeParams(rawValue) : [],
 		};
 	}
 
@@ -157,6 +152,75 @@ export class YamlImporter extends AbstractImporter {
 					paramsGroupId,
 				);
 			}),
+		};
+	}
+
+	static serialize(rawValue: unknown): FuncTree {
+		if (typeof rawValue === 'string') {
+			return {
+				id: -1,
+				groupId: -1,
+				type: FuncType.Serialized,
+				label: '',
+				valueType: ValueType.String,
+				valueText: rawValue,
+				params: [],
+			};
+		}
+		if (typeof rawValue === 'number') {
+			return {
+				id: -1,
+				groupId: -1,
+				type: FuncType.Serialized,
+				label: '',
+				valueType: ValueType.Number,
+				valueText: `${rawValue}`,
+				params: [],
+			};
+		}
+		if (rawValue instanceof Array) {
+			return {
+				id: -1,
+				groupId: -1,
+				type: FuncType.Serialized,
+				label: '[]',
+				valueType: ValueType.Tree,
+				valueText: '',
+				params: rawValue.map((rawChild) => YamlImporter.serialize(rawChild)),
+			};
+		}
+		if (rawValue instanceof Object) {
+			const keys = Object.keys(rawValue);
+			if (keys.length === 1) {
+				return {
+					id: -1,
+					groupId: -1,
+					type: FuncType.Serialized,
+					label: '',
+					valueType: ValueType.String, // TODO
+					valueText: keys[0],
+					params: keys.map((key) => YamlImporter.serialize(rawValue[key])),
+				};
+				// YamlImporter.serialize(rawValue[keys[0]]);
+			}
+			return {
+				id: -1,
+				groupId: -1,
+				type: FuncType.Serialized,
+				label: '',
+				valueType: ValueType.Tree,
+				valueText: '',
+				params: keys.map((key) => YamlImporter.serialize(rawValue[key])),
+			};
+		}
+		return {
+			id: -1,
+			groupId: -1,
+			type: FuncType.Serialized,
+			label: '',
+			valueType: ValueType.Empty,
+			valueText: '∅',
+			params: [],
 		};
 	}
 
