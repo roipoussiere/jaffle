@@ -7,7 +7,7 @@ export enum FuncType {
 	Expression,
 	Constant,
 	List,
-	Anon,
+	LiteralValue,
 }
 
 export enum ValueType {

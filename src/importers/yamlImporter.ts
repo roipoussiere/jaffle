@@ -35,8 +35,8 @@ export class YamlImporter extends AbstractImporter {
 		const rawComposition = <Array<unknown>> data;
 
 		const partialTree = {
-			id: 0,
-			groupId: 0,
+			id: -1,
+			groupId: -1,
 			type: FuncType.Root,
 			label: '',
 			valueType: ValueType.Object,
@@ -66,8 +66,8 @@ export class YamlImporter extends AbstractImporter {
 		const params = YamlImporter.computeParams(rawList);
 
 		return {
-			id: 0,
-			groupId: 0,
+			id: -1,
+			groupId: -1,
 			type: FuncType.List,
 			label: '[]',
 			valueType: ValueType.Object,
@@ -83,8 +83,8 @@ export class YamlImporter extends AbstractImporter {
 		const params = YamlImporter.computeParams(rawValue instanceof Array ? rawValue : []);
 
 		return {
-			id: 0,
-			groupId: 0,
+			id: -1,
+			groupId: -1,
 			type: funcName[0] === c.CHAINED_FUNC_PREFIX ? FuncType.Chained : FuncType.Main,
 			label: funcName,
 			valueType,
@@ -98,8 +98,8 @@ export class YamlImporter extends AbstractImporter {
 			const stringFuncType = YamlImporter.getStringFuncType(rawLiteral);
 			if (stringFuncType !== null) {
 				return {
-					id: 0,
-					groupId: 0,
+					id: -1,
+					groupId: -1,
 					type: stringFuncType,
 					label: rawLiteral,
 					valueType: ValueType.Object,
@@ -110,9 +110,9 @@ export class YamlImporter extends AbstractImporter {
 		}
 
 		return {
-			id: 0,
-			groupId: 0,
-			type: FuncType.Anon,
+			id: -1,
+			groupId: -1,
+			type: FuncType.LiteralValue,
 			label: '',
 			valueType: YamlImporter.getValueType(rawLiteral),
 			valueText: '',
@@ -120,12 +120,23 @@ export class YamlImporter extends AbstractImporter {
 		};
 	}
 
-	private static upgradeTree(tree: FuncTree, funcId = 0, groupId = 0): FuncTree {
-		tree.params.map((func) => {
-			const grouIdIncrement = func.type !== FuncType.Chained ? 1 : 0;
-			return YamlImporter.upgradeTree(tree, funcId + 1, groupId + grouIdIncrement);
-		});
-		return tree;
+	static upgradeTree(tree: FuncTree, funcId = 0, groupId = 0): FuncTree {
+		let paramsGroupId = -1;
+		return {
+			...tree,
+			id: funcId,
+			groupId,
+			params: tree.params.map((param, i) => {
+				if (param.type !== FuncType.Chained) {
+					paramsGroupId += 1;
+				}
+				return YamlImporter.upgradeTree(
+					param,
+					funcId + i + 1,
+					paramsGroupId,
+				);
+			}),
+		};
 	}
 
 	static getFuncName(rawFunc: Dict<unknown>) {
