@@ -4,19 +4,20 @@ export enum FuncType {
 	Chained,
 	Serialized,
 	Mininotation,
-	Expression,
+	// Expression,
 	Constant,
 	List,
 	LiteralValue,
 }
 
 export enum ValueType {
+	Empty,
 	Null,
 	Number,
 	String,
 	Mininotation,
 	Expression,
-	Object,
+	Tree,
 }
 
 export type FuncTree = {

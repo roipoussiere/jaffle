@@ -39,7 +39,7 @@ export class YamlImporter extends AbstractImporter {
 			groupId: -1,
 			type: FuncType.Root,
 			label: '',
-			valueType: ValueType.Object,
+			valueType: ValueType.Tree,
 			valueText: '',
 			params: YamlImporter.computeParams(rawComposition),
 		};
@@ -70,7 +70,7 @@ export class YamlImporter extends AbstractImporter {
 			groupId: -1,
 			type: FuncType.List,
 			label: '[]',
-			valueType: ValueType.Object,
+			valueType: ValueType.Tree,
 			valueText: '',
 			params,
 		};
@@ -88,12 +88,12 @@ export class YamlImporter extends AbstractImporter {
 			type: funcName[0] === c.CHAINED_FUNC_PREFIX ? FuncType.Chained : FuncType.Main,
 			label: funcName,
 			valueType,
-			valueText: valueType === ValueType.Object ? '' : `${rawValue}`,
+			valueText: valueType === ValueType.Tree ? '' : `${rawValue}`,
 			params,
 		};
 	}
 
-	private static computeLiteral(rawLiteral: unknown): FuncTree {
+	static computeLiteral(rawLiteral: unknown): FuncTree {
 		if (typeof rawLiteral === 'string') {
 			const stringFuncType = YamlImporter.getStringFuncType(rawLiteral);
 			if (stringFuncType !== null) {
@@ -102,7 +102,7 @@ export class YamlImporter extends AbstractImporter {
 					groupId: -1,
 					type: stringFuncType,
 					label: rawLiteral,
-					valueType: ValueType.Object,
+					valueType: ValueType.Empty,
 					valueText: '',
 					params: [],
 				};
@@ -115,7 +115,7 @@ export class YamlImporter extends AbstractImporter {
 			type: FuncType.LiteralValue,
 			label: '',
 			valueType: YamlImporter.getValueType(rawLiteral),
-			valueText: '',
+			valueText: rawLiteral === null ? '∅' : `${rawLiteral}`,
 			params: [],
 		};
 	}
@@ -154,7 +154,7 @@ export class YamlImporter extends AbstractImporter {
 		const prefix = funcName[0];
 		const strFuncTypes: Dict<FuncType> = {
 			[c.MINI_STR_PREFIX]: FuncType.Mininotation,
-			[c.EXPR_STR_PREFIX]: FuncType.Expression,
+			// [c.EXPR_STR_PREFIX]: FuncType.Expression,
 			[c.CONST_FUNC_PREFIX]: FuncType.Constant,
 		};
 		return prefix in strFuncTypes ? strFuncTypes[prefix] : null;
@@ -175,7 +175,7 @@ export class YamlImporter extends AbstractImporter {
 			return ValueType.Number;
 		}
 		if (rawValue instanceof Object) {
-			return ValueType.Object;
+			return ValueType.Tree;
 		}
 		return ValueType.Null;
 	}

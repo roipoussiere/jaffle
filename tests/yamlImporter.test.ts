@@ -39,7 +39,7 @@ const funcWithChainsInParam = {
 	label: 'funcWithChainsInParam',
 	type: FuncType.Main,
 	valueText: '',
-	valueType: ValueType.Object,
+	valueType: ValueType.Tree,
 	params: [mainFunc, chainedFunc, mainFunc, chainedFunc],
 };
 
@@ -49,7 +49,7 @@ describe('Testing YamlImporterError', () => {
 	});
 });
 
-describe('Testing getValueType()', () => {
+describe('Testing YI.getValueType()', () => {
 	test('string return string types', () => {
 		expect(YI.getValueType('abc')).toBe(ValueType.String);
 		expect(YI.getValueType('_abc')).toBe(ValueType.Mininotation);
@@ -62,24 +62,24 @@ describe('Testing getValueType()', () => {
 	});
 
 	test('object return object type', () => {
-		expect(YI.getValueType([1, 2, 3])).toBe(ValueType.Object);
-		expect(YI.getValueType({ a: 1, b: 2 })).toBe(ValueType.Object);
+		expect(YI.getValueType([1, 2, 3])).toBe(ValueType.Tree);
+		expect(YI.getValueType({ a: 1, b: 2 })).toBe(ValueType.Tree);
 	});
 });
 
-describe('Testing getStringFuncType()', () => {
+describe('Testing YI.getStringFuncType()', () => {
 	test('string func names return string func types', () => {
 		expect(YI.getStringFuncType('_abc')).toBe(FuncType.Mininotation);
-		expect(YI.getStringFuncType('=abc')).toBe(FuncType.Expression);
 		expect(YI.getStringFuncType('$abc')).toBe(FuncType.Constant);
 	});
 
 	test('common strings return null', () => {
 		expect(YI.getStringFuncType('abc')).toBe(null);
+		expect(YI.getStringFuncType('=abc')).toBe(null);
 	});
 });
 
-describe('Testing getFuncName()', () => {
+describe('Testing YI.getFuncName()', () => {
 	test('bad functions fails', () => {
 		expect(() => YI.getFuncName({})).toThrow(YamlImporterError);
 		expect(() => YI.getFuncName({ a: 1, b: 2 })).toThrow(YamlImporterError);
@@ -92,7 +92,7 @@ describe('Testing getFuncName()', () => {
 	});
 });
 
-describe('Testing upgradeTree()', () => {
+describe('Testing YI.upgradeTree()', () => {
 	test('String value have its id and groupId updated', () => {
 		const tree = YI.upgradeTree(stringValue);
 		expect(tree).toHaveProperty('id', 0);
@@ -111,5 +111,65 @@ describe('Testing upgradeTree()', () => {
 		expect(tree.params[2]).toHaveProperty('groupId', 1);
 		expect(tree.params[3]).toHaveProperty('id', 4);
 		expect(tree.params[3]).toHaveProperty('groupId', 1);
+	});
+});
+
+describe('Testing YI.computeLiteral()', () => {
+	test('string literals are well computed', () => {
+		expect(YI.computeLiteral('a')).toEqual({
+			id: -1,
+			groupId: -1,
+			label: '',
+			type: FuncType.LiteralValue,
+			valueText: 'a',
+			valueType: ValueType.String,
+			params: [],
+		});
+	});
+
+	test('Number literals are well computed', () => {
+		expect(YI.computeLiteral(42)).toEqual({
+			id: -1,
+			groupId: -1,
+			label: '',
+			type: FuncType.LiteralValue,
+			valueText: '42',
+			valueType: ValueType.Number,
+			params: [],
+		});
+	});
+
+	test('null literals are well computed', () => {
+		expect(YI.computeLiteral(null)).toEqual({
+			id: -1,
+			groupId: -1,
+			label: '',
+			type: FuncType.LiteralValue,
+			valueText: '∅',
+			valueType: ValueType.Null,
+			params: [],
+		});
+	});
+
+	test('string funcs are well computed', () => {
+		expect(YI.computeLiteral('_a')).toEqual({
+			id: -1,
+			groupId: -1,
+			label: '_a',
+			type: FuncType.Mininotation,
+			valueText: '',
+			valueType: ValueType.Empty,
+			params: [],
+		});
+
+		expect(YI.computeLiteral('$a')).toEqual({
+			id: -1,
+			groupId: -1,
+			label: '$a',
+			type: FuncType.Constant,
+			valueText: '',
+			valueType: ValueType.Empty,
+			params: [],
+		});
 	});
 });
