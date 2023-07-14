@@ -9,21 +9,21 @@ describe('Testing YamlImporterError', () => {
 	});
 });
 
-describe('Testing getFuncValueType()', () => {
+describe('Testing getValueType()', () => {
 	test('string return string types', () => {
-		expect(YI.getFuncValueType('abc')).toBe(ValueType.String);
-		expect(YI.getFuncValueType('_abc')).toBe(ValueType.Mininotation);
-		expect(YI.getFuncValueType('=abc')).toBe(ValueType.Expression);
+		expect(YI.getValueType('abc')).toBe(ValueType.String);
+		expect(YI.getValueType('_abc')).toBe(ValueType.Mininotation);
+		expect(YI.getValueType('=abc')).toBe(ValueType.Expression);
 	});
 
 	test('other literals return literal types', () => {
-		expect(YI.getFuncValueType(null)).toBe(ValueType.Null);
-		expect(YI.getFuncValueType(123)).toBe(ValueType.Number);
+		expect(YI.getValueType(null)).toBe(ValueType.Null);
+		expect(YI.getValueType(123)).toBe(ValueType.Number);
 	});
 
 	test('object return object type', () => {
-		expect(YI.getFuncValueType([1, 2, 3])).toBe(ValueType.Object);
-		expect(YI.getFuncValueType({ a: 1, b: 2 })).toBe(ValueType.Object);
+		expect(YI.getValueType([1, 2, 3])).toBe(ValueType.Object);
+		expect(YI.getValueType({ a: 1, b: 2 })).toBe(ValueType.Object);
 	});
 });
 
