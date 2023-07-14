@@ -62,8 +62,10 @@ export class YamlImporter extends AbstractImporter {
 		return params;
 	}
 
-	private static computeList(rawList: Array<unknown>): FuncTree {
-		const params = YamlImporter.computeParams(rawList);
+	static computeList(rawList: Array<unknown>): FuncTree {
+		if (rawList.length === 0) {
+			throw new YamlImporterError('list is empty');
+		}
 
 		return {
 			id: -1,
@@ -72,7 +74,7 @@ export class YamlImporter extends AbstractImporter {
 			label: '[]',
 			valueType: ValueType.Tree,
 			valueText: '',
-			params,
+			params: YamlImporter.computeParams(rawList),
 		};
 	}
 

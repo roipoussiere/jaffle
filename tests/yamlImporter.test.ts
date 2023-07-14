@@ -268,3 +268,45 @@ describe('Testing YI.computeFunc()', () => {
 		});
 	});
 });
+
+describe('Testing YI.computeList()', () => {
+	test('empty lists fails', () => {
+		expect(() => YI.computeList([])).toThrow(YamlImporterError);
+	});
+
+	test('lists are well computed', () => {
+		expect(YI.computeList(['a', 1, null])).toEqual({
+			id: -1,
+			groupId: -1,
+			label: '[]',
+			type: FuncType.List,
+			valueText: '',
+			valueType: ValueType.Tree,
+			params: [{
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: 'a',
+				valueType: ValueType.String,
+				params: [],
+			}, {
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: '1',
+				valueType: ValueType.Number,
+				params: [],
+			}, {
+				id: -1,
+				groupId: -1,
+				label: '',
+				type: FuncType.LiteralValue,
+				valueText: '∅',
+				valueType: ValueType.Null,
+				params: [],
+			}],
+		});
+	});
+});
