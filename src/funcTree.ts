@@ -1,9 +1,9 @@
 export enum FuncType {
 	Root,
 	Main,
+	MainMininotation,
 	Chained,
 	Serialized,
-	Mininotation,
 	// Expression,
 	Constant,
 	List,

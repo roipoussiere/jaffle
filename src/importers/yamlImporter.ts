@@ -76,11 +76,12 @@ export class YamlImporter extends AbstractImporter {
 		};
 	}
 
-	private static computeFunc(rawFunc: Dict<unknown>): FuncTree {
+	static computeFunc(rawFunc: Dict<unknown>): FuncTree {
 		const funcName = YamlImporter.getFuncName(rawFunc);
 		const rawValue = rawFunc[funcName];
 		const valueType = YamlImporter.getValueType(rawValue);
 		const params = YamlImporter.computeParams(rawValue instanceof Array ? rawValue : []);
+		const valueText = rawValue === null ? '∅' : `${rawValue}`;
 
 		return {
 			id: -1,
@@ -88,7 +89,7 @@ export class YamlImporter extends AbstractImporter {
 			type: funcName[0] === c.CHAINED_FUNC_PREFIX ? FuncType.Chained : FuncType.Main,
 			label: funcName,
 			valueType,
-			valueText: valueType === ValueType.Tree ? '' : `${rawValue}`,
+			valueText: valueType === ValueType.Tree ? '' : valueText,
 			params,
 		};
 	}
@@ -153,7 +154,7 @@ export class YamlImporter extends AbstractImporter {
 	static getStringFuncType(funcName: string): FuncType | null {
 		const prefix = funcName[0];
 		const strFuncTypes: Dict<FuncType> = {
-			[c.MINI_STR_PREFIX]: FuncType.Mininotation,
+			[c.MINI_STR_PREFIX]: FuncType.MainMininotation,
 			// [c.EXPR_STR_PREFIX]: FuncType.Expression,
 			[c.CONST_FUNC_PREFIX]: FuncType.Constant,
 		};

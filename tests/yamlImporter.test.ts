@@ -69,7 +69,7 @@ describe('Testing YI.getValueType()', () => {
 
 describe('Testing YI.getStringFuncType()', () => {
 	test('string func names return string func types', () => {
-		expect(YI.getStringFuncType('_abc')).toBe(FuncType.Mininotation);
+		expect(YI.getStringFuncType('_abc')).toBe(FuncType.MainMininotation);
 		expect(YI.getStringFuncType('$abc')).toBe(FuncType.Constant);
 	});
 
@@ -156,7 +156,7 @@ describe('Testing YI.computeLiteral()', () => {
 			id: -1,
 			groupId: -1,
 			label: '_a',
-			type: FuncType.Mininotation,
+			type: FuncType.MainMininotation,
 			valueText: '',
 			valueType: ValueType.Empty,
 			params: [],
@@ -169,6 +169,101 @@ describe('Testing YI.computeLiteral()', () => {
 			type: FuncType.Constant,
 			valueText: '',
 			valueType: ValueType.Empty,
+			params: [],
+		});
+	});
+});
+
+describe('Testing YI.computeFunc()', () => {
+	test('Bad funcs fails', () => {
+		expect(() => YI.computeFunc({})).toThrow(YamlImporterError);
+		expect(() => YI.computeFunc({ a: 1, b: 2 })).toThrow(YamlImporterError);
+	});
+
+	test('Main func are well computed', () => {
+		expect(YI.computeFunc({ a: null })).toEqual({
+			id: -1,
+			groupId: -1,
+			label: 'a',
+			type: FuncType.Main,
+			valueText: '∅',
+			valueType: ValueType.Null,
+			params: [],
+		});
+		expect(YI.computeFunc({ a: 1 })).toEqual({
+			id: -1,
+			groupId: -1,
+			label: 'a',
+			type: FuncType.Main,
+			valueText: '1',
+			valueType: ValueType.Number,
+			params: [],
+		});
+		expect(YI.computeFunc({ a: 'b' })).toEqual({
+			id: -1,
+			groupId: -1,
+			label: 'a',
+			type: FuncType.Main,
+			valueText: 'b',
+			valueType: ValueType.String,
+			params: [],
+		});
+		expect(YI.computeFunc({ a: '_b' })).toEqual({
+			id: -1,
+			groupId: -1,
+			label: 'a',
+			type: FuncType.Main,
+			valueText: '_b',
+			valueType: ValueType.Mininotation,
+			params: [],
+		});
+		expect(YI.computeFunc({ a: '=b' })).toEqual({
+			id: -1,
+			groupId: -1,
+			label: 'a',
+			type: FuncType.Main,
+			valueText: '=b',
+			valueType: ValueType.Expression,
+			params: [],
+		});
+		expect(YI.computeFunc({ a: [1, 2] })).toEqual({
+			id: -1,
+			groupId: -1,
+			label: 'a',
+			type: FuncType.Main,
+			valueText: '',
+			valueType: ValueType.Tree,
+			params: [
+				{
+					groupId: -1,
+					id: -1,
+					label: '',
+					params: [],
+					type: FuncType.LiteralValue,
+					valueText: '1',
+					valueType: ValueType.Number,
+				},
+				{
+					groupId: -1,
+					id: -1,
+					label: '',
+					params: [],
+					type: FuncType.LiteralValue,
+					valueText: '2',
+					valueType: ValueType.Number,
+				},
+			],
+		});
+	});
+
+	test('Chained func are well computed', () => {
+		expect(YI.computeFunc({ '.a': 1 })).toEqual({
+			id: -1,
+			groupId: -1,
+			label: '.a',
+			type: FuncType.Chained,
+			valueText: '1',
+			valueType: ValueType.Number,
 			params: [],
 		});
 	});
