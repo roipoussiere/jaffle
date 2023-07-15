@@ -38,6 +38,8 @@ class JaffleGraph {
 
 	public selectedBoxId: string;
 
+	public selectedBoxIsValue: boolean;
+
 	public inputCursorPos = 0;
 
 	public width = 800;
@@ -184,29 +186,33 @@ class JaffleGraph {
 	private drawBoxes() {
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const self = this;
+
+		// eslint-disable-next-line func-names
+		const onMouseOver = function () {
+			d3.select(this)
+				.select('rect')
+				.style('stroke', 'black');
+		};
+
+		// eslint-disable-next-line func-names
+		const onMouseOut = function () {
+			d3.select(this)
+				.select('rect')
+				.style('stroke', 'none');
+		};
+
+		const onClick = (node: FuncNode, isValue: boolean) => {
+			self.selectedBoxId = node.data.id;
+			self.selectedBoxIsValue = isValue;
+			self.inputCursorPos = -1;
+			self.draw();
+		};
+
 		const box = this.svg.append('g')
 			.selectAll()
 			.data(this.tree.descendants().filter((n: FuncNode) => n.depth >= 1))
 			.join('g')
-			.attr('transform', (n: FuncNode) => `translate(${n.y},${n.x})`)
-
-			// eslint-disable-next-line func-names
-			.on('mouseover', function () {
-				d3.select(this)
-					.select('rect')
-					.style('stroke', 'black');
-			})
-			// eslint-disable-next-line func-names
-			.on('mouseout', function () {
-				d3.select(this)
-					.select('rect')
-					.style('stroke', 'none');
-			})
-			.on('click', (event, i: FuncNode) => {
-				self.selectedBoxId = i.data.id;
-				self.inputCursorPos = -1;
-				self.draw();
-			});
+			.attr('transform', (n: FuncNode) => `translate(${n.y},${n.x})`);
 
 		box.append('rect')
 			.attr('width', (n: FuncNode) => n.boxWidth * this.charWidth)
@@ -221,13 +227,19 @@ class JaffleGraph {
 			.style('fill', (n: FuncNode) => BOX_NAME_COLORS[n.data.type])
 			.style('font-weight', (n: FuncNode) => (n.data.type === FuncType.Chained
 				? 'normal' : 'bold'))
-			.text((d: FuncNode) => d.data.label);
+			.text((d: FuncNode) => d.data.label)
+			.on('mouseover', onMouseOver)
+			.on('mouseout', onMouseOut)
+			.on('click', (event, node: FuncNode) => onClick(node, false));
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: FuncNode) => d.boxPadding * this.charWidth)
 			.style('fill', (d: FuncNode) => BOX_VALUE_COLORS[d.data.valueType])
-			.text((d: FuncNode) => d.data.valueText);
+			.text((d: FuncNode) => d.data.valueText)
+			.on('mouseover', onMouseOver)
+			.on('mouseout', onMouseOut)
+			.on('click', (event, node: FuncNode) => onClick(node, true));
 
 		// box.append('title')
 		// 	.text((d: FuncNode) => d.data.id);
@@ -243,21 +255,27 @@ class JaffleGraph {
 
 		this.svg.append('foreignObject')
 			.attr('id', 'jaffle_ne_html')
+			.attr('x', this.selectedBoxIsValue ? node.y + node.boxPadding * this.charWidth : node.y)
 			.attr('y', node.x - 0.5 * this.charHeight)
-			.attr('x', node.y)
-			.attr('width', node.boxWidth * this.charWidth)
+			.attr('width', this.selectedBoxIsValue
+				? (node.boxWidth - node.boxPadding) * this.charWidth
+				: node.boxPadding * this.charWidth)
 			.attr('height', this.charHeight)
 
 			.append('xhtml:input')
 			.attr('id', 'jaffle_ne_input')
 			.attr('type', 'text')
-			.attr('value', node.data.label)
+			.attr('value', this.selectedBoxIsValue ? node.data.valueText : node.data.label)
 
 			.on('input', (e) => {
 				this.inputCursorPos = e.target.selectionStart;
 				const selected = this.tree.find((n: FuncNode) => n.data.id === this.selectedBoxId);
 				if (selected !== undefined) {
-					selected.data.label = e.target.value;
+					if (this.selectedBoxIsValue) {
+						selected.data.valueText = e.target.value;
+					} else {
+						selected.data.label = e.target.value;
+					}
 					this.initTree();
 					self.draw();
 				}
