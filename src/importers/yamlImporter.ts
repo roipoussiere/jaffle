@@ -192,25 +192,60 @@ export class YamlImporter extends AbstractImporter {
 		if (rawValue instanceof Object) {
 			const keys = Object.keys(rawValue);
 			if (keys.length === 1) {
+				const value = rawValue[keys[0]];
+				if (value instanceof Object) {
+					return {
+						id: -1,
+						groupId: -1,
+						type: FuncType.Serialized,
+						label: keys[0],
+						valueType: ValueType.Tree,
+						valueText: '',
+						params: Object.keys(value).map((key) => YamlImporter.serialize(
+							value instanceof Array ? value[key] : { [key]: value[key] },
+						)),
+					};
+				}
+				if (typeof value === 'string') {
+					return {
+						id: -1,
+						groupId: -1,
+						type: FuncType.Serialized,
+						label: keys[0],
+						valueType: ValueType.String,
+						valueText: value,
+						params: [],
+					};
+				}
+				if (typeof value === 'number') {
+					return {
+						id: -1,
+						groupId: -1,
+						type: FuncType.Serialized,
+						label: keys[0],
+						valueType: ValueType.Number,
+						valueText: `${value}`,
+						params: [],
+					};
+				}
 				return {
 					id: -1,
 					groupId: -1,
 					type: FuncType.Serialized,
-					label: '',
-					valueType: ValueType.String, // TODO
-					valueText: keys[0],
-					params: keys.map((key) => YamlImporter.serialize(rawValue[key])),
+					label: keys[0],
+					valueType: ValueType.Null,
+					valueText: '∅',
+					params: [],
 				};
-				// YamlImporter.serialize(rawValue[keys[0]]);
 			}
 			return {
 				id: -1,
 				groupId: -1,
 				type: FuncType.Serialized,
-				label: '',
+				label: '{}',
 				valueType: ValueType.Tree,
 				valueText: '',
-				params: keys.map((key) => YamlImporter.serialize(rawValue[key])),
+				params: keys.map((key) => YamlImporter.serialize({ [key]: rawValue[key] })),
 			};
 		}
 		return {
