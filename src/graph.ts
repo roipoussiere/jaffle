@@ -119,7 +119,7 @@ class JaffleGraph {
 		this.domSvg?.remove();
 		this.domSvg = <SVGElement> this.svg.node();
 		this.container.appendChild(this.domSvg);
-		const domInput = <HTMLInputElement>document.getElementById('jaffle_node_editor_input');
+		const domInput = <HTMLInputElement>document.getElementById('jaffle_ne_input');
 		if (domInput !== null) {
 			domInput.focus();
 			domInput.selectionStart = this.inputCursorPos === -1 ? 0 : this.inputCursorPos;
@@ -129,15 +129,22 @@ class JaffleGraph {
 	}
 
 	private drawSvg() {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const self = this;
-
 		this.svg = d3.create('svg')
 			.attr('class', 'jaffle_graph')
 			.attr('width', this.width)
 			.attr('height', this.height)
 			.attr('viewBox', [this.offsetX, this.offsetY, this.width, this.height])
 			.style('font', `${this.fontSize}px mono`);
+
+		this.svg.append('rect')
+			.attr('x', this.offsetX)
+			.attr('y', this.offsetY)
+			.attr('width', this.width)
+			.attr('height', this.height)
+			.attr('opacity', 0)
+			.on('click', () => {
+				(<HTMLInputElement>document.getElementById('jaffle_ne_html'))?.remove();
+			});
 
 		this.drawLinks();
 		this.drawGroupArea();
@@ -235,13 +242,14 @@ class JaffleGraph {
 		}
 
 		this.svg.append('foreignObject')
+			.attr('id', 'jaffle_ne_html')
 			.attr('y', node.x - 0.5 * this.charHeight)
 			.attr('x', node.y)
 			.attr('width', node.boxWidth * this.charWidth)
 			.attr('height', this.charHeight)
 
 			.append('xhtml:input')
-			.attr('id', 'jaffle_node_editor_input')
+			.attr('id', 'jaffle_ne_input')
 			.attr('type', 'text')
 			.attr('value', node.data.label)
 
