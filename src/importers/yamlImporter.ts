@@ -192,51 +192,7 @@ export class YamlImporter extends AbstractImporter {
 		if (rawValue instanceof Object) {
 			const keys = Object.keys(rawValue);
 			if (keys.length === 1) {
-				const value = rawValue[keys[0]];
-				if (value instanceof Object) {
-					return {
-						id: -1,
-						groupId: -1,
-						type: FuncType.Serialized,
-						label: keys[0],
-						valueType: ValueType.Tree,
-						valueText: '',
-						params: Object.keys(value).map((key) => YamlImporter.serialize(
-							value instanceof Array ? value[key] : { [key]: value[key] },
-						)),
-					};
-				}
-				if (typeof value === 'string') {
-					return {
-						id: -1,
-						groupId: -1,
-						type: FuncType.Serialized,
-						label: keys[0],
-						valueType: ValueType.String,
-						valueText: value,
-						params: [],
-					};
-				}
-				if (typeof value === 'number') {
-					return {
-						id: -1,
-						groupId: -1,
-						type: FuncType.Serialized,
-						label: keys[0],
-						valueType: ValueType.Number,
-						valueText: `${value}`,
-						params: [],
-					};
-				}
-				return {
-					id: -1,
-					groupId: -1,
-					type: FuncType.Serialized,
-					label: keys[0],
-					valueType: ValueType.Null,
-					valueText: '∅',
-					params: [],
-				};
+				return YamlImporter.serializeEntry(keys[0], rawValue[keys[0]]);
 			}
 			return {
 				id: -1,
@@ -254,6 +210,53 @@ export class YamlImporter extends AbstractImporter {
 			type: FuncType.Serialized,
 			label: '',
 			valueType: ValueType.Empty,
+			valueText: '∅',
+			params: [],
+		};
+	}
+
+	static serializeEntry(key: string, rawValue: unknown): FuncTree {
+		if (rawValue instanceof Object) {
+			return {
+				id: -1,
+				groupId: -1,
+				type: FuncType.Serialized,
+				label: key,
+				valueType: ValueType.Tree,
+				valueText: '',
+				params: Object.keys(rawValue).map((chKey) => YamlImporter.serialize(
+					rawValue instanceof Array ? rawValue[chKey] : { [chKey]: rawValue[chKey] },
+				)),
+			};
+		}
+		if (typeof rawValue === 'string') {
+			return {
+				id: -1,
+				groupId: -1,
+				type: FuncType.Serialized,
+				label: key,
+				valueType: ValueType.String,
+				valueText: rawValue,
+				params: [],
+			};
+		}
+		if (typeof rawValue === 'number') {
+			return {
+				id: -1,
+				groupId: -1,
+				type: FuncType.Serialized,
+				label: key,
+				valueType: ValueType.Number,
+				valueText: `${rawValue}`,
+				params: [],
+			};
+		}
+		return {
+			id: -1,
+			groupId: -1,
+			type: FuncType.Serialized,
+			label: key,
+			valueType: ValueType.Null,
 			valueText: '∅',
 			params: [],
 		};
