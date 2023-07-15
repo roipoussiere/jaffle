@@ -188,23 +188,18 @@ class JaffleGraph {
 	}
 
 	private drawBoxes() {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const self = this;
-
-		// eslint-disable-next-line func-names
-		const onMouseOver = function () {
-			d3.select(this)
-				.select('rect')
+		const onMouseOver = (target: HTMLElement) => {
+			d3.select(<HTMLElement>target.parentElement?.firstChild)
 				.style('stroke', 'black');
 		};
 
-		// eslint-disable-next-line func-names
-		const onMouseOut = function () {
-			d3.select(this)
-				.select('rect')
+		const onMouseOut = (target: HTMLElement) => {
+			d3.select(<HTMLElement>target.parentElement?.firstChild)
 				.style('stroke', 'none');
 		};
 
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const self = this;
 		const onClick = (node: FuncNode, isValue: boolean) => {
 			self.selectedBoxId = node.data.id;
 			self.selectedBoxIsValue = isValue;
@@ -232,8 +227,8 @@ class JaffleGraph {
 			.style('font-weight', (n: FuncNode) => (n.data.type === FuncType.Chained
 				? 'normal' : 'bold'))
 			.text((d: FuncNode) => d.data.label)
-			.on('mouseover', onMouseOver)
-			.on('mouseout', onMouseOut)
+			.on('mouseover', (event) => onMouseOver(event.target))
+			.on('mouseout', (event) => onMouseOut(event.target))
 			.on('click', (event, node: FuncNode) => onClick(node, false));
 
 		box.append('text')
@@ -241,8 +236,8 @@ class JaffleGraph {
 			.attr('x', (d: FuncNode) => d.boxPadding * this.charWidth)
 			.style('fill', (d: FuncNode) => BOX_VALUE_COLORS[d.data.valueType])
 			.text((d: FuncNode) => d.data.valueText)
-			.on('mouseover', onMouseOver)
-			.on('mouseout', onMouseOut)
+			.on('mouseover', (event) => onMouseOver(event.target))
+			.on('mouseout', (event) => onMouseOut(event.target))
 			.on('click', (event, node: FuncNode) => onClick(node, true));
 
 		// box.append('title')
