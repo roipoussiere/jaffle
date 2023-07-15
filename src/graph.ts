@@ -131,6 +131,9 @@ class JaffleGraph {
 	}
 
 	private drawSvg() {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const self = this;
+
 		this.svg = d3.create('svg')
 			.attr('class', 'jaffle_graph')
 			.attr('width', this.width)
@@ -145,7 +148,8 @@ class JaffleGraph {
 			.attr('height', this.height)
 			.attr('opacity', 0)
 			.on('click', () => {
-				(<HTMLInputElement>document.getElementById('jaffle_ne_html'))?.remove();
+				self.selectedBoxId = '';
+				self.draw();
 			});
 
 		this.drawLinks();
@@ -254,7 +258,6 @@ class JaffleGraph {
 		}
 
 		this.svg.append('foreignObject')
-			.attr('id', 'jaffle_ne_html')
 			.attr('x', this.selectedBoxIsValue ? node.y + node.boxPadding * this.charWidth : node.y)
 			.attr('y', node.x - 0.5 * this.charHeight)
 			.attr('width', this.selectedBoxIsValue
