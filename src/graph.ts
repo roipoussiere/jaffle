@@ -44,6 +44,10 @@ class JaffleGraph {
 
 	public height: number;
 
+	public offsetX: number;
+
+	public offsetY: number;
+
 	public fontSize = 14;
 
 	public boxGap = 3;
@@ -51,10 +55,6 @@ class JaffleGraph {
 	public charWidth = this.fontSize * 0.6;
 
 	public charHeight = this.fontSize * 1.4;
-
-	public minNodeY: number;
-
-	public maxNodeY: number;
 
 	private svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
 
@@ -83,18 +83,21 @@ class JaffleGraph {
 
 		layout(this.tree);
 
-		this.minNodeY = Infinity;
-		this.maxNodeY = -Infinity;
+		let minNodeY = Infinity;
+		let maxNodeY = -Infinity;
 		this.tree.each((node: FuncNode) => {
-			if (node.x > this.maxNodeY) {
-				this.maxNodeY = node.x;
+			if (node.x > maxNodeY) {
+				maxNodeY = node.x;
 			}
-			if (node.x < this.minNodeY) {
-				this.minNodeY = node.x;
+			if (node.x < minNodeY) {
+				minNodeY = node.x;
 			}
 		});
 
-		this.height = this.maxNodeY - this.minNodeY + this.charHeight * 2;
+		this.height = maxNodeY - minNodeY + this.charHeight * 2;
+		this.offsetX = ((<FuncNode> this.tree).boxWidth + this.boxGap) * this.charWidth;
+		this.offsetY = minNodeY - this.charHeight;
+
 		return this;
 	}
 
@@ -126,15 +129,14 @@ class JaffleGraph {
 	}
 
 	private drawSvg() {
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const self = this;
+
 		this.svg = d3.create('svg')
 			.attr('class', 'jaffle_graph')
 			.attr('width', this.width)
 			.attr('height', this.height)
-			.attr('viewBox', [
-				((<FuncNode> this.tree).boxWidth + this.boxGap) * this.charWidth,
-				this.minNodeY - this.charHeight,
-				this.width,
-				this.height])
+			.attr('viewBox', [this.offsetX, this.offsetY, this.width, this.height])
 			.style('font', `${this.fontSize}px mono`);
 
 		this.drawLinks();
