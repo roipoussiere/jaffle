@@ -4,7 +4,7 @@ import { YamlImporterError, YamlImporter as YI } from '../src/importers/yamlImpo
 import { FuncType, ValueType } from '../src/funcTree';
 
 const stringValue = {
-	id: -1,
+	id: '',
 	groupId: -1,
 	label: '',
 	type: FuncType.LiteralValue,
@@ -14,7 +14,7 @@ const stringValue = {
 };
 
 const mainFunc = {
-	id: -1,
+	id: '',
 	groupId: -1,
 	label: 'mainFunc',
 	type: FuncType.Main,
@@ -24,7 +24,7 @@ const mainFunc = {
 };
 
 const chainedFunc = {
-	id: -1,
+	id: '',
 	groupId: -1,
 	label: '.chainedFunc',
 	type: FuncType.Chained,
@@ -34,7 +34,7 @@ const chainedFunc = {
 };
 
 const funcWithChainsInParam = {
-	id: -1,
+	id: '',
 	groupId: -1,
 	label: 'funcWithChainsInParam',
 	type: FuncType.Main,
@@ -99,21 +99,21 @@ describe('Testing YI.getFuncName()', () => {
 describe('Testing YI.upgradeTree()', () => {
 	test('string value have its id and groupId updated', () => {
 		const tree = YI.upgradeTree(stringValue);
-		expect(tree).toHaveProperty('id', 0);
+		expect(tree).toHaveProperty('id', '');
 		expect(tree).toHaveProperty('groupId', 0);
 	});
 
 	test('tree with several function chains have its id and groupId updated', () => {
 		const tree = YI.upgradeTree(funcWithChainsInParam);
-		expect(tree).toHaveProperty('id', 0);
+		expect(tree).toHaveProperty('id', '');
 		expect(tree).toHaveProperty('groupId', 0);
-		expect(tree.params[0]).toHaveProperty('id', 1);
+		expect(tree.params[0]).toHaveProperty('id', '0');
 		expect(tree.params[0]).toHaveProperty('groupId', 0);
-		expect(tree.params[1]).toHaveProperty('id', 2);
+		expect(tree.params[1]).toHaveProperty('id', '1');
 		expect(tree.params[1]).toHaveProperty('groupId', 0);
-		expect(tree.params[2]).toHaveProperty('id', 3);
+		expect(tree.params[2]).toHaveProperty('id', '2');
 		expect(tree.params[2]).toHaveProperty('groupId', 1);
-		expect(tree.params[3]).toHaveProperty('id', 4);
+		expect(tree.params[3]).toHaveProperty('id', '3');
 		expect(tree.params[3]).toHaveProperty('groupId', 1);
 	});
 });
@@ -121,7 +121,7 @@ describe('Testing YI.upgradeTree()', () => {
 describe('Testing YI.computeLiteral()', () => {
 	test('string literals are well computed', () => {
 		expect(YI.computeLiteral('a')).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '',
 			type: FuncType.LiteralValue,
@@ -133,7 +133,7 @@ describe('Testing YI.computeLiteral()', () => {
 
 	test('number literals are well computed', () => {
 		expect(YI.computeLiteral(42)).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '',
 			type: FuncType.LiteralValue,
@@ -145,7 +145,7 @@ describe('Testing YI.computeLiteral()', () => {
 
 	test('null literals are well computed', () => {
 		expect(YI.computeLiteral(null)).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '',
 			type: FuncType.LiteralValue,
@@ -157,7 +157,7 @@ describe('Testing YI.computeLiteral()', () => {
 
 	test('string funcs are well computed', () => {
 		expect(YI.computeLiteral('_a')).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '_a',
 			type: FuncType.MainMininotation,
@@ -167,7 +167,7 @@ describe('Testing YI.computeLiteral()', () => {
 		});
 
 		expect(YI.computeLiteral('=a')).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '=a',
 			type: FuncType.MainExpression,
@@ -181,7 +181,7 @@ describe('Testing YI.computeLiteral()', () => {
 describe('Testing YI.serializeEntry()', () => {
 	test('literals are well serialized', () => {
 		expect(YI.serializeEntry('a', null)).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Serialized,
@@ -191,7 +191,7 @@ describe('Testing YI.serializeEntry()', () => {
 		});
 
 		expect(YI.serializeEntry('a', 42)).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Serialized,
@@ -201,7 +201,7 @@ describe('Testing YI.serializeEntry()', () => {
 		});
 
 		expect(YI.serializeEntry('a', '_b')).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Serialized,
@@ -213,14 +213,14 @@ describe('Testing YI.serializeEntry()', () => {
 
 	test('array are well serialized', () => {
 		expect(YI.serializeEntry('a', [1, 'a'])).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Serialized,
 			valueText: '',
 			valueType: ValueType.Tree,
 			params: [{
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.Serialized,
@@ -228,7 +228,7 @@ describe('Testing YI.serializeEntry()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.Serialized,
@@ -241,14 +241,14 @@ describe('Testing YI.serializeEntry()', () => {
 
 	test('objects are well serialized', () => {
 		expect(YI.serializeEntry('a', { b: 1, c: 'd' })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Serialized,
 			valueText: '',
 			valueType: ValueType.Tree,
 			params: [{
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: 'b',
 				type: FuncType.Serialized,
@@ -256,7 +256,7 @@ describe('Testing YI.serializeEntry()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: 'c',
 				type: FuncType.Serialized,
@@ -271,7 +271,7 @@ describe('Testing YI.serializeEntry()', () => {
 describe('Testing YI.serialize()', () => {
 	test('literals are well serialized', () => {
 		expect(YI.serialize(null)).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '',
 			type: FuncType.Serialized,
@@ -281,7 +281,7 @@ describe('Testing YI.serialize()', () => {
 		});
 
 		expect(YI.serialize(42)).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '',
 			type: FuncType.Serialized,
@@ -291,7 +291,7 @@ describe('Testing YI.serialize()', () => {
 		});
 
 		expect(YI.serialize('_b')).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '',
 			type: FuncType.Serialized,
@@ -303,14 +303,14 @@ describe('Testing YI.serialize()', () => {
 
 	test('array are well serialized', () => {
 		expect(YI.serialize([1, 'a'])).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '[]',
 			type: FuncType.Serialized,
 			valueText: '',
 			valueType: ValueType.Tree,
 			params: [{
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.Serialized,
@@ -318,7 +318,7 @@ describe('Testing YI.serialize()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.Serialized,
@@ -331,7 +331,7 @@ describe('Testing YI.serialize()', () => {
 
 	test('objects with unique key are well serialized', () => {
 		expect(YI.serialize({ a: 1 })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Serialized,
@@ -343,14 +343,14 @@ describe('Testing YI.serialize()', () => {
 
 	test('objects several keys are well serialized', () => {
 		expect(YI.serialize({ a: 1, b: 'c' })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '{}',
 			type: FuncType.Serialized,
 			valueText: '',
 			valueType: ValueType.Tree,
 			params: [{
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: 'a',
 				type: FuncType.Serialized,
@@ -358,7 +358,7 @@ describe('Testing YI.serialize()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: 'b',
 				type: FuncType.Serialized,
@@ -378,7 +378,7 @@ describe('Testing YI.computeFunc()', () => {
 
 	test('main func are well computed', () => {
 		expect(YI.computeFunc({ a: null })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Main,
@@ -388,7 +388,7 @@ describe('Testing YI.computeFunc()', () => {
 		});
 
 		expect(YI.computeFunc({ a: 1 })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Main,
@@ -398,7 +398,7 @@ describe('Testing YI.computeFunc()', () => {
 		});
 
 		expect(YI.computeFunc({ a: 'b' })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Main,
@@ -408,7 +408,7 @@ describe('Testing YI.computeFunc()', () => {
 		});
 
 		expect(YI.computeFunc({ a: '_b' })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Main,
@@ -418,7 +418,7 @@ describe('Testing YI.computeFunc()', () => {
 		});
 
 		expect(YI.computeFunc({ a: '=b' })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Main,
@@ -428,7 +428,7 @@ describe('Testing YI.computeFunc()', () => {
 		});
 
 		expect(YI.computeFunc({ a: [1, 2] })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Main,
@@ -436,7 +436,7 @@ describe('Testing YI.computeFunc()', () => {
 			valueType: ValueType.Tree,
 			params: [
 				{
-					id: -1,
+					id: '',
 					groupId: -1,
 					label: '',
 					type: FuncType.LiteralValue,
@@ -445,7 +445,7 @@ describe('Testing YI.computeFunc()', () => {
 					params: [],
 				},
 				{
-					id: -1,
+					id: '',
 					groupId: -1,
 					label: '',
 					type: FuncType.LiteralValue,
@@ -459,7 +459,7 @@ describe('Testing YI.computeFunc()', () => {
 
 	test('chained func are well computed', () => {
 		expect(YI.computeFunc({ '.a': 1 })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '.a',
 			type: FuncType.Chained,
@@ -471,7 +471,7 @@ describe('Testing YI.computeFunc()', () => {
 
 	test('serialized functions are serialized', () => {
 		expect(YI.computeFunc({ 'a^': '_a' })).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a^',
 			type: FuncType.Serialized,
@@ -489,14 +489,14 @@ describe('Testing YI.computeList()', () => {
 
 	test('lists are well computed', () => {
 		expect(YI.computeList(['a', 1, null])).toEqual({
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '[]',
 			type: FuncType.List,
 			valueText: '',
 			valueType: ValueType.Tree,
 			params: [{
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -504,7 +504,7 @@ describe('Testing YI.computeList()', () => {
 				valueType: ValueType.String,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -512,7 +512,7 @@ describe('Testing YI.computeList()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -528,7 +528,7 @@ describe('Testing YI.computeParams()', () => {
 	test('literals are well computed', () => {
 		expect(YI.computeParams(['a', 1, null])).toEqual([
 			{
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -536,7 +536,7 @@ describe('Testing YI.computeParams()', () => {
 				valueType: ValueType.String,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -544,7 +544,7 @@ describe('Testing YI.computeParams()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -557,7 +557,7 @@ describe('Testing YI.computeParams()', () => {
 
 	test('funcs are well computed', () => {
 		expect(YI.computeParams([{ a: 1 }, { '.b': 2 }, { c: 3 }, { '.d': 4 }])).toEqual([{
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'a',
 			type: FuncType.Main,
@@ -565,7 +565,7 @@ describe('Testing YI.computeParams()', () => {
 			valueType: ValueType.Number,
 			params: [],
 		}, {
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '.b',
 			type: FuncType.Chained,
@@ -573,7 +573,7 @@ describe('Testing YI.computeParams()', () => {
 			valueType: ValueType.Number,
 			params: [],
 		}, {
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: 'c',
 			type: FuncType.Main,
@@ -581,7 +581,7 @@ describe('Testing YI.computeParams()', () => {
 			valueType: ValueType.Number,
 			params: [],
 		}, {
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '.d',
 			type: FuncType.Chained,
@@ -593,14 +593,14 @@ describe('Testing YI.computeParams()', () => {
 
 	test('lists are well computed', () => {
 		expect(YI.computeParams([[1, 2], [3, 4]])).toEqual([{
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '[]',
 			type: FuncType.List,
 			valueText: '',
 			valueType: ValueType.Tree,
 			params: [{
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -608,7 +608,7 @@ describe('Testing YI.computeParams()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -617,14 +617,14 @@ describe('Testing YI.computeParams()', () => {
 				params: [],
 			}],
 		}, {
-			id: -1,
+			id: '',
 			groupId: -1,
 			label: '[]',
 			type: FuncType.List,
 			valueText: '',
 			valueType: ValueType.Tree,
 			params: [{
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -632,7 +632,7 @@ describe('Testing YI.computeParams()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: -1,
+				id: '',
 				groupId: -1,
 				label: '',
 				type: FuncType.LiteralValue,
@@ -658,7 +658,7 @@ describe('Testing YI.import()', () => {
 
 	test('empty yaml is well computed', () => {
 		expect(YI.import('[]')).toEqual({
-			id: 0,
+			id: '',
 			groupId: 0,
 			type: FuncType.Root,
 			label: '',
@@ -670,14 +670,14 @@ describe('Testing YI.import()', () => {
 
 	test('non-empty valid yaml is well computed', () => {
 		expect(YI.import('[{a: 1}, {.b: 2}, {c: 3}, {.d: 4}]')).toEqual({
-			id: 0,
+			id: '',
 			groupId: 0,
 			type: FuncType.Root,
 			label: '',
 			valueType: ValueType.Tree,
 			valueText: '',
 			params: [{
-				id: 1,
+				id: '0',
 				groupId: 0,
 				label: 'a',
 				type: FuncType.Main,
@@ -685,7 +685,7 @@ describe('Testing YI.import()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: 2,
+				id: '1',
 				groupId: 0,
 				label: '.b',
 				type: FuncType.Chained,
@@ -693,7 +693,7 @@ describe('Testing YI.import()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: 3,
+				id: '2',
 				groupId: 1,
 				label: 'c',
 				type: FuncType.Main,
@@ -701,7 +701,7 @@ describe('Testing YI.import()', () => {
 				valueType: ValueType.Number,
 				params: [],
 			}, {
-				id: 4,
+				id: '3',
 				groupId: 1,
 				label: '.d',
 				type: FuncType.Chained,

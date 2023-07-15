@@ -35,7 +35,7 @@ export class YamlImporter extends AbstractImporter {
 		const rawComposition = <Array<unknown>> data;
 
 		const partialTree = {
-			id: -1,
+			id: '',
 			groupId: -1,
 			type: FuncType.Root,
 			label: '',
@@ -68,7 +68,7 @@ export class YamlImporter extends AbstractImporter {
 		}
 
 		return {
-			id: -1,
+			id: '',
 			groupId: -1,
 			type: FuncType.List,
 			label: '[]',
@@ -99,7 +99,7 @@ export class YamlImporter extends AbstractImporter {
 		}
 
 		return {
-			id: -1,
+			id: '',
 			groupId: -1,
 			type: funcType,
 			label: funcName,
@@ -114,7 +114,7 @@ export class YamlImporter extends AbstractImporter {
 			const stringFuncType = YamlImporter.getFuncType(rawLiteral);
 			if ([FuncType.MainMininotation, FuncType.MainExpression].includes(stringFuncType)) {
 				return {
-					id: -1,
+					id: '',
 					groupId: -1,
 					type: stringFuncType,
 					label: rawLiteral,
@@ -126,7 +126,7 @@ export class YamlImporter extends AbstractImporter {
 		}
 
 		return {
-			id: -1,
+			id: '',
 			groupId: -1,
 			type: FuncType.LiteralValue,
 			label: '',
@@ -136,11 +136,11 @@ export class YamlImporter extends AbstractImporter {
 		};
 	}
 
-	static upgradeTree(tree: FuncTree, funcId = 0, groupId = 0): FuncTree {
+	static upgradeTree(tree: FuncTree, funcId: Array<number> = [], groupId = 0): FuncTree {
 		let paramsGroupId = -1;
 		return {
 			...tree,
-			id: funcId,
+			id: funcId.join('-'),
 			groupId,
 			params: tree.params.map((param, i) => {
 				if (param.type !== FuncType.Chained) {
@@ -148,7 +148,7 @@ export class YamlImporter extends AbstractImporter {
 				}
 				return YamlImporter.upgradeTree(
 					param,
-					funcId + i + 1,
+					funcId.concat(i),
 					paramsGroupId,
 				);
 			}),
@@ -158,7 +158,7 @@ export class YamlImporter extends AbstractImporter {
 	static serialize(rawValue: unknown): FuncTree {
 		if (typeof rawValue === 'string') {
 			return {
-				id: -1,
+				id: '',
 				groupId: -1,
 				type: FuncType.Serialized,
 				label: '',
@@ -169,7 +169,7 @@ export class YamlImporter extends AbstractImporter {
 		}
 		if (typeof rawValue === 'number') {
 			return {
-				id: -1,
+				id: '',
 				groupId: -1,
 				type: FuncType.Serialized,
 				label: '',
@@ -180,7 +180,7 @@ export class YamlImporter extends AbstractImporter {
 		}
 		if (rawValue instanceof Array) {
 			return {
-				id: -1,
+				id: '',
 				groupId: -1,
 				type: FuncType.Serialized,
 				label: '[]',
@@ -195,7 +195,7 @@ export class YamlImporter extends AbstractImporter {
 				return YamlImporter.serializeEntry(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
 			}
 			return {
-				id: -1,
+				id: '',
 				groupId: -1,
 				type: FuncType.Serialized,
 				label: '{}',
@@ -207,7 +207,7 @@ export class YamlImporter extends AbstractImporter {
 			};
 		}
 		return {
-			id: -1,
+			id: '',
 			groupId: -1,
 			type: FuncType.Serialized,
 			label: '',
@@ -220,7 +220,7 @@ export class YamlImporter extends AbstractImporter {
 	static serializeEntry(key: string, rawValue: unknown): FuncTree {
 		if (rawValue instanceof Object) {
 			return {
-				id: -1,
+				id: '',
 				groupId: -1,
 				type: FuncType.Serialized,
 				label: key,
@@ -235,7 +235,7 @@ export class YamlImporter extends AbstractImporter {
 		}
 		if (typeof rawValue === 'string') {
 			return {
-				id: -1,
+				id: '',
 				groupId: -1,
 				type: FuncType.Serialized,
 				label: key,
@@ -246,7 +246,7 @@ export class YamlImporter extends AbstractImporter {
 		}
 		if (typeof rawValue === 'number') {
 			return {
-				id: -1,
+				id: '',
 				groupId: -1,
 				type: FuncType.Serialized,
 				label: key,
@@ -256,7 +256,7 @@ export class YamlImporter extends AbstractImporter {
 			};
 		}
 		return {
-			id: -1,
+			id: '',
 			groupId: -1,
 			type: FuncType.Serialized,
 			label: key,

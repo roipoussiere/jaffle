@@ -36,7 +36,7 @@ class JaffleGraph {
 
 	public domSvg: SVGElement;
 
-	public selectedBoxId: number;
+	public selectedBoxId: string;
 
 	public inputCursorPos = 0;
 
@@ -219,10 +219,9 @@ class JaffleGraph {
 			.attr('x', (d: FuncNode) => d.boxPadding * this.charWidth)
 			.style('fill', (d: FuncNode) => BOX_VALUE_COLORS[d.data.valueType])
 			.text((d: FuncNode) => d.data.valueText);
-		// .text((d: any) => (d.boxValue === null ? '' : `${d.boxValue}`));
 
-		// textParam.append('title')
-		// 	.text((d: any) => d.boxValue);
+		// box.append('title')
+		// 	.text((d: FuncNode) => d.data.id);
 	}
 
 	private drawInput() {

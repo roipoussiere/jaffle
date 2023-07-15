@@ -21,7 +21,7 @@ export enum ValueType {
 }
 
 export type FuncTree = {
-	id: number,
+	id: string,
 	groupId: number,
 	label: string,
 	type: FuncType,
