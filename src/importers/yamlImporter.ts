@@ -192,7 +192,7 @@ export class YamlImporter extends AbstractImporter {
 		if (rawValue instanceof Object) {
 			const keys = Object.keys(rawValue);
 			if (keys.length === 1) {
-				return YamlImporter.serializeEntry(keys[0], rawValue[keys[0]]);
+				return YamlImporter.serializeEntry(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
 			}
 			return {
 				id: -1,
@@ -201,7 +201,9 @@ export class YamlImporter extends AbstractImporter {
 				label: '{}',
 				valueType: ValueType.Tree,
 				valueText: '',
-				params: keys.map((key) => YamlImporter.serialize({ [key]: rawValue[key] })),
+				params: keys.map((key) => YamlImporter.serialize({
+					[key]: (<Dict<unknown>>rawValue)[key],
+				})),
 			};
 		}
 		return {
@@ -225,7 +227,9 @@ export class YamlImporter extends AbstractImporter {
 				valueType: ValueType.Tree,
 				valueText: '',
 				params: Object.keys(rawValue).map((chKey) => YamlImporter.serialize(
-					rawValue instanceof Array ? rawValue[chKey] : { [chKey]: rawValue[chKey] },
+					rawValue instanceof Array ? rawValue[Number(chKey)] : {
+						[chKey]: (<Dict<unknown>>rawValue)[chKey],
+					},
 				)),
 			};
 		}
