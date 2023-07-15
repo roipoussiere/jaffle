@@ -211,7 +211,7 @@ export class YamlImporter extends AbstractImporter {
 			groupId: -1,
 			type: FuncType.Serialized,
 			label: '',
-			valueType: ValueType.Empty,
+			valueType: ValueType.Null,
 			valueText: '∅',
 			params: [],
 		};
