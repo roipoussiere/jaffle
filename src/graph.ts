@@ -131,26 +131,12 @@ class JaffleGraph {
 	}
 
 	private drawSvg() {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const self = this;
-
 		this.svg = d3.create('svg')
 			.attr('class', 'jaffle_graph')
 			.attr('width', this.width)
 			.attr('height', this.height)
 			.attr('viewBox', [this.offsetX, this.offsetY, this.width, this.height])
 			.style('font', `${this.fontSize}px mono`);
-
-		this.svg.append('rect')
-			.attr('x', this.offsetX)
-			.attr('y', this.offsetY)
-			.attr('width', this.width)
-			.attr('height', this.height)
-			.attr('opacity', 0)
-			.on('click', () => {
-				self.selectedBoxId = '';
-				self.draw();
-			});
 
 		this.drawLinks();
 		this.drawGroupArea();
@@ -285,14 +271,18 @@ class JaffleGraph {
 				this.inputCursorPos = e.target.selectionStart;
 				const selected = this.tree.find((n: FuncNode) => n.data.id === this.selectedBoxId);
 				if (selected !== undefined) {
+					// todo: change raw values instead
 					if (this.selectedBoxIsValue) {
 						selected.data.valueText = e.target.value;
 					} else {
 						selected.data.label = e.target.value;
 					}
-					this.initTree();
-					self.draw();
 				}
+			})
+			.on('change', () => {
+				self.selectedBoxId = '';
+				this.initTree();
+				self.draw();
 			})
 
 			.style('width', '100%')
