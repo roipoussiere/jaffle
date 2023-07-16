@@ -175,10 +175,9 @@ class JaffleGraph {
 	}
 
 	private drawGroupArea() {
-		const mainFuncs = [FuncType.Main, FuncType.MainExpression, FuncType.MainMininotation];
 		this.svg.append('g')
 			.selectAll()
-			.data(this.tree.descendants().filter((n: FuncNode) => mainFuncs.includes(n.data.type)))
+			.data(this.tree.descendants().filter((n: FuncNode) => n.data.type !== FuncType.Chained))
 			.join('rect')
 			.attr('width', (node: FuncNode) => (node.boxWidth - 0.5) * this.charWidth)
 			.attr('height', (node: FuncNode) => node.last.x - node.x)
@@ -291,10 +290,10 @@ class JaffleGraph {
 	}
 
 	private static shouldStack(nodeA: FuncNode, nodeB: FuncNode): boolean {
-		const bothAreNone = nodeA.data.type === FuncType.LiteralValue
+		const bothAreLiteral = nodeA.data.type === FuncType.LiteralValue
 			&& nodeB.data.type === FuncType.LiteralValue;
 		return nodeA.parent === nodeB.parent
-			&& (nodeB.data.type === FuncType.Chained || bothAreNone);
+			&& (nodeB.data.type === FuncType.Chained || bothAreLiteral);
 	}
 
 	private static getGroup(node: FuncNode): Array<FuncNode> {
@@ -325,11 +324,11 @@ class JaffleGraph {
 		if (group === undefined) {
 			return node.contentWidth;
 		}
-		return Math.max(...group
-			.filter((child: FuncNode) => ![FuncType.MainMininotation, FuncType.Constant]
-				.includes(child.data.type))
-			.map((child: FuncNode) => child.data.label.length))
-			+ (node.data.type === FuncType.LiteralValue ? 0 : 1);
+		const maxLength = Math.max(...group
+			.filter((child: FuncNode) => child.data.type !== FuncType.MainMininotation)
+			.map((child: FuncNode) => child.data.label.length));
+
+		return maxLength + (node.data.type === FuncType.LiteralValue ? 0 : 1);
 	}
 
 	private static getBoxWidth(node: FuncNode): number {
@@ -337,12 +336,11 @@ class JaffleGraph {
 		if (group === undefined) {
 			return node.boxPadding;
 		}
-		return Math.max(...group
-			.map((child: FuncNode) => (
-				[FuncType.MainMininotation, FuncType.MainExpression].includes(child.data.type)
-					? child.data.label.length : node.boxPadding
-					+ (child.data.valueType === ValueType.Null ? 2 : child.data.valueText.length)
-			)));
+		const getDataWidth = (data: FuncTree) => node.boxPadding
+			+ (data.valueType === ValueType.Null ? 2 : data.valueText.length);
+		return Math.max(...group.map((child: FuncNode) => (
+			child.data.type < FuncType.Main ? child.data.label.length : getDataWidth(child.data)
+		)));
 	}
 }
 
