@@ -36,12 +36,6 @@ class JaffleGraph {
 
 	public domSvg: SVGElement;
 
-	public selectedBoxId: string;
-
-	public selectedBoxIsValue: boolean;
-
-	public inputCursorPos = 0;
-
 	public width = 800;
 
 	public height: number;
@@ -121,12 +115,6 @@ class JaffleGraph {
 		this.domSvg?.remove();
 		this.domSvg = <SVGElement> this.svg.node();
 		this.container.appendChild(this.domSvg);
-		const domInput = <HTMLInputElement>document.getElementById('jaffle_ne_input');
-		if (domInput !== null) {
-			domInput.focus();
-			domInput.selectionStart = this.inputCursorPos === -1 ? 0 : this.inputCursorPos;
-			domInput.selectionEnd = this.inputCursorPos === -1 ? 9999 : this.inputCursorPos;
-		}
 		return this;
 	}
 
@@ -141,7 +129,6 @@ class JaffleGraph {
 		this.drawLinks();
 		this.drawGroupArea();
 		this.drawBoxes();
-		this.drawInput();
 	}
 
 	private drawLinks() {
@@ -186,10 +173,7 @@ class JaffleGraph {
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const self = this;
 		const onClick = (node: FuncNode, isValue: boolean) => {
-			self.selectedBoxId = node.data.id;
-			self.selectedBoxIsValue = isValue;
-			self.inputCursorPos = -1;
-			self.draw();
+			self.drawInput(node.data.id, isValue);
 		};
 
 		const box = this.svg.append('g')
@@ -246,18 +230,19 @@ class JaffleGraph {
 		// 	.text((d: FuncNode) => d.data.id);
 	}
 
-	private drawInput() {
+	private drawInput(selectedBoxId: string, selectedBoxIsValue: boolean) {
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const self = this;
-		const node = this.tree.find((n: FuncNode) => n.data.id === this.selectedBoxId);
+
+		const node = this.tree.find((n: FuncNode) => n.data.id === selectedBoxId);
 		if (node === undefined) {
 			return;
 		}
 
 		this.svg.append('foreignObject')
-			.attr('x', this.selectedBoxIsValue ? node.y + node.boxPadding * this.charWidth : node.y)
+			.attr('x', selectedBoxIsValue ? node.y + node.boxPadding * this.charWidth : node.y)
 			.attr('y', node.x - 0.5 * this.charHeight)
-			.attr('width', this.selectedBoxIsValue
+			.attr('width', selectedBoxIsValue
 				? (node.boxWidth - node.boxPadding) * this.charWidth
 				: node.boxPadding * this.charWidth)
 			.attr('height', this.charHeight)
@@ -265,24 +250,29 @@ class JaffleGraph {
 			.append('xhtml:input')
 			.attr('id', 'jaffle_ne_input')
 			.attr('type', 'text')
-			.attr('value', this.selectedBoxIsValue ? node.data.valueText : node.data.label)
+			.attr('value', selectedBoxIsValue ? node.data.valueText : node.data.label)
 
-			.on('input', (e) => {
-				this.inputCursorPos = e.target.selectionStart;
-				const selected = this.tree.find((n: FuncNode) => n.data.id === this.selectedBoxId);
+			.on('input', (event: Event) => {
+				const target = <HTMLInputElement>event.target;
+				target.width = selectedBoxIsValue
+					? (node.boxWidth - node.boxPadding) * self.charWidth
+					: node.boxPadding * self.charWidth;
+				const selected = self.tree.find((n: FuncNode) => n.data.id === selectedBoxId);
 				if (selected !== undefined) {
 					// todo: change raw values instead
-					if (this.selectedBoxIsValue) {
-						selected.data.valueText = e.target.value;
+					if (selectedBoxIsValue) {
+						selected.data.valueText = target.value;
 					} else {
-						selected.data.label = e.target.value;
+						selected.data.label = target.value;
 					}
 				}
 			})
 			.on('change', () => {
-				self.selectedBoxId = '';
-				this.initTree();
+				self.initTree();
 				self.draw();
+			})
+			.on('focusout', (event: Event) => {
+				(<HTMLInputElement>event.target).parentElement?.remove();
 			})
 
 			.style('width', '100%')
@@ -294,6 +284,10 @@ class JaffleGraph {
 			.style('font-weight', node.data.type === FuncType.Chained ? 'normal' : 'bold')
 			.style('border', 'none')
 			.style('border-radius', '3px');
+
+		const domInput = <HTMLInputElement>document.getElementById('jaffle_ne_input');
+		domInput.focus();
+		domInput.selectionStart = 9999;
 	}
 
 	private static shouldStack(nodeA: FuncNode, nodeB: FuncNode): boolean {
