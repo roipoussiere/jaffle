@@ -188,13 +188,13 @@ class JaffleGraph {
 
 	private drawBoxes() {
 		const onMouseOver = (target: HTMLElement) => {
-			d3.select(<HTMLElement>target.parentElement?.firstChild)
-				.style('stroke', 'black');
+			d3.select(<HTMLElement>target)
+				.style('opacity', 0.2);
 		};
 
 		const onMouseOut = (target: HTMLElement) => {
-			d3.select(<HTMLElement>target.parentElement?.firstChild)
-				.style('stroke', 'none');
+			d3.select(<HTMLElement>target)
+				.style('opacity', 0);
 		};
 
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -225,16 +225,33 @@ class JaffleGraph {
 			.style('fill', (n: FuncNode) => BOX_NAME_COLORS[n.data.type])
 			.style('font-weight', (n: FuncNode) => (n.data.type === FuncType.Chained
 				? 'normal' : 'bold'))
-			.text((d: FuncNode) => d.data.label)
-			.on('mouseover', (event) => onMouseOver(event.target))
-			.on('mouseout', (event) => onMouseOut(event.target))
-			.on('click', (event, node: FuncNode) => onClick(node, false));
+			.text((d: FuncNode) => d.data.label);
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: FuncNode) => d.boxPadding * this.charWidth)
 			.style('fill', (d: FuncNode) => BOX_VALUE_COLORS[d.data.valueType])
-			.text((d: FuncNode) => d.data.valueText)
+			.text((d: FuncNode) => d.data.valueText);
+
+		box.append('rect')
+			.attr('width', (n: FuncNode) => n.boxPadding * this.charWidth)
+			.attr('height', 1 * this.charHeight)
+			.attr('y', -0.5 * this.charHeight)
+			.attr('rx', 3)
+			.attr('ry', 3)
+			.attr('opacity', 0)
+			.on('mouseover', (event) => onMouseOver(event.target))
+			.on('mouseout', (event) => onMouseOut(event.target))
+			.on('click', (event, node: FuncNode) => onClick(node, false));
+
+		box.append('rect')
+			.attr('width', (n: FuncNode) => (n.boxWidth - n.boxPadding) * this.charWidth)
+			.attr('height', 1 * this.charHeight)
+			.attr('x', (n: FuncNode) => n.boxPadding * this.charWidth)
+			.attr('y', -0.5 * this.charHeight)
+			.attr('rx', 3)
+			.attr('ry', 3)
+			.attr('opacity', 0)
 			.on('mouseover', (event) => onMouseOver(event.target))
 			.on('mouseout', (event) => onMouseOut(event.target))
 			.on('click', (event, node: FuncNode) => onClick(node, true));
