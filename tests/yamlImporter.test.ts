@@ -56,28 +56,6 @@ describe('Testing YI.getFuncName()', () => {
 	});
 });
 
-// describe('Testing YI.upgradeTree()', () => {
-// 	test('string value have its id and groupId updated', () => {
-// 		const tree = YI.upgradeTree(stringValue);
-// 		expect(tree).toHaveProperty('id', '');
-// 		expect(tree).toHaveProperty('groupId', 0);
-// 	});
-
-// 	test('tree with several function chains have its id and groupId updated', () => {
-// 		const tree = YI.upgradeTree(funcWithChainsInParam);
-// 		expect(tree).toHaveProperty('id', '');
-// 		expect(tree).toHaveProperty('groupId', 0);
-// 		expect(tree.params[0]).toHaveProperty('id', '0');
-// 		expect(tree.params[0]).toHaveProperty('groupId', 0);
-// 		expect(tree.params[1]).toHaveProperty('id', '1');
-// 		expect(tree.params[1]).toHaveProperty('groupId', 0);
-// 		expect(tree.params[2]).toHaveProperty('id', '2');
-// 		expect(tree.params[2]).toHaveProperty('groupId', 1);
-// 		expect(tree.params[3]).toHaveProperty('id', '3');
-// 		expect(tree.params[3]).toHaveProperty('groupId', 1);
-// 	});
-// });
-
 describe('Testing YI.computeLiteral()', () => {
 	test('string literals are well computed', () => {
 		expect(YI.computeLiteral('a')).toEqual({
