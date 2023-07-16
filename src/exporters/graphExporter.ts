@@ -116,7 +116,7 @@ export class GraphExporter extends AbstractExporter {
 	}
 
 	static getvalueText(func: FuncTree): string {
-		return `${func.value}`;
+		return func.value === null ? '∅' : `${func.value}`;
 	}
 }
 
