@@ -3,46 +3,6 @@ import { describe, expect, test } from '@jest/globals';
 import { YamlImporterError, YamlImporter as YI } from '../src/importers/yamlImporter';
 import { FuncType, ValueType } from '../src/funcTree';
 
-const stringValue = {
-	id: '',
-	groupId: -1,
-	label: '',
-	type: FuncType.Literal,
-	valueText: 'stringValue',
-	valueType: ValueType.String,
-	params: [],
-};
-
-const mainFunc = {
-	id: '',
-	groupId: -1,
-	label: 'mainFunc',
-	type: FuncType.Main,
-	valueText: 'mainFuncValue',
-	valueType: ValueType.String,
-	params: [],
-};
-
-const chainedFunc = {
-	id: '',
-	groupId: -1,
-	label: '.chainedFunc',
-	type: FuncType.Chained,
-	valueText: 'chainedFuncValue',
-	valueType: ValueType.String,
-	params: [],
-};
-
-const funcWithChainsInParam = {
-	id: '',
-	groupId: -1,
-	label: 'funcWithChainsInParam',
-	type: FuncType.Main,
-	valueText: '',
-	valueType: ValueType.Tree,
-	params: [mainFunc, chainedFunc, mainFunc, chainedFunc],
-};
-
 describe('Testing YamlImporterError', () => {
 	test('YamlImporterError should raise', () => {
 		expect(() => { throw new YamlImporterError('abc'); }).toThrow(YamlImporterError);
