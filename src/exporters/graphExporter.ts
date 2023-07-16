@@ -1,5 +1,7 @@
 /* eslint-disable max-classes-per-file */
+import { ExporterError } from '../errors';
 import { FuncTree, FuncType, ValueType } from '../funcTree';
+
 import AbstractExporter from './abstractExporter';
 
 export type PartialBoxTree = {
@@ -29,6 +31,13 @@ export type BoxTree = {
 
 	children: Array<BoxTree>,
 };
+
+export class GraphExporterError extends ExporterError {
+	constructor(message: string) {
+		super(message);
+		this.name = GraphExporterError.name;
+	}
+}
 
 class Box {
 	root: PartialBoxTree;
