@@ -6,7 +6,7 @@ export enum FuncType {
 	Chained,
 	Serialized,
 	List,
-	LiteralValue,
+	Literal,
 }
 
 export enum ValueType {
@@ -20,11 +20,9 @@ export enum ValueType {
 }
 
 export type FuncTree = {
-	id: string,
-	groupId: number,
-	label: string,
+	name: string,
 	type: FuncType,
-	valueText: string,
+	value: unknown,
 	valueType: ValueType,
 	params: Array<FuncTree>,
 };

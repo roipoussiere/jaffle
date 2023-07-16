@@ -34,16 +34,13 @@ export class YamlImporter extends AbstractImporter {
 		}
 		const rawComposition = <Array<unknown>> data;
 
-		const partialTree = {
-			id: '',
-			groupId: -1,
+		return {
+			name: '',
 			type: FuncType.Main,
-			label: '',
+			value: '',
 			valueType: ValueType.Tree,
-			valueText: '',
 			params: YamlImporter.computeParams(rawComposition),
 		};
-		return YamlImporter.upgradeTree(partialTree);
 	}
 
 	static computeParams(rawParams: Array<unknown>): Params {
@@ -68,12 +65,11 @@ export class YamlImporter extends AbstractImporter {
 		}
 
 		return {
-			id: '',
-			groupId: -1,
 			type: FuncType.List,
-			label: '[]',
+			name: '',
+			// label: '[]',
+			value: '',
 			valueType: ValueType.Tree,
-			valueText: '',
 			params: YamlImporter.computeParams(rawList),
 		};
 	}
@@ -87,24 +83,20 @@ export class YamlImporter extends AbstractImporter {
 			return YamlImporter.serialize(rawFunc);
 		}
 
-		const valueType = YamlImporter.getValueType(rawValue);
-
-		let valueText: string;
-		if (valueType === ValueType.Tree) {
-			valueText = '';
-		} else if (rawValue === null) {
-			valueText = '∅';
-		} else {
-			valueText = `${rawValue}`;
-		}
+		// let valueText: string;
+		// if (valueType === ValueType.Tree) {
+		// 	valueText = '';
+		// } else if (rawValue === null) {
+		// 	valueText = '∅';
+		// } else {
+		// 	valueText = `${rawValue}`;
+		// }
 
 		return {
-			id: '',
-			groupId: -1,
+			name: funcName,
 			type: funcType,
-			label: funcName,
-			valueType,
-			valueText,
+			value: rawValue,
+			valueType: YamlImporter.getValueType(rawValue),
 			params: rawValue instanceof Array ? YamlImporter.computeParams(rawValue) : [],
 		};
 	}
@@ -114,78 +106,51 @@ export class YamlImporter extends AbstractImporter {
 			const stringFuncType = YamlImporter.getFuncType(rawLiteral);
 			if ([FuncType.MainMininotation, FuncType.MainExpression].includes(stringFuncType)) {
 				return {
-					id: '',
-					groupId: -1,
+					name: rawLiteral,
 					type: stringFuncType,
-					label: rawLiteral,
+					value: '',
 					valueType: ValueType.Empty,
-					valueText: '',
 					params: [],
 				};
 			}
 		}
 
 		return {
-			id: '',
-			groupId: -1,
-			type: FuncType.LiteralValue,
-			label: '',
+			name: '',
+			type: FuncType.Literal,
+			// value: rawLiteral === null ? '∅' : `${rawLiteral}`,
+			value: rawLiteral,
 			valueType: YamlImporter.getValueType(rawLiteral),
-			valueText: rawLiteral === null ? '∅' : `${rawLiteral}`,
 			params: [],
-		};
-	}
-
-	static upgradeTree(tree: FuncTree, funcId: Array<number> = [], groupId = 0): FuncTree {
-		let paramsGroupId = -1;
-		return {
-			...tree,
-			id: funcId.join('-'),
-			groupId,
-			params: tree.params.map((param, i) => {
-				if (param.type !== FuncType.Chained) {
-					paramsGroupId += 1;
-				}
-				return YamlImporter.upgradeTree(
-					param,
-					funcId.concat(i),
-					paramsGroupId,
-				);
-			}),
 		};
 	}
 
 	static serialize(rawValue: unknown): FuncTree {
 		if (typeof rawValue === 'string') {
 			return {
-				id: '',
-				groupId: -1,
+				name: '',
 				type: FuncType.Serialized,
-				label: '',
+				value: rawValue,
 				valueType: ValueType.String,
-				valueText: rawValue,
 				params: [],
 			};
 		}
 		if (typeof rawValue === 'number') {
 			return {
-				id: '',
-				groupId: -1,
+				name: '',
 				type: FuncType.Serialized,
-				label: '',
+				value: rawValue,
 				valueType: ValueType.Number,
-				valueText: `${rawValue}`,
 				params: [],
 			};
 		}
 		if (rawValue instanceof Array) {
 			return {
-				id: '',
-				groupId: -1,
+				// name: '[]',
+				name: '',
 				type: FuncType.Serialized,
-				label: '[]',
+				value: '',
 				valueType: ValueType.Tree,
-				valueText: '',
 				params: rawValue.map((rawChild) => YamlImporter.serialize(rawChild)),
 			};
 		}
@@ -195,24 +160,22 @@ export class YamlImporter extends AbstractImporter {
 				return YamlImporter.serializeEntry(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
 			}
 			return {
-				id: '',
-				groupId: -1,
+				name: '',
+				// name: '{}',
 				type: FuncType.Serialized,
-				label: '{}',
+				value: '',
 				valueType: ValueType.Tree,
-				valueText: '',
 				params: keys.map((key) => YamlImporter.serialize({
 					[key]: (<Dict<unknown>>rawValue)[key],
 				})),
 			};
 		}
 		return {
-			id: '',
-			groupId: -1,
+			name: '',
 			type: FuncType.Serialized,
-			label: '',
+			value: '',
+			// value: '∅',
 			valueType: ValueType.Null,
-			valueText: '∅',
 			params: [],
 		};
 	}
@@ -220,12 +183,10 @@ export class YamlImporter extends AbstractImporter {
 	static serializeEntry(key: string, rawValue: unknown): FuncTree {
 		if (rawValue instanceof Object) {
 			return {
-				id: '',
-				groupId: -1,
+				name: key,
 				type: FuncType.Serialized,
-				label: key,
+				value: '',
 				valueType: ValueType.Tree,
-				valueText: '',
 				params: Object.keys(rawValue).map((chKey) => YamlImporter.serialize(
 					rawValue instanceof Array ? rawValue[Number(chKey)] : {
 						[chKey]: (<Dict<unknown>>rawValue)[chKey],
@@ -235,33 +196,28 @@ export class YamlImporter extends AbstractImporter {
 		}
 		if (typeof rawValue === 'string') {
 			return {
-				id: '',
-				groupId: -1,
+				name: key,
 				type: FuncType.Serialized,
-				label: key,
+				value: rawValue,
 				valueType: ValueType.String,
-				valueText: rawValue,
 				params: [],
 			};
 		}
 		if (typeof rawValue === 'number') {
 			return {
-				id: '',
-				groupId: -1,
+				name: key,
 				type: FuncType.Serialized,
-				label: key,
+				value: rawValue,
 				valueType: ValueType.Number,
-				valueText: `${rawValue}`,
 				params: [],
 			};
 		}
 		return {
-			id: '',
-			groupId: -1,
+			name: key,
 			type: FuncType.Serialized,
-			label: key,
+			value: '',
+			// value: '∅',
 			valueType: ValueType.Null,
-			valueText: '∅',
 			params: [],
 		};
 	}
