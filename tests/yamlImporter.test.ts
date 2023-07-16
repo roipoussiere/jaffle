@@ -660,7 +660,7 @@ describe('Testing YI.import()', () => {
 		expect(YI.import('[]')).toEqual({
 			id: '',
 			groupId: 0,
-			type: FuncType.Root,
+			type: FuncType.Main,
 			label: '',
 			valueType: ValueType.Tree,
 			valueText: '',
@@ -672,7 +672,7 @@ describe('Testing YI.import()', () => {
 		expect(YI.import('[{a: 1}, {.b: 2}, {c: 3}, {.d: 4}]')).toEqual({
 			id: '',
 			groupId: 0,
-			type: FuncType.Root,
+			type: FuncType.Main,
 			label: '',
 			valueType: ValueType.Tree,
 			valueText: '',

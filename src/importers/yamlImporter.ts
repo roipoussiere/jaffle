@@ -37,7 +37,7 @@ export class YamlImporter extends AbstractImporter {
 		const partialTree = {
 			id: '',
 			groupId: -1,
-			type: FuncType.Root,
+			type: FuncType.Main,
 			label: '',
 			valueType: ValueType.Tree,
 			valueText: '',

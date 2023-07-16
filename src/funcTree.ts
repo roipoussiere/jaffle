@@ -3,7 +3,6 @@ export enum FuncType {
 	MainExpression,
 	MainMininotation,
 	Main,
-	Root,
 	Chained,
 	Serialized,
 	List,
