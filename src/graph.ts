@@ -280,8 +280,10 @@ class JaffleGraph {
 			.style('font-size', `${this.fontSize}px`)
 			.style('font-family', 'monospace')
 			.style('background-color', '#ccc')
-			.style('color', BOX_NAME_COLORS[node.data.type])
-			.style('font-weight', node.data.type === FuncType.Chained ? 'normal' : 'bold')
+			.style('color', selectedBoxIsValue
+				? BOX_VALUE_COLORS[node.data.valueType] : BOX_NAME_COLORS[node.data.type])
+			.style('font-weight', selectedBoxIsValue || node.data.type === FuncType.Chained
+				? 'normal' : 'bold')
 			.style('border', 'none')
 			.style('border-radius', '3px');
 
