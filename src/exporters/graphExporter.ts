@@ -39,72 +39,10 @@ export class GraphExporterError extends ExporterError {
 	}
 }
 
-class Box {
-	root: PartialBoxTree;
-
-	func: PartialBoxTree;
-
-	funcText: string;
-
-	valueText: string;
-
-	group: Array<PartialBoxTree>;
-
-	contentWidth: number;
-
-	padding: number;
-
-	width: number;
-
-	constructor(root: PartialBoxTree, func: PartialBoxTree) {
-		this.root = root;
-		this.func = func;
-		this.group = this.getGroup();
-		this.contentWidth = this.getContentWidth();
-		this.padding = this.getPadding();
-		this.width = this.getWidth();
-	}
-
-	private getGroup(): Array<PartialBoxTree> {
-		return this.root.children.filter(
-			(func: PartialBoxTree) => this.func.groupId === func.groupId,
-		);
-	}
-
-	private getContentWidth(): number {
-		const noSpace = this.func.funcType === FuncType.Literal
-			|| this.func.valueType === ValueType.Null;
-		return this.funcText.length
-			+ this.valueText.length + (noSpace ? 0 : 1);
-	}
-
-	private getPadding(): number {
-		if (this.group === undefined) {
-			return this.contentWidth;
-		}
-		const maxLength = Math.max(...this.group
-			.filter((child: PartialBoxTree) => child.funcType !== FuncType.MainMininotation)
-			.map((child: PartialBoxTree) => child.funcText.length));
-
-		return maxLength + (this.func.funcType === FuncType.Literal ? 0 : 1);
-	}
-
-	private getWidth(): number {
-		if (this.group === undefined) {
-			return this.padding;
-		}
-		const getDataWidth = (box: PartialBoxTree) => this.padding
-			+ (box.valueType === ValueType.Null ? 2 : box.valueText.length);
-		return Math.max(...this.group.map((child: PartialBoxTree) => (
-			child.funcType < FuncType.Main ? child.funcText.length : getDataWidth(child)
-		)));
-	}
-}
-
 export class GraphExporter extends AbstractExporter {
 	static export(composition: FuncTree): BoxTree {
 		const partialBoxTree = GraphExporter.upgradeTree(composition);
-		return GraphExporter.upgradeBox(partialBoxTree, partialBoxTree);
+		return GraphExporter.computeBox(partialBoxTree, { ...partialBoxTree });
 	}
 
 	static upgradeTree(func: FuncTree, funcId: Array<number> = [], groupId = 0): PartialBoxTree {
@@ -132,16 +70,44 @@ export class GraphExporter extends AbstractExporter {
 		};
 	}
 
-	static upgradeBox(root: PartialBoxTree, partialBox: PartialBoxTree): BoxTree {
-		const box = new Box(root, partialBox);
-		const children = partialBox.children.map((childBox) => this.upgradeBox(root, childBox));
+	static computeBox(root: PartialBoxTree, func: PartialBoxTree): BoxTree {
+		const group = root.children.filter(
+			(child: PartialBoxTree) => child.groupId === func.groupId,
+		);
+
+		const noSpace = func.funcType === FuncType.Literal
+			|| func.valueType === ValueType.Null;
+
+		const contentWidth = func.funcText.length
+			+ func.valueText.length + (noSpace ? 0 : 1);
+
+		let padding: number;
+		let width: number;
+
+		if (group === undefined) {
+			padding = contentWidth;
+			width = contentWidth;
+		} else {
+			const maxLength = Math.max(...group
+				.filter((child: PartialBoxTree) => child.funcType !== FuncType.MainMininotation)
+				.map((child: PartialBoxTree) => child.funcText.length));
+
+			padding = maxLength + (func.funcType === FuncType.Literal ? 0 : 1);
+
+			const getDataWidth = (box: PartialBoxTree) => padding
+				+ (box.valueType === ValueType.Null ? 2 : box.valueText.length);
+
+			width = Math.max(...group.map((child: PartialBoxTree) => (
+				child.funcType < FuncType.Main ? child.funcText.length : getDataWidth(child)
+			)));
+		}
 
 		return {
-			...partialBox,
-			contentWidth: box.contentWidth,
-			padding: box.padding,
-			width: box.width,
-			children,
+			...func,
+			contentWidth,
+			padding,
+			width,
+			children: func.children.map((child) => GraphExporter.computeBox(root, child)),
 		};
 	}
 

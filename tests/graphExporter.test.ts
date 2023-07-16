@@ -1,6 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
 import { GraphExporterError } from '../src/exporters/graphExporter';
+import { FuncType, ValueType } from '../src/funcTree';
 
 describe('Testing YamlImporterError', () => {
 	test('YamlImporterError should raise', () => {
@@ -10,22 +11,35 @@ describe('Testing YamlImporterError', () => {
 
 // class Box
 
-// describe('Testing B.getWidth()', () => {
-// });
+const partialBoxTree1 = {
+	id: '0',
+	groupId: 0,
+	funcText: 'b',
+	funcType: FuncType.Main,
+	valueText: 'c',
+	valueType: ValueType.String,
+	children: [],
+};
 
-// describe('Testing B.getPadding()', () => {
-// });
+const partialBoxTree2 = {
+	id: '1',
+	groupId: 0,
+	funcText: 'd',
+	funcType: FuncType.Main,
+	valueText: 'e',
+	valueType: ValueType.String,
+	children: [],
+};
 
-// describe('Testing B.getContentWidth()', () => {
-// });
-
-// describe('Testing B.getGroup()', () => {
-// });
-
-// describe('Testing Box()', () => {
-// });
-
-// class GraphExporter
+const partialBoxTreeRoot = {
+	id: '',
+	groupId: 0,
+	funcText: 'a',
+	funcType: FuncType.Main,
+	valueText: '',
+	valueType: ValueType.Tree,
+	children: [partialBoxTree1, partialBoxTree2],
+};
 
 // describe('Testing GE.getvalueText()', () => {
 // });
