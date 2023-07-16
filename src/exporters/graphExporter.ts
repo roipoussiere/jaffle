@@ -2,6 +2,18 @@
 import { FuncTree, FuncType, ValueType } from '../funcTree';
 import AbstractExporter from './abstractExporter';
 
+export type PartialBoxTree = {
+	id: string,
+	groupId: number,
+
+	funcText: string,
+	funcType: FuncType,
+	valueText: string,
+	valueType: ValueType,
+
+	children: Array<PartialBoxTree>,
+};
+
 export type BoxTree = {
 	id: string,
 	groupId: number,
@@ -19,13 +31,15 @@ export type BoxTree = {
 };
 
 class Box {
-	func: FuncTree;
+	root: PartialBoxTree;
+
+	func: PartialBoxTree;
 
 	funcText: string;
 
 	valueText: string;
 
-	group: Array<FuncTree>;
+	group: Array<PartialBoxTree>;
 
 	contentWidth: number;
 
@@ -33,38 +47,23 @@ class Box {
 
 	width: number;
 
-	constructor(func: FuncTree) {
+	constructor(root: PartialBoxTree, func: PartialBoxTree) {
+		this.root = root;
 		this.func = func;
-		this.funcText = this.getFuncText();
-		this.valueText = this.getValueText();
 		this.group = this.getGroup();
 		this.contentWidth = this.getContentWidth();
 		this.padding = this.getPadding();
 		this.width = this.getWidth();
 	}
 
-	private getFuncText(): string {
-		return this.func.name;
-	}
-
-	private getValueText(): string {
-		return `${this.func.value}`;
-	}
-
-	private static getFuncTextOf(func: FuncTree): string {
-		return func.name;
-	}
-
-	private static getValueTextOf(func: FuncTree): string {
-		return `${func.value}`;
-	}
-
-	private getGroup(): Array<FuncTree> {
-		return []; // TODO
+	private getGroup(): Array<PartialBoxTree> {
+		return this.root.children.filter(
+			(func: PartialBoxTree) => this.func.groupId === func.groupId,
+		);
 	}
 
 	private getContentWidth(): number {
-		const noSpace = this.func.type === FuncType.Literal
+		const noSpace = this.func.funcType === FuncType.Literal
 			|| this.func.valueType === ValueType.Null;
 		return this.funcText.length
 			+ this.valueText.length + (noSpace ? 0 : 1);
@@ -75,31 +74,31 @@ class Box {
 			return this.contentWidth;
 		}
 		const maxLength = Math.max(...this.group
-			.filter((child: FuncTree) => child.type !== FuncType.MainMininotation)
-			.map((child: FuncTree) => Box.getFuncTextOf(child).length));
+			.filter((child: PartialBoxTree) => child.funcType !== FuncType.MainMininotation)
+			.map((child: PartialBoxTree) => child.funcText.length));
 
-		return maxLength + (this.func.type === FuncType.Literal ? 0 : 1);
+		return maxLength + (this.func.funcType === FuncType.Literal ? 0 : 1);
 	}
 
 	private getWidth(): number {
 		if (this.group === undefined) {
 			return this.padding;
 		}
-		const getDataWidth = (n: FuncTree) => this.padding
-			+ (n.valueType === ValueType.Null ? 2 : Box.getValueTextOf(n).length);
-		return Math.max(...this.group.map((child: FuncTree) => (
-			child.type < FuncType.Main ? Box.getFuncTextOf(child).length : getDataWidth(child)
+		const getDataWidth = (box: PartialBoxTree) => this.padding
+			+ (box.valueType === ValueType.Null ? 2 : box.valueText.length);
+		return Math.max(...this.group.map((child: PartialBoxTree) => (
+			child.funcType < FuncType.Main ? child.funcText.length : getDataWidth(child)
 		)));
 	}
 }
 
 export class GraphExporter extends AbstractExporter {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
 	static export(composition: FuncTree): BoxTree {
-		return GraphExporter.upgradeTree(composition);
+		const partialBoxTree = GraphExporter.upgradeTree(composition);
+		return GraphExporter.upgradeBox(partialBoxTree, partialBoxTree);
 	}
 
-	static upgradeTree(func: FuncTree, funcId: Array<number> = [], groupId = 0): BoxTree {
+	static upgradeTree(func: FuncTree, funcId: Array<number> = [], groupId = 0): PartialBoxTree {
 		let paramsGroupId = -1;
 		const children = func.params.map((param, i) => {
 			if (param.type !== FuncType.Chained) {
@@ -112,24 +111,37 @@ export class GraphExporter extends AbstractExporter {
 			);
 		});
 
-		const box = new Box(func);
-
 		return {
 			...func,
 			id: funcId.join('-'),
 			groupId,
-
-			funcText: box.funcText,
+			funcText: GraphExporter.getFuncText(func),
+			valueText: GraphExporter.getvalueText(func),
 			funcType: func.type,
-			valueText: box.valueText,
 			valueType: func.valueType,
+			children,
+		};
+	}
 
+	static upgradeBox(root: PartialBoxTree, partialBox: PartialBoxTree): BoxTree {
+		const box = new Box(root, partialBox);
+		const children = partialBox.children.map((childBox) => this.upgradeBox(root, childBox));
+
+		return {
+			...partialBox,
 			contentWidth: box.contentWidth,
 			padding: box.padding,
 			width: box.width,
-
 			children,
 		};
+	}
+
+	static getFuncText(func: FuncTree): string {
+		return func.name;
+	}
+
+	static getvalueText(func: FuncTree): string {
+		return `${func.value}`;
 	}
 }
 
