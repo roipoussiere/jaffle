@@ -13,5 +13,5 @@ module.exports = {
 	preset: 'ts-jest',
 	slowTestThreshold: 1,
 	testEnvironment: 'jsdom',
-	testMatch: ['**/tests/*.test.ts'],
+	testMatch: ['**/tests/**/*.test.ts'],
 };

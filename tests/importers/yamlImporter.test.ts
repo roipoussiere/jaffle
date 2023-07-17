@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { YamlImporterError, YamlImporter as YI } from '../src/importers/yamlImporter';
-import { FuncType, ValueType } from '../src/funcTree';
+import { YamlImporterError, YamlImporter as YI } from '../../src/importers/yamlImporter';
+import { FuncType, ValueType } from '../../src/funcTree';
 
 describe('Testing YamlImporterError', () => {
 	test('YamlImporterError should raise', () => {
