@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { GraphExporterError, GraphExporter as GE } from '../src/exporters/graphExporter';
+import { GraphExporterError, GraphExporter as GE, PartialBoxTree } from '../src/exporters/graphExporter';
 import { FuncTree, FuncType, ValueType } from '../src/funcTree';
 
 describe('Testing YamlImporterError', () => {
@@ -50,60 +50,64 @@ describe('Testing GE.getvalueText()', () => {
 });
 
 describe('Testing GE.upgradeTree()', () => {
-	const complexFunc: FuncTree = {
+	const childA: FuncTree = {
+		name: 'a',
+		type: FuncType.Main,
+		value: 1,
+		valueType: ValueType.Number,
+		params: [],
+	};
+
+	const childB: FuncTree = {
+		name: '.b',
+		type: FuncType.Chained,
+		value: 2,
+		valueType: ValueType.Number,
+		params: [],
+	};
+
+	const childC: FuncTree = {
+		name: 'c',
+		type: FuncType.Main,
+		value: 3,
+		valueType: ValueType.Number,
+		params: [],
+	};
+
+	const childE: FuncTree = {
+		name: 'e',
+		type: FuncType.Main,
+		value: 5,
+		valueType: ValueType.Number,
+		params: [],
+	};
+
+	const childF: FuncTree = {
+		name: 'f',
+		type: FuncType.Main,
+		value: 6,
+		valueType: ValueType.Number,
+		params: [],
+	};
+
+	const childD: FuncTree = {
+		name: '.d',
+		type: FuncType.Chained,
+		value: 4,
+		valueType: ValueType.Tree,
+		params: [childE, childF],
+	};
+
+	const root: FuncTree = {
 		name: 'root',
 		type: FuncType.Main,
 		value: '',
 		valueType: ValueType.Tree,
-		params: [
-			{
-				name: 'a',
-				type: FuncType.Main,
-				value: 1,
-				valueType: ValueType.Number,
-				params: [],
-			},
-			{
-				name: '.b',
-				type: FuncType.Chained,
-				value: 2,
-				valueType: ValueType.Number,
-				params: [],
-			},
-			{
-				name: 'c',
-				type: FuncType.Main,
-				value: 3,
-				valueType: ValueType.Number,
-				params: [],
-			},
-			{
-				name: '.d',
-				type: FuncType.Chained,
-				value: 4,
-				valueType: ValueType.Tree,
-				params: [
-					{
-						name: 'e',
-						type: FuncType.Main,
-						value: 5,
-						valueType: ValueType.Number,
-						params: [],
-					},
-					{
-						name: 'f',
-						type: FuncType.Main,
-						value: 6,
-						valueType: ValueType.Number,
-						params: [],
-					},
-				],
-			},
-		],
+		params: [childA, childB, childC, childD],
 	};
 
-	test('tree with several func params are upgraded to partial box tree with correct ids', () => {
-		const partialBoxTree = GE.upgradeTree(complexFunc);
+	test('func with several func params are upgraded to partial box tree with correct ids', () => {
+		const partialBoxTree = GE.upgradeTree(root);
 
 		expect(partialBoxTree.id).toBe('');
 		expect(partialBoxTree.groupId).toBe(0);

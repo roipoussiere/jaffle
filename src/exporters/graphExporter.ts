@@ -70,16 +70,16 @@ export class GraphExporter extends AbstractExporter {
 		};
 	}
 
-	static computeBox(root: PartialBoxTree, func: PartialBoxTree): BoxTree {
+	static computeBox(root: PartialBoxTree, pbt: PartialBoxTree): BoxTree {
 		const group = root.children.filter(
-			(child: PartialBoxTree) => child.groupId === func.groupId,
+			(child: PartialBoxTree) => child.groupId === pbt.groupId,
 		);
 
-		const noSpace = func.funcType === FuncType.Literal
-			|| func.valueType === ValueType.Null;
+		const noSpace = pbt.funcType === FuncType.Literal
+			|| pbt.valueType === ValueType.Null;
 
-		const contentWidth = func.funcText.length
-			+ func.valueText.length + (noSpace ? 0 : 1);
+		const contentWidth = pbt.funcText.length
+			+ pbt.valueText.length + (noSpace ? 0 : 1);
 
 		let padding: number;
 		let width: number;
@@ -92,7 +92,7 @@ export class GraphExporter extends AbstractExporter {
 				.filter((child: PartialBoxTree) => child.funcType !== FuncType.MainMininotation)
 				.map((child: PartialBoxTree) => child.funcText.length));
 
-			padding = maxLength + (func.funcType === FuncType.Literal ? 0 : 1);
+			padding = maxLength + (pbt.funcType === FuncType.Literal ? 0 : 1);
 
 			const getDataWidth = (box: PartialBoxTree) => padding
 				+ (box.valueType === ValueType.Null ? 2 : box.valueText.length);
@@ -103,11 +103,11 @@ export class GraphExporter extends AbstractExporter {
 		}
 
 		return {
-			...func,
+			...pbt,
 			contentWidth,
 			padding,
 			width,
-			children: func.children.map((child) => GraphExporter.computeBox(root, child)),
+			children: pbt.children.map((child) => GraphExporter.computeBox(root, child)),
 		};
 	}
 
