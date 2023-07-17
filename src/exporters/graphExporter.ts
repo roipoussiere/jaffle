@@ -85,7 +85,7 @@ export class GraphExporter extends AbstractExporter {
 		let width: number;
 
 		if (group === undefined) {
-			padding = contentWidth + 1;
+			padding = pbt.funcText.length + 1;
 			width = contentWidth;
 		} else {
 			const maxLength = Math.max(...group

@@ -1,6 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { GraphExporterError, GraphExporter as GE, PartialBoxTree } from '../src/exporters/graphExporter';
+import { GraphExporterError, GraphExporter as GE, PartialBoxTree }
+	from '../src/exporters/graphExporter';
 import { FuncTree, FuncType, ValueType } from '../src/funcTree';
 
 describe('Testing YamlImporterError', () => {
@@ -145,7 +146,7 @@ describe('Testing GE.computeBox()', () => {
 
 	const childB: PartialBoxTree = {
 		id: '1',
-		groupId: 0,
+		groupId: 1,
 		funcText: 'b',
 		funcType: FuncType.Main,
 		valueText: 'bbb',
@@ -155,7 +156,7 @@ describe('Testing GE.computeBox()', () => {
 
 	const childC: PartialBoxTree = {
 		id: '2',
-		groupId: 0,
+		groupId: 1,
 		funcText: '.c',
 		funcType: FuncType.Chained,
 		valueText: 'ccccc',
@@ -165,7 +166,7 @@ describe('Testing GE.computeBox()', () => {
 
 	const childD: PartialBoxTree = {
 		id: '3',
-		groupId: 0,
+		groupId: 2,
 		funcText: 'd',
 		funcType: FuncType.Main,
 		valueText: 'd',
@@ -183,26 +184,39 @@ describe('Testing GE.computeBox()', () => {
 		children: [childA, childB, childC, childD],
 	};
 
-	test('partial box with several func params is computed to a box with correct dimention', () => {
-		const boxTreeA = GE.computeBox(root, childA);
+	test('simple partial box without root is correctly computed', () => {
+		const boxTreeA = GE.computeBox(childA);
 		expect(boxTreeA.contentWidth).toBe(3);
 		expect(boxTreeA.padding).toBe(2);
 		expect(boxTreeA.width).toBe(3);
+	});
 
-		const boxTreeB = GE.computeBox(root, childB);
+	test('partial box of a func preceding a chain is correctly computed', () => {
+		const boxTreeB = GE.computeBox(childB, root);
 		expect(boxTreeB.contentWidth).toBe(5);
 		expect(boxTreeB.padding).toBe(3);
 		expect(boxTreeB.width).toBe(8);
+	});
 
-		const boxTreeC = GE.computeBox(root, childC);
+	test('partial box of chained func is correctly computed', () => {
+		const boxTreeC = GE.computeBox(childC, root);
 		expect(boxTreeC.contentWidth).toBe(8);
 		expect(boxTreeC.padding).toBe(3);
 		expect(boxTreeC.width).toBe(8);
+	});
 
-		const boxTreeD = GE.computeBox(root, childD);
+	test('partial box of func after a chain is correctly computed', () => {
+		const boxTreeD = GE.computeBox(childD, root);
 		expect(boxTreeD.contentWidth).toBe(3);
 		expect(boxTreeD.padding).toBe(2);
 		expect(boxTreeD.width).toBe(3);
+	});
+
+	test('partial box of func tree is correctly computed', () => {
+		const boxTreeD = GE.computeBox(root);
+		expect(boxTreeD.contentWidth).toBe(5);
+		expect(boxTreeD.padding).toBe(5);
+		expect(boxTreeD.width).toBe(5);
 	});
 });
 
