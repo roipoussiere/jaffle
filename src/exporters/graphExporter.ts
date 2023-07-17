@@ -42,7 +42,7 @@ export class GraphExporterError extends ExporterError {
 export class GraphExporter extends AbstractExporter {
 	static export(composition: FuncTree): BoxTree {
 		const partialBoxTree = GraphExporter.upgradeTree(composition);
-		return GraphExporter.computeBox(partialBoxTree, { ...partialBoxTree });
+		return GraphExporter.computeBox(partialBoxTree);
 	}
 
 	static upgradeTree(func: FuncTree, funcId: Array<number> = [], groupId = 0): PartialBoxTree {
@@ -70,29 +70,29 @@ export class GraphExporter extends AbstractExporter {
 		};
 	}
 
-	static computeBox(root: PartialBoxTree, pbt: PartialBoxTree): BoxTree {
-		const group = root.children.filter(
-			(child: PartialBoxTree) => child.groupId === pbt.groupId,
-		);
-
+	static computeBox(pbt: PartialBoxTree, parent?: PartialBoxTree): BoxTree {
 		const noSpace = pbt.funcType === FuncType.Literal
 			|| pbt.valueType === ValueType.Null;
 
 		const contentWidth = pbt.funcText.length
 			+ pbt.valueText.length + (noSpace ? 0 : 1);
 
+		const group = parent?.children.filter(
+			(child: PartialBoxTree) => child.groupId === pbt.groupId,
+		);
+
 		let padding: number;
 		let width: number;
 
 		if (group === undefined) {
-			padding = contentWidth;
+			padding = contentWidth + 1;
 			width = contentWidth;
 		} else {
 			const maxLength = Math.max(...group
 				.filter((child: PartialBoxTree) => child.funcType !== FuncType.MainMininotation)
 				.map((child: PartialBoxTree) => child.funcText.length));
 
-			padding = maxLength + (pbt.funcType === FuncType.Literal ? 0 : 1);
+			padding = maxLength + 1; // + (pbt.funcType === FuncType.Literal ? 0 : 1);
 
 			const getDataWidth = (box: PartialBoxTree) => padding
 				+ (box.valueType === ValueType.Null ? 2 : box.valueText.length);
@@ -107,7 +107,7 @@ export class GraphExporter extends AbstractExporter {
 			contentWidth,
 			padding,
 			width,
-			children: pbt.children.map((child) => GraphExporter.computeBox(root, child)),
+			children: pbt.children.map((child) => GraphExporter.computeBox(child, pbt)),
 		};
 	}
 
@@ -116,6 +116,9 @@ export class GraphExporter extends AbstractExporter {
 	}
 
 	static getvalueText(func: FuncTree): string {
+		if ([ValueType.Tree, ValueType.Empty].includes(func.valueType)) {
+			return '';
+		}
 		return func.value === null ? '∅' : `${func.value}`;
 	}
 }

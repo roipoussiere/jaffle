@@ -56,7 +56,6 @@ class JaffleGraph {
 
 	public load(rawComposition: FuncTree): JaffleGraph {
 		const composition = GraphExporter.export(rawComposition);
-		// this.tree = <FuncNode> d3.hierarchy(composition, (data: BoxTree) => data.params);
 		this.tree = <FuncNode> d3.hierarchy(composition);
 		this.initTree();
 		return this;
@@ -124,7 +123,7 @@ class JaffleGraph {
 			.join('path')
 			.attr('d', (link: d3.HierarchyLink<BoxTree>) => d3.linkHorizontal()
 				.x((n: FuncNode) =>
-					(n.y === link.source.y ? n.y + n.boxWidth * this.charWidth : n.y))
+					(n.y === link.source.y ? n.y + n.data.width * this.charWidth : n.y))
 				.y((n: FuncNode) => n.x)(link));
 	}
 
@@ -208,8 +207,17 @@ class JaffleGraph {
 			.on('mouseout', (event) => onMouseOut(event.target))
 			.on('click', (event, node: FuncNode) => onClick(node, true));
 
-		// box.append('title')
-		// 	.text((d: FuncNode) => d.data.id);
+	// 		box.append('title')
+	// 			.text((d: FuncNode) => `id: ${d.data.id}
+	// groupId: ${d.data.groupId}
+	// funcText: ${d.data.funcText}
+	// funcType: ${FuncType[d.data.funcType]}
+	// valueText: ${d.data.valueText}
+	// valueType: ${ValueType[d.data.valueType]}
+	// contentWidth: ${d.data.contentWidth}
+	// padding: ${d.data.padding}
+	// width: ${d.data.width}
+	// `);
 	}
 
 	private drawInput(selectedBoxId: string, selectedBoxIsValue: boolean) {
