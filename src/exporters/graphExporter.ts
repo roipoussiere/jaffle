@@ -47,6 +47,7 @@ export class GraphExporter extends AbstractExporter {
 
 	static upgradeTree(func: FuncTree, funcId: Array<number> = [], groupId = 0): PartialBoxTree {
 		let paramsGroupId = -1;
+
 		const children = func.params.map((param, i) => {
 			if (param.type !== FuncType.Chained) {
 				paramsGroupId += 1;
@@ -59,12 +60,11 @@ export class GraphExporter extends AbstractExporter {
 		});
 
 		return {
-			...func,
 			id: funcId.join('-'),
 			groupId,
 			funcText: GraphExporter.getFuncText(func),
-			valueText: GraphExporter.getvalueText(func),
 			funcType: func.type,
+			valueText: GraphExporter.getvalueText(func),
 			valueType: func.valueType,
 			children,
 		};

@@ -65,7 +65,7 @@ describe('Testing GE.upgradeTree()', () => {
 			},
 			{
 				name: '.b',
-				type: FuncType.Main,
+				type: FuncType.Chained,
 				value: 2,
 				valueType: ValueType.Number,
 				params: [],
@@ -79,7 +79,7 @@ describe('Testing GE.upgradeTree()', () => {
 			},
 			{
 				name: '.d',
-				type: FuncType.Main,
+				type: FuncType.Chained,
 				value: 4,
 				valueType: ValueType.Tree,
 				params: [
@@ -123,8 +123,8 @@ describe('Testing GE.upgradeTree()', () => {
 		expect(partialBoxTree.children[3].children[0].id).toBe('3-0');
 		expect(partialBoxTree.children[3].children[0].groupId).toBe(0);
 
-		expect(partialBoxTree.children[3].children[0].id).toBe('3-1');
-		expect(partialBoxTree.children[3].children[0].groupId).toBe(1);
+		expect(partialBoxTree.children[3].children[1].id).toBe('3-1');
+		expect(partialBoxTree.children[3].children[1].groupId).toBe(1);
 	});
 });
 
