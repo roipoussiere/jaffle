@@ -220,5 +220,27 @@ describe('Testing GE.computeBox()', () => {
 	});
 });
 
-// describe('Testing GE.export()', () => {
-// });
+describe('Testing GE.export()', () => {
+	const funcTree: FuncTree = {
+		name: 'a',
+		type: FuncType.Main,
+		value: 1,
+		valueType: ValueType.Number,
+		params: [],
+	};
+
+	test('simple box tree is exported to correct box', () => {
+		expect(GE.export(funcTree)).toEqual({
+			id: '',
+			groupId: 0,
+			funcText: 'a',
+			funcType: FuncType.Main,
+			valueText: '1',
+			valueType: ValueType.Number,
+			contentWidth: 3,
+			padding: 2,
+			width: 3,
+			children: [],
+		});
+	});
+});
