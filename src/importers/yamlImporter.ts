@@ -67,7 +67,6 @@ export class YamlImporter extends AbstractImporter {
 		return {
 			type: FuncType.List,
 			name: '',
-			// label: '[]',
 			value: '',
 			valueType: ValueType.Tree,
 			params: YamlImporter.computeParams(rawList),
@@ -83,19 +82,10 @@ export class YamlImporter extends AbstractImporter {
 			return YamlImporter.serialize(rawFunc);
 		}
 
-		// let valueText: string;
-		// if (valueType === ValueType.Tree) {
-		// 	valueText = '';
-		// } else if (rawValue === null) {
-		// 	valueText = '∅';
-		// } else {
-		// 	valueText = `${rawValue}`;
-		// }
-
 		return {
 			name: funcName,
 			type: funcType,
-			value: rawValue,
+			value: rawValue instanceof Array ? '' : rawValue,
 			valueType: YamlImporter.getValueType(rawValue),
 			params: rawValue instanceof Array ? YamlImporter.computeParams(rawValue) : [],
 		};
@@ -118,7 +108,6 @@ export class YamlImporter extends AbstractImporter {
 		return {
 			name: '',
 			type: FuncType.Literal,
-			// value: rawLiteral === null ? '∅' : `${rawLiteral}`,
 			value: rawLiteral,
 			valueType: YamlImporter.getValueType(rawLiteral),
 			params: [],
@@ -146,7 +135,6 @@ export class YamlImporter extends AbstractImporter {
 		}
 		if (rawValue instanceof Array) {
 			return {
-				// name: '[]',
 				name: '',
 				type: FuncType.Serialized,
 				value: '',
@@ -161,7 +149,6 @@ export class YamlImporter extends AbstractImporter {
 			}
 			return {
 				name: '',
-				// name: '{}',
 				type: FuncType.Serialized,
 				value: '',
 				valueType: ValueType.Tree,
@@ -173,8 +160,7 @@ export class YamlImporter extends AbstractImporter {
 		return {
 			name: '',
 			type: FuncType.Serialized,
-			value: '',
-			// value: '∅',
+			value: null,
 			valueType: ValueType.Null,
 			params: [],
 		};
@@ -215,8 +201,7 @@ export class YamlImporter extends AbstractImporter {
 		return {
 			name: key,
 			type: FuncType.Serialized,
-			value: '',
-			// value: '∅',
+			value: null,
 			valueType: ValueType.Null,
 			params: [],
 		};
