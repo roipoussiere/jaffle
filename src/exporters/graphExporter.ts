@@ -119,7 +119,13 @@ export class GraphExporter extends AbstractExporter {
 		if ([ValueType.Tree, ValueType.Empty].includes(func.valueType)) {
 			return '';
 		}
-		return func.value === null ? '∅' : `${func.value}`;
+		if (func.type === FuncType.List) {
+			return '[]';
+		}
+		if (func.value === null) {
+			return '∅';
+		}
+		return `${func.value}`;
 	}
 }
 
