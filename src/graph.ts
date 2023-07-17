@@ -3,6 +3,7 @@ import { flextree } from 'd3-flextree';
 
 import { FuncTree, FuncType, ValueType } from './funcTree';
 import { GraphExporter, BoxTree } from './exporters/graphExporter';
+import { GraphImporter } from './importers/graphImporter';
 
 export type FuncNode = d3.id<BoxTree> & {
 	x: number,
@@ -249,7 +250,6 @@ class JaffleGraph {
 					: node.data.padding * self.charWidth;
 				const selected = self.tree.find((n: FuncNode) => n.data.id === selectedBoxId);
 				if (selected !== undefined) {
-					// todo: change raw values instead
 					if (selectedBoxIsValue) {
 						selected.data.valueText = target.value;
 					} else {
@@ -258,8 +258,8 @@ class JaffleGraph {
 				}
 			})
 			.on('change', () => {
-				self.initTree();
-				self.draw();
+				this.load(GraphImporter.import(this.tree.data));
+				this.draw();
 			})
 			.on('focusout', (event: Event) => {
 				(<HTMLInputElement>event.target).parentElement?.remove();
