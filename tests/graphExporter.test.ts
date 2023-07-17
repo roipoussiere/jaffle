@@ -132,8 +132,79 @@ describe('Testing GE.upgradeTree()', () => {
 	});
 });
 
-// describe('Testing GE.upgradeBox()', () => {
-// });
+describe('Testing GE.computeBox()', () => {
+	const childA: PartialBoxTree = {
+		id: '0',
+		groupId: 0,
+		funcText: 'a',
+		funcType: FuncType.Main,
+		valueText: 'a',
+		valueType: ValueType.String,
+		children: [],
+	};
+
+	const childB: PartialBoxTree = {
+		id: '1',
+		groupId: 0,
+		funcText: 'b',
+		funcType: FuncType.Main,
+		valueText: 'bbb',
+		valueType: ValueType.String,
+		children: [],
+	};
+
+	const childC: PartialBoxTree = {
+		id: '2',
+		groupId: 0,
+		funcText: '.c',
+		funcType: FuncType.Chained,
+		valueText: 'ccccc',
+		valueType: ValueType.String,
+		children: [],
+	};
+
+	const childD: PartialBoxTree = {
+		id: '3',
+		groupId: 0,
+		funcText: 'd',
+		funcType: FuncType.Main,
+		valueText: 'd',
+		valueType: ValueType.String,
+		children: [],
+	};
+
+	const root: PartialBoxTree = {
+		id: '',
+		groupId: 0,
+		funcText: 'root',
+		funcType: FuncType.Main,
+		valueText: '',
+		valueType: ValueType.Tree,
+		children: [childA, childB, childC, childD],
+	};
+
+	test('partial box with several func params is computed to a box with correct dimention', () => {
+		const boxTreeA = GE.computeBox(root, childA);
+		expect(boxTreeA.contentWidth).toBe(3);
+		expect(boxTreeA.padding).toBe(2);
+		expect(boxTreeA.width).toBe(3);
+
+		const boxTreeB = GE.computeBox(root, childB);
+		expect(boxTreeB.contentWidth).toBe(5);
+		expect(boxTreeB.padding).toBe(3);
+		expect(boxTreeB.width).toBe(8);
+
+		const boxTreeC = GE.computeBox(root, childC);
+		expect(boxTreeC.contentWidth).toBe(8);
+		expect(boxTreeC.padding).toBe(3);
+		expect(boxTreeC.width).toBe(8);
+
+		const boxTreeD = GE.computeBox(root, childD);
+		expect(boxTreeD.contentWidth).toBe(3);
+		expect(boxTreeD.padding).toBe(2);
+		expect(boxTreeD.width).toBe(3);
+	});
+});
 
 // describe('Testing GE.export()', () => {
 // });
