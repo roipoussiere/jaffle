@@ -6,12 +6,12 @@ import { AbstractClassError } from '../errors';
 class AbstractExporter {
 	constructor() {
 		if (this.constructor === AbstractExporter) {
-			throw new AbstractClassError('class AbstractDumper can\'t be instantiated.');
+			throw new AbstractClassError('class AbstractExporter can\'t be instantiated.');
 		}
 	}
 
-	public export(composition: FuncTree): unknown {
-		throw new AbstractClassError('Method dump() must be implemented.');
+	static export(composition: FuncTree): unknown {
+		throw new AbstractClassError('Method AE.export() must be implemented.');
 	}
 }
 

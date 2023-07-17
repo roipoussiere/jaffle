@@ -6,12 +6,12 @@ import { AbstractClassError } from '../errors';
 class AbstractImporter {
 	constructor() {
 		if (this.constructor === AbstractImporter) {
-			throw new AbstractClassError('class AbstractLoader can\'t be instantiated.');
+			throw new AbstractClassError('class AbstractImporter can\'t be instantiated.');
 		}
 	}
 
-	public import(thing: unknown): FuncTree {
-		throw new AbstractClassError('Method load() must be implemented.');
+	static import(thing: unknown): FuncTree {
+		throw new AbstractClassError('Method AI.import() must be implemented.');
 	}
 }
 
