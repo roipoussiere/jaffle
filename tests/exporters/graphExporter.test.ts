@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { GraphExporterError, GraphExporter as GE, PartialBoxTree }
+import { GraphExporterError, GraphExporter as GE, PartialBoxTree, BoxTree }
 	from '../../src/exporters/graphExporter';
 import { FuncTree, FuncType, ValueType } from '../../src/funcTree';
 
@@ -141,6 +141,7 @@ describe('Testing GE.computeBox()', () => {
 		funcType: FuncType.Main,
 		valueText: 'a',
 		valueType: ValueType.Literal,
+		isNumber: false,
 		children: [],
 	};
 
@@ -151,6 +152,7 @@ describe('Testing GE.computeBox()', () => {
 		funcType: FuncType.Main,
 		valueText: 'bbb',
 		valueType: ValueType.Literal,
+		isNumber: false,
 		children: [],
 	};
 
@@ -161,6 +163,7 @@ describe('Testing GE.computeBox()', () => {
 		funcType: FuncType.Chained,
 		valueText: 'ccccc',
 		valueType: ValueType.Literal,
+		isNumber: false,
 		children: [],
 	};
 
@@ -171,6 +174,7 @@ describe('Testing GE.computeBox()', () => {
 		funcType: FuncType.Main,
 		valueText: 'd',
 		valueType: ValueType.Literal,
+		isNumber: false,
 		children: [],
 	};
 
@@ -181,6 +185,7 @@ describe('Testing GE.computeBox()', () => {
 		funcType: FuncType.Main,
 		valueText: '',
 		valueType: ValueType.Tree,
+		isNumber: false,
 		children: [childA, childB, childC, childD],
 	};
 
@@ -221,7 +226,7 @@ describe('Testing GE.computeBox()', () => {
 });
 
 describe('Testing GE.export()', () => {
-	const funcTree: FuncTree = {
+	const input: FuncTree = {
 		name: 'a',
 		type: FuncType.Main,
 		value: 1,
@@ -229,18 +234,21 @@ describe('Testing GE.export()', () => {
 		params: [],
 	};
 
+	const expected: BoxTree = {
+		id: '',
+		groupId: 0,
+		funcText: 'a',
+		funcType: FuncType.Main,
+		valueText: '1',
+		valueType: ValueType.Literal,
+		isNumber: true,
+		contentWidth: 3,
+		padding: 2,
+		width: 3,
+		children: [],
+	};
+
 	test('simple box tree is exported to correct box', () => {
-		expect(GE.export(funcTree)).toEqual({
-			id: '',
-			groupId: 0,
-			funcText: 'a',
-			funcType: FuncType.Main,
-			valueText: '1',
-			valueType: ValueType.Literal,
-			contentWidth: 3,
-			padding: 2,
-			width: 3,
-			children: [],
-		});
+		expect(GE.export(input)).toEqual(expected);
 	});
 });

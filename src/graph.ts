@@ -19,10 +19,9 @@ const BOX_NAME_COLORS = {
 };
 
 const BOX_VALUE_COLORS = {
-	[ValueType.String]: 'darkSlateGray',
+	[ValueType.Literal]: ['darkSlateGray', 'darkRed'],
 	[ValueType.Mininotation]: 'green',
 	[ValueType.Expression]: 'blue',
-	[ValueType.Number]: 'darkRed',
 };
 
 class JaffleGraph {
@@ -182,7 +181,7 @@ class JaffleGraph {
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: FuncNode) => d.data.padding * this.charWidth)
-			.style('fill', (d: FuncNode) => BOX_VALUE_COLORS[d.data.valueType])
+			.style('fill', (d: FuncNode) => JaffleGraph.getValueColor(d.data))
 			.text((d: FuncNode) => (
 				(d.data.valueType === ValueType.Literal && d.data.valueText) === ''
 					? '∅' : d.data.valueText
@@ -274,7 +273,7 @@ class JaffleGraph {
 			.style('font-family', 'monospace')
 			.style('background-color', '#ccc')
 			.style('color', selectedBoxIsValue
-				? BOX_VALUE_COLORS[node.data.valueType] : BOX_NAME_COLORS[node.data.funcType])
+				? JaffleGraph.getValueColor(node.data) : BOX_NAME_COLORS[node.data.funcType])
 			.style('font-weight', selectedBoxIsValue || node.data.funcType === FuncType.Chained
 				? 'normal' : 'bold')
 			.style('border', 'none')
@@ -290,6 +289,13 @@ class JaffleGraph {
 			&& nodeB.data.funcType === FuncType.Literal;
 		return nodeA.parent === nodeB.parent
 			&& (nodeB.data.funcType === FuncType.Chained || bothAreLiteral);
+	}
+
+	private static getValueColor(box: BoxTree) {
+		if (box.valueType === ValueType.Literal) {
+			return BOX_VALUE_COLORS[ValueType.Literal][box.isNumber ? 1 : 0];
+		}
+		return BOX_VALUE_COLORS[box.valueType];
 	}
 
 	private static getGroup(node: FuncNode): Array<FuncNode> {

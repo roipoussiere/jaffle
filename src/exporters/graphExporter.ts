@@ -12,6 +12,7 @@ export type PartialBoxTree = {
 	funcType: FuncType,
 	valueText: string,
 	valueType: ValueType,
+	isNumber: boolean,
 
 	children: Array<PartialBoxTree>,
 };
@@ -24,6 +25,7 @@ export type BoxTree = {
 	funcType: FuncType,
 	valueText: string,
 	valueType: ValueType,
+	isNumber: boolean,
 
 	contentWidth: number,
 	padding: number,
@@ -66,6 +68,7 @@ export class GraphExporter extends AbstractExporter {
 			funcType: func.type,
 			valueText: GraphExporter.getvalueText(func),
 			valueType: func.valueType,
+			isNumber: typeof func.value === 'number',
 			children,
 		};
 	}
