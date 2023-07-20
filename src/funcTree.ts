@@ -1,28 +1,19 @@
-export enum FuncType {
-	Constant,
-	MainExpression,
-	MainMininotation,
-	Main,
-	Chained,
-	Serialized,
+export enum VertexType {
+	Func,
+	ExpressionFunc,
+	MininotationFunc,
+	ChainedFunc,
+	ConstantDef,
+	SerializedData,
 	List,
 	Literal,
 }
 
-export enum ValueType {
-	Empty,
-	Literal,
-	Mininotation,
-	Expression,
-	Tree,
-}
+// eslint-disable-next-line no-use-before-define
+export type Children = Array<Vertex>;
 
-export type FuncTree = {
-	name: string,
-	type: FuncType,
+export type Vertex = {
+	type: VertexType,
 	value: unknown,
-	valueType: ValueType,
-	params: Array<FuncTree>,
+	children: Children,
 };
-
-export type Params = Array<FuncTree>;
