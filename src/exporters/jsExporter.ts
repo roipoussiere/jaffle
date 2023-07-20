@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { FuncTree, FuncType } from '../funcTree';
+import { Vertex, VertexType } from '../funcTree';
 import { ExporterError } from '../errors';
 // import * as c from '../constants';
 
@@ -18,28 +18,28 @@ export class JsExporterError extends ExporterError {
 
 export class JsExporter extends AbstractExporter {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
-	public export(composition: FuncTree): string {
+	public export(composition: Vertex): string {
 		return JsExporter.funcToJs(composition);
 	}
 
-	static funcToJs(func: FuncTree): string {
-		const params = func.params.map((param) => JsExporter.funcToJs(param));
+	static funcToJs(func: Vertex): string {
+		const params = func.children.map((param) => JsExporter.funcToJs(param));
 		let js: string;
 
-		if (func.type === FuncType.Main) {
-			js = `${func.name}(${params.join(', ')})`;
-		} else if (func.type === FuncType.Chained) {
-			js = `.${func.name}(${params.join(', ')})`;
-		} else if (func.type === FuncType.Constant) {
-			js = `const ${VAR_NAME_PREFIX}${func.name} = ${params[0]};`;
-		} else if (func.type === FuncType.List) {
+		if (func.type === VertexType.Func) {
+			js = `${func.value}(${params.join(', ')})`;
+		} else if (func.type === VertexType.ChainedFunc) {
+			js = `.${func.value}(${params.join(', ')})`;
+		} else if (func.type === VertexType.ConstantDef) {
+			js = `const ${VAR_NAME_PREFIX}${func.value} = ${params[0]};`;
+		} else if (func.type === VertexType.List) {
 			js = `[${params.join(', ')}]`;
-		} else if (func.type === FuncType.Literal) {
-			js = `[${params.join(', ')}]`;
-		} else if (func.type === FuncType.MainExpression) {
-			js = `${VAR_NAME_PREFIX}${func.name}`;
-		} else if (func.type === FuncType.MainMininotation) {
-			js = `mini(${func.name})`;
+		} else if (func.type === VertexType.Literal) {
+			js = typeof func.value === 'string' ? `'${func.value}'` : `${func.value}`;
+		} else if (func.type === VertexType.ExpressionFunc) {
+			js = `${VAR_NAME_PREFIX}${func.value}`;
+		} else if (func.type === VertexType.MininotationFunc) {
+			js = `mini(${func.value})`;
 		} else {
 			js = JsExporter.serialize(func.value);
 		}
