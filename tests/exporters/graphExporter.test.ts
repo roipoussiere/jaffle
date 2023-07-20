@@ -102,7 +102,7 @@ describe('Testing GE.upgradeTree()', () => {
 	const root: FuncTree = {
 		name: 'root',
 		type: FuncType.Main,
-		value: '',
+		value: null,
 		valueType: ValueType.Tree,
 		params: [childA, childB, childC, childD],
 	};

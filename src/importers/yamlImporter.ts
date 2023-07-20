@@ -37,7 +37,7 @@ export class YamlImporter extends AbstractImporter {
 		return {
 			name: '',
 			type: FuncType.Main,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: YamlImporter.computeParams(rawComposition),
 		};
@@ -67,7 +67,7 @@ export class YamlImporter extends AbstractImporter {
 		return {
 			type: FuncType.List,
 			name: '',
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: YamlImporter.computeParams(rawList),
 		};
@@ -85,7 +85,7 @@ export class YamlImporter extends AbstractImporter {
 		return {
 			name: funcName,
 			type: funcType,
-			value: rawValue instanceof Array ? '' : rawValue,
+			value: rawValue instanceof Array ? null : rawValue,
 			valueType: YamlImporter.getValueType(rawValue),
 			params: rawValue instanceof Array ? YamlImporter.computeParams(rawValue) : [],
 		};
@@ -98,7 +98,7 @@ export class YamlImporter extends AbstractImporter {
 				return {
 					name: rawLiteral,
 					type: stringFuncType,
-					value: '',
+					value: null,
 					valueType: ValueType.Empty,
 					params: [],
 				};
@@ -119,7 +119,7 @@ export class YamlImporter extends AbstractImporter {
 			return {
 				name: '',
 				type: FuncType.Serialized,
-				value: '',
+				value: null,
 				valueType: ValueType.Tree,
 				params: rawValue.map((rawChild) => YamlImporter.serialize(rawChild)),
 			};
@@ -132,7 +132,7 @@ export class YamlImporter extends AbstractImporter {
 			return {
 				name: '',
 				type: FuncType.Serialized,
-				value: '',
+				value: null,
 				valueType: ValueType.Tree,
 				params: keys.map((key) => YamlImporter.serialize({
 					[key]: (<Dict<unknown>>rawValue)[key],
@@ -153,7 +153,7 @@ export class YamlImporter extends AbstractImporter {
 			return {
 				name: key,
 				type: FuncType.Serialized,
-				value: '',
+				value: null,
 				valueType: ValueType.Tree,
 				params: Object.keys(rawValue).map((chKey) => YamlImporter.serialize(
 					rawValue instanceof Array ? rawValue[Number(chKey)] : {

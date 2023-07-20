@@ -91,7 +91,7 @@ describe('Testing YI.computeLiteral()', () => {
 		expect(YI.computeLiteral('_a')).toEqual({
 			name: '_a',
 			type: FuncType.MainMininotation,
-			value: '',
+			value: null,
 			valueType: ValueType.Empty,
 			params: [],
 		});
@@ -99,7 +99,7 @@ describe('Testing YI.computeLiteral()', () => {
 		expect(YI.computeLiteral('=a')).toEqual({
 			name: '=a',
 			type: FuncType.MainExpression,
-			value: '',
+			value: null,
 			valueType: ValueType.Empty,
 			params: [],
 		});
@@ -137,7 +137,7 @@ describe('Testing YI.serializeEntry()', () => {
 		expect(YI.serializeEntry('a', [1, 'a'])).toEqual({
 			name: 'a',
 			type: FuncType.Serialized,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [{
 				name: '',
@@ -159,7 +159,7 @@ describe('Testing YI.serializeEntry()', () => {
 		expect(YI.serializeEntry('a', { b: 1, c: 'd' })).toEqual({
 			name: 'a',
 			type: FuncType.Serialized,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [{
 				name: 'b',
@@ -193,7 +193,7 @@ describe('Testing YI.serialize()', () => {
 		expect(YI.serialize([1, 'a'])).toEqual({
 			name: '',
 			type: FuncType.Serialized,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [{
 				name: '',
@@ -225,7 +225,7 @@ describe('Testing YI.serialize()', () => {
 		expect(YI.serialize({ a: 1, b: 'c' })).toEqual({
 			name: '',
 			type: FuncType.Serialized,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [{
 				name: 'a',
@@ -294,7 +294,7 @@ describe('Testing YI.computeFunc()', () => {
 		expect(YI.computeFunc({ a: [1, 2] })).toEqual({
 			name: 'a',
 			type: FuncType.Main,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [
 				{
@@ -345,7 +345,7 @@ describe('Testing YI.computeList()', () => {
 		expect(YI.computeList(['a', 1, null])).toEqual({
 			name: '',
 			type: FuncType.List,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [{
 				name: '',
@@ -427,7 +427,7 @@ describe('Testing YI.computeParams()', () => {
 		expect(YI.computeParams([[null, 42], ['a', 'b']])).toEqual([{
 			name: '',
 			type: FuncType.List,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [{
 				name: '',
@@ -445,7 +445,7 @@ describe('Testing YI.computeParams()', () => {
 		}, {
 			name: '',
 			type: FuncType.List,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [{
 				name: '',
@@ -480,7 +480,7 @@ describe('Testing YI.import()', () => {
 		expect(YI.import('[]')).toEqual({
 			name: '',
 			type: FuncType.Main,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [],
 		});
@@ -490,7 +490,7 @@ describe('Testing YI.import()', () => {
 		expect(YI.import('[{a: }, {.b: 42}, {c: foo}, {.d: [1, 2]}]')).toEqual({
 			name: '',
 			type: FuncType.Main,
-			value: '',
+			value: null,
 			valueType: ValueType.Tree,
 			params: [{
 				name: 'a',
@@ -513,7 +513,7 @@ describe('Testing YI.import()', () => {
 			}, {
 				name: '.d',
 				type: FuncType.Chained,
-				value: '',
+				value: null,
 				valueType: ValueType.Tree,
 				params: [{
 					name: '',
