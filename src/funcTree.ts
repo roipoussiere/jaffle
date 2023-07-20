@@ -11,9 +11,7 @@ export enum FuncType {
 
 export enum ValueType {
 	Empty,
-	Null,
-	Number,
-	String,
+	Literal,
 	Mininotation,
 	Expression,
 	Tree,

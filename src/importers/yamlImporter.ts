@@ -115,24 +115,6 @@ export class YamlImporter extends AbstractImporter {
 	}
 
 	static serialize(rawValue: unknown): FuncTree {
-		if (typeof rawValue === 'string') {
-			return {
-				name: '',
-				type: FuncType.Serialized,
-				value: rawValue,
-				valueType: ValueType.String,
-				params: [],
-			};
-		}
-		if (typeof rawValue === 'number') {
-			return {
-				name: '',
-				type: FuncType.Serialized,
-				value: rawValue,
-				valueType: ValueType.Number,
-				params: [],
-			};
-		}
 		if (rawValue instanceof Array) {
 			return {
 				name: '',
@@ -160,8 +142,8 @@ export class YamlImporter extends AbstractImporter {
 		return {
 			name: '',
 			type: FuncType.Serialized,
-			value: null,
-			valueType: ValueType.Null,
+			value: rawValue,
+			valueType: ValueType.Literal,
 			params: [],
 		};
 	}
@@ -180,29 +162,11 @@ export class YamlImporter extends AbstractImporter {
 				)),
 			};
 		}
-		if (typeof rawValue === 'string') {
-			return {
-				name: key,
-				type: FuncType.Serialized,
-				value: rawValue,
-				valueType: ValueType.String,
-				params: [],
-			};
-		}
-		if (typeof rawValue === 'number') {
-			return {
-				name: key,
-				type: FuncType.Serialized,
-				value: rawValue,
-				valueType: ValueType.Number,
-				params: [],
-			};
-		}
 		return {
 			name: key,
 			type: FuncType.Serialized,
-			value: null,
-			valueType: ValueType.Null,
+			value: rawValue,
+			valueType: ValueType.Literal,
 			params: [],
 		};
 	}
@@ -237,22 +201,17 @@ export class YamlImporter extends AbstractImporter {
 
 	static getValueType(rawValue: unknown): ValueType {
 		if (typeof rawValue === 'string') {
-			const prefix = rawValue[0];
-			if (prefix === c.MINI_STR_PREFIX) {
+			if (rawValue[0] === c.MINI_STR_PREFIX) {
 				return ValueType.Mininotation;
 			}
-			if (prefix === c.EXPR_STR_PREFIX) {
+			if (rawValue[0] === c.EXPR_STR_PREFIX) {
 				return ValueType.Expression;
 			}
-			return ValueType.String;
-		}
-		if (typeof rawValue === 'number') {
-			return ValueType.Number;
 		}
 		if (rawValue instanceof Object) {
 			return ValueType.Tree;
 		}
-		return ValueType.Null;
+		return ValueType.Literal;
 	}
 }
 

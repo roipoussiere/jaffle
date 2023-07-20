@@ -10,15 +10,15 @@ describe('Testing YamlImporterError', () => {
 });
 
 describe('Testing YI.getValueType()', () => {
-	test('string return string types', () => {
-		expect(YI.getValueType('abc')).toBe(ValueType.String);
+	test('special string inputs return special string types', () => {
 		expect(YI.getValueType('_abc')).toBe(ValueType.Mininotation);
 		expect(YI.getValueType('=abc')).toBe(ValueType.Expression);
 	});
 
-	test('other literals return literal types', () => {
-		expect(YI.getValueType(null)).toBe(ValueType.Null);
-		expect(YI.getValueType(123)).toBe(ValueType.Number);
+	test('literal inputs return literal types', () => {
+		expect(YI.getValueType('abc')).toBe(ValueType.Literal);
+		expect(YI.getValueType(null)).toBe(ValueType.Literal);
+		expect(YI.getValueType(123)).toBe(ValueType.Literal);
 	});
 
 	test('object return object type', () => {
@@ -57,32 +57,32 @@ describe('Testing YI.getFuncName()', () => {
 });
 
 describe('Testing YI.computeLiteral()', () => {
-	test('string literals are well computed', () => {
+	test('string literals', () => {
 		expect(YI.computeLiteral('a')).toEqual({
 			name: '',
 			type: FuncType.Literal,
 			value: 'a',
-			valueType: ValueType.String,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 	});
 
-	test('number literals are well computed', () => {
+	test('number literals', () => {
 		expect(YI.computeLiteral(42)).toEqual({
 			name: '',
 			type: FuncType.Literal,
 			value: 42,
-			valueType: ValueType.Number,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 	});
 
-	test('null literals are well computed', () => {
+	test('null literals', () => {
 		expect(YI.computeLiteral(null)).toEqual({
 			name: '',
 			type: FuncType.Literal,
 			value: null,
-			valueType: ValueType.Null,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 	});
@@ -107,12 +107,12 @@ describe('Testing YI.computeLiteral()', () => {
 });
 
 describe('Testing YI.serializeEntry()', () => {
-	test('literals are well serialized', () => {
+	test('literals', () => {
 		expect(YI.serializeEntry('a', null)).toEqual({
 			name: 'a',
 			type: FuncType.Serialized,
 			value: null,
-			valueType: ValueType.Null,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 
@@ -120,7 +120,7 @@ describe('Testing YI.serializeEntry()', () => {
 			name: 'a',
 			type: FuncType.Serialized,
 			value: 42,
-			valueType: ValueType.Number,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 
@@ -128,7 +128,7 @@ describe('Testing YI.serializeEntry()', () => {
 			name: 'a',
 			type: FuncType.Serialized,
 			value: '_b',
-			valueType: ValueType.String,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 	});
@@ -143,13 +143,13 @@ describe('Testing YI.serializeEntry()', () => {
 				name: '',
 				type: FuncType.Serialized,
 				value: 1,
-				valueType: ValueType.Number,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '',
 				type: FuncType.Serialized,
 				value: 'a',
-				valueType: ValueType.String,
+				valueType: ValueType.Literal,
 				params: [],
 			}],
 		});
@@ -165,13 +165,13 @@ describe('Testing YI.serializeEntry()', () => {
 				name: 'b',
 				type: FuncType.Serialized,
 				value: 1,
-				valueType: ValueType.Number,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: 'c',
 				type: FuncType.Serialized,
 				value: 'd',
-				valueType: ValueType.String,
+				valueType: ValueType.Literal,
 				params: [],
 			}],
 		});
@@ -180,27 +180,11 @@ describe('Testing YI.serializeEntry()', () => {
 
 describe('Testing YI.serialize()', () => {
 	test('literals are well serialized', () => {
-		expect(YI.serialize(null)).toEqual({
-			name: '',
-			type: FuncType.Serialized,
-			value: null,
-			valueType: ValueType.Null,
-			params: [],
-		});
-
 		expect(YI.serialize(42)).toEqual({
 			name: '',
 			type: FuncType.Serialized,
 			value: 42,
-			valueType: ValueType.Number,
-			params: [],
-		});
-
-		expect(YI.serialize('_b')).toEqual({
-			name: '',
-			type: FuncType.Serialized,
-			value: '_b',
-			valueType: ValueType.String,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 	});
@@ -215,13 +199,13 @@ describe('Testing YI.serialize()', () => {
 				name: '',
 				type: FuncType.Serialized,
 				value: 1,
-				valueType: ValueType.Number,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '',
 				type: FuncType.Serialized,
 				value: 'a',
-				valueType: ValueType.String,
+				valueType: ValueType.Literal,
 				params: [],
 			}],
 		});
@@ -232,7 +216,7 @@ describe('Testing YI.serialize()', () => {
 			name: 'a',
 			type: FuncType.Serialized,
 			value: 1,
-			valueType: ValueType.Number,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 	});
@@ -247,13 +231,13 @@ describe('Testing YI.serialize()', () => {
 				name: 'a',
 				type: FuncType.Serialized,
 				value: 1,
-				valueType: ValueType.Number,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: 'b',
 				type: FuncType.Serialized,
 				value: 'c',
-				valueType: ValueType.String,
+				valueType: ValueType.Literal,
 				params: [],
 			}],
 		});
@@ -266,12 +250,12 @@ describe('Testing YI.computeFunc()', () => {
 		expect(() => YI.computeFunc({ a: 1, b: 2 })).toThrow(YamlImporterError);
 	});
 
-	test('main func are well computed', () => {
+	test('main funcs are well computed', () => {
 		expect(YI.computeFunc({ a: null })).toEqual({
 			name: 'a',
 			type: FuncType.Main,
 			value: null,
-			valueType: ValueType.Null,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 
@@ -279,7 +263,7 @@ describe('Testing YI.computeFunc()', () => {
 			name: 'a',
 			type: FuncType.Main,
 			value: 1,
-			valueType: ValueType.Number,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 
@@ -287,7 +271,7 @@ describe('Testing YI.computeFunc()', () => {
 			name: 'a',
 			type: FuncType.Main,
 			value: 'b',
-			valueType: ValueType.String,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 
@@ -317,14 +301,14 @@ describe('Testing YI.computeFunc()', () => {
 					name: '',
 					type: FuncType.Literal,
 					value: 1,
-					valueType: ValueType.Number,
+					valueType: ValueType.Literal,
 					params: [],
 				},
 				{
 					name: '',
 					type: FuncType.Literal,
 					value: 2,
-					valueType: ValueType.Number,
+					valueType: ValueType.Literal,
 					params: [],
 				},
 			],
@@ -336,7 +320,7 @@ describe('Testing YI.computeFunc()', () => {
 			name: '.a',
 			type: FuncType.Chained,
 			value: 1,
-			valueType: ValueType.Number,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 	});
@@ -346,7 +330,7 @@ describe('Testing YI.computeFunc()', () => {
 			name: 'a^',
 			type: FuncType.Serialized,
 			value: '_a',
-			valueType: ValueType.String,
+			valueType: ValueType.Literal,
 			params: [],
 		});
 	});
@@ -367,19 +351,19 @@ describe('Testing YI.computeList()', () => {
 				name: '',
 				type: FuncType.Literal,
 				value: 'a',
-				valueType: ValueType.String,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '',
 				type: FuncType.Literal,
 				value: 1,
-				valueType: ValueType.Number,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '',
 				type: FuncType.Literal,
 				value: null,
-				valueType: ValueType.Null,
+				valueType: ValueType.Literal,
 				params: [],
 			}],
 		});
@@ -393,54 +377,54 @@ describe('Testing YI.computeParams()', () => {
 				name: '',
 				type: FuncType.Literal,
 				value: 'a',
-				valueType: ValueType.String,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '',
 				type: FuncType.Literal,
 				value: 1,
-				valueType: ValueType.Number,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '',
 				type: FuncType.Literal,
 				value: null,
-				valueType: ValueType.Null,
+				valueType: ValueType.Literal,
 				params: [],
 			},
 		]);
 	});
 
 	test('funcs are well computed', () => {
-		expect(YI.computeParams([{ a: 1 }, { '.b': 2 }, { c: 3 }, { '.d': 4 }])).toEqual([{
+		expect(YI.computeParams([{ a: null }, { '.b': 42 }, { c: 'd' }, { '.d': 'f' }])).toEqual([{
 			name: 'a',
 			type: FuncType.Main,
-			value: 1,
-			valueType: ValueType.Number,
+			value: null,
+			valueType: ValueType.Literal,
 			params: [],
 		}, {
 			name: '.b',
 			type: FuncType.Chained,
-			value: 2,
-			valueType: ValueType.Number,
+			value: 42,
+			valueType: ValueType.Literal,
 			params: [],
 		}, {
 			name: 'c',
 			type: FuncType.Main,
-			value: 3,
-			valueType: ValueType.Number,
+			value: 'd',
+			valueType: ValueType.Literal,
 			params: [],
 		}, {
 			name: '.d',
 			type: FuncType.Chained,
-			value: 4,
-			valueType: ValueType.Number,
+			value: 'f',
+			valueType: ValueType.Literal,
 			params: [],
 		}]);
 	});
 
 	test('lists are well computed', () => {
-		expect(YI.computeParams([[1, 2], [3, 4]])).toEqual([{
+		expect(YI.computeParams([[null, 42], ['a', 'b']])).toEqual([{
 			name: '',
 			type: FuncType.List,
 			value: '',
@@ -448,14 +432,14 @@ describe('Testing YI.computeParams()', () => {
 			params: [{
 				name: '',
 				type: FuncType.Literal,
-				value: 1,
-				valueType: ValueType.Number,
+				value: null,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '',
 				type: FuncType.Literal,
-				value: 2,
-				valueType: ValueType.Number,
+				value: 42,
+				valueType: ValueType.Literal,
 				params: [],
 			}],
 		}, {
@@ -466,14 +450,14 @@ describe('Testing YI.computeParams()', () => {
 			params: [{
 				name: '',
 				type: FuncType.Literal,
-				value: 3,
-				valueType: ValueType.Number,
+				value: 'a',
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '',
 				type: FuncType.Literal,
-				value: 4,
-				valueType: ValueType.Number,
+				value: 'b',
+				valueType: ValueType.Literal,
 				params: [],
 			}],
 		}]);
@@ -503,7 +487,7 @@ describe('Testing YI.import()', () => {
 	});
 
 	test('non-empty valid yaml is well computed', () => {
-		expect(YI.import('[{a: 1}, {.b: 2}, {c: 3}, {.d: 4}]')).toEqual({
+		expect(YI.import('[{a: }, {.b: 42}, {c: foo}, {.d: [1, 2]}]')).toEqual({
 			name: '',
 			type: FuncType.Main,
 			value: '',
@@ -511,27 +495,39 @@ describe('Testing YI.import()', () => {
 			params: [{
 				name: 'a',
 				type: FuncType.Main,
-				value: 1,
-				valueType: ValueType.Number,
+				value: null,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '.b',
 				type: FuncType.Chained,
-				value: 2,
-				valueType: ValueType.Number,
+				value: 42,
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: 'c',
 				type: FuncType.Main,
-				value: 3,
-				valueType: ValueType.Number,
+				value: 'foo',
+				valueType: ValueType.Literal,
 				params: [],
 			}, {
 				name: '.d',
 				type: FuncType.Chained,
-				value: 4,
-				valueType: ValueType.Number,
-				params: [],
+				value: '',
+				valueType: ValueType.Tree,
+				params: [{
+					name: '',
+					type: FuncType.Literal,
+					value: 1,
+					valueType: ValueType.Literal,
+					params: [],
+				}, {
+					name: '',
+					type: FuncType.Literal,
+					value: 2,
+					valueType: ValueType.Literal,
+					params: [],
+				}],
 			}],
 		});
 	});

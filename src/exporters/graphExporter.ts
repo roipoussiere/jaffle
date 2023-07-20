@@ -71,8 +71,8 @@ export class GraphExporter extends AbstractExporter {
 	}
 
 	static computeBox(pbt: PartialBoxTree, parent?: PartialBoxTree): BoxTree {
-		const noSpace = pbt.funcType === FuncType.Literal
-			|| pbt.valueType === ValueType.Null;
+		const isNull = pbt.valueType === ValueType.Literal && pbt.valueText === '';
+		const noSpace = pbt.funcType === FuncType.Literal || isNull;
 
 		const contentWidth = pbt.funcText.length
 			+ pbt.valueText.length + (noSpace ? 0 : 1);
@@ -95,7 +95,7 @@ export class GraphExporter extends AbstractExporter {
 			padding = maxLength + 1; // + (pbt.funcType === FuncType.Literal ? 0 : 1);
 
 			const getDataWidth = (box: PartialBoxTree) => padding
-				+ (box.valueType === ValueType.Null ? 2 : box.valueText.length);
+				+ (isNull ? 2 : box.valueText.length);
 
 			width = Math.max(...group.map((child: PartialBoxTree) => (
 				child.funcType < FuncType.Main ? child.funcText.length : getDataWidth(child)

@@ -15,7 +15,7 @@ describe('Testing GE.getFuncText()', () => {
 		name: 'a',
 		type: FuncType.Main,
 		value: 'b',
-		valueType: ValueType.String,
+		valueType: ValueType.Literal,
 		params: [],
 	};
 
@@ -29,7 +29,7 @@ describe('Testing GE.getvalueText()', () => {
 		name: 'a',
 		type: FuncType.Main,
 		value: 'b',
-		valueType: ValueType.String,
+		valueType: ValueType.Literal,
 		params: [],
 	};
 
@@ -55,7 +55,7 @@ describe('Testing GE.upgradeTree()', () => {
 		name: 'a',
 		type: FuncType.Main,
 		value: 1,
-		valueType: ValueType.Number,
+		valueType: ValueType.Literal,
 		params: [],
 	};
 
@@ -63,7 +63,7 @@ describe('Testing GE.upgradeTree()', () => {
 		name: '.b',
 		type: FuncType.Chained,
 		value: 2,
-		valueType: ValueType.Number,
+		valueType: ValueType.Literal,
 		params: [],
 	};
 
@@ -71,7 +71,7 @@ describe('Testing GE.upgradeTree()', () => {
 		name: 'c',
 		type: FuncType.Main,
 		value: 3,
-		valueType: ValueType.Number,
+		valueType: ValueType.Literal,
 		params: [],
 	};
 
@@ -79,7 +79,7 @@ describe('Testing GE.upgradeTree()', () => {
 		name: 'e',
 		type: FuncType.Main,
 		value: 5,
-		valueType: ValueType.Number,
+		valueType: ValueType.Literal,
 		params: [],
 	};
 
@@ -87,7 +87,7 @@ describe('Testing GE.upgradeTree()', () => {
 		name: 'f',
 		type: FuncType.Main,
 		value: 6,
-		valueType: ValueType.Number,
+		valueType: ValueType.Literal,
 		params: [],
 	};
 
@@ -140,7 +140,7 @@ describe('Testing GE.computeBox()', () => {
 		funcText: 'a',
 		funcType: FuncType.Main,
 		valueText: 'a',
-		valueType: ValueType.String,
+		valueType: ValueType.Literal,
 		children: [],
 	};
 
@@ -150,7 +150,7 @@ describe('Testing GE.computeBox()', () => {
 		funcText: 'b',
 		funcType: FuncType.Main,
 		valueText: 'bbb',
-		valueType: ValueType.String,
+		valueType: ValueType.Literal,
 		children: [],
 	};
 
@@ -160,7 +160,7 @@ describe('Testing GE.computeBox()', () => {
 		funcText: '.c',
 		funcType: FuncType.Chained,
 		valueText: 'ccccc',
-		valueType: ValueType.String,
+		valueType: ValueType.Literal,
 		children: [],
 	};
 
@@ -170,7 +170,7 @@ describe('Testing GE.computeBox()', () => {
 		funcText: 'd',
 		funcType: FuncType.Main,
 		valueText: 'd',
-		valueType: ValueType.String,
+		valueType: ValueType.Literal,
 		children: [],
 	};
 
@@ -225,7 +225,7 @@ describe('Testing GE.export()', () => {
 		name: 'a',
 		type: FuncType.Main,
 		value: 1,
-		valueType: ValueType.Number,
+		valueType: ValueType.Literal,
 		params: [],
 	};
 
@@ -236,7 +236,7 @@ describe('Testing GE.export()', () => {
 			funcText: 'a',
 			funcType: FuncType.Main,
 			valueText: '1',
-			valueType: ValueType.Number,
+			valueType: ValueType.Literal,
 			contentWidth: 3,
 			padding: 2,
 			width: 3,

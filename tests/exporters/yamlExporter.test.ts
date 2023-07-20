@@ -15,18 +15,10 @@ describe('Testing YE.arrangeFunc()', () => {
 			name: 'a',
 			type: FuncType.Main,
 			value: 'b',
-			valueType: ValueType.String,
+			valueType: ValueType.Literal,
 			params: [],
 		};
 		expect(YE.arrangeFunc(funcTree)).toEqual({ a: 'b' });
-
-		funcTree.valueType = ValueType.Number;
-		funcTree.value = 42;
-		expect(YE.arrangeFunc(funcTree)).toEqual({ a: 42 });
-
-		funcTree.valueType = ValueType.Null;
-		funcTree.value = null;
-		expect(YE.arrangeFunc(funcTree)).toEqual({ a: null });
 	});
 
 	test('function with params are correctly converted', () => {
@@ -39,11 +31,10 @@ describe('Testing YE.arrangeFunc()', () => {
 				name: 'b',
 				type: FuncType.Main,
 				value: 'c',
-				valueType: ValueType.String,
+				valueType: ValueType.Literal,
 				params: [],
 			}],
 		};
-
 		expect(YE.arrangeFunc(funcTree)).toEqual({ a: [{ b: 'c' }] });
 	});
 });

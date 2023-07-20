@@ -18,7 +18,7 @@ describe('Testing AE.export()', () => {
 			name: 'a',
 			type: FuncType.Main,
 			value: null,
-			valueType: ValueType.Null,
+			valueType: ValueType.Literal,
 			params: [],
 		};
 

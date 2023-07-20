@@ -53,10 +53,6 @@ export class GraphImporter extends AbstractImporter {
 		let valueType: ValueType;
 		if (boxTree.valueText === '') {
 			valueType = ValueType.Empty;
-		} else if (boxTree.valueText === '∅') {
-			valueType = ValueType.Null;
-		} else if (!Number.isNaN(boxTree.valueText)) {
-			valueType = ValueType.Number;
 		} else if (boxTree.valueText[0] === '_') {
 			valueType = ValueType.Mininotation;
 		} else if (boxTree.valueText[0] === '=') {
@@ -64,7 +60,7 @@ export class GraphImporter extends AbstractImporter {
 		} else if (boxTree.children.length > 0) {
 			valueType = ValueType.Tree;
 		} else {
-			valueType = ValueType.String;
+			valueType = ValueType.Literal;
 		}
 		return valueType;
 	}
