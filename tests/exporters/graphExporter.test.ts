@@ -46,7 +46,7 @@ describe('Testing GE.getvalueText()', () => {
 
 	test('functions with null value returns the null sign', () => {
 		funcTree.value = null;
-		expect(GE.getvalueText(funcTree)).toBe('∅');
+		expect(GE.getvalueText(funcTree)).toBe('');
 	});
 });
 

@@ -116,14 +116,11 @@ export class GraphExporter extends AbstractExporter {
 	}
 
 	static getvalueText(func: FuncTree): string {
-		if ([ValueType.Tree, ValueType.Empty].includes(func.valueType)) {
+		if (func.value === null || [ValueType.Tree, ValueType.Empty].includes(func.valueType)) {
 			return '';
 		}
 		if (func.type === FuncType.List) {
 			return '[]';
-		}
-		if (func.value === null) {
-			return '∅';
 		}
 		return `${func.value}`;
 	}

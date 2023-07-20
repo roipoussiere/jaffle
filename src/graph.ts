@@ -183,7 +183,10 @@ class JaffleGraph {
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: FuncNode) => d.data.padding * this.charWidth)
 			.style('fill', (d: FuncNode) => BOX_VALUE_COLORS[d.data.valueType])
-			.text((d: FuncNode) => d.data.valueText);
+			.text((d: FuncNode) => (
+				(d.data.valueType === ValueType.Literal && d.data.valueText) === ''
+					? '∅' : d.data.valueText
+			));
 
 		box.append('rect')
 			.attr('width', (n: FuncNode) => n.data.padding * this.charWidth)
