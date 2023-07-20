@@ -122,8 +122,9 @@ class JaffleGraph {
 			)))
 			.join('path')
 			.attr('d', (link: d3.HierarchyLink<BoxTree>) => d3.linkHorizontal()
-				.x((n: FuncNode) =>
-					(n.y === link.source.y ? n.y + n.data.width * this.charWidth : n.y))
+				.x((n: FuncNode) => (
+					n.y === link.source.y ? n.y + n.data.width * this.charWidth : n.y
+				))
 				.y((n: FuncNode) => n.x)(link));
 	}
 

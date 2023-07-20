@@ -1,8 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { GraphExporterError, GraphExporter as GE, PartialBoxTree, BoxTree }
-	from '../../src/exporters/graphExporter';
 import { FuncTree, FuncType, ValueType } from '../../src/funcTree';
+import { GraphExporterError, PartialBoxTree, BoxTree, GraphExporter as GE }
+	from '../../src/exporters/graphExporter';
 
 describe('Testing YamlImporterError', () => {
 	test('YamlImporterError should raise', () => {

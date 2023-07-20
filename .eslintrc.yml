@@ -16,6 +16,10 @@ rules:
   max-len: [ warn, 100 ]
   no-shadow: off
   '@typescript-eslint/no-shadow': error
+  object-curly-newline:
+  - error
+  - ImportDeclaration: never
+    ExportDeclaration: always
 
 settings:
   import/resolver:

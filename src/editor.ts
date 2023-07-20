@@ -1,6 +1,5 @@
-import {
-	EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine,
-} from '@codemirror/view';
+import { EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine }
+	from '@codemirror/view';
 import { solarizedDark } from '@uiw/codemirror-theme-solarized';
 import { yaml as yamlMode } from '@codemirror/legacy-modes/mode/yaml';
 import { StreamLanguage, LanguageSupport, bracketMatching } from '@codemirror/language';
