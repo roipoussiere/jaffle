@@ -26,19 +26,19 @@ export class JsExporter extends AbstractExporter {
 		const params = func.children.map((param) => JsExporter.funcToJs(param));
 		let js: string;
 
-		if (func.type === VertexType.Func) {
+		if (func.type === VertexType.MainFunc) {
 			js = `${func.value}(${params.join(', ')})`;
 		} else if (func.type === VertexType.ChainedFunc) {
 			js = `.${func.value}(${params.join(', ')})`;
 		} else if (func.type === VertexType.ConstantDef) {
 			js = `const ${VAR_NAME_PREFIX}${func.value} = ${params[0]};`;
-		} else if (func.type === VertexType.List) {
-			js = `[${params.join(', ')}]`;
+		// } else if (func.type === VertexType.List) {
+		// 	js = `[${params.join(', ')}]`;
 		} else if (func.type === VertexType.Literal) {
 			js = typeof func.value === 'string' ? `'${func.value}'` : `${func.value}`;
-		} else if (func.type === VertexType.ExpressionFunc) {
+		} else if (func.type === VertexType.Expression) {
 			js = `${VAR_NAME_PREFIX}${func.value}`;
-		} else if (func.type === VertexType.MininotationFunc) {
+		} else if (func.type === VertexType.Mininotation) {
 			js = `mini(${func.value})`;
 		} else {
 			js = JsExporter.serialize(func.value);

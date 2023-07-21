@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this, @typescript-eslint/no-unused-vars */
 
-import { FuncTree } from '../funcTree';
+import { Vertex } from '../funcTree';
 import { AbstractClassError } from '../errors';
 
 class AbstractImporter {
@@ -10,7 +10,7 @@ class AbstractImporter {
 		}
 	}
 
-	static import(thing: unknown): FuncTree {
+	static import(thing: unknown): Vertex {
 		throw new AbstractClassError('Method AI.import() must be implemented.');
 	}
 }

@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { dump as dumpYaml } from 'js-yaml';
 
-import { FuncTree, ValueType } from '../funcTree';
+import { Vertex } from '../funcTree';
 import { ExporterError } from '../errors';
 
 import AbstractExporter from './abstractExporter';
@@ -18,15 +18,15 @@ export class YamlExporterError extends ExporterError {
 }
 
 export class YamlExporter extends AbstractExporter {
-	static export(composition: FuncTree): string {
+	static export(composition: Vertex): string {
 		const yamlTree = YamlExporter.arrangeFunc(composition);
 		return dumpYaml(yamlTree);
 	}
 
-	static arrangeFunc(funcTree: FuncTree): Dict<unknown> {
-		const value = funcTree.valueType === ValueType.Tree
-			? funcTree.params.map((param) => YamlExporter.arrangeFunc(param)) : funcTree.value;
-		return { [funcTree.name]: value };
+	static arrangeFunc(funcTree: Vertex): Dict<unknown> {
+		const value = funcTree.children.length > 1
+			? funcTree.children.map((param) => YamlExporter.arrangeFunc(param)) : funcTree.value;
+		return { [`${funcTree.value}`]: value };
 	}
 }
 

@@ -1,37 +1,45 @@
 /* eslint-disable max-classes-per-file */
 import { ExporterError } from '../errors';
-import { FuncTree, FuncType, ValueType } from '../funcTree';
+import { Vertex, VertexType } from '../funcTree';
 
 import AbstractExporter from './abstractExporter';
 
-export type PartialBoxTree = {
-	id: string,
-	groupId: number,
-
-	funcText: string,
-	funcType: FuncType,
-	valueText: string,
-	valueType: ValueType,
-	isNumber: boolean,
-
-	children: Array<PartialBoxTree>,
+export type DraftBox = {
+	funcName: string,
+	funcType: VertexType,
+	value: unknown,
+	valueType: VertexType,
+	children: Array<DraftBox>,
 };
 
-export type BoxTree = {
+export type PartialBox = {
 	id: string,
 	groupId: number,
 
-	funcText: string,
-	funcType: FuncType,
+	funcName: string,
+	funcType: VertexType,
 	valueText: string,
-	valueType: ValueType,
+	valueType: VertexType,
+	isNumber: boolean,
+
+	children: Array<PartialBox>,
+};
+
+export type Box = {
+	id: string,
+	groupId: number,
+
+	funcName: string,
+	funcType: VertexType,
+	valueText: string,
+	valueType: VertexType,
 	isNumber: boolean,
 
 	contentWidth: number,
 	padding: number,
 	width: number,
 
-	children: Array<BoxTree>,
+	children: Array<Box>,
 };
 
 export class GraphExporterError extends ExporterError {
@@ -42,16 +50,51 @@ export class GraphExporterError extends ExporterError {
 }
 
 export class GraphExporter extends AbstractExporter {
-	static export(composition: FuncTree): BoxTree {
-		const partialBoxTree = GraphExporter.upgradeTree(composition);
+	static export(composition: Vertex): Box {
+		const arrangedTree = GraphExporter.arrangeTree(composition);
+		const partialBoxTree = GraphExporter.upgradeTree(arrangedTree);
 		return GraphExporter.computeBox(partialBoxTree);
 	}
 
-	static upgradeTree(func: FuncTree, funcId: Array<number> = [], groupId = 0): PartialBoxTree {
+	static arrangeTree(vertex: Vertex): DraftBox {
+		if (vertex.type === VertexType.Literal) {
+			return {
+				funcName: '',
+				funcType: VertexType.Literal,
+				value: vertex.value,
+				valueType: VertexType.Literal,
+				children: [],
+			};
+		}
+
+		if (typeof vertex.value !== 'string') {
+			throw new GraphExporterError(`Vertex value "${vertex.value}" must be a string`);
+		}
+
+		if (vertex.children.length === 1 && vertex.children[0].children.length === 0) {
+			return {
+				funcName: vertex.value,
+				funcType: vertex.type,
+				value: vertex.children[0].value,
+				valueType: vertex.children[0].type,
+				children: [],
+			};
+		}
+
+		return {
+			funcName: vertex.value,
+			funcType: vertex.type,
+			value: vertex.children[0].value,
+			valueType: vertex.children[0].type,
+			children: vertex.children.map((child) => GraphExporter.arrangeTree(child)),
+		};
+	}
+
+	static upgradeTree(func: DraftBox, funcId: Array<number> = [], groupId = 0): PartialBox {
 		let paramsGroupId = -1;
 
-		const children = func.params.map((param, i) => {
-			if (param.type !== FuncType.Chained) {
+		const children = func.children.length <= 1 ? [] : func.children.map((param, i) => {
+			if (param.funcType !== VertexType.ChainedFunc) {
 				paramsGroupId += 1;
 			}
 			return GraphExporter.upgradeTree(
@@ -64,8 +107,8 @@ export class GraphExporter extends AbstractExporter {
 		return {
 			id: funcId.join('-'),
 			groupId,
-			funcText: GraphExporter.getFuncText(func),
-			funcType: func.type,
+			funcName: GraphExporter.getFuncText(func),
+			funcType: func.funcType,
 			valueText: GraphExporter.getvalueText(func),
 			valueType: func.valueType,
 			isNumber: typeof func.value === 'number',
@@ -73,35 +116,35 @@ export class GraphExporter extends AbstractExporter {
 		};
 	}
 
-	static computeBox(pbt: PartialBoxTree, parent?: PartialBoxTree): BoxTree {
-		const isNull = pbt.valueType === ValueType.Literal && pbt.valueText === '';
-		const noSpace = pbt.funcType === FuncType.Literal || isNull;
+	static computeBox(pbt: PartialBox, parent?: PartialBox): Box {
+		const isNull = pbt.valueType === VertexType.Literal && pbt.valueText === '';
+		const noSpace = pbt.funcType === VertexType.Literal || isNull;
 
-		const contentWidth = pbt.funcText.length
+		const contentWidth = pbt.funcName.length
 			+ pbt.valueText.length + (noSpace ? 0 : 1);
 
 		const group = parent?.children.filter(
-			(child: PartialBoxTree) => child.groupId === pbt.groupId,
+			(child: PartialBox) => child.groupId === pbt.groupId,
 		);
 
 		let padding: number;
 		let width: number;
 
 		if (group === undefined) {
-			padding = pbt.funcText.length + 1;
+			padding = pbt.funcName.length + 1;
 			width = contentWidth;
 		} else {
 			const maxLength = Math.max(...group
-				.filter((child: PartialBoxTree) => child.funcType !== FuncType.MainMininotation)
-				.map((child: PartialBoxTree) => child.funcText.length));
+				.filter((child: PartialBox) => child.funcType !== VertexType.Mininotation)
+				.map((child: PartialBox) => child.funcName.length));
 
 			padding = maxLength + 1; // + (pbt.funcType === FuncType.Literal ? 0 : 1);
 
-			const getDataWidth = (box: PartialBoxTree) => padding
+			const getDataWidth = (box: PartialBox) => padding
 				+ (isNull ? 2 : box.valueText.length);
 
-			width = Math.max(...group.map((child: PartialBoxTree) => (
-				child.funcType < FuncType.Main ? child.funcText.length : getDataWidth(child)
+			width = Math.max(...group.map((child: PartialBox) => (
+				child.funcType < VertexType.MainFunc ? child.funcName.length : getDataWidth(child)
 			)));
 		}
 
@@ -114,18 +157,12 @@ export class GraphExporter extends AbstractExporter {
 		};
 	}
 
-	static getFuncText(func: FuncTree): string {
-		return func.name;
+	static getFuncText(func: DraftBox): string {
+		return func.funcName;
 	}
 
-	static getvalueText(func: FuncTree): string {
-		if (func.value === null || [ValueType.Tree, ValueType.Empty].includes(func.valueType)) {
-			return '';
-		}
-		if (func.type === FuncType.List) {
-			return '[]';
-		}
-		return `${func.value}`;
+	static getvalueText(func: DraftBox): string {
+		return func.value === null ? '' : `${func.value}`;
 	}
 }
 
