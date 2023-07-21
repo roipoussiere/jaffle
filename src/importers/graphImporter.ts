@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { Vertex, VertexType } from '../funcTree';
+import { Vertex, VertexType } from '../dataTypes/vertex';
 import { ImporterError } from '../errors';
 import { Box } from '../exporters/graphExporter';
 

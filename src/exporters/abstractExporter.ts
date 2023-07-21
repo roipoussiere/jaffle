@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this, @typescript-eslint/no-unused-vars */
 
-import { Vertex } from '../funcTree';
+import { Vertex } from '../dataTypes/vertex';
 import { AbstractClassError } from '../errors';
 
 class AbstractExporter {

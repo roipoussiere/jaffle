@@ -2,7 +2,7 @@
 import { load as loadYaml } from 'js-yaml';
 
 // eslint-disable-next-line object-curly-newline
-import { Children, Vertex, VertexType } from '../funcTree';
+import { Children, Vertex, VertexType } from '../dataTypes/vertex';
 import { ImporterError } from '../errors';
 import * as c from '../constants';
 

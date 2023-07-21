@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { Vertex, VertexType } from '../funcTree';
+import { Vertex, VertexType } from '../dataType/vertex';
 import { ExporterError } from '../errors';
 // import * as c from '../constants';
 

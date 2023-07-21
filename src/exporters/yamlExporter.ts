@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { dump as dumpYaml } from 'js-yaml';
 
-import { Vertex } from '../funcTree';
+import { Vertex } from '../dataTypes/vertex';
 import { ExporterError } from '../errors';
 
 import AbstractExporter from './abstractExporter';

@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
-import { FuncTree, FuncType, ValueType } from './funcTree';
+import { Vertex, VertexType } from './dataTypes/vertex';
 import { GraphExporter, BoxTree } from './exporters/graphExporter';
 import { GraphImporter } from './importers/graphImporter';
 
