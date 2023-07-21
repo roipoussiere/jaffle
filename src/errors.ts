@@ -14,13 +14,6 @@ export class NotImplementedError extends JaffleError {
 	}
 }
 
-export class AbstractClassError extends JaffleError {
-	constructor(message: string) {
-		super(message);
-		this.name = AbstractClassError.name;
-	}
-}
-
 // todo: remove from here
 
 export class BadYamlJaffleError extends JaffleError {

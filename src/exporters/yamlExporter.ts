@@ -4,19 +4,19 @@ import { dump as dumpYaml } from 'js-yaml';
 import { Vertex } from '../dataTypes/vertex';
 import { Dict } from '../dataTypes/box';
 
-import AbstractExporter from './abstractExporter';
+import Exporter from './exporterInterface';
 
-class YamlExporter extends AbstractExporter {
-	static export(composition: Vertex): string {
-		const yamlTree = YamlExporter.arrangeFunc(composition);
-		return dumpYaml(yamlTree);
-	}
-
-	static arrangeFunc(funcTree: Vertex): Dict<unknown> {
-		const value = funcTree.children.length > 1
-			? funcTree.children.map((param) => YamlExporter.arrangeFunc(param)) : funcTree.value;
-		return { [`${funcTree.value}`]: value };
-	}
+function arrangeFunc(funcTree: Vertex): Dict<unknown> {
+	const value = funcTree.children.length > 1
+		? funcTree.children.map((param) => arrangeFunc(param)) : funcTree.value;
+	return { [`${funcTree.value}`]: value };
 }
+
+const YamlExporter: Exporter = {
+	export(composition: Vertex): string {
+		const yamlTree = arrangeFunc(composition);
+		return dumpYaml(yamlTree);
+	},
+};
 
 export default YamlExporter;
