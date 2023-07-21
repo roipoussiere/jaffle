@@ -10,11 +10,8 @@ export enum VertexType {
 	Literal, // ie. "null", "42", "'abc'"
 }
 
-// eslint-disable-next-line no-use-before-define
-export type Children = Array<Vertex>;
-
 export type Vertex = {
 	type: VertexType,
 	value: unknown,
-	children: Children,
+	children: Array<Vertex>,
 };
