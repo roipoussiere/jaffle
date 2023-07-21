@@ -1,25 +1,16 @@
-/* eslint-disable max-classes-per-file */
 import { load as loadYaml } from 'js-yaml';
 
-// eslint-disable-next-line object-curly-newline
-import { Children, Vertex, VertexType } from '../dataTypes/vertex';
-import { ImporterError } from '../errors';
+import { Vertex, VertexType } from '../dataTypes/vertex';
 import * as c from '../constants';
 
 import AbstractImporter from './abstractImporter';
+import { YamlImporterError } from './importerErrors';
 
 interface Dict<T> {
 	[key: string]: T;
 }
 
-export class YamlImporterError extends ImporterError {
-	constructor(message: string) {
-		super(message);
-		this.name = YamlImporterError.name;
-	}
-}
-
-export class YamlImporter extends AbstractImporter {
+class YamlImporter extends AbstractImporter {
 	public static import(yaml: string): Vertex {
 		let data: unknown;
 
@@ -43,8 +34,8 @@ export class YamlImporter extends AbstractImporter {
 		};
 	}
 
-	static computeParams(rawParams: Array<unknown>): Children {
-		const params: Children = [];
+	static computeParams(rawParams: Array<unknown>): Array<Vertex> {
+		const params: Array<Vertex> = [];
 
 		rawParams.forEach((rawParam: unknown) => {
 			if (rawParam instanceof Array) {

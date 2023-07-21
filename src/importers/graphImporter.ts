@@ -1,18 +1,9 @@
-/* eslint-disable max-classes-per-file */
 import { Vertex, VertexType } from '../dataTypes/vertex';
-import { ImporterError } from '../errors';
 import { Box } from '../exporters/graphExporter';
 
 import AbstractImporter from './abstractImporter';
 
-export class GraphImporterError extends ImporterError {
-	constructor(message: string) {
-		super(message);
-		this.name = GraphImporterError.name;
-	}
-}
-
-export class GraphImporter extends AbstractImporter {
+class GraphImporter extends AbstractImporter {
 	static import(graph: Box): Vertex {
 		return GraphImporter.getFunc(graph);
 	}
@@ -64,3 +55,5 @@ export class GraphImporter extends AbstractImporter {
 		return valueType;
 	}
 }
+
+export default GraphImporter;

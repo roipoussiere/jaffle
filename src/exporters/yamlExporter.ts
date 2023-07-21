@@ -2,7 +2,6 @@
 import { dump as dumpYaml } from 'js-yaml';
 
 import { Vertex } from '../dataTypes/vertex';
-import { ExporterError } from '../errors';
 
 import AbstractExporter from './abstractExporter';
 
@@ -10,14 +9,7 @@ interface Dict<T> {
 	[key: string]: T;
 }
 
-export class YamlExporterError extends ExporterError {
-	constructor(message: string) {
-		super(message);
-		this.name = YamlExporterError.name;
-	}
-}
-
-export class YamlExporter extends AbstractExporter {
+class YamlExporter extends AbstractExporter {
 	static export(composition: Vertex): string {
 		const yamlTree = YamlExporter.arrangeFunc(composition);
 		return dumpYaml(yamlTree);

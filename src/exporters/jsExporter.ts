@@ -1,6 +1,4 @@
-// eslint-disable-next-line max-classes-per-file
-import { Vertex, VertexType } from '../dataType/vertex';
-import { ExporterError } from '../errors';
+import { Vertex, VertexType } from '../dataTypes/vertex';
 // import * as c from '../constants';
 
 import AbstractExporter from './abstractExporter';
@@ -9,14 +7,7 @@ const VAR_NAME_PREFIX = '_';
 // const LAMBDA_NAME = 'set';
 // const LAMBDA_VAR = '_x_';
 
-export class JsExporterError extends ExporterError {
-	constructor(message: string) {
-		super(message);
-		this.name = JsExporterError.name;
-	}
-}
-
-export class JsExporter extends AbstractExporter {
+class JsExporter extends AbstractExporter {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
 	public export(composition: Vertex): string {
 		return JsExporter.funcToJs(composition);

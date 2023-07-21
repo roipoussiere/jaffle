@@ -1,8 +1,7 @@
-/* eslint-disable max-classes-per-file */
-import { ExporterError } from '../errors';
-import { Vertex, VertexType } from '../funcTree';
+import { Vertex, VertexType } from '../dataTypes/vertex';
 
 import AbstractExporter from './abstractExporter';
+import { GraphExporterError } from './exporterErrors';
 
 export type DraftBox = {
 	funcName: string,
@@ -42,14 +41,7 @@ export type Box = {
 	children: Array<Box>,
 };
 
-export class GraphExporterError extends ExporterError {
-	constructor(message: string) {
-		super(message);
-		this.name = GraphExporterError.name;
-	}
-}
-
-export class GraphExporter extends AbstractExporter {
+class GraphExporter extends AbstractExporter {
 	static export(composition: Vertex): Box {
 		const arrangedTree = GraphExporter.arrangeTree(composition);
 		const partialBoxTree = GraphExporter.upgradeTree(arrangedTree);

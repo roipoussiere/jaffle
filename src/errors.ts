@@ -21,20 +21,6 @@ export class AbstractClassError extends JaffleError {
 	}
 }
 
-export class ImporterError extends JaffleError {
-	constructor(message: string) {
-		super(message);
-		this.name = ImporterError.name;
-	}
-}
-
-export class ExporterError extends JaffleError {
-	constructor(message: string) {
-		super(message);
-		this.name = ExporterError.name;
-	}
-}
-
 // todo: remove from here
 
 export class BadYamlJaffleError extends JaffleError {
