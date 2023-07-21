@@ -1,14 +1,20 @@
 import { load as loadYaml } from 'js-yaml';
 
-import { Vertex, VertexType } from '../dataTypes/vertex';
+import { Vertex } from '../dataTypes/vertex';
 import * as c from '../constants';
-import { Dict } from '../dataTypes/box';
+import { Box, BoxType, BoxValueType, Dict } from '../dataTypes/box';
 
 import AbstractImporter from './abstractImporter';
 import { YamlImporterError } from './importerErrors';
+import BoxTreeImporter from './boxTreeImporter';
 
 class YamlImporter extends AbstractImporter {
-	public static import(yaml: string): Vertex {
+	static import(yaml: string): Vertex {
+		const box = YamlImporter.YamlToBox(yaml);
+		return BoxTreeImporter.import(box);
+	}
+
+	static YamlToBox(yaml: string): Box {
 		let data: unknown;
 
 		try {
@@ -23,16 +29,16 @@ class YamlImporter extends AbstractImporter {
 		const rawComposition = <Array<unknown>> data;
 
 		return {
-			// name: '',
-			type: VertexType.MainFunc,
+			name: '',
+			type: BoxType.MainFunc,
 			value: null,
-			// valueType: VertexType.Tree,
+			valueType: BoxValueType.Empty,
 			children: YamlImporter.computeParams(rawComposition),
 		};
 	}
 
-	static computeParams(rawParams: Array<unknown>): Array<Vertex> {
-		const params: Array<Vertex> = [];
+	static computeParams(rawParams: Array<unknown>): Array<Box> {
+		const params: Array<Box> = [];
 
 		rawParams.forEach((rawParam: unknown) => {
 			if (rawParam instanceof Array) {
@@ -47,68 +53,68 @@ class YamlImporter extends AbstractImporter {
 		return params;
 	}
 
-	static computeList(rawList: Array<unknown>): Vertex {
+	static computeList(rawList: Array<unknown>): Box {
 		if (rawList.length === 0) {
 			throw new YamlImporterError('list is empty');
 		}
 
 		return {
-			// name: '',
-			type: VertexType.MainFunc,
+			name: '',
+			type: BoxType.MainFunc,
 			value: null,
-			// valueType: VertexType.Tree,
+			valueType: BoxValueType.Empty,
 			children: YamlImporter.computeParams(rawList),
 		};
 	}
 
-	static computeFunc(rawFunc: Dict<unknown>): Vertex {
+	static computeFunc(rawFunc: Dict<unknown>): Box {
 		const funcName = YamlImporter.getFuncName(rawFunc);
 		const funcType = YamlImporter.getFuncType(funcName);
 		const rawValue = rawFunc[funcName];
 
-		if (funcType === VertexType.SerializedData) {
+		if (funcType === BoxType.SerializedData) {
 			return YamlImporter.serialize(rawFunc);
 		}
 
 		return {
-			// name: funcName,
+			name: funcName,
 			type: funcType,
 			value: rawValue instanceof Array ? null : rawValue,
-			// valueType: YamlImporter.getValueType(rawValue),
+			valueType: YamlImporter.getValueType(rawValue),
 			children: rawValue instanceof Array ? YamlImporter.computeParams(rawValue) : [],
 		};
 	}
 
-	static computeLiteral(rawLiteral: unknown): Vertex {
+	static computeLiteral(rawLiteral: unknown): Box {
 		if (typeof rawLiteral === 'string') {
 			const stringFuncType = YamlImporter.getFuncType(rawLiteral);
-			if ([VertexType.Mininotation, VertexType.Expression].includes(stringFuncType)) {
+			if ([BoxType.Mininotation, BoxType.Expression].includes(stringFuncType)) {
 				return {
-					// name: rawLiteral,
+					name: rawLiteral,
 					type: stringFuncType,
 					value: null,
-					// valueType: VertexType.Empty,
+					valueType: BoxValueType.Empty,
 					children: [],
 				};
 			}
 		}
 
 		return {
-			// name: '',
-			type: VertexType.Literal,
+			name: '',
+			type: BoxType.Literal,
 			value: rawLiteral,
-			// valueType: YamlImporter.getValueType(rawLiteral),
+			valueType: YamlImporter.getValueType(rawLiteral),
 			children: [],
 		};
 	}
 
-	static serialize(rawValue: unknown): Vertex {
+	static serialize(rawValue: unknown): Box {
 		if (rawValue instanceof Array) {
 			return {
-				// name: '',
-				type: VertexType.SerializedData,
+				name: '',
+				type: BoxType.SerializedData,
 				value: null,
-				// valueType: VertexType.Tree,
+				valueType: BoxValueType.Empty,
 				children: rawValue.map((rawChild) => YamlImporter.serialize(rawChild)),
 			};
 		}
@@ -118,31 +124,31 @@ class YamlImporter extends AbstractImporter {
 				return YamlImporter.serializeEntry(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
 			}
 			return {
-				// name: '',
-				type: VertexType.SerializedData,
+				name: '',
+				type: BoxType.SerializedData,
 				value: null,
-				// valueType: VertexType.Tree,
+				valueType: BoxValueType.Empty,
 				children: keys.map((key) => YamlImporter.serialize({
 					[key]: (<Dict<unknown>>rawValue)[key],
 				})),
 			};
 		}
 		return {
-			// name: '',
-			type: VertexType.SerializedData,
+			name: '',
+			type: BoxType.SerializedData,
 			value: rawValue,
-			// valueType: VertexType.Literal,
+			valueType: BoxValueType.String,
 			children: [],
 		};
 	}
 
-	static serializeEntry(key: string, rawValue: unknown): Vertex {
+	static serializeEntry(key: string, rawValue: unknown): Box {
 		if (rawValue instanceof Object) {
 			return {
-				// name: key,
-				type: VertexType.SerializedData,
+				name: key,
+				type: BoxType.SerializedData,
 				value: null,
-				// valueType: VertexType.Tree,
+				valueType: BoxValueType.Empty,
 				children: Object.keys(rawValue).map((chKey) => YamlImporter.serialize(
 					rawValue instanceof Array ? rawValue[Number(chKey)] : {
 						[chKey]: (<Dict<unknown>>rawValue)[chKey],
@@ -151,10 +157,10 @@ class YamlImporter extends AbstractImporter {
 			};
 		}
 		return {
-			// name: key,
-			type: VertexType.SerializedData,
+			name: key,
+			type: BoxType.SerializedData,
 			value: rawValue,
-			// valueType: VertexType.Literal,
+			valueType: BoxValueType.String,
 			children: [],
 		};
 	}
@@ -170,36 +176,36 @@ class YamlImporter extends AbstractImporter {
 		return keys[0];
 	}
 
-	static getFuncType(funcName: string): VertexType {
+	static getFuncType(funcName: string): BoxType {
 		const prefix = funcName[0];
-		const funcTypes: Dict<VertexType> = {
-			[c.CHAINED_FUNC_PREFIX]: VertexType.ChainedFunc,
-			[c.MINI_STR_PREFIX]: VertexType.Mininotation,
-			[c.EXPR_STR_PREFIX]: VertexType.Expression,
-			[c.CONST_FUNC_PREFIX]: VertexType.ConstantDef,
+		const funcTypes: Dict<BoxType> = {
+			[c.CHAINED_FUNC_PREFIX]: BoxType.ChainedFunc,
+			[c.MINI_STR_PREFIX]: BoxType.Mininotation,
+			[c.EXPR_STR_PREFIX]: BoxType.Expression,
+			[c.CONST_FUNC_PREFIX]: BoxType.ConstantDef,
 		};
 		if (prefix in funcTypes) {
 			return funcTypes[prefix];
 		}
 		if (funcName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-			return VertexType.SerializedData;
+			return BoxType.SerializedData;
 		}
-		return VertexType.MainFunc;
+		return BoxType.MainFunc;
 	}
 
-	static getValueType(rawValue: unknown): VertexType {
+	static getValueType(rawValue: unknown): BoxValueType {
 		if (typeof rawValue === 'string') {
 			if (rawValue[0] === c.MINI_STR_PREFIX) {
-				return VertexType.Mininotation;
+				return BoxValueType.Mininotation;
 			}
 			if (rawValue[0] === c.EXPR_STR_PREFIX) {
-				return VertexType.Expression;
+				return BoxValueType.Expression;
 			}
 		}
 		// if (rawValue instanceof Object) {
 		// 	return VertexType.Tree;
 		// }
-		return VertexType.Literal;
+		return BoxValueType.String;
 	}
 }
 

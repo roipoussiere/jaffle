@@ -1,10 +1,28 @@
-import { VertexType } from './vertex';
+export enum BoxType {
+	MainFunc,
+	Mininotation,
+	Expression,
+	ChainedFunc,
+	Object,
+	ConstantDef,
+	SerializedData,
+	Literal,
+}
+export enum BoxValueType {
+	Null,
+	Boolean,
+	Number,
+	String,
+	Mininotation,
+	Expression,
+	Empty,
+}
 
 export type Box = {
-	boxName: string,
-	boxType: VertexType,
+	name: string,
+	type: BoxType,
 	value: unknown,
-	valueType: VertexType,
+	valueType: BoxValueType,
 	children: Array<Box>,
 };
 
