@@ -2,12 +2,9 @@
 import { dump as dumpYaml } from 'js-yaml';
 
 import { Vertex } from '../dataTypes/vertex';
+import { Dict } from '../dataTypes/box';
 
 import AbstractExporter from './abstractExporter';
-
-interface Dict<T> {
-	[key: string]: T;
-}
 
 class YamlExporter extends AbstractExporter {
 	static export(composition: Vertex): string {

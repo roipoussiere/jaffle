@@ -7,3 +7,7 @@ export type Box = {
 	valueType: VertexType,
 	children: Array<Box>,
 };
+
+export interface Dict<T> {
+	[key: string]: T;
+}

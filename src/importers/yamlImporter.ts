@@ -2,13 +2,10 @@ import { load as loadYaml } from 'js-yaml';
 
 import { Vertex, VertexType } from '../dataTypes/vertex';
 import * as c from '../constants';
+import { Dict } from '../dataTypes/box';
 
 import AbstractImporter from './abstractImporter';
 import { YamlImporterError } from './importerErrors';
-
-interface Dict<T> {
-	[key: string]: T;
-}
 
 class YamlImporter extends AbstractImporter {
 	public static import(yaml: string): Vertex {
