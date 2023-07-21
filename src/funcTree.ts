@@ -1,12 +1,13 @@
 export enum VertexType {
-	Func,
-	ExpressionFunc,
-	MininotationFunc,
-	ChainedFunc,
-	ConstantDef,
-	SerializedData,
-	List,
-	Literal,
+	MainFunc, // ie. "stack(...)"
+	Mininotation, // '"c@3 eb"'
+	Expression, // ie. "myVar"
+	ChainedFunc, // ie. ".range()"
+	Object, // ie. "sine"
+	ConstantDef, // ie. "const myVar = ..."
+	SerializedData, // ie. '{"a": 42}'
+	// List, // ie. "[1, 2]"
+	Literal, // ie. "null", "42", "'abc'"
 }
 
 // eslint-disable-next-line no-use-before-define
