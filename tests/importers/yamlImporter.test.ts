@@ -18,19 +18,19 @@ describe('Testing YI.getBoxName()', () => {
 });
 
 describe('Testing YI.getBoxType()', () => {
+	test('common func names return main func type', () => {
+		expect(YI.getBoxType('abc')).toBe(BoxType.MainFunc);
+		expect(YI.getBoxType('_abc')).toBe(BoxType.MainFunc);
+		expect(YI.getBoxType('=abc')).toBe(BoxType.MainFunc);
+	});
+
 	test('prefixed func names return related func types', () => {
 		expect(YI.getBoxType('.abc')).toBe(BoxType.ChainedFunc);
-		expect(YI.getBoxType('_abc')).toBe(BoxType.Mininotation);
-		expect(YI.getBoxType('=abc')).toBe(BoxType.Expression);
 		expect(YI.getBoxType('$abc')).toBe(BoxType.ConstantDef);
 	});
 
 	test('func names with serialize suffix return serialized func type', () => {
 		expect(YI.getBoxType('abc^')).toBe(BoxType.SerializedData);
-	});
-
-	test('common func names return main func type', () => {
-		expect(YI.getBoxType('abc')).toBe(BoxType.MainFunc);
 	});
 });
 
@@ -186,7 +186,7 @@ describe('Testing YI.buildLiteralBox()', () => {
 	test('can build box from literal', () => {
 		const expected: Box = {
 			name: '',
-			type: BoxType.Literal,
+			type: BoxType.Value,
 			value: 'a',
 			valueType: BoxValueType.String,
 			children: [],
@@ -208,19 +208,19 @@ describe('Testing YI.buildListBox()', () => {
 			valueType: BoxValueType.Empty,
 			children: [{
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: true,
 				valueType: BoxValueType.Boolean,
 				children: [],
 			}, {
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: 1,
 				valueType: BoxValueType.Number,
 				children: [],
 			}, {
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: 'a',
 				valueType: BoxValueType.String,
 				children: [],
@@ -267,14 +267,14 @@ describe('Testing YI.buildFuncBox()', () => {
 			children: [
 				{
 					name: '',
-					type: BoxType.Literal,
+					type: BoxType.Value,
 					value: 1,
 					valueType: BoxValueType.Number,
 					children: [],
 				},
 				{
 					name: '',
-					type: BoxType.Literal,
+					type: BoxType.Value,
 					value: 2,
 					valueType: BoxValueType.Number,
 					children: [],
@@ -312,19 +312,19 @@ describe('Testing YI.buildBoxChildren()', () => {
 		const expected: Array<Box> = [
 			{
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: true,
 				valueType: BoxValueType.Boolean,
 				children: [],
 			}, {
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: 1,
 				valueType: BoxValueType.Number,
 				children: [],
 			}, {
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: 'a',
 				valueType: BoxValueType.String,
 				children: [],
@@ -357,43 +357,44 @@ describe('Testing YI.buildBoxChildren()', () => {
 	});
 
 	test('can build boxes from lists', () => {
-		expect(YI.buildBoxChildren([[null, true], [42, 'a']])).toEqual([{
+		const expected: Array<Box> = [{
 			name: '',
 			type: BoxType.List,
 			value: null,
 			valueType: BoxValueType.Empty,
-			params: [{
+			children: [{
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: null,
 				valueType: BoxValueType.Null,
-				params: [],
+				children: [],
 			}, {
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: true,
 				valueType: BoxValueType.Boolean,
-				params: [],
+				children: [],
 			}],
 		}, {
 			name: '',
 			type: BoxType.List,
 			value: null,
 			valueType: BoxValueType.Empty,
-			params: [{
+			children: [{
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: 42,
 				valueType: BoxValueType.Number,
-				params: [],
+				children: [],
 			}, {
 				name: '',
-				type: BoxType.Literal,
+				type: BoxType.Value,
 				value: 'a',
 				valueType: BoxValueType.String,
-				params: [],
+				children: [],
 			}],
-		}]);
+		}];
+		expect(YI.buildBoxChildren([[null, true], [42, 'a']])).toEqual(expected);
 	});
 });
 
@@ -411,52 +412,54 @@ describe('Testing YI.buildBoxFromYaml()', () => {
 	});
 
 	test('empty yaml array is well computed', () => {
-		expect(YI.buildBoxFromYaml('[]')).toEqual({
+		const expected: Box = {
 			name: '',
 			type: BoxType.MainFunc,
 			value: null,
 			valueType: BoxValueType.Empty,
-			params: [],
-		});
+			children: [],
+		};
+		expect(YI.buildBoxFromYaml('[]')).toEqual(expected);
 	});
 
 	test('non-empty valid yaml is well computed', () => {
-		expect(YI.buildBoxFromYaml('[{a: }, {.b: true}, {c: [42, d]}]')).toEqual({
+		const expected: Box = {
 			name: '',
 			type: BoxType.MainFunc,
 			value: null,
 			valueType: BoxValueType.Empty,
-			params: [{
+			children: [{
 				name: 'a',
 				type: BoxType.MainFunc,
 				value: null,
 				valueType: BoxValueType.Null,
-				params: [],
+				children: [],
 			}, {
 				name: '.b',
 				type: BoxType.ChainedFunc,
 				value: true,
 				valueType: BoxValueType.Boolean,
-				params: [],
+				children: [],
 			}, {
 				name: 'c',
 				type: BoxType.MainFunc,
 				value: null,
 				valueType: BoxValueType.Empty,
-				params: [{
+				children: [{
 					name: '',
-					type: BoxType.Literal,
+					type: BoxType.Value,
 					value: 42,
 					valueType: BoxValueType.Number,
-					params: [],
+					children: [],
 				}, {
 					name: '',
-					type: BoxType.Literal,
+					type: BoxType.Value,
 					value: 'd',
 					valueType: BoxValueType.String,
-					params: [],
+					children: [],
 				}],
 			}],
-		});
+		};
+		expect(YI.buildBoxFromYaml('[{a: }, {.b: true}, {c: [42, d]}]')).toEqual(expected);
 	});
 });

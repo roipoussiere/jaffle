@@ -1,12 +1,9 @@
 import { load as loadYaml } from 'js-yaml';
 
-import { Vertex } from '../dataTypes/vertex';
 import * as c from '../constants';
 import { Box, BoxType, BoxValueType, Dict } from '../dataTypes/box';
 
-import Importer from './importerInterface';
 import { YamlImporterError } from './importerErrors';
-import BoxTreeImporter from './boxTreeImporter';
 
 export function getBoxName(rawFunc: Dict<unknown>) {
 	const keys = Object.keys(rawFunc);
@@ -24,11 +21,7 @@ export function getBoxType(boxName: string): BoxType {
 	let boxType: BoxType;
 	if (prefix === c.CHAINED_FUNC_PREFIX) {
 		boxType = BoxType.ChainedFunc;
-	} else if (c.MINI_STR_PREFIX) {
-		boxType = BoxType.Mininotation;
-	} else if (c.EXPR_STR_PREFIX) {
-		boxType = BoxType.Expression;
-	} else if (c.CONST_FUNC_PREFIX) {
+	} else if (prefix === c.CONST_FUNC_PREFIX) {
 		boxType = BoxType.ConstantDef;
 	} else if (boxName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
 		boxType = BoxType.SerializedData;
@@ -38,15 +31,16 @@ export function getBoxType(boxName: string): BoxType {
 	return boxType;
 }
 
-export function getBoxValueType(rawValue: unknown): BoxValueType {
+export function getBoxValueType(rawValue: unknown, specialString = true): BoxValueType {
 	let boxValueType: BoxValueType;
 	if (typeof rawValue === 'string') {
-		if (rawValue[0] === c.MINI_STR_PREFIX) {
-			boxValueType = BoxValueType.Mininotation;
-		} else if (rawValue[0] === c.EXPR_STR_PREFIX) {
-			boxValueType = BoxValueType.Expression;
-		} else {
-			boxValueType = BoxValueType.String;
+		boxValueType = BoxValueType.String;
+		if (specialString) {
+			if (rawValue[0] === c.MINI_STR_PREFIX) {
+				boxValueType = BoxValueType.Mininotation;
+			} else if (rawValue[0] === c.EXPR_STR_PREFIX) {
+				boxValueType = BoxValueType.Expression;
+			}
 		}
 	} else if (typeof rawValue === 'number') {
 		boxValueType = BoxValueType.Number;
@@ -79,7 +73,7 @@ export function buildSerializedBoxFromKeyVal(key: string, rawValue: unknown): Bo
 		name: key,
 		type: BoxType.SerializedData,
 		value: rawValue,
-		valueType: getBoxValueType(rawValue),
+		valueType: getBoxValueType(rawValue, false),
 		children: [],
 	};
 }
@@ -113,7 +107,7 @@ export function buildSerializedBox(rawValue: unknown): Box {
 		name: '',
 		type: BoxType.SerializedData,
 		value: rawValue,
-		valueType: getBoxValueType(rawValue),
+		valueType: getBoxValueType(rawValue, false),
 		children: [],
 	};
 }
@@ -121,7 +115,7 @@ export function buildSerializedBox(rawValue: unknown): Box {
 export function buildLiteralBox(rawLiteral: unknown): Box {
 	return {
 		name: '',
-		type: BoxType.Literal,
+		type: BoxType.Value,
 		value: rawLiteral,
 		valueType: getBoxValueType(rawLiteral),
 		children: [],
@@ -135,7 +129,7 @@ export function buildListBox(rawList: Array<unknown>): Box {
 
 	return {
 		name: '',
-		type: BoxType.MainFunc,
+		type: BoxType.List,
 		value: null,
 		valueType: BoxValueType.Empty,
 		// eslint-disable-next-line no-use-before-define
@@ -209,21 +203,3 @@ export function buildBoxFromYaml(yaml: string): Box {
 		children: buildBoxChildren(rawComposition),
 	};
 }
-
-export const YamlImporter: Importer = {
-	toBox(yaml: unknown): Box {
-		if (typeof yaml !== 'string') {
-			throw new YamlImporterError('YamlImporter input must be a string');
-		}
-		return buildBoxFromYaml(yaml);
-	},
-	toVertex(yaml: unknown): Vertex {
-		if (typeof yaml !== 'string') {
-			throw new YamlImporterError('YamlImporter input must be a string');
-		}
-		const box = buildBoxFromYaml(yaml);
-		return BoxTreeImporter.toVertex(box);
-	},
-};
-
-export default YamlImporter;
