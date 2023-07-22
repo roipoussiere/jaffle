@@ -1,114 +1,68 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { FuncTree, FuncType, ValueType } from '../../src/funcTree';
-import { GraphExporterError, PartialBoxTree, BoxTree, GraphExporter as GE }
-	from '../../src/exporters/graphExporter';
+import * as GE from '../../src/exporters/graphExporter';
+import { Box, BoxType, BoxValueType } from '../../src/dataTypes/box';
+import { GraphBox, PartialGraphBox } from '../../src/dataTypes/graphBox';
 
-describe('Testing YamlImporterError', () => {
-	test('YamlImporterError should raise', () => {
-		expect(() => { throw new GraphExporterError('abc'); }).toThrow(GraphExporterError);
-	});
-});
-
-describe('Testing GE.getFuncText()', () => {
-	const funcTree = {
+describe('Testing GE.boxToPartialGBox()', () => {
+	const childA: Box = {
 		name: 'a',
-		type: FuncType.Main,
-		value: 'b',
-		valueType: ValueType.Literal,
-		params: [],
-	};
-
-	test('simple function returns the func name', () => {
-		expect(GE.getFuncText(funcTree)).toBe('a');
-	});
-});
-
-describe('Testing GE.getvalueText()', () => {
-	const funcTree: FuncTree = {
-		name: 'a',
-		type: FuncType.Main,
-		value: 'b',
-		valueType: ValueType.Literal,
-		params: [],
-	};
-
-	test('functions with string value returns the string', () => {
-		expect(GE.getvalueText(funcTree)).toBe('b');
-		funcTree.value = '.a';
-		expect(GE.getvalueText(funcTree)).toBe('.a');
-	});
-
-	test('functions with number value returns the stringified number', () => {
-		funcTree.value = 42;
-		expect(GE.getvalueText(funcTree)).toBe('42');
-	});
-
-	test('functions with null value returns the null sign', () => {
-		funcTree.value = null;
-		expect(GE.getvalueText(funcTree)).toBe('');
-	});
-});
-
-describe('Testing GE.upgradeTree()', () => {
-	const childA: FuncTree = {
-		name: 'a',
-		type: FuncType.Main,
+		type: BoxType.MainFunc,
 		value: 1,
-		valueType: ValueType.Literal,
-		params: [],
+		valueType: BoxValueType.Number,
+		children: [],
 	};
 
-	const childB: FuncTree = {
+	const childB: Box = {
 		name: '.b',
-		type: FuncType.Chained,
+		type: BoxType.ChainedFunc,
 		value: 2,
-		valueType: ValueType.Literal,
-		params: [],
+		valueType: BoxValueType.Number,
+		children: [],
 	};
 
-	const childC: FuncTree = {
+	const childC: Box = {
 		name: 'c',
-		type: FuncType.Main,
+		type: BoxType.MainFunc,
 		value: 3,
-		valueType: ValueType.Literal,
-		params: [],
+		valueType: BoxValueType.Number,
+		children: [],
 	};
 
-	const childE: FuncTree = {
+	const childE: Box = {
 		name: 'e',
-		type: FuncType.Main,
+		type: BoxType.MainFunc,
 		value: 5,
-		valueType: ValueType.Literal,
-		params: [],
+		valueType: BoxValueType.Number,
+		children: [],
 	};
 
-	const childF: FuncTree = {
+	const childF: Box = {
 		name: 'f',
-		type: FuncType.Main,
+		type: BoxType.MainFunc,
 		value: 6,
-		valueType: ValueType.Literal,
-		params: [],
+		valueType: BoxValueType.Number,
+		children: [],
 	};
 
-	const childD: FuncTree = {
+	const childD: Box = {
 		name: '.d',
-		type: FuncType.Chained,
+		type: BoxType.ChainedFunc,
 		value: 4,
-		valueType: ValueType.Tree,
-		params: [childE, childF],
+		valueType: BoxValueType.Empty,
+		children: [childE, childF],
 	};
 
-	const root: FuncTree = {
+	const root: Box = {
 		name: 'root',
-		type: FuncType.Main,
+		type: BoxType.MainFunc,
 		value: null,
-		valueType: ValueType.Tree,
-		params: [childA, childB, childC, childD],
+		valueType: BoxValueType.Empty,
+		children: [childA, childB, childC, childD],
 	};
 
 	test('func with several func params are upgraded to partial box tree with correct ids', () => {
-		const partialBoxTree = GE.upgradeTree(root);
+		const partialBoxTree = GE.boxToPartialGBox(root);
 
 		expect(partialBoxTree.id).toBe('');
 		expect(partialBoxTree.groupId).toBe(0);
@@ -133,92 +87,87 @@ describe('Testing GE.upgradeTree()', () => {
 	});
 });
 
-describe('Testing GE.computeBox()', () => {
-	const childA: PartialBoxTree = {
+describe('Testing GE.partialGBoxToGBox()', () => {
+	const childA: PartialGraphBox = {
 		id: '0',
 		groupId: 0,
-		funcText: 'a',
-		funcType: FuncType.Main,
+		name: 'a',
+		type: BoxType.MainFunc,
 		valueText: 'a',
-		valueType: ValueType.Literal,
-		isNumber: false,
+		valueType: BoxValueType.String,
 		children: [],
 	};
 
-	const childB: PartialBoxTree = {
+	const childB: PartialGraphBox = {
 		id: '1',
 		groupId: 1,
-		funcText: 'b',
-		funcType: FuncType.Main,
+		name: 'b',
+		type: BoxType.MainFunc,
 		valueText: 'bbb',
-		valueType: ValueType.Literal,
-		isNumber: false,
+		valueType: BoxValueType.String,
 		children: [],
 	};
 
-	const childC: PartialBoxTree = {
+	const childC: PartialGraphBox = {
 		id: '2',
 		groupId: 1,
-		funcText: '.c',
-		funcType: FuncType.Chained,
+		name: '.c',
+		type: BoxType.ChainedFunc,
 		valueText: 'ccccc',
-		valueType: ValueType.Literal,
-		isNumber: false,
+		valueType: BoxValueType.String,
 		children: [],
 	};
 
-	const childD: PartialBoxTree = {
+	const childD: PartialGraphBox = {
 		id: '3',
 		groupId: 2,
-		funcText: 'd',
-		funcType: FuncType.Main,
+		name: 'd',
+		type: BoxType.MainFunc,
 		valueText: 'd',
-		valueType: ValueType.Literal,
-		isNumber: false,
+		valueType: BoxValueType.String,
 		children: [],
 	};
 
-	const root: PartialBoxTree = {
+	const root: PartialGraphBox = {
 		id: '',
 		groupId: 0,
-		funcText: 'root',
-		funcType: FuncType.Main,
+		name: 'root',
+		type: BoxType.MainFunc,
 		valueText: '',
-		valueType: ValueType.Tree,
-		isNumber: false,
+		valueType: BoxValueType.Empty,
 		children: [childA, childB, childC, childD],
 	};
 
 	test('simple partial box without root is correctly computed', () => {
-		const boxTreeA = GE.computeBox(childA);
+		const boxTreeA = GE.partialGBoxToGBox(childA);
 		expect(boxTreeA.contentWidth).toBe(3);
 		expect(boxTreeA.padding).toBe(2);
 		expect(boxTreeA.width).toBe(3);
 	});
 
 	test('partial box of a func preceding a chain is correctly computed', () => {
-		const boxTreeB = GE.computeBox(childB, root);
+		const boxTreeB = GE.partialGBoxToGBox(childB, root);
 		expect(boxTreeB.contentWidth).toBe(5);
 		expect(boxTreeB.padding).toBe(3);
 		expect(boxTreeB.width).toBe(8);
 	});
 
 	test('partial box of chained func is correctly computed', () => {
-		const boxTreeC = GE.computeBox(childC, root);
+		const boxTreeC = GE.partialGBoxToGBox(childC, root);
 		expect(boxTreeC.contentWidth).toBe(8);
 		expect(boxTreeC.padding).toBe(3);
 		expect(boxTreeC.width).toBe(8);
 	});
 
 	test('partial box of func after a chain is correctly computed', () => {
-		const boxTreeD = GE.computeBox(childD, root);
+		const boxTreeD = GE.partialGBoxToGBox(childD, root);
 		expect(boxTreeD.contentWidth).toBe(3);
 		expect(boxTreeD.padding).toBe(2);
 		expect(boxTreeD.width).toBe(3);
 	});
 
 	test('partial box of func tree is correctly computed', () => {
-		const boxTreeD = GE.computeBox(root);
+		const boxTreeD = GE.partialGBoxToGBox(root);
 		expect(boxTreeD.contentWidth).toBe(5);
 		expect(boxTreeD.padding).toBe(5);
 		expect(boxTreeD.width).toBe(5);
@@ -226,22 +175,21 @@ describe('Testing GE.computeBox()', () => {
 });
 
 describe('Testing GE.export()', () => {
-	const input: FuncTree = {
+	const input: Box = {
 		name: 'a',
-		type: FuncType.Main,
+		type: BoxType.MainFunc,
 		value: 1,
-		valueType: ValueType.Literal,
-		params: [],
+		valueType: BoxValueType.Number,
+		children: [],
 	};
 
-	const expected: BoxTree = {
+	const expected: GraphBox = {
 		id: '',
 		groupId: 0,
-		funcText: 'a',
-		funcType: FuncType.Main,
+		name: 'a',
+		type: BoxType.MainFunc,
 		valueText: '1',
-		valueType: ValueType.Literal,
-		isNumber: true,
+		valueType: BoxValueType.Number,
 		contentWidth: 3,
 		padding: 2,
 		width: 3,
@@ -249,6 +197,6 @@ describe('Testing GE.export()', () => {
 	};
 
 	test('simple box tree is exported to correct box', () => {
-		expect(GE.export(input)).toEqual(expected);
+		expect(GE.boxToGraphBox(input)).toEqual(expected);
 	});
 });

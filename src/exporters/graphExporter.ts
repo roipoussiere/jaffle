@@ -1,5 +1,5 @@
 import { Box, BoxType, BoxValueType } from '../dataTypes/box';
-import { GraphBox, PartialGraphBox } from '../dataTypes/graphBox';
+import { GraphBox, PartialGraphBox as PartialGBox } from '../dataTypes/graphBox';
 
 // function arrangeTree(vertex: Vertex): DraftBox {
 // 	if (vertex.type === VertexType.Literal) {
@@ -43,14 +43,14 @@ import { GraphBox, PartialGraphBox } from '../dataTypes/graphBox';
 // 	return func.value === null ? '' : `${func.value}`;
 // }
 
-function boxToPartialGraphBox(box: Box, funcId: Array<number> = [], groupId = 0): PartialGraphBox {
+export function boxToPartialGBox(box: Box, funcId: Array<number> = [], groupId = 0): PartialGBox {
 	let paramsGroupId = -1;
 
 	const children = box.children.length <= 1 ? [] : box.children.map((child, i) => {
 		if (child.type !== BoxType.ChainedFunc) {
 			paramsGroupId += 1;
 		}
-		return boxToPartialGraphBox(
+		return boxToPartialGBox(
 			child,
 			funcId.concat(i),
 			paramsGroupId,
@@ -68,7 +68,7 @@ function boxToPartialGraphBox(box: Box, funcId: Array<number> = [], groupId = 0)
 	};
 }
 
-function computeBox(pgb: PartialGraphBox, parent?: PartialGraphBox): GraphBox {
+export function partialGBoxToGBox(pgb: PartialGBox, parent?: PartialGBox): GraphBox {
 	const noSpace = pgb.type === BoxType.Value || pgb.valueType === BoxValueType.Null;
 
 	const contentWidth = pgb.name.length
@@ -89,10 +89,10 @@ function computeBox(pgb: PartialGraphBox, parent?: PartialGraphBox): GraphBox {
 
 		padding = maxLength + 1; // + (pbt.funcType === FuncType.Literal ? 0 : 1);
 
-		const getDataWidth = (box: PartialGraphBox) => padding
+		const getDataWidth = (box: PartialGBox) => padding
 			+ (pgb.valueType === BoxValueType.Null ? 2 : box.valueText.length);
 
-		width = Math.max(...group.map((child: PartialGraphBox) => (
+		width = Math.max(...group.map((child: PartialGBox) => (
 			child.type < BoxType.MainFunc ? child.name.length : getDataWidth(child)
 		)));
 	}
@@ -102,14 +102,14 @@ function computeBox(pgb: PartialGraphBox, parent?: PartialGraphBox): GraphBox {
 		contentWidth,
 		padding,
 		width,
-		children: pgb.children.map((child) => computeBox(child, pgb)),
+		children: pgb.children.map((child) => partialGBoxToGBox(child, pgb)),
 	};
 }
 
 export function boxToGraphBox(box: Box): GraphBox {
 	// const arrangedTree = arrangeTree(composition);
-	const partialBoxTree = boxToPartialGraphBox(box);
-	return computeBox(partialBoxTree);
+	const partialBoxTree = boxToPartialGBox(box);
+	return partialGBoxToGBox(partialBoxTree);
 }
 
 export default boxToGraphBox;

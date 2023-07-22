@@ -1,40 +1,35 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { YamlExporterError, YamlExporter as YE } from '../../src/exporters/yamlExporter';
-import { FuncTree, FuncType, ValueType } from '../../src/funcTree';
+import * as YE from '../../src/exporters/yamlExporter';
+import { Box, BoxType, BoxValueType } from '../../src/dataTypes/box';
 
-describe('Testing YamlImporterError', () => {
-	test('YamlImporterError should raise', () => {
-		expect(() => { throw new YamlExporterError('abc'); }).toThrow(YamlExporterError);
-	});
-});
-
-describe('Testing YE.arrangeFunc()', () => {
+describe('Testing YE.boxToYaml()', () => {
 	test('function with literal values are correctly converted', () => {
-		const funcTree: FuncTree = {
+		const input: Box = {
 			name: 'a',
-			type: FuncType.Main,
+			type: BoxType.MainFunc,
 			value: 'b',
-			valueType: ValueType.Literal,
-			params: [],
+			valueType: BoxValueType.String,
+			children: [],
 		};
-		expect(YE.arrangeFunc(funcTree)).toEqual({ a: 'b' });
+		expect(YE.boxToYaml(input)).toBe('a: b');
 	});
 
 	test('function with params are correctly converted', () => {
-		const funcTree: FuncTree = {
+		const input: Box = {
 			name: 'a',
-			type: FuncType.Main,
+			type: BoxType.MainFunc,
 			value: null,
-			valueType: ValueType.Tree,
-			params: [{
+			valueType: BoxValueType.Empty,
+			children: [{
 				name: 'b',
-				type: FuncType.Main,
+				type: BoxType.MainFunc,
 				value: 'c',
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.String,
+				children: [],
 			}],
 		};
-		expect(YE.arrangeFunc(funcTree)).toEqual({ a: [{ b: 'c' }] });
+		expect(YE.boxToYaml(input)).toBe(`a:
+  b: c`);
 	});
 });
