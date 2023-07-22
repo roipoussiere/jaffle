@@ -1,531 +1,459 @@
 import { describe, expect, test } from '@jest/globals';
 
-import { YamlImporterError, YamlImporter as YI } from '../../src/importers/yamlImporter';
-import { FuncType, ValueType } from '../../src/funcTree';
+import * as YI from '../../src/importers/yamlImporter';
+import { YamlImporterError } from '../../src/importers/importerErrors';
+import { Box, BoxType, BoxValueType } from '../../src/dataTypes/box';
 
-describe('Testing YamlImporterError', () => {
-	test('YamlImporterError should raise', () => {
-		expect(() => { throw new YamlImporterError('abc'); }).toThrow(YamlImporterError);
-	});
-});
-
-describe('Testing YI.getValueType()', () => {
-	test('special string inputs return special string types', () => {
-		expect(YI.getValueType('_abc')).toBe(ValueType.Mininotation);
-		expect(YI.getValueType('=abc')).toBe(ValueType.Expression);
-	});
-
-	test('literal inputs return literal types', () => {
-		expect(YI.getValueType('abc')).toBe(ValueType.Literal);
-		expect(YI.getValueType(null)).toBe(ValueType.Literal);
-		expect(YI.getValueType(123)).toBe(ValueType.Literal);
-	});
-
-	test('object return object type', () => {
-		expect(YI.getValueType([1, 2, 3])).toBe(ValueType.Tree);
-		expect(YI.getValueType({ a: 1, b: 2 })).toBe(ValueType.Tree);
-	});
-});
-
-describe('Testing YI.getFuncType()', () => {
-	test('prefixed func names return related func types', () => {
-		expect(YI.getFuncType('_abc')).toBe(FuncType.MainMininotation);
-		expect(YI.getFuncType('$abc')).toBe(FuncType.Constant);
-		expect(YI.getFuncType('.abc')).toBe(FuncType.Chained);
-	});
-
-	test('func names with serialize suffix return serialized func type', () => {
-		expect(YI.getFuncType('abc^')).toBe(FuncType.Serialized);
-	});
-
-	test('common func names return main func type', () => {
-		expect(YI.getFuncType('abc')).toBe(FuncType.Main);
-	});
-});
-
-describe('Testing YI.getFuncName()', () => {
+describe('Testing YI.getBoxName()', () => {
 	test('bad functions fails', () => {
-		expect(() => YI.getFuncName({})).toThrow(YamlImporterError);
-		expect(() => YI.getFuncName({ a: 1, b: 2 })).toThrow(YamlImporterError);
+		expect(() => YI.getBoxName({})).toThrow(YamlImporterError);
+		expect(() => YI.getBoxName({ a: 1, b: 2 })).toThrow(YamlImporterError);
 	});
 
 	test('common functions return function name', () => {
-		expect(YI.getFuncName({ a: 1 })).toBe('a');
-		expect(YI.getFuncName({ _a: 1 })).toBe('_a');
-		expect(YI.getFuncName({ $a: 1 })).toBe('$a');
+		expect(YI.getBoxName({ a: 1 })).toBe('a');
+		expect(YI.getBoxName({ _a: 1 })).toBe('_a');
+		expect(YI.getBoxName({ $a: 1 })).toBe('$a');
 	});
 });
 
-describe('Testing YI.computeLiteral()', () => {
-	test('string literals', () => {
-		expect(YI.computeLiteral('a')).toEqual({
-			name: '',
-			type: FuncType.Literal,
-			value: 'a',
-			valueType: ValueType.Literal,
-			params: [],
-		});
+describe('Testing YI.getBoxType()', () => {
+	test('prefixed func names return related func types', () => {
+		expect(YI.getBoxType('.abc')).toBe(BoxType.ChainedFunc);
+		expect(YI.getBoxType('_abc')).toBe(BoxType.Mininotation);
+		expect(YI.getBoxType('=abc')).toBe(BoxType.Expression);
+		expect(YI.getBoxType('$abc')).toBe(BoxType.ConstantDef);
 	});
 
-	test('number literals', () => {
-		expect(YI.computeLiteral(42)).toEqual({
-			name: '',
-			type: FuncType.Literal,
-			value: 42,
-			valueType: ValueType.Literal,
-			params: [],
-		});
+	test('func names with serialize suffix return serialized func type', () => {
+		expect(YI.getBoxType('abc^')).toBe(BoxType.SerializedData);
 	});
 
-	test('null literals', () => {
-		expect(YI.computeLiteral(null)).toEqual({
-			name: '',
-			type: FuncType.Literal,
-			value: null,
-			valueType: ValueType.Literal,
-			params: [],
-		});
-	});
-
-	test('string funcs are well computed', () => {
-		expect(YI.computeLiteral('_a')).toEqual({
-			name: '_a',
-			type: FuncType.MainMininotation,
-			value: null,
-			valueType: ValueType.Empty,
-			params: [],
-		});
-
-		expect(YI.computeLiteral('=a')).toEqual({
-			name: '=a',
-			type: FuncType.MainExpression,
-			value: null,
-			valueType: ValueType.Empty,
-			params: [],
-		});
+	test('common func names return main func type', () => {
+		expect(YI.getBoxType('abc')).toBe(BoxType.MainFunc);
 	});
 });
 
-describe('Testing YI.serializeEntry()', () => {
-	test('literals', () => {
-		expect(YI.serializeEntry('a', null)).toEqual({
-			name: 'a',
-			type: FuncType.Serialized,
-			value: null,
-			valueType: ValueType.Literal,
-			params: [],
-		});
+describe('Testing YI.getBoxValueType()', () => {
+	test('literals return literal types', () => {
+		expect(YI.getBoxValueType(null)).toBe(BoxValueType.Null);
+		expect(YI.getBoxValueType(true)).toBe(BoxValueType.Boolean);
+		expect(YI.getBoxValueType('abc')).toBe(BoxValueType.String);
+		expect(YI.getBoxValueType(123)).toBe(BoxValueType.Number);
+	});
 
-		expect(YI.serializeEntry('a', 42)).toEqual({
-			name: 'a',
-			type: FuncType.Serialized,
-			value: 42,
-			valueType: ValueType.Literal,
-			params: [],
-		});
+	test('special strings return special string types', () => {
+		expect(YI.getBoxValueType('_abc')).toBe(BoxValueType.Mininotation);
+		expect(YI.getBoxValueType('=abc')).toBe(BoxValueType.Expression);
+	});
 
-		expect(YI.serializeEntry('a', '_b')).toEqual({
+	test('objects return empty type', () => {
+		expect(YI.getBoxValueType([1, 2, 3])).toBe(BoxValueType.Empty);
+		expect(YI.getBoxValueType({ a: 1, b: 2 })).toBe(BoxValueType.Empty);
+	});
+});
+
+describe('Testing YI.buildSerializedBoxFromKeyVal()', () => {
+	test('can build serialized box from key and literal', () => {
+		const expected: Box = {
 			name: 'a',
-			type: FuncType.Serialized,
+			type: BoxType.SerializedData,
 			value: '_b',
-			valueType: ValueType.Literal,
-			params: [],
-		});
+			valueType: BoxValueType.String,
+			children: [],
+		};
+		expect(YI.buildSerializedBoxFromKeyVal('a', '_b')).toEqual(expected);
 	});
 
-	test('array are well serialized', () => {
-		expect(YI.serializeEntry('a', [1, 'a'])).toEqual({
+	test('can build serialized box from key and array', () => {
+		const expected: Box = {
 			name: 'a',
-			type: FuncType.Serialized,
+			type: BoxType.SerializedData,
 			value: null,
-			valueType: ValueType.Tree,
-			params: [{
+			valueType: BoxValueType.Empty,
+			children: [{
 				name: '',
-				type: FuncType.Serialized,
+				type: BoxType.SerializedData,
 				value: 1,
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.Number,
+				children: [],
 			}, {
 				name: '',
-				type: FuncType.Serialized,
+				type: BoxType.SerializedData,
 				value: 'a',
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.String,
+				children: [],
 			}],
-		});
+		};
+		expect(YI.buildSerializedBoxFromKeyVal('a', [1, 'a'])).toEqual(expected);
 	});
 
-	test('objects are well serialized', () => {
-		expect(YI.serializeEntry('a', { b: 1, c: 'd' })).toEqual({
+	test('can build serialized box from key and object', () => {
+		const expected: Box = {
 			name: 'a',
-			type: FuncType.Serialized,
+			type: BoxType.SerializedData,
 			value: null,
-			valueType: ValueType.Tree,
-			params: [{
+			valueType: BoxValueType.Empty,
+			children: [{
 				name: 'b',
-				type: FuncType.Serialized,
+				type: BoxType.SerializedData,
 				value: 1,
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.Number,
+				children: [],
 			}, {
 				name: 'c',
-				type: FuncType.Serialized,
+				type: BoxType.SerializedData,
 				value: 'd',
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.String,
+				children: [],
 			}],
-		});
+		};
+		expect(YI.buildSerializedBoxFromKeyVal('a', { b: 1, c: 'd' })).toEqual(expected);
 	});
 });
 
 describe('Testing YI.serialize()', () => {
-	test('literals are well serialized', () => {
-		expect(YI.serialize(42)).toEqual({
+	test('can build serialized box from literal', () => {
+		const expected: Box = {
 			name: '',
-			type: FuncType.Serialized,
+			type: BoxType.SerializedData,
 			value: 42,
-			valueType: ValueType.Literal,
-			params: [],
-		});
+			valueType: BoxValueType.Number,
+			children: [],
+		};
+		expect(YI.buildSerializedBox(42)).toEqual(expected);
 	});
 
-	test('array are well serialized', () => {
-		expect(YI.serialize([1, 'a'])).toEqual({
+	test('can build serialized box from array', () => {
+		const expected: Box = {
 			name: '',
-			type: FuncType.Serialized,
+			type: BoxType.SerializedData,
 			value: null,
-			valueType: ValueType.Tree,
-			params: [{
+			valueType: BoxValueType.Empty,
+			children: [{
 				name: '',
-				type: FuncType.Serialized,
+				type: BoxType.SerializedData,
 				value: 1,
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.Number,
+				children: [],
 			}, {
 				name: '',
-				type: FuncType.Serialized,
+				type: BoxType.SerializedData,
 				value: 'a',
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.String,
+				children: [],
 			}],
-		});
+		};
+		expect(YI.buildSerializedBox([1, 'a'])).toEqual(expected);
 	});
 
-	test('objects with unique key are well serialized', () => {
-		expect(YI.serialize({ a: 1 })).toEqual({
+	test('can build serialized box from object with unique key', () => {
+		const expected: Box = {
 			name: 'a',
-			type: FuncType.Serialized,
+			type: BoxType.SerializedData,
 			value: 1,
-			valueType: ValueType.Literal,
-			params: [],
-		});
+			valueType: BoxValueType.Number,
+			children: [],
+		};
+		expect(YI.buildSerializedBox({ a: 1 })).toEqual(expected);
 	});
 
-	test('objects several keys are well serialized', () => {
-		expect(YI.serialize({ a: 1, b: 'c' })).toEqual({
+	test('can build serialized box from object with several keys', () => {
+		const expected: Box = {
 			name: '',
-			type: FuncType.Serialized,
+			type: BoxType.SerializedData,
 			value: null,
-			valueType: ValueType.Tree,
-			params: [{
+			valueType: BoxValueType.Empty,
+			children: [{
 				name: 'a',
-				type: FuncType.Serialized,
+				type: BoxType.SerializedData,
 				value: 1,
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.Number,
+				children: [],
 			}, {
 				name: 'b',
-				type: FuncType.Serialized,
+				type: BoxType.SerializedData,
 				value: 'c',
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.String,
+				children: [],
 			}],
-		});
+		};
+		expect(YI.buildSerializedBox({ a: 1, b: 'c' })).toEqual(expected);
 	});
 });
 
-describe('Testing YI.computeFunc()', () => {
-	test('bad funcs fails', () => {
-		expect(() => YI.computeFunc({})).toThrow(YamlImporterError);
-		expect(() => YI.computeFunc({ a: 1, b: 2 })).toThrow(YamlImporterError);
+describe('Testing YI.buildLiteralBox()', () => {
+	test('can build box from literal', () => {
+		const expected: Box = {
+			name: '',
+			type: BoxType.Literal,
+			value: 'a',
+			valueType: BoxValueType.String,
+			children: [],
+		};
+		expect(YI.buildLiteralBox('a')).toEqual(expected);
+	});
+});
+
+describe('Testing YI.buildListBox()', () => {
+	test('empty lists fails', () => {
+		expect(() => YI.buildListBox([])).toThrow(YamlImporterError);
 	});
 
-	test('main funcs are well computed', () => {
-		expect(YI.computeFunc({ a: null })).toEqual({
-			name: 'a',
-			type: FuncType.Main,
+	test('can build box from list of literals', () => {
+		const expected: Box = {
+			name: '',
+			type: BoxType.List,
 			value: null,
-			valueType: ValueType.Literal,
-			params: [],
-		});
+			valueType: BoxValueType.Empty,
+			children: [{
+				name: '',
+				type: BoxType.Literal,
+				value: true,
+				valueType: BoxValueType.Boolean,
+				children: [],
+			}, {
+				name: '',
+				type: BoxType.Literal,
+				value: 1,
+				valueType: BoxValueType.Number,
+				children: [],
+			}, {
+				name: '',
+				type: BoxType.Literal,
+				value: 'a',
+				valueType: BoxValueType.String,
+				children: [],
+			}],
+		};
+		expect(YI.buildListBox([true, 1, 'a'])).toEqual(expected);
+	});
+});
 
-		expect(YI.computeFunc({ a: 1 })).toEqual({
-			name: 'a',
-			type: FuncType.Main,
-			value: 1,
-			valueType: ValueType.Literal,
-			params: [],
-		});
+describe('Testing YI.buildFuncBox()', () => {
+	test('bad funcs fails', () => {
+		expect(() => YI.buildFuncBox({})).toThrow(YamlImporterError);
+		expect(() => YI.buildFuncBox({ a: 1, b: 2 })).toThrow(YamlImporterError);
+	});
 
-		expect(YI.computeFunc({ a: 'b' })).toEqual({
+	test('can build box from main func with literal', () => {
+		const expected: Box = {
 			name: 'a',
-			type: FuncType.Main,
+			type: BoxType.MainFunc,
 			value: 'b',
-			valueType: ValueType.Literal,
-			params: [],
-		});
+			valueType: BoxValueType.String,
+			children: [],
+		};
+		expect(YI.buildFuncBox({ a: 'b' })).toEqual(expected);
+	});
 
-		expect(YI.computeFunc({ a: '_b' })).toEqual({
+	test('can build box from main func with mininotation', () => {
+		const expected: Box = {
 			name: 'a',
-			type: FuncType.Main,
+			type: BoxType.MainFunc,
 			value: '_b',
-			valueType: ValueType.Mininotation,
-			params: [],
-		});
+			valueType: BoxValueType.Mininotation,
+			children: [],
+		};
+		expect(YI.buildFuncBox({ a: '_b' })).toEqual(expected);
+	});
 
-		expect(YI.computeFunc({ a: '=b' })).toEqual({
+	test('can build box from main func with array', () => {
+		const expected: Box = {
 			name: 'a',
-			type: FuncType.Main,
-			value: '=b',
-			valueType: ValueType.Expression,
-			params: [],
-		});
-
-		expect(YI.computeFunc({ a: [1, 2] })).toEqual({
-			name: 'a',
-			type: FuncType.Main,
+			type: BoxType.MainFunc,
 			value: null,
-			valueType: ValueType.Tree,
-			params: [
+			valueType: BoxValueType.Empty,
+			children: [
 				{
 					name: '',
-					type: FuncType.Literal,
+					type: BoxType.Literal,
 					value: 1,
-					valueType: ValueType.Literal,
-					params: [],
+					valueType: BoxValueType.Number,
+					children: [],
 				},
 				{
 					name: '',
-					type: FuncType.Literal,
+					type: BoxType.Literal,
 					value: 2,
-					valueType: ValueType.Literal,
-					params: [],
+					valueType: BoxValueType.Number,
+					children: [],
 				},
 			],
-		});
+		};
+		expect(YI.buildFuncBox({ a: [1, 2] })).toEqual(expected);
 	});
 
-	test('chained func are well computed', () => {
-		expect(YI.computeFunc({ '.a': 1 })).toEqual({
+	test('can build box from chained func', () => {
+		const expected: Box = {
 			name: '.a',
-			type: FuncType.Chained,
+			type: BoxType.ChainedFunc,
 			value: 1,
-			valueType: ValueType.Literal,
-			params: [],
-		});
+			valueType: BoxValueType.Number,
+			children: [],
+		};
+		expect(YI.buildFuncBox({ '.a': 1 })).toEqual(expected);
 	});
 
-	test('serialized functions are serialized', () => {
-		expect(YI.computeFunc({ 'a^': '_a' })).toEqual({
+	test('can build box from serialized func', () => {
+		const expected: Box = {
 			name: 'a^',
-			type: FuncType.Serialized,
+			type: BoxType.SerializedData,
 			value: '_a',
-			valueType: ValueType.Literal,
-			params: [],
-		});
+			valueType: BoxValueType.String,
+			children: [],
+		};
+		expect(YI.buildFuncBox({ 'a^': '_a' })).toEqual(expected);
 	});
 });
 
-describe('Testing YI.computeList()', () => {
-	test('empty lists fails', () => {
-		expect(() => YI.computeList([])).toThrow(YamlImporterError);
-	});
-
-	test('lists are well computed', () => {
-		expect(YI.computeList(['a', 1, null])).toEqual({
-			name: '',
-			type: FuncType.List,
-			value: null,
-			valueType: ValueType.Tree,
-			params: [{
-				name: '',
-				type: FuncType.Literal,
-				value: 'a',
-				valueType: ValueType.Literal,
-				params: [],
-			}, {
-				name: '',
-				type: FuncType.Literal,
-				value: 1,
-				valueType: ValueType.Literal,
-				params: [],
-			}, {
-				name: '',
-				type: FuncType.Literal,
-				value: null,
-				valueType: ValueType.Literal,
-				params: [],
-			}],
-		});
-	});
-});
-
-describe('Testing YI.computeParams()', () => {
-	test('literals are well computed', () => {
-		expect(YI.computeParams(['a', 1, null])).toEqual([
+describe('Testing YI.buildBoxChildren()', () => {
+	test('can build boxes from literals', () => {
+		const expected: Array<Box> = [
 			{
 				name: '',
-				type: FuncType.Literal,
-				value: 'a',
-				valueType: ValueType.Literal,
-				params: [],
+				type: BoxType.Literal,
+				value: true,
+				valueType: BoxValueType.Boolean,
+				children: [],
 			}, {
 				name: '',
-				type: FuncType.Literal,
+				type: BoxType.Literal,
 				value: 1,
-				valueType: ValueType.Literal,
-				params: [],
+				valueType: BoxValueType.Number,
+				children: [],
 			}, {
 				name: '',
-				type: FuncType.Literal,
-				value: null,
-				valueType: ValueType.Literal,
-				params: [],
+				type: BoxType.Literal,
+				value: 'a',
+				valueType: BoxValueType.String,
+				children: [],
 			},
-		]);
+		];
+		expect(YI.buildBoxChildren([true, 1, 'a'])).toEqual(expected);
 	});
 
-	test('funcs are well computed', () => {
-		expect(YI.computeParams([{ a: null }, { '.b': 42 }, { c: 'd' }, { '.d': 'f' }])).toEqual([{
+	test('can build boxes from main and chained funcs', () => {
+		const expected: Array<Box> = [{
 			name: 'a',
-			type: FuncType.Main,
-			value: null,
-			valueType: ValueType.Literal,
-			params: [],
+			type: BoxType.MainFunc,
+			value: true,
+			valueType: BoxValueType.Boolean,
+			children: [],
 		}, {
 			name: '.b',
-			type: FuncType.Chained,
+			type: BoxType.ChainedFunc,
 			value: 42,
-			valueType: ValueType.Literal,
-			params: [],
+			valueType: BoxValueType.Number,
+			children: [],
 		}, {
 			name: 'c',
-			type: FuncType.Main,
+			type: BoxType.MainFunc,
 			value: 'd',
-			valueType: ValueType.Literal,
-			params: [],
-		}, {
-			name: '.d',
-			type: FuncType.Chained,
-			value: 'f',
-			valueType: ValueType.Literal,
-			params: [],
-		}]);
+			valueType: BoxValueType.String,
+			children: [],
+		}];
+		expect(YI.buildBoxChildren([{ a: true }, { '.b': 42 }, { c: 'd' }])).toEqual(expected);
 	});
 
-	test('lists are well computed', () => {
-		expect(YI.computeParams([[null, 42], ['a', 'b']])).toEqual([{
+	test('can build boxes from lists', () => {
+		expect(YI.buildBoxChildren([[null, true], [42, 'a']])).toEqual([{
 			name: '',
-			type: FuncType.List,
+			type: BoxType.List,
 			value: null,
-			valueType: ValueType.Tree,
+			valueType: BoxValueType.Empty,
 			params: [{
 				name: '',
-				type: FuncType.Literal,
+				type: BoxType.Literal,
 				value: null,
-				valueType: ValueType.Literal,
+				valueType: BoxValueType.Null,
 				params: [],
 			}, {
 				name: '',
-				type: FuncType.Literal,
-				value: 42,
-				valueType: ValueType.Literal,
+				type: BoxType.Literal,
+				value: true,
+				valueType: BoxValueType.Boolean,
 				params: [],
 			}],
 		}, {
 			name: '',
-			type: FuncType.List,
+			type: BoxType.List,
 			value: null,
-			valueType: ValueType.Tree,
+			valueType: BoxValueType.Empty,
 			params: [{
 				name: '',
-				type: FuncType.Literal,
-				value: 'a',
-				valueType: ValueType.Literal,
+				type: BoxType.Literal,
+				value: 42,
+				valueType: BoxValueType.Number,
 				params: [],
 			}, {
 				name: '',
-				type: FuncType.Literal,
-				value: 'b',
-				valueType: ValueType.Literal,
+				type: BoxType.Literal,
+				value: 'a',
+				valueType: BoxValueType.String,
 				params: [],
 			}],
 		}]);
 	});
 });
 
-describe('Testing YI.import()', () => {
+describe('Testing YI.buildBoxFromYaml()', () => {
 	test('non-valid yaml fails', () => {
-		expect(() => YI.import('[')).toThrow(YamlImporterError);
+		expect(() => YI.buildBoxFromYaml('[')).toThrow(YamlImporterError);
 	});
 
 	test('yaml with non-array root element fails', () => {
-		expect(() => YI.import('null')).toThrow(YamlImporterError);
-		expect(() => YI.import('1')).toThrow(YamlImporterError);
-		expect(() => YI.import('a')).toThrow(YamlImporterError);
-		expect(() => YI.import('{a: 1}')).toThrow(YamlImporterError);
+		expect(() => YI.buildBoxFromYaml('null')).toThrow(YamlImporterError);
+		expect(() => YI.buildBoxFromYaml('true')).toThrow(YamlImporterError);
+		expect(() => YI.buildBoxFromYaml('1')).toThrow(YamlImporterError);
+		expect(() => YI.buildBoxFromYaml('a')).toThrow(YamlImporterError);
+		expect(() => YI.buildBoxFromYaml('{a: 1}')).toThrow(YamlImporterError);
 	});
 
-	test('empty yaml is well computed', () => {
-		expect(YI.import('[]')).toEqual({
+	test('empty yaml array is well computed', () => {
+		expect(YI.buildBoxFromYaml('[]')).toEqual({
 			name: '',
-			type: FuncType.Main,
+			type: BoxType.MainFunc,
 			value: null,
-			valueType: ValueType.Tree,
+			valueType: BoxValueType.Empty,
 			params: [],
 		});
 	});
 
 	test('non-empty valid yaml is well computed', () => {
-		expect(YI.import('[{a: }, {.b: 42}, {c: foo}, {.d: [1, 2]}]')).toEqual({
+		expect(YI.buildBoxFromYaml('[{a: }, {.b: true}, {c: [42, d]}]')).toEqual({
 			name: '',
-			type: FuncType.Main,
+			type: BoxType.MainFunc,
 			value: null,
-			valueType: ValueType.Tree,
+			valueType: BoxValueType.Empty,
 			params: [{
 				name: 'a',
-				type: FuncType.Main,
+				type: BoxType.MainFunc,
 				value: null,
-				valueType: ValueType.Literal,
+				valueType: BoxValueType.Null,
 				params: [],
 			}, {
 				name: '.b',
-				type: FuncType.Chained,
-				value: 42,
-				valueType: ValueType.Literal,
+				type: BoxType.ChainedFunc,
+				value: true,
+				valueType: BoxValueType.Boolean,
 				params: [],
 			}, {
 				name: 'c',
-				type: FuncType.Main,
-				value: 'foo',
-				valueType: ValueType.Literal,
-				params: [],
-			}, {
-				name: '.d',
-				type: FuncType.Chained,
+				type: BoxType.MainFunc,
 				value: null,
-				valueType: ValueType.Tree,
+				valueType: BoxValueType.Empty,
 				params: [{
 					name: '',
-					type: FuncType.Literal,
-					value: 1,
-					valueType: ValueType.Literal,
+					type: BoxType.Literal,
+					value: 42,
+					valueType: BoxValueType.Number,
 					params: [],
 				}, {
 					name: '',
-					type: FuncType.Literal,
-					value: 2,
-					valueType: ValueType.Literal,
+					type: BoxType.Literal,
+					value: 'd',
+					valueType: BoxValueType.String,
 					params: [],
 				}],
 			}],

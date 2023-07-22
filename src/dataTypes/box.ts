@@ -6,8 +6,10 @@ export enum BoxType {
 	Object,
 	ConstantDef,
 	SerializedData,
+	List,
 	Literal,
 }
+
 export enum BoxValueType {
 	Null,
 	Boolean,
