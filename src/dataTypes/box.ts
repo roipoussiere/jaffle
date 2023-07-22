@@ -1,13 +1,11 @@
 export enum BoxType {
 	MainFunc,
-	Mininotation,
-	Expression,
 	ChainedFunc,
 	Object,
 	ConstantDef,
 	SerializedData,
 	List,
-	Literal,
+	Value,
 }
 
 export enum BoxValueType {

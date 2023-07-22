@@ -1,7 +1,7 @@
 export enum VertexType {
 	MainFunc, // ie. "stack(...)"
-	Mininotation, // '"c@3 eb"'
-	Expression, // ie. "myVar"
+	// Mininotation, // '"c@3 eb"'
+	// Expression, // ie. "myVar"
 	ChainedFunc, // ie. ".range()"
 	Object, // ie. "sine"
 	ConstantDef, // ie. "const myVar = ..."
