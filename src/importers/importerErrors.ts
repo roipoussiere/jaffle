@@ -8,6 +8,13 @@ export class ImporterError extends JaffleError {
 	}
 }
 
+export class BoxTreeImporterError extends ImporterError {
+	constructor(message: string) {
+		super(message);
+		this.name = BoxTreeImporterError.name;
+	}
+}
+
 export class YamlImporterError extends ImporterError {
 	constructor(message: string) {
 		super(message);
