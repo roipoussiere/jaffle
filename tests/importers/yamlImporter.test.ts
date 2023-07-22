@@ -400,15 +400,15 @@ describe('Testing YI.buildBoxChildren()', () => {
 
 describe('Testing YI.buildBoxFromYaml()', () => {
 	test('non-valid yaml fails', () => {
-		expect(() => YI.buildBoxFromYaml('[')).toThrow(YamlImporterError);
+		expect(() => YI.yamlToBox('[')).toThrow(YamlImporterError);
 	});
 
 	test('yaml with non-array root element fails', () => {
-		expect(() => YI.buildBoxFromYaml('null')).toThrow(YamlImporterError);
-		expect(() => YI.buildBoxFromYaml('true')).toThrow(YamlImporterError);
-		expect(() => YI.buildBoxFromYaml('1')).toThrow(YamlImporterError);
-		expect(() => YI.buildBoxFromYaml('a')).toThrow(YamlImporterError);
-		expect(() => YI.buildBoxFromYaml('{a: 1}')).toThrow(YamlImporterError);
+		expect(() => YI.yamlToBox('null')).toThrow(YamlImporterError);
+		expect(() => YI.yamlToBox('true')).toThrow(YamlImporterError);
+		expect(() => YI.yamlToBox('1')).toThrow(YamlImporterError);
+		expect(() => YI.yamlToBox('a')).toThrow(YamlImporterError);
+		expect(() => YI.yamlToBox('{a: 1}')).toThrow(YamlImporterError);
 	});
 
 	test('empty yaml array is well computed', () => {
@@ -419,7 +419,7 @@ describe('Testing YI.buildBoxFromYaml()', () => {
 			valueType: BoxValueType.Empty,
 			children: [],
 		};
-		expect(YI.buildBoxFromYaml('[]')).toEqual(expected);
+		expect(YI.yamlToBox('[]')).toEqual(expected);
 	});
 
 	test('non-empty valid yaml is well computed', () => {
@@ -460,6 +460,6 @@ describe('Testing YI.buildBoxFromYaml()', () => {
 				}],
 			}],
 		};
-		expect(YI.buildBoxFromYaml('[{a: }, {.b: true}, {c: [42, d]}]')).toEqual(expected);
+		expect(YI.yamlToBox('[{a: }, {.b: true}, {c: [42, d]}]')).toEqual(expected);
 	});
 });
