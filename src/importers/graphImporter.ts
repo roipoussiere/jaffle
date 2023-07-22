@@ -7,10 +7,6 @@ function getFuncType(boxTree: Box): VertexType {
 	let funcType: VertexType;
 	if (boxTree.funcName[0] === '$') {
 		funcType = VertexType.ConstantDef;
-	} else if (boxTree.funcName[0] === '=') {
-		funcType = VertexType.Expression;
-	} else if (boxTree.funcName[0] === '_') {
-		funcType = VertexType.Mininotation;
 	} else if (boxTree.funcName[0] === '.') {
 		funcType = VertexType.ChainedFunc;
 	} else if (boxTree.funcName.slice(-1) === '^') {
@@ -23,22 +19,6 @@ function getFuncType(boxTree: Box): VertexType {
 		funcType = VertexType.MainFunc;
 	}
 	return funcType;
-}
-
-function getValueType(boxTree: Box): VertexType {
-	let valueType: VertexType;
-	// if (boxTree.valueText === '') {
-	// 	valueType = VertexType.Empty;
-	if (boxTree.valueText[0] === '_') {
-		valueType = VertexType.Mininotation;
-	} else if (boxTree.valueText[0] === '=') {
-		valueType = VertexType.Expression;
-	// } else if (boxTree.children.length > 0) {
-	// 	valueType = VertexType.Tree;
-	} else {
-		valueType = VertexType.Literal;
-	}
-	return valueType;
 }
 
 function getFunc(boxTree: Box): Vertex {
