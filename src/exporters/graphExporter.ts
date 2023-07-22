@@ -1,161 +1,115 @@
-import { Vertex, VertexType } from '../dataTypes/vertex';
+import { Box, BoxType, BoxValueType } from '../dataTypes/box';
+import { GraphBox, PartialGraphBox } from '../dataTypes/graphBox';
 
-import Exporter from './exporterInterface';
-import { GraphExporterError } from './exporterErrors';
+// function arrangeTree(vertex: Vertex): DraftBox {
+// 	if (vertex.type === VertexType.Literal) {
+// 		return {
+// 			funcName: '',
+// 			funcType: VertexType.Literal,
+// 			value: vertex.value,
+// 			valueType: VertexType.Literal,
+// 			children: [],
+// 		};
+// 	}
 
-export type DraftBox = {
-	funcName: string,
-	funcType: VertexType,
-	value: unknown,
-	valueType: VertexType,
-	children: Array<DraftBox>,
-};
+// 	if (typeof vertex.value !== 'string') {
+// 		throw new GraphExporterError(`Vertex value "${vertex.value}" must be a string`);
+// 	}
 
-export type PartialBox = {
-	id: string,
-	groupId: number,
+// 	if (vertex.children.length === 1 && vertex.children[0].children.length === 0) {
+// 		return {
+// 			funcName: vertex.value,
+// 			funcType: vertex.type,
+// 			value: vertex.children[0].value,
+// 			valueType: vertex.children[0].type,
+// 			children: [],
+// 		};
+// 	}
 
-	funcName: string,
-	funcType: VertexType,
-	valueText: string,
-	valueType: VertexType,
-	isNumber: boolean,
+// 	return {
+// 		funcName: vertex.value,
+// 		funcType: vertex.type,
+// 		value: vertex.children[0].value,
+// 		valueType: vertex.children[0].type,
+// 		children: vertex.children.map((child) => arrangeTree(child)),
+// 	};
+// }
 
-	children: Array<PartialBox>,
-};
+// function getFuncText(func: DraftBox): string {
+// 	return func.funcName;
+// }
 
-export type Box = {
-	id: string,
-	groupId: number,
+// function getvalueText(func: DraftBox): string {
+// 	return func.value === null ? '' : `${func.value}`;
+// }
 
-	funcName: string,
-	funcType: VertexType,
-	valueText: string,
-	valueType: VertexType,
-	isNumber: boolean,
-
-	contentWidth: number,
-	padding: number,
-	width: number,
-
-	children: Array<Box>,
-};
-
-function arrangeTree(vertex: Vertex): DraftBox {
-	if (vertex.type === VertexType.Literal) {
-		return {
-			funcName: '',
-			funcType: VertexType.Literal,
-			value: vertex.value,
-			valueType: VertexType.Literal,
-			children: [],
-		};
-	}
-
-	if (typeof vertex.value !== 'string') {
-		throw new GraphExporterError(`Vertex value "${vertex.value}" must be a string`);
-	}
-
-	if (vertex.children.length === 1 && vertex.children[0].children.length === 0) {
-		return {
-			funcName: vertex.value,
-			funcType: vertex.type,
-			value: vertex.children[0].value,
-			valueType: vertex.children[0].type,
-			children: [],
-		};
-	}
-
-	return {
-		funcName: vertex.value,
-		funcType: vertex.type,
-		value: vertex.children[0].value,
-		valueType: vertex.children[0].type,
-		children: vertex.children.map((child) => arrangeTree(child)),
-	};
-}
-
-function getFuncText(func: DraftBox): string {
-	return func.funcName;
-}
-
-function getvalueText(func: DraftBox): string {
-	return func.value === null ? '' : `${func.value}`;
-}
-
-function upgradeTree(func: DraftBox, funcId: Array<number> = [], groupId = 0): PartialBox {
+function boxToPartialGraphBox(box: Box, funcId: Array<number> = [], groupId = 0): PartialGraphBox {
 	let paramsGroupId = -1;
 
-	const children = func.children.length <= 1 ? [] : func.children.map((param, i) => {
-		if (param.funcType !== VertexType.ChainedFunc) {
+	const children = box.children.length <= 1 ? [] : box.children.map((child, i) => {
+		if (child.type !== BoxType.ChainedFunc) {
 			paramsGroupId += 1;
 		}
-		return upgradeTree(
-			param,
+		return boxToPartialGraphBox(
+			child,
 			funcId.concat(i),
 			paramsGroupId,
 		);
 	});
 
 	return {
+		name: box.name,
+		type: box.type,
+		valueText: `${box.value}`,
+		valueType: box.valueType,
 		id: funcId.join('-'),
 		groupId,
-		funcName: getFuncText(func),
-		funcType: func.funcType,
-		valueText: getvalueText(func),
-		valueType: func.valueType,
-		isNumber: typeof func.value === 'number',
 		children,
 	};
 }
 
-function computeBox(pbt: PartialBox, parent?: PartialBox): Box {
-	const isNull = pbt.valueType === VertexType.Literal && pbt.valueText === '';
-	const noSpace = pbt.funcType === VertexType.Literal || isNull;
+function computeBox(pgb: PartialGraphBox, parent?: PartialGraphBox): GraphBox {
+	const noSpace = pgb.type === BoxType.Value || pgb.valueType === BoxValueType.Null;
 
-	const contentWidth = pbt.funcName.length
-		+ pbt.valueText.length + (noSpace ? 0 : 1);
+	const contentWidth = pgb.name.length
+		+ pgb.valueText.length + (noSpace ? 0 : 1);
 
-	const group = parent?.children.filter(
-		(child: PartialBox) => child.groupId === pbt.groupId,
-	);
+	const group = parent?.children.filter((child) => child.groupId === pgb.groupId);
 
 	let padding: number;
 	let width: number;
 
 	if (group === undefined) {
-		padding = pbt.funcName.length + 1;
+		padding = pgb.name.length + 1;
 		width = contentWidth;
 	} else {
 		const maxLength = Math.max(...group
-			.filter((child: PartialBox) => child.funcType !== VertexType.Mininotation)
-			.map((child: PartialBox) => child.funcName.length));
+			// .filter((child: PartialGraphBox) => child.type !== BoxType.Mininotation)
+			.map((child) => child.name.length));
 
 		padding = maxLength + 1; // + (pbt.funcType === FuncType.Literal ? 0 : 1);
 
-		const getDataWidth = (box: PartialBox) => padding
-			+ (isNull ? 2 : box.valueText.length);
+		const getDataWidth = (box: PartialGraphBox) => padding
+			+ (pgb.valueType === BoxValueType.Null ? 2 : box.valueText.length);
 
-		width = Math.max(...group.map((child: PartialBox) => (
-			child.funcType < VertexType.MainFunc ? child.funcName.length : getDataWidth(child)
+		width = Math.max(...group.map((child: PartialGraphBox) => (
+			child.type < BoxType.MainFunc ? child.name.length : getDataWidth(child)
 		)));
 	}
 
 	return {
-		...pbt,
+		...pgb,
 		contentWidth,
 		padding,
 		width,
-		children: pbt.children.map((child) => computeBox(child, pbt)),
+		children: pgb.children.map((child) => computeBox(child, pgb)),
 	};
 }
 
-const GraphExporter: Exporter = {
-	export(composition: Vertex): Box {
-		const arrangedTree = arrangeTree(composition);
-		const partialBoxTree = upgradeTree(arrangedTree);
-		return computeBox(partialBoxTree);
-	},
-};
+export function boxToGraphBox(box: Box): GraphBox {
+	// const arrangedTree = arrangeTree(composition);
+	const partialBoxTree = boxToPartialGraphBox(box);
+	return computeBox(partialBoxTree);
+}
 
-export default GraphExporter;
+export default boxToGraphBox;

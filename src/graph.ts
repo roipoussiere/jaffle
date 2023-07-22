@@ -1,30 +1,30 @@
 import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
-import { Vertex, VertexType } from './dataTypes/vertex';
-import { GraphExporter, BoxTree } from './exporters/graphExporter';
-import { GraphImporter } from './importers/graphImporter';
+import BoxHelper from './helpers/boxHelper';
+import { BoxType, BoxValueType } from './dataTypes/box';
+import { GraphBox } from './dataTypes/graphBox';
 
-export type FuncNode = d3.id<BoxTree> & {
+export type FuncNode = d3.id<GraphBox> & {
 	x: number,
 	y: number,
 }
 
 const BOX_NAME_COLORS = {
-	[FuncType.Main]: 'black',
-	[FuncType.MainMininotation]: 'green',
-	[FuncType.MainExpression]: 'blue',
-	[FuncType.Constant]: 'blue',
-	[FuncType.Serialized]: 'darkRed',
+	[BoxType.MainFunc]: 'black',
+	[BoxType.ConstantDef]: 'blue',
+	[BoxType.SerializedData]: 'darkRed',
 };
 
 const BOX_VALUE_COLORS = {
-	[ValueType.Literal]: ['darkSlateGray', 'darkRed'],
-	[ValueType.Mininotation]: 'green',
-	[ValueType.Expression]: 'blue',
+	[BoxValueType.String]: 'darkSlateGray',
+	[BoxValueType.Number]: 'darkRed',
+	[BoxValueType.Boolean]: 'darkGreen',
+	[BoxValueType.Mininotation]: 'green',
+	[BoxValueType.Expression]: 'blue',
 };
 
-class JaffleGraph {
+class Graph {
 	public container: HTMLElement;
 
 	public domSvg: SVGElement;
@@ -49,25 +49,24 @@ class JaffleGraph {
 
 	private tree: FuncNode;
 
-	public init(container: HTMLElement): JaffleGraph {
+	public init(container: HTMLElement): Graph {
 		this.container = container;
 		return this;
 	}
 
-	public load(rawComposition: FuncTree): JaffleGraph {
-		const composition = GraphExporter.export(rawComposition);
-		this.tree = <FuncNode> d3.hierarchy(composition);
+	public load(rawComposition: GraphBox): Graph {
+		this.tree = <FuncNode> d3.hierarchy(rawComposition);
 		this.initTree();
 		return this;
 	}
 
-	public initTree(): JaffleGraph {
+	public initTree(): Graph {
 		const layout = flextree({})
 			.nodeSize((n: FuncNode) => (
 				[this.charHeight, (n.data.width + this.boxGap) * this.charWidth]
 			))
 			.spacing((a: FuncNode, b: FuncNode) => (
-				JaffleGraph.shouldStack(a, b) ? 0 : 0.5 * this.charHeight
+				Graph.shouldStack(a, b) ? 0 : 0.5 * this.charHeight
 			));
 
 		layout(this.tree);
@@ -90,7 +89,7 @@ class JaffleGraph {
 		return this;
 	}
 
-	public draw(): JaffleGraph {
+	public draw(): Graph {
 		this.drawSvg();
 		this.domSvg?.remove();
 		this.domSvg = <SVGElement> this.svg.node();
@@ -117,11 +116,11 @@ class JaffleGraph {
 			.attr('stroke', '#333')
 			.attr('stroke-width', 2)
 			.selectAll()
-			.data(this.tree.links().filter((d: d3.HierarchyLink<BoxTree>) => (
-				d.source.depth >= 1 && d.target.data.funcType !== FuncType.Chained
+			.data(this.tree.links().filter((d: d3.HierarchyLink<GraphBox>) => (
+				d.source.depth >= 1 && d.target.data.type !== BoxType.ChainedFunc
 			)))
 			.join('path')
-			.attr('d', (link: d3.HierarchyLink<BoxTree>) => d3.linkHorizontal()
+			.attr('d', (link: d3.HierarchyLink<GraphBox>) => d3.linkHorizontal()
 				.x((n: FuncNode) => (
 					n.y === link.source.y ? n.y + n.data.width * this.charWidth : n.y
 				))
@@ -132,10 +131,10 @@ class JaffleGraph {
 		this.svg.append('g')
 			.selectAll()
 			.data(this.tree.descendants()
-				.filter((n: FuncNode) => n.data.funcType !== FuncType.Chained))
+				.filter((n: FuncNode) => n.data.type !== BoxType.ChainedFunc))
 			.join('rect')
 			.attr('width', (node: FuncNode) => (node.data.width - 0.5) * this.charWidth)
-			.attr('height', (node: FuncNode) => JaffleGraph.getLastFunc(node).x - node.x)
+			.attr('height', (node: FuncNode) => Graph.getLastFunc(node).x - node.x)
 			.attr('x', (node: FuncNode) => node.y + 0.25 * this.charWidth)
 			.attr('y', (node: FuncNode) => node.x)
 			.attr('fill', '#ccc8');
@@ -174,18 +173,17 @@ class JaffleGraph {
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
-			.style('fill', (n: FuncNode) => BOX_NAME_COLORS[n.data.funcType])
-			.style('font-weight', (n: FuncNode) => (n.data.funcType === FuncType.Chained
+			.style('fill', (n: FuncNode) => BOX_NAME_COLORS[n.data.type])
+			.style('font-weight', (n: FuncNode) => (n.data.type === BoxType.ChainedFunc
 				? 'normal' : 'bold'))
-			.text((d: FuncNode) => d.data.funcText);
+			.text((d: FuncNode) => d.data.name);
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: FuncNode) => d.data.padding * this.charWidth)
-			.style('fill', (d: FuncNode) => JaffleGraph.getValueColor(d.data))
+			.style('fill', (d: FuncNode) => Graph.getValueColor(d.data))
 			.text((d: FuncNode) => (
-				(d.data.valueType === ValueType.Literal && d.data.valueText) === ''
-					? '∅' : d.data.valueText
+				d.data.valueType === BoxValueType.Null ? '∅' : d.data.valueText
 			));
 
 		box.append('rect')
@@ -244,7 +242,7 @@ class JaffleGraph {
 			.append('xhtml:input')
 			.attr('id', 'jaffle_ne_input')
 			.attr('type', 'text')
-			.attr('value', selectedBoxIsValue ? node.data.valueText : node.data.funcText)
+			.attr('value', selectedBoxIsValue ? node.data.valueText : node.data.name)
 
 			.on('input', (event: Event) => {
 				const target = <HTMLInputElement>event.target;
@@ -256,12 +254,12 @@ class JaffleGraph {
 					if (selectedBoxIsValue) {
 						selected.data.valueText = target.value;
 					} else {
-						selected.data.funcText = target.value;
+						selected.data.name = target.value;
 					}
 				}
 			})
 			.on('change', () => {
-				this.load(GraphImporter.import(this.tree.data));
+				this.load(BoxHelper.fromGraph(this.tree.data).toGraph());
 				this.draw();
 			})
 			.on('focusout', (event: Event) => {
@@ -274,8 +272,8 @@ class JaffleGraph {
 			.style('font-family', 'monospace')
 			.style('background-color', '#ccc')
 			.style('color', selectedBoxIsValue
-				? JaffleGraph.getValueColor(node.data) : BOX_NAME_COLORS[node.data.funcType])
-			.style('font-weight', selectedBoxIsValue || node.data.funcType === FuncType.Chained
+				? Graph.getValueColor(node.data) : BOX_NAME_COLORS[node.data.type])
+			.style('font-weight', selectedBoxIsValue || node.data.type === BoxType.ChainedFunc
 				? 'normal' : 'bold')
 			.style('border', 'none')
 			.style('border-radius', '3px');
@@ -286,16 +284,13 @@ class JaffleGraph {
 	}
 
 	private static shouldStack(nodeA: FuncNode, nodeB: FuncNode): boolean {
-		const bothAreLiteral = nodeA.data.funcType === FuncType.Literal
-			&& nodeB.data.funcType === FuncType.Literal;
+		const bothAreLiteral = nodeA.data.type === BoxType.Value
+			&& nodeB.data.type === BoxType.Value;
 		return nodeA.parent === nodeB.parent
-			&& (nodeB.data.funcType === FuncType.Chained || bothAreLiteral);
+			&& (bothAreLiteral || nodeB.data.type === BoxType.ChainedFunc);
 	}
 
-	private static getValueColor(box: BoxTree) {
-		if (box.valueType === ValueType.Literal) {
-			return BOX_VALUE_COLORS[ValueType.Literal][box.isNumber ? 1 : 0];
-		}
+	private static getValueColor(box: GraphBox) {
 		return BOX_VALUE_COLORS[box.valueType];
 	}
 
@@ -309,13 +304,13 @@ class JaffleGraph {
 	}
 
 	private static getFirstFunc(node: FuncNode): FuncNode {
-		return JaffleGraph.getGroup(node)[0];
+		return Graph.getGroup(node)[0];
 	}
 
 	private static getLastFunc(node: FuncNode): FuncNode {
-		const group = JaffleGraph.getGroup(node);
+		const group = Graph.getGroup(node);
 		return group[group.length - 1];
 	}
 }
 
-export default JaffleGraph;
+export default Graph;

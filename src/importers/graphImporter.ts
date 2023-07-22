@@ -1,39 +1,32 @@
-import { Vertex, VertexType } from '../dataTypes/vertex';
-import { Box } from '../exporters/graphExporter';
+import { Box, BoxType, BoxValueType } from '../dataTypes/box';
+import { GraphBox } from '../dataTypes/graphBox';
 
-import Importer from './importerInterface';
-
-function getFuncType(boxTree: Box): VertexType {
-	let funcType: VertexType;
-	if (boxTree.funcName[0] === '$') {
-		funcType = VertexType.ConstantDef;
-	} else if (boxTree.funcName[0] === '.') {
-		funcType = VertexType.ChainedFunc;
-	} else if (boxTree.funcName.slice(-1) === '^') {
-		funcType = VertexType.SerializedData;
+export function getBoxType(graph: GraphBox): BoxType {
+	let funcType: BoxType;
+	if (graph.name[0] === '$') {
+		funcType = BoxType.ConstantDef;
+	} else if (graph.name[0] === '.') {
+		funcType = BoxType.ChainedFunc;
+	} else if (graph.name.slice(-1) === '^') {
+		funcType = BoxType.SerializedData;
 	// } else if (boxTree.children.length > 0) {
 	// 	funcType = VertexType.List;
-	} else if (boxTree.funcName === '') {
-		funcType = VertexType.Literal;
+	} else if (graph.name === '') {
+		funcType = BoxType.Value;
 	} else {
-		funcType = VertexType.MainFunc;
+		funcType = BoxType.MainFunc;
 	}
 	return funcType;
 }
 
-function getFunc(boxTree: Box): Vertex {
+export function graphBoxToBox(graphBox: GraphBox): Box {
 	return {
-		type: getFuncType(boxTree),
-		value: boxTree.valueText,
-		// valueType: GraphImporter.getValueType(boxTree),
-		children: boxTree.children.map((child) => getFunc(child)),
+		name: graphBox.name,
+		type: getBoxType(graphBox),
+		value: graphBox.valueText,
+		valueType: BoxValueType.String,
+		children: graphBox.children.map((child) => graphBoxToBox(child)),
 	};
 }
 
-const GraphImporter: Importer = {
-	import(graph: Box): Vertex {
-		return getFunc(graph);
-	},
-};
-
-export default GraphImporter;
+export default graphBoxToBox;
