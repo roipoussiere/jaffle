@@ -181,7 +181,7 @@ export function buildBoxChildren(rawBoxChildren: Array<unknown>): Array<Box> {
 	return children;
 }
 
-export function buildBoxFromYaml(yaml: string): Box {
+export function yamlToBox(yaml: string): Box {
 	let data: unknown;
 
 	try {
@@ -203,3 +203,5 @@ export function buildBoxFromYaml(yaml: string): Box {
 		children: buildBoxChildren(rawComposition),
 	};
 }
+
+export default yamlToBox;
