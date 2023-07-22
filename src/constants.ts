@@ -7,3 +7,7 @@ export const EXPR_STR_PREFIX = '=';
 
 export const MININOTATION_FUNC_NAME = '_mini';
 export const EXPRESSION_FUNC_NAME = '_expr';
+
+export const VAR_NAME_PREFIX = '_';
+export const LAMBDA_NAME = 'set';
+export const LAMBDA_VAR = '_x_';
