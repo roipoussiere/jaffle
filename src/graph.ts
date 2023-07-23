@@ -2,10 +2,9 @@ import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
 import BoxHelper from './helpers/boxHelper';
-import { BoxType, BoxValueType } from './dataTypes/box';
-import { GraphBox } from './dataTypes/graphBox';
+import { VBox, BoxType, BoxValueType } from './boxInterfaces';
 
-export type FuncNode = d3.id<GraphBox> & {
+export type FuncNode = d3.id<VBox> & {
 	x: number,
 	y: number,
 }
@@ -54,7 +53,7 @@ class Graph {
 		return this;
 	}
 
-	public load(rawComposition: GraphBox): Graph {
+	public load(rawComposition: VBox): Graph {
 		this.tree = <FuncNode> d3.hierarchy(rawComposition);
 		this.initTree();
 		return this;
@@ -116,11 +115,11 @@ class Graph {
 			.attr('stroke', '#333')
 			.attr('stroke-width', 2)
 			.selectAll()
-			.data(this.tree.links().filter((d: d3.HierarchyLink<GraphBox>) => (
+			.data(this.tree.links().filter((d: d3.HierarchyLink<VBox>) => (
 				d.source.depth >= 1 && d.target.data.type !== BoxType.ChainedFunc
 			)))
 			.join('path')
-			.attr('d', (link: d3.HierarchyLink<GraphBox>) => d3.linkHorizontal()
+			.attr('d', (link: d3.HierarchyLink<VBox>) => d3.linkHorizontal()
 				.x((n: FuncNode) => (
 					n.y === link.source.y ? n.y + n.data.width * this.charWidth : n.y
 				))
@@ -135,6 +134,7 @@ class Graph {
 			.join('rect')
 			.attr('width', (node: FuncNode) => (node.data.width - 0.5) * this.charWidth)
 			.attr('height', (node: FuncNode) => Graph.getLastFunc(node).x - node.x)
+			// .attr('height', (node: FuncNode) => this.getNodeById(node.lastSibling).x - node.x)
 			.attr('x', (node: FuncNode) => node.y + 0.25 * this.charWidth)
 			.attr('y', (node: FuncNode) => node.x)
 			.attr('fill', '#ccc8');
@@ -176,15 +176,13 @@ class Graph {
 			.style('fill', (n: FuncNode) => BOX_NAME_COLORS[n.data.type])
 			.style('font-weight', (n: FuncNode) => (n.data.type === BoxType.ChainedFunc
 				? 'normal' : 'bold'))
-			.text((d: FuncNode) => d.data.name);
+			.text((d: FuncNode) => d.data.displayName);
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: FuncNode) => d.data.padding * this.charWidth)
-			.style('fill', (d: FuncNode) => Graph.getValueColor(d.data))
-			.text((d: FuncNode) => (
-				d.data.valueType === BoxValueType.Null ? '∅' : d.data.valueText
-			));
+			.style('fill', (d: FuncNode) => BOX_VALUE_COLORS[d.data.valueType])
+			.text((d: FuncNode) => d.data.displayValue);
 
 		box.append('rect')
 			.attr('width', (n: FuncNode) => n.data.padding * this.charWidth)
@@ -222,48 +220,43 @@ class Graph {
 	// `);
 	}
 
-	private drawInput(selectedBoxId: string, selectedBoxIsValue: boolean) {
-		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const self = this;
-
-		const node = this.tree.find((n: FuncNode) => n.data.id === selectedBoxId);
-		if (node === undefined) {
+	private drawInput(selectedBoxId: string, isValueSelected: boolean) {
+		const focusedNode = this.getNodeById(selectedBoxId);
+		if (focusedNode === undefined) {
 			return;
 		}
 
 		this.svg.append('foreignObject')
-			.attr('x', selectedBoxIsValue ? node.y + node.data.padding * this.charWidth : node.y)
-			.attr('y', node.x - 0.5 * this.charHeight)
-			.attr('width', selectedBoxIsValue
-				? (node.data.width - node.data.padding) * this.charWidth
-				: node.data.padding * this.charWidth)
+			.attr('x', isValueSelected
+				? focusedNode.y + focusedNode.data.padding * this.charWidth
+				: focusedNode.y)
+			.attr('y', focusedNode.x - 0.5 * this.charHeight)
+			.attr('width', isValueSelected
+				? (focusedNode.data.width - focusedNode.data.padding) * this.charWidth
+				: focusedNode.data.padding * this.charWidth)
 			.attr('height', this.charHeight)
 
 			.append('xhtml:input')
 			.attr('id', 'jaffle_ne_input')
 			.attr('type', 'text')
-			.attr('value', selectedBoxIsValue ? node.data.valueText : node.data.name)
+			.attr('value', isValueSelected ? focusedNode.data.rawValue : focusedNode.data.rawName)
+			// .on('input', (event: Event) => {})
 
-			.on('input', (event: Event) => {
-				const target = <HTMLInputElement>event.target;
-				target.width = selectedBoxIsValue
-					? (node.data.width - node.data.padding) * self.charWidth
-					: node.data.padding * self.charWidth;
-				const selected = self.tree.find((n: FuncNode) => n.data.id === selectedBoxId);
-				if (selected !== undefined) {
-					if (selectedBoxIsValue) {
-						selected.data.valueText = target.value;
-					} else {
-						selected.data.name = target.value;
-					}
+			.on('change', (event: Event) => {
+				const rawText = (<HTMLInputElement>event.target).value;
+
+				if (isValueSelected) {
+					focusedNode.data.rawValue = rawText;
+				} else {
+					focusedNode.data.rawName = rawText;
 				}
-			})
-			.on('change', () => {
+
 				this.load(BoxHelper.fromGraph(this.tree.data).toGraph());
 				this.draw();
 			})
 			.on('focusout', (event: Event) => {
-				(<HTMLInputElement>event.target).parentElement?.remove();
+				const target = <HTMLInputElement>event.target;
+				target.parentElement?.remove();
 			})
 
 			.style('width', '100%')
@@ -271,9 +264,10 @@ class Graph {
 			.style('font-size', `${this.fontSize}px`)
 			.style('font-family', 'monospace')
 			.style('background-color', '#ccc')
-			.style('color', selectedBoxIsValue
-				? Graph.getValueColor(node.data) : BOX_NAME_COLORS[node.data.type])
-			.style('font-weight', selectedBoxIsValue || node.data.type === BoxType.ChainedFunc
+			.style('color', isValueSelected
+				? BOX_VALUE_COLORS[focusedNode.data.valueType]
+				: BOX_NAME_COLORS[focusedNode.data.type])
+			.style('font-weight', isValueSelected || focusedNode.data.type === BoxType.ChainedFunc
 				? 'normal' : 'bold')
 			.style('border', 'none')
 			.style('border-radius', '3px');
@@ -283,15 +277,15 @@ class Graph {
 		domInput.selectionStart = 9999;
 	}
 
+	getNodeById(id: string): FuncNode | undefined {
+		return this.tree.find((n: FuncNode) => n.data.id === id);
+	}
+
 	private static shouldStack(nodeA: FuncNode, nodeB: FuncNode): boolean {
 		const bothAreLiteral = nodeA.data.type === BoxType.Value
 			&& nodeB.data.type === BoxType.Value;
 		return nodeA.parent === nodeB.parent
 			&& (bothAreLiteral || nodeB.data.type === BoxType.ChainedFunc);
-	}
-
-	private static getValueColor(box: GraphBox) {
-		return BOX_VALUE_COLORS[box.valueType];
 	}
 
 	private static getGroup(node: FuncNode): Array<FuncNode> {
@@ -307,6 +301,7 @@ class Graph {
 		return Graph.getGroup(node)[0];
 	}
 
+	// TODO: remove in favor of this.getNodeById(node.lastSibling)
 	private static getLastFunc(node: FuncNode): FuncNode {
 		const group = Graph.getGroup(node);
 		return group[group.length - 1];

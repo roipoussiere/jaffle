@@ -1,7 +1,6 @@
-import { Box } from '../dataTypes/box';
-import { GraphBox } from '../dataTypes/graphBox';
+import { Box, VBox } from '../boxInterfaces';
 import yamlToBox from '../importers/yamlImporter';
-import graphBoxToBox from '../importers/graphImporter';
+import vBoxToBox from '../importers/graphImporter';
 import boxToGraphBox from '../exporters/graphExporter';
 
 export default class BoxHelper {
@@ -15,15 +14,15 @@ export default class BoxHelper {
 		return new BoxHelper(yamlToBox(yaml));
 	}
 
-	static fromGraph(graph: GraphBox): BoxHelper {
-		return new BoxHelper(graphBoxToBox(graph));
+	static fromGraph(graph: VBox): BoxHelper {
+		return new BoxHelper(vBoxToBox(graph));
 	}
 
 	toBox(): Box {
 		return this.box;
 	}
 
-	toGraph(): GraphBox {
+	toGraph(): VBox {
 		return boxToGraphBox(this.box);
 	}
 }

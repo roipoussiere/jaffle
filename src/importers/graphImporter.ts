@@ -1,17 +1,16 @@
-import { Box, BoxType, BoxValueType } from '../dataTypes/box';
-import { GraphBox } from '../dataTypes/graphBox';
+import { VBox, Box, BoxType, BoxValueType } from '../boxInterfaces';
 
-export function getBoxType(graph: GraphBox): BoxType {
+export function getBoxType(vBox: VBox): BoxType {
 	let funcType: BoxType;
-	if (graph.name[0] === '$') {
+	if (vBox.rawName[0] === '$') {
 		funcType = BoxType.ConstantDef;
-	} else if (graph.name[0] === '.') {
+	} else if (vBox.rawName[0] === '.') {
 		funcType = BoxType.ChainedFunc;
-	} else if (graph.name.slice(-1) === '^') {
+	} else if (vBox.rawName.slice(-1) === '^') {
 		funcType = BoxType.SerializedData;
 	// } else if (boxTree.children.length > 0) {
 	// 	funcType = VertexType.List;
-	} else if (graph.name === '') {
+	} else if (vBox.rawName === '') {
 		funcType = BoxType.Value;
 	} else {
 		funcType = BoxType.MainFunc;
@@ -19,14 +18,14 @@ export function getBoxType(graph: GraphBox): BoxType {
 	return funcType;
 }
 
-export function graphBoxToBox(graphBox: GraphBox): Box {
+export function vBoxToBox(graphBox: VBox): Box {
 	return {
-		name: graphBox.name,
+		rawName: graphBox.rawName,
 		type: getBoxType(graphBox),
-		value: graphBox.valueText,
+		rawValue: graphBox.rawValue,
 		valueType: BoxValueType.String,
-		children: graphBox.children.map((child) => graphBoxToBox(child)),
+		children: graphBox.children.map((child) => vBoxToBox(child)),
 	};
 }
 
-export default graphBoxToBox;
+export default vBoxToBox;

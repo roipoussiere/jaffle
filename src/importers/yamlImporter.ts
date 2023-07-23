@@ -1,7 +1,7 @@
 import { load as loadYaml } from 'js-yaml';
 
 import * as c from '../constants';
-import { Box, BoxType, BoxValueType, Dict } from '../dataTypes/box';
+import { Box, Dict, BoxType, BoxValueType } from '../boxInterfaces';
 
 import { YamlImporterError } from './importerErrors';
 
@@ -31,22 +31,22 @@ export function getBoxType(boxName: string): BoxType {
 	return boxType;
 }
 
-export function getBoxValueType(rawValue: unknown, specialString = true): BoxValueType {
+export function valueToValueType(value: unknown, specialString = true): BoxValueType {
 	let boxValueType: BoxValueType;
-	if (typeof rawValue === 'string') {
+	if (typeof value === 'string') {
 		boxValueType = BoxValueType.String;
 		if (specialString) {
-			if (rawValue[0] === c.MINI_STR_PREFIX) {
+			if (value[0] === c.MINI_STR_PREFIX) {
 				boxValueType = BoxValueType.Mininotation;
-			} else if (rawValue[0] === c.EXPR_STR_PREFIX) {
+			} else if (value[0] === c.EXPR_STR_PREFIX) {
 				boxValueType = BoxValueType.Expression;
 			}
 		}
-	} else if (typeof rawValue === 'number') {
+	} else if (typeof value === 'number') {
 		boxValueType = BoxValueType.Number;
-	} else if (typeof rawValue === 'boolean') {
+	} else if (typeof value === 'boolean') {
 		boxValueType = BoxValueType.Boolean;
-	} else if (rawValue === null) {
+	} else if (value === null) {
 		boxValueType = BoxValueType.Null;
 	} else {
 		boxValueType = BoxValueType.Empty;
@@ -54,15 +54,15 @@ export function getBoxValueType(rawValue: unknown, specialString = true): BoxVal
 	return boxValueType;
 }
 
-export function buildSerializedBoxFromKeyVal(key: string, rawValue: unknown): Box {
+export function keyValToSerializedBox(key: string, rawValue: unknown): Box {
 	if (rawValue instanceof Object) {
 		return {
-			name: key,
+			rawName: key,
 			type: BoxType.SerializedData,
-			value: null,
+			rawValue: '',
 			valueType: BoxValueType.Empty,
 			// eslint-disable-next-line no-use-before-define
-			children: Object.keys(rawValue).map((chKey) => buildSerializedBox(
+			children: Object.keys(rawValue).map((chKey) => valueToSerializedBox(
 				rawValue instanceof Array ? rawValue[Number(chKey)] : {
 					[chKey]: (<Dict<unknown>>rawValue)[chKey],
 				},
@@ -70,54 +70,54 @@ export function buildSerializedBoxFromKeyVal(key: string, rawValue: unknown): Bo
 		};
 	}
 	return {
-		name: key,
+		rawName: key,
 		type: BoxType.SerializedData,
-		value: rawValue,
-		valueType: getBoxValueType(rawValue, false),
+		rawValue: `${rawValue}`,
+		valueType: valueToValueType(rawValue, false),
 		children: [],
 	};
 }
 
-export function buildSerializedBox(rawValue: unknown): Box {
+export function valueToSerializedBox(rawValue: unknown): Box {
 	if (rawValue instanceof Array) {
 		return {
-			name: '',
+			rawName: '',
 			type: BoxType.SerializedData,
-			value: null,
+			rawValue: '',
 			valueType: BoxValueType.Empty,
-			children: rawValue.map((rawChild) => buildSerializedBox(rawChild)),
+			children: rawValue.map((rawChild) => valueToSerializedBox(rawChild)),
 		};
 	}
 	if (rawValue instanceof Object) {
 		const keys = Object.keys(rawValue);
 		if (keys.length === 1) {
-			return buildSerializedBoxFromKeyVal(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
+			return keyValToSerializedBox(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
 		}
 		return {
-			name: '',
+			rawName: '',
 			type: BoxType.SerializedData,
-			value: null,
+			rawValue: '',
 			valueType: BoxValueType.Empty,
-			children: keys.map((key) => buildSerializedBox({
+			children: keys.map((key) => valueToSerializedBox({
 				[key]: (<Dict<unknown>>rawValue)[key],
 			})),
 		};
 	}
 	return {
-		name: '',
+		rawName: '',
 		type: BoxType.SerializedData,
-		value: rawValue,
-		valueType: getBoxValueType(rawValue, false),
+		rawValue: `${rawValue}`,
+		valueType: valueToValueType(rawValue, false),
 		children: [],
 	};
 }
 
 export function buildLiteralBox(rawLiteral: unknown): Box {
 	return {
-		name: '',
+		rawName: '',
 		type: BoxType.Value,
-		value: rawLiteral,
-		valueType: getBoxValueType(rawLiteral),
+		rawValue: `${rawLiteral}`,
+		valueType: valueToValueType(rawLiteral),
 		children: [],
 	};
 }
@@ -128,9 +128,9 @@ export function buildListBox(rawList: Array<unknown>): Box {
 	}
 
 	return {
-		name: '',
+		rawName: '',
 		type: BoxType.List,
-		value: null,
+		rawValue: '',
 		valueType: BoxValueType.Empty,
 		// eslint-disable-next-line no-use-before-define
 		children: buildBoxChildren(rawList),
@@ -143,24 +143,24 @@ export function buildFuncBox(rawFunc: Dict<unknown>): Box {
 	const rawValue = rawFunc[funcName];
 
 	if (funcType === BoxType.SerializedData) {
-		return buildSerializedBox(rawFunc);
+		return valueToSerializedBox(rawFunc);
 	}
 
 	if (rawValue instanceof Array) {
 		return {
-			name: funcName,
+			rawName: funcName,
 			type: funcType,
-			value: null,
-			valueType: getBoxValueType(rawValue),
+			rawValue: '',
+			valueType: valueToValueType(rawValue),
 			// eslint-disable-next-line no-use-before-define
 			children: buildBoxChildren(rawValue),
 		};
 	}
 	return {
-		name: funcName,
+		rawName: funcName,
 		type: funcType,
-		value: rawValue,
-		valueType: getBoxValueType(rawValue),
+		rawValue: `${rawValue}`,
+		valueType: valueToValueType(rawValue),
 		children: [],
 	};
 }
@@ -196,9 +196,9 @@ export function yamlToBox(yaml: string): Box {
 	const rawComposition = <Array<unknown>> data;
 
 	return {
-		name: '',
+		rawName: '',
 		type: BoxType.MainFunc,
-		value: null,
+		rawValue: '',
 		valueType: BoxValueType.Empty,
 		children: buildBoxChildren(rawComposition),
 	};
