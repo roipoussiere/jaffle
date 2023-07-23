@@ -1,4 +1,4 @@
-import { Box, VBox, PartialVBox, BoxType, BoxValueType } from '../boxInterfaces';
+import { RawBox, VBox, PartialVBox, BoxType, BoxValueType } from '../boxInterfaces';
 import * as c from '../constants';
 
 // function arrangeTree(vertex: Vertex): DraftBox {
@@ -79,7 +79,7 @@ export function rawValueToDisplayValue(rawValue: string): string {
 	return `${rawValue}`; // TODO
 }
 
-export function boxToPartialVBox(box: Box, funcId: Array<number> = [], groupId = 0): PartialVBox {
+export function boxToPartialVBox(box: RawBox, funcId: Array<number> = [], groupId = 0): PartialVBox {
 	let paramsGroupId = -1;
 
 	return {
@@ -143,7 +143,7 @@ export function partialVBoxToVBox(pvb: PartialVBox, parent?: PartialVBox): VBox 
 	};
 }
 
-export function boxToVBox(box: Box): VBox {
+export function boxToVBox(box: RawBox): VBox {
 	// const arrangedTree = arrangeTree(composition);
 	const partialBoxTree = boxToPartialVBox(box);
 	return partialVBoxToVBox(partialBoxTree);

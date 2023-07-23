@@ -1,7 +1,7 @@
 import { load as loadYaml } from 'js-yaml';
 
 import * as c from '../constants';
-import { Box, Dict, BoxType, BoxValueType } from '../boxInterfaces';
+import { RawBox, Dict, BoxType, BoxValueType } from '../boxInterfaces';
 
 import { YamlImporterError } from './importerErrors';
 
@@ -54,7 +54,7 @@ export function valueToValueType(value: unknown, specialString = true): BoxValue
 	return boxValueType;
 }
 
-export function keyValToSerializedBox(key: string, rawValue: unknown): Box {
+export function keyValToSerializedBox(key: string, rawValue: unknown): RawBox {
 	if (rawValue instanceof Object) {
 		return {
 			rawName: key,
@@ -78,7 +78,7 @@ export function keyValToSerializedBox(key: string, rawValue: unknown): Box {
 	};
 }
 
-export function valueToSerializedBox(rawValue: unknown): Box {
+export function valueToSerializedBox(rawValue: unknown): RawBox {
 	if (rawValue instanceof Array) {
 		return {
 			rawName: '',
@@ -112,7 +112,7 @@ export function valueToSerializedBox(rawValue: unknown): Box {
 	};
 }
 
-export function buildLiteralBox(rawLiteral: unknown): Box {
+export function buildLiteralBox(rawLiteral: unknown): RawBox {
 	return {
 		rawName: '',
 		type: BoxType.Value,
@@ -122,7 +122,7 @@ export function buildLiteralBox(rawLiteral: unknown): Box {
 	};
 }
 
-export function buildListBox(rawList: Array<unknown>): Box {
+export function buildListBox(rawList: Array<unknown>): RawBox {
 	if (rawList.length === 0) {
 		throw new YamlImporterError('list is empty');
 	}
@@ -137,7 +137,7 @@ export function buildListBox(rawList: Array<unknown>): Box {
 	};
 }
 
-export function buildFuncBox(rawFunc: Dict<unknown>): Box {
+export function buildFuncBox(rawFunc: Dict<unknown>): RawBox {
 	const funcName = getBoxName(rawFunc);
 	const funcType = getBoxType(funcName);
 	const rawValue = rawFunc[funcName];
@@ -165,8 +165,8 @@ export function buildFuncBox(rawFunc: Dict<unknown>): Box {
 	};
 }
 
-export function buildBoxChildren(rawBoxChildren: Array<unknown>): Array<Box> {
-	const children: Array<Box> = [];
+export function buildBoxChildren(rawBoxChildren: Array<unknown>): Array<RawBox> {
+	const children: Array<RawBox> = [];
 
 	rawBoxChildren.forEach((child: unknown) => {
 		if (child instanceof Array) {
@@ -181,7 +181,7 @@ export function buildBoxChildren(rawBoxChildren: Array<unknown>): Array<Box> {
 	return children;
 }
 
-export function yamlToBox(yaml: string): Box {
+export function yamlToBox(yaml: string): RawBox {
 	let data: unknown;
 
 	try {

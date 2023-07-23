@@ -1,4 +1,4 @@
-import { VBox, Box, BoxType, BoxValueType } from '../boxInterfaces';
+import { VBox, RawBox, BoxType, BoxValueType } from '../boxInterfaces';
 
 export function getBoxType(vBox: VBox): BoxType {
 	let funcType: BoxType;
@@ -18,7 +18,7 @@ export function getBoxType(vBox: VBox): BoxType {
 	return funcType;
 }
 
-export function vBoxToBox(graphBox: VBox): Box {
+export function vBoxToBox(graphBox: VBox): RawBox {
 	return {
 		rawName: graphBox.rawName,
 		type: getBoxType(graphBox),

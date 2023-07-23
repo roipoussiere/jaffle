@@ -1,12 +1,12 @@
-import { Box, VBox } from '../boxInterfaces';
+import { RawBox, VBox } from '../boxInterfaces';
 import yamlToBox from '../importers/yamlImporter';
 import vBoxToBox from '../importers/graphImporter';
 import boxToGraphBox from '../exporters/graphExporter';
 
 export default class BoxHelper {
-	readonly box: Box;
+	readonly box: RawBox;
 
-	constructor(box: Box) {
+	constructor(box: RawBox) {
 		this.box = box;
 	}
 
@@ -18,7 +18,7 @@ export default class BoxHelper {
 		return new BoxHelper(vBoxToBox(graph));
 	}
 
-	toBox(): Box {
+	toBox(): RawBox {
 		return this.box;
 	}
 
