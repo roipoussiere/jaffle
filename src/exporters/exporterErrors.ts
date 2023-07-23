@@ -8,10 +8,17 @@ export class ExporterError extends JaffleError {
 	}
 }
 
-export class GraphExporterError extends ExporterError {
+export class AstNodeExporterError extends ExporterError {
 	constructor(message: string) {
 		super(message);
-		this.name = GraphExporterError.name;
+		this.name = AstNodeExporterError.name;
+	}
+}
+
+export class BoxExporterError extends ExporterError {
+	constructor(message: string) {
+		super(message);
+		this.name = BoxExporterError.name;
 	}
 }
 

@@ -8,10 +8,17 @@ export class ImporterError extends JaffleError {
 	}
 }
 
-export class BoxTreeImporterError extends ImporterError {
+export class AstNodeImporterError extends ImporterError {
 	constructor(message: string) {
 		super(message);
-		this.name = BoxTreeImporterError.name;
+		this.name = AstNodeImporterError.name;
+	}
+}
+
+export class BoxImporterError extends ImporterError {
+	constructor(message: string) {
+		super(message);
+		this.name = BoxImporterError.name;
 	}
 }
 
@@ -19,12 +26,5 @@ export class YamlImporterError extends ImporterError {
 	constructor(message: string) {
 		super(message);
 		this.name = YamlImporterError.name;
-	}
-}
-
-export class GraphImporterError extends ImporterError {
-	constructor(message: string) {
-		super(message);
-		this.name = GraphImporterError.name;
 	}
 }

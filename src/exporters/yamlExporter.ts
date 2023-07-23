@@ -1,10 +1,10 @@
 // eslint-disable-next-line max-classes-per-file
 import { dump as dumpYaml } from 'js-yaml';
 
-import { Box } from '../boxInterfaces';
+import { Entry } from '../model';
 
-export function boxToYaml(box: Box) {
-	return dumpYaml(box);
+export function entryToYaml(entry: Entry): string {
+	return dumpYaml(entry);
 }
 
-export default boxToYaml;
+export default entryToYaml;

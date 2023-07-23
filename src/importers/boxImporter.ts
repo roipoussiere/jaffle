@@ -1,6 +1,6 @@
-import { VBox, RawBox, BoxType, BoxValueType } from '../boxInterfaces';
+import { Box, Entry, BoxType, ValueType } from '../model';
 
-export function getBoxType(vBox: VBox): BoxType {
+export function getBoxType(vBox: Box): BoxType {
 	let funcType: BoxType;
 	if (vBox.rawName[0] === '$') {
 		funcType = BoxType.ConstantDef;
@@ -18,14 +18,14 @@ export function getBoxType(vBox: VBox): BoxType {
 	return funcType;
 }
 
-export function vBoxToBox(graphBox: VBox): RawBox {
+export function boxToEntry(box: Box): Entry {
 	return {
-		rawName: graphBox.rawName,
-		type: getBoxType(graphBox),
-		rawValue: graphBox.rawValue,
-		valueType: BoxValueType.String,
-		children: graphBox.children.map((child) => vBoxToBox(child)),
+		rawName: box.rawName,
+		type: getBoxType(box),
+		rawValue: box.rawValue,
+		valueType: ValueType.String,
+		children: box.children.map((child) => boxToEntry(child)),
 	};
 }
 
-export default vBoxToBox;
+export default boxToEntry;

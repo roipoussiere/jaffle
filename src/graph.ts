@@ -1,10 +1,10 @@
 import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
-import BoxHelper from './helpers/boxHelper';
-import { VBox, BoxType, BoxValueType } from './boxInterfaces';
+import BoxHelper from './converter';
+import { Box, BoxType, ValueType } from './model';
 
-export type FuncNode = d3.id<VBox> & {
+export type FuncNode = d3.id<Box> & {
 	x: number,
 	y: number,
 }
@@ -16,11 +16,11 @@ const BOX_NAME_COLORS = {
 };
 
 const BOX_VALUE_COLORS = {
-	[BoxValueType.String]: 'darkSlateGray',
-	[BoxValueType.Number]: 'darkRed',
-	[BoxValueType.Boolean]: 'darkGreen',
-	[BoxValueType.Mininotation]: 'green',
-	[BoxValueType.Expression]: 'blue',
+	[ValueType.String]: 'darkSlateGray',
+	[ValueType.Number]: 'darkRed',
+	[ValueType.Boolean]: 'darkGreen',
+	[ValueType.Mininotation]: 'green',
+	[ValueType.Expression]: 'blue',
 };
 
 class Graph {
@@ -53,7 +53,7 @@ class Graph {
 		return this;
 	}
 
-	public load(rawComposition: VBox): Graph {
+	public load(rawComposition: Box): Graph {
 		this.tree = <FuncNode> d3.hierarchy(rawComposition);
 		this.initTree();
 		return this;
@@ -115,11 +115,11 @@ class Graph {
 			.attr('stroke', '#333')
 			.attr('stroke-width', 2)
 			.selectAll()
-			.data(this.tree.links().filter((d: d3.HierarchyLink<VBox>) => (
+			.data(this.tree.links().filter((d: d3.HierarchyLink<Box>) => (
 				d.source.depth >= 1 && d.target.data.type !== BoxType.ChainedFunc
 			)))
 			.join('path')
-			.attr('d', (link: d3.HierarchyLink<VBox>) => d3.linkHorizontal()
+			.attr('d', (link: d3.HierarchyLink<Box>) => d3.linkHorizontal()
 				.x((n: FuncNode) => (
 					n.y === link.source.y ? n.y + n.data.width * this.charWidth : n.y
 				))
@@ -251,7 +251,7 @@ class Graph {
 					focusedNode.data.rawName = rawText;
 				}
 
-				this.load(BoxHelper.fromGraph(this.tree.data).toGraph());
+				this.load(BoxHelper.fromBox(this.tree.data).toBox());
 				this.draw();
 			})
 			.on('focusout', (event: Event) => {

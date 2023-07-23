@@ -1,4 +1,4 @@
-import { RawBox, VBox, PartialVBox, BoxType, BoxValueType } from '../boxInterfaces';
+import { Entry, Box, PartialBox, BoxType, ValueType } from '../model';
 import * as c from '../constants';
 
 // function arrangeTree(vertex: Vertex): DraftBox {
@@ -53,20 +53,20 @@ export function rawNameToType(rawName: string): BoxType {
 	return vBoxType;
 }
 
-export function rawValueToValueType(rawValue: string, specialString = true): BoxValueType {
-	let boxValueType: BoxValueType;
+export function rawValueToValueType(rawValue: string, specialString = true): ValueType {
+	let boxValueType: ValueType;
 	if (specialString && rawValue[0] === c.MINI_STR_PREFIX) {
-		boxValueType = BoxValueType.Mininotation;
+		boxValueType = ValueType.Mininotation;
 	} else if (specialString && rawValue[0] === c.EXPR_STR_PREFIX) {
-		boxValueType = BoxValueType.Expression;
+		boxValueType = ValueType.Expression;
 	} else if (!Number.isNaN(rawValue)) {
-		boxValueType = BoxValueType.Number;
+		boxValueType = ValueType.Number;
 	} else if (rawValue === 'true' || rawValue === 'false') {
-		boxValueType = BoxValueType.Boolean;
+		boxValueType = ValueType.Boolean;
 	} else if (rawValue === '') {
-		boxValueType = BoxValueType.Null;
+		boxValueType = ValueType.Null;
 	} else {
-		boxValueType = BoxValueType.String;
+		boxValueType = ValueType.String;
 	}
 	return boxValueType;
 }
@@ -79,7 +79,7 @@ export function rawValueToDisplayValue(rawValue: string): string {
 	return `${rawValue}`; // TODO
 }
 
-export function boxToPartialVBox(box: RawBox, funcId: Array<number> = [], groupId = 0): PartialVBox {
+export function boxToPartialVBox(box: Entry, funcId: Array<number> = [], groupId = 0): PartialBox {
 	let paramsGroupId = -1;
 
 	return {
@@ -106,10 +106,10 @@ export function boxToPartialVBox(box: RawBox, funcId: Array<number> = [], groupI
 	};
 }
 
-export function partialVBoxToVBox(pvb: PartialVBox, parent?: PartialVBox): VBox {
+export function partialVBoxToVBox(pvb: PartialBox, parent?: PartialBox): Box {
 	const type = rawNameToType(pvb.rawName);
 	const valueType = rawValueToValueType(pvb.rawValue);
-	const noSpace = type === BoxType.Value || valueType === BoxValueType.Null;
+	const noSpace = type === BoxType.Value || valueType === ValueType.Null;
 	const contentWidth = pvb.displayName.length + pvb.displayValue.length + (noSpace ? 0 : 1);
 	const group = parent?.children.filter((child) => child.groupId === pvb.groupId);
 
@@ -126,8 +126,8 @@ export function partialVBoxToVBox(pvb: PartialVBox, parent?: PartialVBox): VBox 
 		// const getDataWidth = (box: PartialVBox) => padding
 		// 	+ (valueType === VBoxValueType.Null ? 2 : box.displayName.length);
 
-		width = Math.max(...group.map((child: PartialVBox) => (
-			padding + (valueType === BoxValueType.Null ? 2 : child.displayName.length)
+		width = Math.max(...group.map((child: PartialBox) => (
+			padding + (valueType === ValueType.Null ? 2 : child.displayName.length)
 			// child.type < VBoxType.MainFunc ? child.displayName.length : getDataWidth(child)
 		)));
 	}
@@ -143,10 +143,10 @@ export function partialVBoxToVBox(pvb: PartialVBox, parent?: PartialVBox): VBox 
 	};
 }
 
-export function boxToVBox(box: RawBox): VBox {
+export function entryToBox(entry: Entry): Box {
 	// const arrangedTree = arrangeTree(composition);
-	const partialBoxTree = boxToPartialVBox(box);
+	const partialBoxTree = boxToPartialVBox(entry);
 	return partialVBoxToVBox(partialBoxTree);
 }
 
-export default boxToVBox;
+export default entryToBox;

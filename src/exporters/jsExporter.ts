@@ -1,5 +1,6 @@
-import { Vertex, BoxType } from '../boxInterfaces';
+import { AstNode, BoxType, Entry } from '../model';
 import * as c from '../constants';
+import entryToAstNode from './astNodeExporter';
 
 /**
  * Serialise an object to JSON.
@@ -10,28 +11,33 @@ function serialize(thing: unknown): string {
 	return JSON.stringify(thing);
 }
 
-export function vertexToJs(func: Vertex): string {
-	const params = func.children.map((param) => vertexToJs(param));
+export function astNodeToJs(astNode: AstNode): string {
+	const params = astNode.children.map((param) => astNodeToJs(param));
 	let js: string;
 
-	if (func.type === BoxType.MainFunc) {
-		js = `${func.value}(${params.join(', ')})`;
-	} else if (func.type === BoxType.ChainedFunc) {
-		js = `.${func.value}(${params.join(', ')})`;
-	} else if (func.type === BoxType.ConstantDef) {
-		js = `const ${c.VAR_NAME_PREFIX}${func.value} = ${params[0]};`;
+	if (astNode.type === BoxType.MainFunc) {
+		js = `${astNode.value}(${params.join(', ')})`;
+	} else if (astNode.type === BoxType.ChainedFunc) {
+		js = `.${astNode.value}(${params.join(', ')})`;
+	} else if (astNode.type === BoxType.ConstantDef) {
+		js = `const ${c.VAR_NAME_PREFIX}${astNode.value} = ${params[0]};`;
 	// } else if (func.type === BoxType.List) {
 	// 	js = `[${params.join(', ')}]`;
-	} else if (func.type === BoxType.Value) {
-		js = typeof func.value === 'string' ? `'${func.value}'` : `${func.value}`;
+	} else if (astNode.type === BoxType.Value) {
+		js = typeof astNode.value === 'string' ? `'${astNode.value}'` : `${astNode.value}`;
 	// } else if (func.type === BoxType.Expression) {
 	// 	js = `${c.VAR_NAME_PREFIX}${func.value}`;
 	// } else if (func.type === BoxType.Mininotation) {
 	// 	js = `mini(${func.value})`;
 	} else {
-		js = serialize(func.value);
+		js = serialize(astNode.value);
 	}
 	return js;
 }
 
-export default vertexToJs;
+export function entryToJs(entry: Entry): string {
+	const astNode = entryToAstNode(entry);
+	return astNodeToJs(astNode);
+}
+
+export default entryToJs;
