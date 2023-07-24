@@ -5,7 +5,7 @@ import { Entry, Dict } from '../model';
 
 import { ImporterError } from '../errors';
 
-export function getBoxName(rawFunc: Dict<unknown>) {
+export function getEntryName(rawFunc: Dict<unknown>) {
 	const keys = Object.keys(rawFunc);
 	if (keys.length === 0) {
 		throw new ImporterError('function must have an attribute');
@@ -16,13 +16,13 @@ export function getBoxName(rawFunc: Dict<unknown>) {
 	return keys[0];
 }
 
-export function keyValToSerializedBox(key: string, rawValue: unknown): Entry {
+export function keyValToSerializedEntry(key: string, rawValue: unknown): Entry {
 	if (rawValue instanceof Object) {
 		return {
 			rawName: key,
 			rawValue: '',
 			// eslint-disable-next-line no-use-before-define
-			children: Object.keys(rawValue).map((chKey) => valueToSerializedBox(
+			children: Object.keys(rawValue).map((chKey) => valueToSerializedEntry(
 				rawValue instanceof Array ? rawValue[Number(chKey)] : {
 					[chKey]: (<Dict<unknown>>rawValue)[chKey],
 				},
@@ -31,48 +31,48 @@ export function keyValToSerializedBox(key: string, rawValue: unknown): Entry {
 	}
 	return {
 		rawName: key,
-		rawValue: `${rawValue}`,
+		rawValue: rawValue === null ? '' : `${rawValue}`,
 		children: [],
 	};
 }
 
-export function valueToSerializedBox(rawValue: unknown): Entry {
+export function valueToSerializedEntry(rawValue: unknown): Entry {
 	if (rawValue instanceof Array) {
 		return {
 			rawName: '',
 			rawValue: '',
-			children: rawValue.map((rawChild) => valueToSerializedBox(rawChild)),
+			children: rawValue.map((rawChild) => valueToSerializedEntry(rawChild)),
 		};
 	}
 	if (rawValue instanceof Object) {
 		const keys = Object.keys(rawValue);
 		if (keys.length === 1) {
-			return keyValToSerializedBox(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
+			return keyValToSerializedEntry(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
 		}
 		return {
 			rawName: '',
 			rawValue: '',
-			children: keys.map((key) => valueToSerializedBox({
+			children: keys.map((key) => valueToSerializedEntry({
 				[key]: (<Dict<unknown>>rawValue)[key],
 			})),
 		};
 	}
 	return {
 		rawName: '',
-		rawValue: `${rawValue}`,
+		rawValue: rawValue === null ? '' : `${rawValue}`,
 		children: [],
 	};
 }
 
-export function buildLiteralBox(rawLiteral: unknown): Entry {
+export function buildLiteralEntry(rawLiteral: unknown): Entry {
 	return {
 		rawName: '',
-		rawValue: `${rawLiteral}`,
+		rawValue: rawLiteral === null ? '' : `${rawLiteral}`,
 		children: [],
 	};
 }
 
-export function buildListBox(rawList: Array<unknown>): Entry {
+export function buildListEntry(rawList: Array<unknown>): Entry {
 	if (rawList.length === 0) {
 		throw new ImporterError('list is empty');
 	}
@@ -81,16 +81,16 @@ export function buildListBox(rawList: Array<unknown>): Entry {
 		rawName: '',
 		rawValue: '',
 		// eslint-disable-next-line no-use-before-define
-		children: buildBoxChildren(rawList),
+		children: buildEntryChildren(rawList),
 	};
 }
 
-export function buildFuncBox(rawFunc: Dict<unknown>): Entry {
-	const boxName = getBoxName(rawFunc);
+export function buildFuncEntry(rawFunc: Dict<unknown>): Entry {
+	const boxName = getEntryName(rawFunc);
 	const rawValue = rawFunc[boxName];
 
 	if (boxName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-		return valueToSerializedBox(rawFunc);
+		return valueToSerializedEntry(rawFunc);
 	}
 
 	if (rawValue instanceof Array) {
@@ -98,26 +98,26 @@ export function buildFuncBox(rawFunc: Dict<unknown>): Entry {
 			rawName: boxName,
 			rawValue: '',
 			// eslint-disable-next-line no-use-before-define
-			children: buildBoxChildren(rawValue),
+			children: buildEntryChildren(rawValue),
 		};
 	}
 	return {
 		rawName: boxName,
-		rawValue: `${rawValue}`,
+		rawValue: rawValue === null ? '' : `${rawValue}`,
 		children: [],
 	};
 }
 
-export function buildBoxChildren(rawBoxChildren: Array<unknown>): Array<Entry> {
+export function buildEntryChildren(rawBoxChildren: Array<unknown>): Array<Entry> {
 	const children: Array<Entry> = [];
 
 	rawBoxChildren.forEach((child: unknown) => {
 		if (child instanceof Array) {
-			children.push(buildListBox(child));
+			children.push(buildListEntry(child));
 		} else if (child instanceof Object) {
-			children.push(buildFuncBox(<Dict<unknown>>child));
+			children.push(buildFuncEntry(<Dict<unknown>>child));
 		} else {
-			children.push(buildLiteralBox(child));
+			children.push(buildLiteralEntry(child));
 		}
 	});
 
@@ -141,7 +141,7 @@ export function yamlToEntry(yaml: string): Entry {
 	return {
 		rawName: 'root',
 		rawValue: '',
-		children: buildBoxChildren(composition),
+		children: buildEntryChildren(composition),
 	};
 }
 
