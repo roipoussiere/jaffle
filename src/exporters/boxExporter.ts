@@ -69,37 +69,24 @@ export function buildBoxDisplay(entryData: EntryData): BoxDisplay {
 	};
 }
 
-export function buildBoxGeometry(
-	boxTyping: BoxTyping,
-	boxDisplay: BoxDisplay,
-	displayNameMaxLen: number,
-	displayMaxLen: number,
-): BoxGeometry {
-	// const noSpace = boxTyping.type === BoxType.Value || boxTyping.valueType === ValueType.Null;
-	// const contentWidth = boxDisplay.displayName.length + boxDisplay.displayValue.length
-	// 	+ (noSpace ? 0 : 1);
-
-	return {
-		padding: displayNameMaxLen + 1,
-		width: displayMaxLen,
-	};
-}
-
 export function entryToBox(entry: Entry, funcId: Array<number> = [], groupId = 0): Box {
 	let paramsGroupId = -1;
 
 	const entryData = <EntryData>entry;
 	const boxTyping = buildBoxTyping(entryData);
 	const boxDisplay = buildBoxDisplay(entryData);
-	const displayNameMaxLen = boxDisplay.displayName.length; // TODO
-	const displayMaxLen = boxDisplay.displayName.length + boxDisplay.displayValue.length; // TODO
-	const boxGeometry = buildBoxGeometry(boxTyping, boxDisplay, displayNameMaxLen, displayMaxLen);
+
+	// TODO
+	const padding = boxDisplay.displayName.length + 1;
+	const width = boxDisplay.displayName.length + boxDisplay.displayValue.length + 1;
 
 	return {
 		...entryData,
 		...boxTyping,
 		...boxDisplay,
-		...boxGeometry,
+
+		padding,
+		width,
 
 		id: funcId.join('-'),
 		groupId,
