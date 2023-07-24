@@ -8,7 +8,7 @@ export function getBoxType(rawName: string): BoxType {
 		vBoxType = BoxType.Value;
 	} else if (rawName[0] === c.CHAINED_FUNC_PREFIX) {
 		vBoxType = BoxType.ChainedFunc;
-	} else if (rawName[0] === c.CONST_FUNC_PREFIX) {
+	} else if (rawName[0] === c.CONSTANT_DEF_PREFIX) {
 		vBoxType = BoxType.ConstantDef;
 	} else if (rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
 		vBoxType = BoxType.SerializedData;
@@ -22,16 +22,16 @@ export function getBoxType(rawName: string): BoxType {
 
 export function getValueType(rawValue: string, specialString = true): ValueType {
 	let boxValueType: ValueType;
-	if (specialString && rawValue[0] === c.MINI_STR_PREFIX) {
+	if (rawValue === '') {
+		boxValueType = ValueType.Null;
+	} else if (specialString && rawValue[0] === c.MINI_STR_PREFIX) {
 		boxValueType = ValueType.Mininotation;
 	} else if (specialString && rawValue[0] === c.EXPR_STR_PREFIX) {
 		boxValueType = ValueType.Expression;
-	} else if (!Number.isNaN(rawValue)) {
+	} else if (!Number.isNaN(Number(rawValue))) {
 		boxValueType = ValueType.Number;
 	} else if (rawValue === 'true' || rawValue === 'false') {
 		boxValueType = ValueType.Boolean;
-	} else if (rawValue === '') {
-		boxValueType = ValueType.Null;
 	} else {
 		boxValueType = ValueType.String;
 	}

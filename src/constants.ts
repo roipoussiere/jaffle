@@ -1,5 +1,5 @@
 export const CHAINED_FUNC_PREFIX = '.';
-export const CONST_FUNC_PREFIX = '$';
+export const CONSTANT_DEF_PREFIX = '$';
 export const SERIALIZE_FUNC_SUFFIX = '^';
 
 export const MINI_STR_PREFIX = '_';
