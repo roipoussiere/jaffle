@@ -26,41 +26,108 @@ describe('Testing BE.getBoxType()', () => {
 });
 
 describe('Testing BE.getBoxValue()', () => {
-	test('mininotation string return ValueType.Mininotation', () => {
-		expect(BE.getValueType('_a')).toBe(ValueType.Mininotation);
+	test('Entry with mininotation value return ValueType.Mininotation', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '_a',
+			children: [],
+		};
+		expect(BE.getValueType(input)).toBe(ValueType.Mininotation);
 	});
 
-	test('expression string return ValueType.Expression', () => {
-		expect(BE.getValueType('=a')).toBe(ValueType.Expression);
+	test('Entry with expression value return ValueType.Expression', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '=a',
+			children: [],
+		};
+		expect(BE.getValueType(input)).toBe(ValueType.Expression);
 	});
 
-	test('string of number return ValueType.Number', () => {
-		expect(BE.getValueType('42')).toBe(ValueType.Number);
+	test('Entry with number value return ValueType.Number', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '42',
+			children: [],
+		};
+		expect(BE.getValueType(input)).toBe(ValueType.Number);
 	});
 
-	test('string of boolean return ValueType.Boolean', () => {
-		expect(BE.getValueType('true')).toBe(ValueType.Boolean);
-		expect(BE.getValueType('false')).toBe(ValueType.Boolean);
+	test('Entry with boolean value return ValueType.Boolean', () => {
+		const inputTrue: Entry = {
+			rawName: 'a',
+			rawValue: 'true',
+			children: [],
+		};
+		expect(BE.getValueType(inputTrue)).toBe(ValueType.Boolean);
+
+		const inputFalse: Entry = {
+			rawName: 'a',
+			rawValue: 'false',
+			children: [],
+		};
+		expect(BE.getValueType(inputFalse)).toBe(ValueType.Boolean);
 	});
 
-	test('empty string return ValueType.Null', () => {
-		expect(BE.getValueType('')).toBe(ValueType.Null);
+	test('Entry with null value return ValueType.Null', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [],
+		};
+		expect(BE.getValueType(input)).toBe(ValueType.Null);
 	});
 
-	test('other string return ValueType.String', () => {
-		expect(BE.getValueType('a')).toBe(ValueType.String);
+	test('Entry with string value return ValueType.String', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: 'b',
+			children: [],
+		};
+		expect(BE.getValueType(input)).toBe(ValueType.String);
+	});
+
+	test('Entry with children return ValueType.Empty', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [{
+				rawName: 'b',
+				rawValue: '42',
+				children: [],
+			}],
+		};
+		expect(BE.getValueType(input)).toBe(ValueType.Empty);
 	});
 });
 
 describe('Testing BE.buildBoxTyping()', () => {
-	test('EntryData can be used to build BoxTyping', () => {
-		const input: EntryData = {
+	test('Entry without children can be used to build BoxTyping', () => {
+		const input: Entry = {
 			rawName: 'a',
 			rawValue: '42',
+			children: [],
 		};
 		const expected: BoxTyping = {
 			type: BoxType.MainFunc,
 			valueType: ValueType.Number,
+		};
+		expect(BE.buildBoxTyping(input)).toEqual(expected);
+	});
+
+	test('Entry with children can be used to build BoxTyping', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [{
+				rawName: 'b',
+				rawValue: '42',
+				children: [],
+			}],
+		};
+		const expected: BoxTyping = {
+			type: BoxType.MainFunc,
+			valueType: ValueType.Empty,
 		};
 		expect(BE.buildBoxTyping(input)).toEqual(expected);
 	});
@@ -113,6 +180,7 @@ describe('Testing BE.entryToBox()', () => {
 			rawValue: '_b',
 			children: [],
 		};
+
 		const expected: Box = {
 			rawName: '.a',
 			rawValue: '_b',
@@ -131,6 +199,57 @@ describe('Testing BE.entryToBox()', () => {
 
 			children: [],
 		};
+
+		expect(BE.entryToBox(input)).toEqual(expected);
+	});
+
+	test('Entry with one child can be used to build Box', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [{
+				rawName: 'b',
+				rawValue: '42',
+				children: [],
+			}],
+		};
+
+		const expected: Box = {
+			rawName: 'a',
+			rawValue: '',
+
+			type: BoxType.MainFunc,
+			valueType: ValueType.Empty,
+
+			displayName: 'a',
+			displayValue: '',
+
+			id: '',
+			groupId: 0,
+
+			padding: 2,
+			width: 2,
+
+			children: [{
+				rawName: 'b',
+				rawValue: '42',
+
+				type: BoxType.MainFunc,
+				valueType: ValueType.Number,
+
+				displayName: 'b',
+				displayValue: '42',
+
+				id: '0',
+				groupId: 0,
+
+				padding: 2,
+				width: 4,
+
+				children: [],
+			}],
+		};
+
 		expect(BE.entryToBox(input)).toEqual(expected);
 	});
 });

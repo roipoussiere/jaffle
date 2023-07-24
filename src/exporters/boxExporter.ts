@@ -1,4 +1,4 @@
-import { Entry, Box, BoxType, ValueType, BoxTyping, BoxGeometry, EntryData, BoxDisplay }
+import { Entry, Box, BoxType, ValueType, BoxTyping, EntryData, BoxDisplay }
 	from '../model';
 import * as c from '../constants';
 
@@ -20,17 +20,19 @@ export function getBoxType(rawName: string): BoxType {
 	return vBoxType;
 }
 
-export function getValueType(rawValue: string, specialString = true): ValueType {
+export function getValueType(entry: Entry): ValueType {
 	let boxValueType: ValueType;
-	if (rawValue === '') {
+	if (entry.children.length > 0) {
+		boxValueType = ValueType.Empty;
+	} else if (entry.rawValue === '') {
 		boxValueType = ValueType.Null;
-	} else if (specialString && rawValue[0] === c.MINI_STR_PREFIX) {
+	} else if (entry.rawValue[0] === c.MINI_STR_PREFIX) {
 		boxValueType = ValueType.Mininotation;
-	} else if (specialString && rawValue[0] === c.EXPR_STR_PREFIX) {
+	} else if (entry.rawValue[0] === c.EXPR_STR_PREFIX) {
 		boxValueType = ValueType.Expression;
-	} else if (!Number.isNaN(Number(rawValue))) {
+	} else if (!Number.isNaN(Number(entry.rawValue))) {
 		boxValueType = ValueType.Number;
-	} else if (rawValue === 'true' || rawValue === 'false') {
+	} else if (entry.rawValue === 'true' || entry.rawValue === 'false') {
 		boxValueType = ValueType.Boolean;
 	} else {
 		boxValueType = ValueType.String;
@@ -38,10 +40,10 @@ export function getValueType(rawValue: string, specialString = true): ValueType 
 	return boxValueType;
 }
 
-export function buildBoxTyping(entryData: EntryData): BoxTyping {
+export function buildBoxTyping(entry: Entry): BoxTyping {
 	return {
-		type: getBoxType(entryData.rawName),
-		valueType: getValueType(entryData.rawValue),
+		type: getBoxType(entry.rawName),
+		valueType: getValueType(entry),
 	};
 }
 
@@ -73,7 +75,7 @@ export function entryToBox(entry: Entry, funcId: Array<number> = [], groupId = 0
 	let paramsGroupId = -1;
 
 	const entryData = <EntryData>entry;
-	const boxTyping = buildBoxTyping(entryData);
+	const boxTyping = buildBoxTyping(entry);
 	const boxDisplay = buildBoxDisplay(entryData);
 
 	// TODO
@@ -93,7 +95,7 @@ export function entryToBox(entry: Entry, funcId: Array<number> = [], groupId = 0
 
 		// const children = box.children.length <= 1 ? [] : box.children.map((child, i) => {
 		children: entry.children.map((child, i) => {
-			if (child.rawName[0] === c.CHAINED_FUNC_PREFIX) {
+			if (child.rawName[0] === c.CHAINED_FUNC_PREFIX || paramsGroupId === -1) {
 				paramsGroupId += 1;
 			}
 			return entryToBox(
