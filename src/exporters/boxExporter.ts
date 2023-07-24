@@ -115,7 +115,8 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 		...boxDisplay,
 
 		padding: boxDisplay.displayName.length + 1,
-		width: boxDisplay.displayName.length + boxDisplay.displayValue.length + 1,
+		width: boxDisplay.displayName.length + boxDisplay.displayValue.length
+			+ (boxTyping.valueType === ValueType.Null ? 2 : 1),
 
 		id: id.join('-'),
 		groupId: 0,
