@@ -75,39 +75,52 @@ export function buildBoxDisplay(entry: Entry): BoxDisplay {
 	};
 }
 
-export function entryToBox(entry: Entry, funcId: Array<number> = [], groupId = 0): Box {
-	let paramsGroupId = -1;
-
+export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 	const entryData = <EntryData>entry;
 	const boxTyping = buildBoxTyping(entry);
 	const boxDisplay = buildBoxDisplay(entry);
 
-	// TODO
-	const padding = boxDisplay.displayName.length + 1;
-	const width = boxDisplay.displayName.length + boxDisplay.displayValue.length + 1;
+	const paddings: Array<number> = [];
+	const widths: Array<number> = [];
+	let groupId = -1;
+
+	const children = entry.children
+		.map((child, i) => entryToBox(child, id.concat(i)))
+		.map((child) => {
+			if (child.rawName[0] !== c.CHAINED_FUNC_PREFIX) {
+				groupId += 1;
+				paddings[groupId] = child.padding;
+				widths[groupId] = child.width;
+			} else {
+				if (child.padding > paddings[groupId]) {
+					paddings[groupId] = child.padding;
+				}
+				if (child.width > widths[groupId]) {
+					widths[groupId] = child.width;
+				}
+			}
+			const _child = child;
+			_child.groupId = groupId;
+			return _child;
+		}).map((child) => {
+			const _child = child;
+			_child.padding = paddings[child.groupId];
+			_child.width = widths[child.groupId];
+			return _child;
+		});
 
 	return {
 		...entryData,
 		...boxTyping,
 		...boxDisplay,
 
-		padding,
-		width,
+		padding: boxDisplay.displayName.length + 1,
+		width: boxDisplay.displayName.length + boxDisplay.displayValue.length + 1,
 
-		id: funcId.join('-'),
-		groupId,
+		id: id.join('-'),
+		groupId: 0,
 
-		// const children = box.children.length <= 1 ? [] : box.children.map((child, i) => {
-		children: entry.children.map((child, i) => {
-			if (child.rawName[0] === c.CHAINED_FUNC_PREFIX || paramsGroupId === -1) {
-				paramsGroupId += 1;
-			}
-			return entryToBox(
-				child,
-				funcId.concat(i),
-				paramsGroupId,
-			);
-		}),
+		children,
 	};
 }
 

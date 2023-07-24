@@ -299,7 +299,7 @@ describe('Testing BE.entryToBox()', () => {
 			rawValue: '',
 			children: [{
 				rawName: 'b',
-				rawValue: '42',
+				rawValue: 'c',
 				children: [],
 			}],
 		};
@@ -322,16 +322,110 @@ describe('Testing BE.entryToBox()', () => {
 
 			children: [{
 				rawName: 'b',
-				rawValue: '42',
+				rawValue: 'c',
 
 				type: BoxType.MainFunc,
-				valueType: ValueType.Number,
+				valueType: ValueType.String,
 
 				displayName: 'b',
-				displayValue: '42',
+				displayValue: 'c',
 
 				id: '0',
 				groupId: 0,
+
+				padding: 2,
+				width: 3,
+
+				children: [],
+			}],
+		};
+
+		expect(BE.entryToBox(input)).toEqual(expected);
+	});
+
+	test('Entry with several children can be used to build Box', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [{
+				rawName: 'b123',
+				rawValue: 'true',
+				children: [],
+			},
+			{
+				rawName: '.c',
+				rawValue: '1234567890',
+				children: [],
+			},
+			{
+				rawName: 'd',
+				rawValue: '',
+				children: [],
+			}],
+		};
+
+		const expected: Box = {
+			rawName: 'a',
+			rawValue: '',
+
+			type: BoxType.MainFunc,
+			valueType: ValueType.Empty,
+
+			displayName: 'a',
+			displayValue: ' ',
+
+			id: '',
+			groupId: 0,
+
+			padding: 2,
+			width: 3,
+
+			children: [{
+				rawName: 'b123',
+				rawValue: 'true',
+
+				type: BoxType.MainFunc,
+				valueType: ValueType.Boolean,
+
+				displayName: 'b123',
+				displayValue: 'true',
+
+				id: '0',
+				groupId: 0,
+
+				padding: 5,
+				width: 16,
+
+				children: [],
+			}, {
+				rawName: '.c',
+				rawValue: '1234567890',
+
+				type: BoxType.ChainedFunc,
+				valueType: ValueType.Number,
+
+				displayName: 'c',
+				displayValue: '1234567890',
+
+				id: '1',
+				groupId: 0,
+
+				padding: 5,
+				width: 16,
+
+				children: [],
+			}, {
+				rawName: 'd',
+				rawValue: '',
+
+				type: BoxType.MainFunc,
+				valueType: ValueType.Null,
+
+				displayName: 'd',
+				displayValue: '∅',
+
+				id: '2',
+				groupId: 1,
 
 				padding: 2,
 				width: 4,
