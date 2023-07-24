@@ -3,15 +3,15 @@ import { load as loadYaml } from 'js-yaml';
 import * as c from '../constants';
 import { Entry, Dict } from '../model';
 
-import { YamlImporterError } from './importerErrors';
+import { ImporterError } from '../errors';
 
 export function getBoxName(rawFunc: Dict<unknown>) {
 	const keys = Object.keys(rawFunc);
 	if (keys.length === 0) {
-		throw new YamlImporterError('function must have an attribute');
+		throw new ImporterError('function must have an attribute');
 	}
 	if (keys.length > 1) {
-		throw new YamlImporterError('function attribute must be unique');
+		throw new ImporterError('function attribute must be unique');
 	}
 	return keys[0];
 }
@@ -74,7 +74,7 @@ export function buildLiteralBox(rawLiteral: unknown): Entry {
 
 export function buildListBox(rawList: Array<unknown>): Entry {
 	if (rawList.length === 0) {
-		throw new YamlImporterError('list is empty');
+		throw new ImporterError('list is empty');
 	}
 
 	return {
@@ -130,11 +130,11 @@ export function yamlToEntry(yaml: string): Entry {
 	try {
 		data = loadYaml(yaml);
 	} catch (err) {
-		throw new YamlImporterError(`can not parse yaml: ${err.message}`);
+		throw new ImporterError(`can not parse yaml: ${err.message}`);
 	}
 
 	if (!(data instanceof Array)) {
-		throw new YamlImporterError('yaml root element must be an array');
+		throw new ImporterError('yaml root element must be an array');
 	}
 	const composition = <Array<unknown>> data;
 

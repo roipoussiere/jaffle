@@ -1,7 +1,7 @@
 import { AstNode, Entry, BoxType } from '../model';
 import * as c from '../constants';
 
-import { AstNodeImporterError } from './importerErrors';
+import { ImporterError } from '../errors';
 
 export function getRawName(astNode: AstNode): string {
 	let rawName: string;
@@ -16,7 +16,7 @@ export function getRawName(astNode: AstNode): string {
 	} else if (astNode.type === BoxType.SerializedData) {
 		rawName = `${astNode.value}${c.SERIALIZE_FUNC_SUFFIX}`;
 	} else {
-		throw new AstNodeImporterError(`Unsupported ast node type: ${BoxType[astNode.type]}`);
+		throw new ImporterError(`Unsupported ast node type: ${BoxType[astNode.type]}`);
 	}
 	return rawName;
 }

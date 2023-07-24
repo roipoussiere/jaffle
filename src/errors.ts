@@ -14,6 +14,20 @@ export class NotImplementedError extends JaffleError {
 	}
 }
 
+export class ExporterError extends JaffleError {
+	constructor(message: string) {
+		super(message);
+		this.name = ExporterError.name;
+	}
+}
+
+export class ImporterError extends JaffleError {
+	constructor(message: string) {
+		super(message);
+		this.name = ImporterError.name;
+	}
+}
+
 // todo: remove from here
 
 export class BadYamlJaffleError extends JaffleError {
