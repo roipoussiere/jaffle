@@ -47,27 +47,31 @@ export function buildBoxTyping(entry: Entry): BoxTyping {
 	};
 }
 
-export function getDisplayName(rawName: string) {
-	if (rawName[0] === c.CHAINED_FUNC_PREFIX || rawName[0] === c.CONSTANT_DEF_PREFIX) {
-		return rawName.substring(1);
+export function getDisplayName(entry: Entry) {
+	if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX || entry.rawName[0] === c.CONSTANT_DEF_PREFIX) {
+		return entry.rawName.substring(1);
 	}
-	if (rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-		return rawName.substring(0, rawName.length - 1);
+	if (entry.rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
+		return entry.rawName.substring(0, entry.rawName.length - 1);
 	}
-	return rawName;
+	return entry.rawName;
 }
 
-export function getDisplayValue(rawValue: string) {
-	if (rawValue[0] === c.MINI_STR_PREFIX || rawValue[0] === c.EXPR_STR_PREFIX) {
-		return rawValue.substring(1);
+export function getDisplayValue(entry: Entry) {
+	if (entry.rawValue === '' && entry.children.length === 0) {
+		return '∅';
 	}
-	return `${rawValue}`;
+
+	if (entry.rawValue[0] === c.MINI_STR_PREFIX || entry.rawValue[0] === c.EXPR_STR_PREFIX) {
+		return entry.rawValue.substring(1);
+	}
+	return `${entry.rawValue}`;
 }
 
-export function buildBoxDisplay(entryData: EntryData): BoxDisplay {
+export function buildBoxDisplay(entry: Entry): BoxDisplay {
 	return {
-		displayName: getDisplayName(entryData.rawName),
-		displayValue: getDisplayValue(entryData.rawValue),
+		displayName: getDisplayName(entry),
+		displayValue: getDisplayValue(entry),
 	};
 }
 
@@ -76,7 +80,7 @@ export function entryToBox(entry: Entry, funcId: Array<number> = [], groupId = 0
 
 	const entryData = <EntryData>entry;
 	const boxTyping = buildBoxTyping(entry);
-	const boxDisplay = buildBoxDisplay(entryData);
+	const boxDisplay = buildBoxDisplay(entry);
 
 	// TODO
 	const padding = boxDisplay.displayName.length + 1;

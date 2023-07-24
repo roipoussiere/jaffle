@@ -134,40 +134,130 @@ describe('Testing BE.buildBoxTyping()', () => {
 });
 
 describe('Testing BE.getDisplayName()', () => {
-	test('prefixes are stripped', () => {
-		expect(BE.getDisplayName('.a')).toBe('a');
-		expect(BE.getDisplayName('$a')).toBe('a');
+	test('Entry of main func return func name', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [],
+		};
+		expect(BE.getDisplayName(input)).toBe('a');
 	});
 
-	test('suffixes are stripped', () => {
-		expect(BE.getDisplayName('a^')).toBe('a');
+	test('Entry of value return empty string', () => {
+		const input: Entry = {
+			rawName: '',
+			rawValue: '42',
+			children: [],
+		};
+		expect(BE.getDisplayName(input)).toBe('');
 	});
 
-	test('other string remains same', () => {
-		expect(BE.getDisplayName('a')).toBe('a');
+	test('Entry of chained func return stripped func name', () => {
+		const input: Entry = {
+			rawName: '.a',
+			rawValue: '',
+			children: [],
+		};
+		expect(BE.getDisplayName(input)).toBe('a');
+	});
+
+	test('Entry of constant def return stripped func name', () => {
+		const input: Entry = {
+			rawName: '$a',
+			rawValue: '',
+			children: [],
+		};
+		expect(BE.getDisplayName(input)).toBe('a');
+	});
+
+	test('Entry of serialized data return stripped func name', () => {
+		const input: Entry = {
+			rawName: 'a^',
+			rawValue: '',
+			children: [],
+		};
+		expect(BE.getDisplayName(input)).toBe('a');
 	});
 });
 
 describe('Testing BE.getDisplayValue()', () => {
-	test('prefixes are stripped', () => {
-		expect(BE.getDisplayValue('_a')).toBe('a');
-		expect(BE.getDisplayValue('=a')).toBe('a');
+	test('Entry with string value return the string', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: 'b',
+			children: [],
+		};
+		expect(BE.getDisplayValue(input)).toBe('b');
 	});
 
-	test('other string remains same', () => {
-		expect(BE.getDisplayValue('a')).toBe('a');
+	test('Entry with mininotation value return the stripped string', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '_b',
+			children: [],
+		};
+		expect(BE.getDisplayValue(input)).toBe('b');
+	});
+
+	test('Entry with expression value return the stripped string', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '=b',
+			children: [],
+		};
+		expect(BE.getDisplayValue(input)).toBe('b');
+	});
+
+	test('Entry with null value return the ∅ symbol', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [],
+		};
+		expect(BE.getDisplayValue(input)).toBe('∅');
+	});
+
+	test('Entry with children return an empty string', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [{
+				rawName: 'b',
+				rawValue: '42',
+				children: [],
+			}],
+		};
+		expect(BE.getDisplayValue(input)).toBe('');
 	});
 });
 
 describe('Testing BE.buildBoxDisplay()', () => {
-	test('EntryData can be used to build BoxDisplay', () => {
-		const input: EntryData = {
+	test('Entry without children can be used to build BoxDisplay', () => {
+		const input: Entry = {
 			rawName: '.a',
 			rawValue: '_b',
+			children: [],
 		};
 		const expected: BoxDisplay = {
 			displayName: 'a',
 			displayValue: 'b',
+		};
+		expect(BE.buildBoxDisplay(input)).toEqual(expected);
+	});
+
+	test('Entry with children can be used to build BoxDisplay', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [{
+				rawName: 'b',
+				rawValue: '42',
+				children: [],
+			}],
+		};
+		const expected: BoxDisplay = {
+			displayName: 'a',
+			displayValue: '',
 		};
 		expect(BE.buildBoxDisplay(input)).toEqual(expected);
 	});
