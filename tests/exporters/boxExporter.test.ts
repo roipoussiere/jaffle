@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
 import * as BE from '../../src/exporters/boxExporter';
-import { BoxType, BoxTyping, EntryData, ValueType } from '../../src/model';
+import { BoxDisplay, BoxType, BoxTyping, EntryData, ValueType } from '../../src/model';
 
 describe('Testing BE.getBoxType()', () => {
 	test('empty string return BoxType.Value', () => {
@@ -63,6 +63,46 @@ describe('Testing BE.buildBoxTyping()', () => {
 			valueType: ValueType.Number,
 		};
 		expect(BE.buildBoxTyping(input)).toEqual(expected);
+	});
+});
+
+describe('Testing BE.getDisplayName()', () => {
+	test('prefixes are stripped', () => {
+		expect(BE.getDisplayName('.a')).toBe('a');
+		expect(BE.getDisplayName('$a')).toBe('a');
+	});
+
+	test('suffixes are stripped', () => {
+		expect(BE.getDisplayName('a^')).toBe('a');
+	});
+
+	test('other string remains same', () => {
+		expect(BE.getDisplayName('a')).toBe('a');
+	});
+});
+
+describe('Testing BE.getDisplayValue()', () => {
+	test('prefixes are stripped', () => {
+		expect(BE.getDisplayValue('_a')).toBe('a');
+		expect(BE.getDisplayValue('=a')).toBe('a');
+	});
+
+	test('other string remains same', () => {
+		expect(BE.getDisplayValue('a')).toBe('a');
+	});
+});
+
+describe('Testing BE.buildBoxDisplay()', () => {
+	test('EntryData can be used to build BoxDisplay', () => {
+		const input: EntryData = {
+			rawName: '.a',
+			rawValue: '_b',
+		};
+		const expected: BoxDisplay = {
+			displayName: 'a',
+			displayValue: 'b',
+		};
+		expect(BE.buildBoxDisplay(input)).toEqual(expected);
 	});
 });
 

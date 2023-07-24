@@ -45,10 +45,27 @@ export function buildBoxTyping(entryData: EntryData): BoxTyping {
 	};
 }
 
+export function getDisplayName(rawName: string) {
+	if (rawName[0] === c.CHAINED_FUNC_PREFIX || rawName[0] === c.CONSTANT_DEF_PREFIX) {
+		return rawName.substring(1);
+	}
+	if (rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
+		return rawName.substring(0, rawName.length - 1);
+	}
+	return rawName;
+}
+
+export function getDisplayValue(rawValue: string) {
+	if (rawValue[0] === c.MINI_STR_PREFIX || rawValue[0] === c.EXPR_STR_PREFIX) {
+		return rawValue.substring(1);
+	}
+	return `${rawValue}`;
+}
+
 export function buildBoxDisplay(entryData: EntryData): BoxDisplay {
 	return {
-		displayName: entryData.rawName, // TODO
-		displayValue: `${entryData.rawValue}`, // TODO
+		displayName: getDisplayName(entryData.rawName),
+		displayValue: getDisplayValue(entryData.rawValue),
 	};
 }
 
