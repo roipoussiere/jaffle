@@ -1,5 +1,6 @@
 import { Entry, Box, PartialBox, BoxType, ValueType } from '../model';
 import * as c from '../constants';
+import { entryToPartialBox } from './partialBoxExporter';
 
 // function arrangeTree(vertex: Vertex): DraftBox {
 // 	if (vertex.type === VertexType.Literal) {
@@ -71,42 +72,7 @@ export function rawValueToValueType(rawValue: string, specialString = true): Val
 	return boxValueType;
 }
 
-export function rawNameToDisplayName(rawName: string): string {
-	return rawName; // TODO
-}
-
-export function rawValueToDisplayValue(rawValue: string): string {
-	return `${rawValue}`; // TODO
-}
-
-export function boxToPartialVBox(box: Entry, funcId: Array<number> = [], groupId = 0): PartialBox {
-	let paramsGroupId = -1;
-
-	return {
-		rawName: box.rawName,
-		rawValue: box.rawValue,
-
-		id: funcId.join('-'),
-		groupId,
-
-		displayName: rawNameToDisplayName(box.rawName),
-		displayValue: rawValueToDisplayValue(box.rawValue),
-
-		// const children = box.children.length <= 1 ? [] : box.children.map((child, i) => {
-		children: box.children.map((child, i) => {
-			if (child.rawName[0] === c.CHAINED_FUNC_PREFIX) {
-				paramsGroupId += 1;
-			}
-			return boxToPartialVBox(
-				child,
-				funcId.concat(i),
-				paramsGroupId,
-			);
-		}),
-	};
-}
-
-export function partialVBoxToVBox(pvb: PartialBox, parent?: PartialBox): Box {
+export function partialBoxToBox(pvb: PartialBox, parent?: PartialBox): Box {
 	const type = rawNameToType(pvb.rawName);
 	const valueType = rawValueToValueType(pvb.rawValue);
 	const noSpace = type === BoxType.Value || valueType === ValueType.Null;
@@ -139,14 +105,14 @@ export function partialVBoxToVBox(pvb: PartialBox, parent?: PartialBox): Box {
 		contentWidth,
 		padding,
 		width,
-		children: pvb.children.map((child) => partialVBoxToVBox(child, pvb)),
+		children: pvb.children.map((child) => partialBoxToBox(child, pvb)),
 	};
 }
 
 export function entryToBox(entry: Entry): Box {
 	// const arrangedTree = arrangeTree(composition);
-	const partialBoxTree = boxToPartialVBox(entry);
-	return partialVBoxToVBox(partialBoxTree);
+	const partialBoxTree = entryToPartialBox(entry);
+	return partialBoxToBox(partialBoxTree);
 }
 
 export default entryToBox;
