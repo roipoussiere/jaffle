@@ -212,13 +212,16 @@ class Graph {
 	// 		box.append('title')
 	// 			.text((d: FuncNode) => `id: ${d.data.id}
 	// groupId: ${d.data.groupId}
-	// funcText: ${d.data.funcText}
-	// funcType: ${FuncType[d.data.funcType]}
-	// valueText: ${d.data.valueText}
-	// valueType: ${ValueType[d.data.valueType]}
+	// name:
+	//   displayName: ${d.data.displayName}
+	//   rawName: ${d.data.rawName}
+	//   type: ${BoxType[d.data.type]}
+	// value:
+	//   displayValue: ${d.data.displayValue}
+	//   rawValue: ${d.data.rawValue}
+	//   valueType: ${ValueType[d.data.valueType]}
 	// padding: ${d.data.padding}
-	// width: ${d.data.width}
-	// `);
+	// width: ${d.data.width}`);
 	}
 
 	private drawInput(selectedBoxId: string, isValueSelected: boolean) {
@@ -232,9 +235,8 @@ class Graph {
 				? focusedNode.y + focusedNode.data.padding * this.charWidth
 				: focusedNode.y)
 			.attr('y', focusedNode.x - 0.5 * this.charHeight)
-			.attr('width', isValueSelected
-				? (focusedNode.data.width - focusedNode.data.padding) * this.charWidth
-				: focusedNode.data.padding * this.charWidth)
+			.attr('width', this.charWidth * (3 + (isValueSelected
+				? (focusedNode.data.width - focusedNode.data.padding) : focusedNode.data.padding)))
 			.attr('height', this.charHeight)
 
 			.append('xhtml:input')
@@ -264,7 +266,7 @@ class Graph {
 			.style('padding', '0')
 			.style('font-size', `${this.fontSize}px`)
 			.style('font-family', 'monospace')
-			.style('background-color', '#ccc')
+			.style('background-color', '#aaa')
 			.style('color', isValueSelected
 				? BOX_VALUE_COLORS[focusedNode.data.valueType]
 				: BOX_NAME_COLORS[focusedNode.data.type])

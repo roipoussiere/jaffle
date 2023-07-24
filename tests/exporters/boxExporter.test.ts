@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
 import * as BE from '../../src/exporters/boxExporter';
-import { Box, BoxDisplay, BoxType, BoxTyping, Entry, EntryData, ValueType } from '../../src/model';
+import { Box, BoxDisplay, BoxType, BoxTyping, Entry, ValueType } from '../../src/model';
 
 describe('Testing BE.getBoxType()', () => {
 	test('empty string return BoxType.Value', () => {
@@ -227,7 +227,7 @@ describe('Testing BE.getDisplayValue()', () => {
 				children: [],
 			}],
 		};
-		expect(BE.getDisplayValue(input)).toBe('');
+		expect(BE.getDisplayValue(input)).toBe(' ');
 	});
 });
 
@@ -257,7 +257,7 @@ describe('Testing BE.buildBoxDisplay()', () => {
 		};
 		const expected: BoxDisplay = {
 			displayName: 'a',
-			displayValue: '',
+			displayValue: ' ',
 		};
 		expect(BE.buildBoxDisplay(input)).toEqual(expected);
 	});
@@ -312,13 +312,13 @@ describe('Testing BE.entryToBox()', () => {
 			valueType: ValueType.Empty,
 
 			displayName: 'a',
-			displayValue: '',
+			displayValue: ' ',
 
 			id: '',
 			groupId: 0,
 
 			padding: 2,
-			width: 2,
+			width: 3,
 
 			children: [{
 				rawName: 'b',

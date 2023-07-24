@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 
-import YamlImporter from './jaffle/importers/yamlImporter';
+import yamlToEntry from './jaffle/importers/yamlImporter';
+import entryToBox from './jaffle/exporters/boxExporter';
 import { transpiler, JaffleEditor, JaffleGraph } from './jaffle';
 import StrudelRepl from './strudel_repl';
 
@@ -64,7 +65,7 @@ editor.onPlay = () => {
 	strudel.play(tune);
 };
 editor.onStop = () => strudel.stop();
-editor.onUpdate = (tuneYml) => graph.load(YamlImporter.import(tuneYml)).draw();
+editor.onUpdate = (tuneYml) => graph.load(entryToBox(yamlToEntry(tuneYml))).draw();
 
 window.addEventListener('DOMContentLoaded', () => {
 	editor.build(getContainer());
