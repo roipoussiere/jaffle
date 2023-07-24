@@ -1,7 +1,9 @@
 import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
-import BoxHelper from './converter';
+import entryToBox from './exporters/boxExporter';
+import boxToEntry from './importers/boxImporter';
+
 import { Box, BoxType, ValueType } from './model';
 
 export type FuncNode = d3.id<Box> & {
@@ -251,7 +253,7 @@ class Graph {
 					focusedNode.data.rawName = rawText;
 				}
 
-				this.load(BoxHelper.fromBox(this.tree.data).toBox());
+				this.load(entryToBox(boxToEntry(this.tree.data)));
 				this.draw();
 			})
 			.on('focusout', (event: Event) => {
