@@ -1,7 +1,7 @@
 import { load as loadYaml } from 'js-yaml';
 
 import * as c from '../constants';
-import { Entry, Dict, BoxType, ValueType } from '../model';
+import { Entry, Dict } from '../model';
 
 import { YamlImporterError } from './importerErrors';
 
@@ -16,51 +16,11 @@ export function getBoxName(rawFunc: Dict<unknown>) {
 	return keys[0];
 }
 
-export function getBoxType(boxName: string): BoxType {
-	const prefix = boxName[0];
-	let boxType: BoxType;
-	if (prefix === c.CHAINED_FUNC_PREFIX) {
-		boxType = BoxType.ChainedFunc;
-	} else if (prefix === c.CONST_FUNC_PREFIX) {
-		boxType = BoxType.ConstantDef;
-	} else if (boxName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-		boxType = BoxType.SerializedData;
-	} else {
-		boxType = BoxType.MainFunc;
-	}
-	return boxType;
-}
-
-export function valueToValueType(value: unknown, specialString = true): ValueType {
-	let boxValueType: ValueType;
-	if (typeof value === 'string') {
-		boxValueType = ValueType.String;
-		if (specialString) {
-			if (value[0] === c.MINI_STR_PREFIX) {
-				boxValueType = ValueType.Mininotation;
-			} else if (value[0] === c.EXPR_STR_PREFIX) {
-				boxValueType = ValueType.Expression;
-			}
-		}
-	} else if (typeof value === 'number') {
-		boxValueType = ValueType.Number;
-	} else if (typeof value === 'boolean') {
-		boxValueType = ValueType.Boolean;
-	} else if (value === null) {
-		boxValueType = ValueType.Null;
-	} else {
-		boxValueType = ValueType.Empty;
-	}
-	return boxValueType;
-}
-
 export function keyValToSerializedBox(key: string, rawValue: unknown): Entry {
 	if (rawValue instanceof Object) {
 		return {
 			rawName: key,
-			type: BoxType.SerializedData,
 			rawValue: '',
-			valueType: ValueType.Empty,
 			// eslint-disable-next-line no-use-before-define
 			children: Object.keys(rawValue).map((chKey) => valueToSerializedBox(
 				rawValue instanceof Array ? rawValue[Number(chKey)] : {
@@ -71,9 +31,7 @@ export function keyValToSerializedBox(key: string, rawValue: unknown): Entry {
 	}
 	return {
 		rawName: key,
-		type: BoxType.SerializedData,
 		rawValue: `${rawValue}`,
-		valueType: valueToValueType(rawValue, false),
 		children: [],
 	};
 }
@@ -82,9 +40,7 @@ export function valueToSerializedBox(rawValue: unknown): Entry {
 	if (rawValue instanceof Array) {
 		return {
 			rawName: '',
-			type: BoxType.SerializedData,
 			rawValue: '',
-			valueType: ValueType.Empty,
 			children: rawValue.map((rawChild) => valueToSerializedBox(rawChild)),
 		};
 	}
@@ -95,9 +51,7 @@ export function valueToSerializedBox(rawValue: unknown): Entry {
 		}
 		return {
 			rawName: '',
-			type: BoxType.SerializedData,
 			rawValue: '',
-			valueType: ValueType.Empty,
 			children: keys.map((key) => valueToSerializedBox({
 				[key]: (<Dict<unknown>>rawValue)[key],
 			})),
@@ -105,9 +59,7 @@ export function valueToSerializedBox(rawValue: unknown): Entry {
 	}
 	return {
 		rawName: '',
-		type: BoxType.SerializedData,
 		rawValue: `${rawValue}`,
-		valueType: valueToValueType(rawValue, false),
 		children: [],
 	};
 }
@@ -115,9 +67,7 @@ export function valueToSerializedBox(rawValue: unknown): Entry {
 export function buildLiteralBox(rawLiteral: unknown): Entry {
 	return {
 		rawName: '',
-		type: BoxType.Value,
 		rawValue: `${rawLiteral}`,
-		valueType: valueToValueType(rawLiteral),
 		children: [],
 	};
 }
@@ -129,38 +79,31 @@ export function buildListBox(rawList: Array<unknown>): Entry {
 
 	return {
 		rawName: '',
-		type: BoxType.List,
 		rawValue: '',
-		valueType: ValueType.Empty,
 		// eslint-disable-next-line no-use-before-define
 		children: buildBoxChildren(rawList),
 	};
 }
 
 export function buildFuncBox(rawFunc: Dict<unknown>): Entry {
-	const funcName = getBoxName(rawFunc);
-	const funcType = getBoxType(funcName);
-	const rawValue = rawFunc[funcName];
+	const boxName = getBoxName(rawFunc);
+	const rawValue = rawFunc[boxName];
 
-	if (funcType === BoxType.SerializedData) {
+	if (boxName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
 		return valueToSerializedBox(rawFunc);
 	}
 
 	if (rawValue instanceof Array) {
 		return {
-			rawName: funcName,
-			type: funcType,
+			rawName: boxName,
 			rawValue: '',
-			valueType: valueToValueType(rawValue),
 			// eslint-disable-next-line no-use-before-define
 			children: buildBoxChildren(rawValue),
 		};
 	}
 	return {
-		rawName: funcName,
-		type: funcType,
+		rawName: boxName,
 		rawValue: `${rawValue}`,
-		valueType: valueToValueType(rawValue),
 		children: [],
 	};
 }
@@ -193,14 +136,12 @@ export function yamlToEntry(yaml: string): Entry {
 	if (!(data instanceof Array)) {
 		throw new YamlImporterError('yaml root element must be an array');
 	}
-	const rawComposition = <Array<unknown>> data;
+	const composition = <Array<unknown>> data;
 
 	return {
-		rawName: '',
-		type: BoxType.MainFunc,
+		rawName: 'root',
 		rawValue: '',
-		valueType: ValueType.Empty,
-		children: buildBoxChildren(rawComposition),
+		children: buildBoxChildren(composition),
 	};
 }
 

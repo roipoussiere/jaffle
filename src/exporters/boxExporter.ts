@@ -2,41 +2,7 @@ import { Entry, Box, PartialBox, BoxType, ValueType } from '../model';
 import * as c from '../constants';
 import { entryToPartialBox } from './partialBoxExporter';
 
-// function arrangeTree(vertex: Vertex): DraftBox {
-// 	if (vertex.type === VertexType.Literal) {
-// 		return {
-// 			funcName: '',
-// 			funcType: VertexType.Literal,
-// 			value: vertex.value,
-// 			valueType: VertexType.Literal,
-// 			children: [],
-// 		};
-// 	}
-
-// 	if (typeof vertex.value !== 'string') {
-// 		throw new GraphExporterError(`Vertex value "${vertex.value}" must be a string`);
-// 	}
-
-// 	if (vertex.children.length === 1 && vertex.children[0].children.length === 0) {
-// 		return {
-// 			funcName: vertex.value,
-// 			funcType: vertex.type,
-// 			value: vertex.children[0].value,
-// 			valueType: vertex.children[0].type,
-// 			children: [],
-// 		};
-// 	}
-
-// 	return {
-// 		funcName: vertex.value,
-// 		funcType: vertex.type,
-// 		value: vertex.children[0].value,
-// 		valueType: vertex.children[0].type,
-// 		children: vertex.children.map((child) => arrangeTree(child)),
-// 	};
-// }
-
-export function rawNameToType(rawName: string): BoxType {
+export function rawNameToBoxType(rawName: string): BoxType {
 	let vBoxType: BoxType;
 	if (rawName === '') {
 		vBoxType = BoxType.Value;
@@ -72,18 +38,18 @@ export function rawValueToValueType(rawValue: string, specialString = true): Val
 	return boxValueType;
 }
 
-export function partialBoxToBox(pvb: PartialBox, parent?: PartialBox): Box {
-	const type = rawNameToType(pvb.rawName);
-	const valueType = rawValueToValueType(pvb.rawValue);
+export function partialBoxToBox(pBox: PartialBox, parent?: PartialBox): Box {
+	const type = rawNameToBoxType(pBox.rawName);
+	const valueType = rawValueToValueType(pBox.rawValue);
 	const noSpace = type === BoxType.Value || valueType === ValueType.Null;
-	const contentWidth = pvb.displayName.length + pvb.displayValue.length + (noSpace ? 0 : 1);
-	const group = parent?.children.filter((child) => child.groupId === pvb.groupId);
+	const contentWidth = pBox.displayName.length + pBox.displayValue.length + (noSpace ? 0 : 1);
+	const group = parent?.children.filter((child) => child.groupId === pBox.groupId);
 
 	let padding: number;
 	let width: number;
 
 	if (group === undefined) {
-		padding = pvb.displayName.length + 1;
+		padding = pBox.displayName.length + 1;
 		width = contentWidth;
 	} else {
 		const maxLength = Math.max(...group.map((child) => child.displayName.length));
@@ -99,13 +65,13 @@ export function partialBoxToBox(pvb: PartialBox, parent?: PartialBox): Box {
 	}
 
 	return {
-		...pvb,
+		...pBox,
 		type,
 		valueType,
 		contentWidth,
 		padding,
 		width,
-		children: pvb.children.map((child) => partialBoxToBox(child, pvb)),
+		children: pBox.children.map((child) => partialBoxToBox(child, pBox)),
 	};
 }
 
