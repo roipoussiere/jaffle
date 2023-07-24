@@ -216,7 +216,6 @@ class Graph {
 	// funcType: ${FuncType[d.data.funcType]}
 	// valueText: ${d.data.valueText}
 	// valueType: ${ValueType[d.data.valueType]}
-	// contentWidth: ${d.data.contentWidth}
 	// padding: ${d.data.padding}
 	// width: ${d.data.width}
 	// `);

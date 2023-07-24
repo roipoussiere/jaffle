@@ -9,14 +9,8 @@
  ┌───┴───────┐       ┌───┴───────┐       ┌───────┴───┐
  │           ├──────▶│           ├──────▶│           │
  │    Box    │       │   Entry   │       │  AstNode  │
- │           │◀┐   ┌─┤           │◁╌╌╌╌╌╌┤           │
- └───────────┘ │   │ └───────────┘       └───────────┘
-               │   ▼
-           ┌───┴───────┐
-		   │           │
-           │PartialBox │
-		   │           │
-           └───────────┘
+ │           │◀──────┤           │◁╌╌╌╌╌╌┤           │
+ └───────────┘       └───────────┘       └───────────┘
 */
 
 export enum BoxType {
@@ -39,40 +33,47 @@ export enum ValueType {
 	Empty,
 }
 
-export interface Entry {
+export interface EntryData {
 	rawName: string,
 	rawValue: string,
+}
 
+export interface Entry extends EntryData {
 	children: Array<Entry>,
 }
 
-export interface PartialBox extends Entry {
+export interface BoxInternal {
 	id: string,
 	groupId: number,
 	// lastSibling: string, // TODO instead Graph.getLastFunc(n)
-
-	displayName: string,
-	displayValue: string,
-
-	children: Array<PartialBox>,
 }
 
-export interface Box extends PartialBox {
+export interface BoxDisplay {
+	displayName: string,
+	displayValue: string,
+}
+
+export interface BoxTyping {
 	type: BoxType,
 	valueType: ValueType,
+}
 
-	contentWidth: number,
+export interface BoxGeometry {
 	padding: number,
 	width: number,
 	// isStacked: boolean, // TODO instead Graph.shouldStack(a, b)
+}
 
+export interface Box extends EntryData, BoxInternal, BoxDisplay, BoxTyping, BoxGeometry {
 	children: Array<Box>,
 }
 
-export interface AstNode {
+export interface AstNodeData {
 	type: BoxType,
 	value: unknown,
+}
 
+export interface AstNode extends AstNodeData {
 	children: Array<AstNode>,
 }
 

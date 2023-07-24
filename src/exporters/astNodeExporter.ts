@@ -1,7 +1,7 @@
-import { AstNode, BoxType, Entry } from '../model';
+import { AstNodeData, AstNode, BoxType, Entry } from '../model';
 import * as c from '../constants';
 
-export function getBoxType(rawName: string): BoxType {
+export function rawNameToBoxType(rawName: string): BoxType {
 	const prefix = rawName[0];
 	let boxType: BoxType;
 	if (prefix === c.CHAINED_FUNC_PREFIX) {
@@ -18,7 +18,7 @@ export function getBoxType(rawName: string): BoxType {
 	return boxType;
 }
 
-export function getValue(rawValue: string): unknown {
+export function rawValueToValue(rawValue: string): unknown {
 	let value: unknown;
 
 	if (rawValue === '') {
@@ -35,10 +35,16 @@ export function getValue(rawValue: string): unknown {
 	return value;
 }
 
+export function entryToAstData(entry: Entry): AstNodeData {
+	return {
+		type: rawNameToBoxType(entry.rawName),
+		value: rawValueToValue(entry.rawValue),
+	};
+}
+
 export function entryToAstNode(entry: Entry): AstNode {
 	return {
-		type: getBoxType(entry.rawName),
-		value: getValue(entry.rawValue),
+		...entryToAstData(entry),
 		children: entry.children.map((child) => entryToAstNode(child)),
 	};
 }

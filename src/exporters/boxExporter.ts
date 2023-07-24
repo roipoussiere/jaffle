@@ -1,8 +1,8 @@
-import { Entry, Box, PartialBox, BoxType, ValueType } from '../model';
+import { Entry, Box, BoxType, ValueType, BoxTyping, BoxGeometry, EntryData, BoxDisplay }
+	from '../model';
 import * as c from '../constants';
-import { entryToPartialBox } from './partialBoxExporter';
 
-export function rawNameToBoxType(rawName: string): BoxType {
+export function getBoxType(rawName: string): BoxType {
 	let vBoxType: BoxType;
 	if (rawName === '') {
 		vBoxType = BoxType.Value;
@@ -20,7 +20,7 @@ export function rawNameToBoxType(rawName: string): BoxType {
 	return vBoxType;
 }
 
-export function rawValueToValueType(rawValue: string, specialString = true): ValueType {
+export function getValueType(rawValue: string, specialString = true): ValueType {
 	let boxValueType: ValueType;
 	if (specialString && rawValue[0] === c.MINI_STR_PREFIX) {
 		boxValueType = ValueType.Mininotation;
@@ -38,47 +38,67 @@ export function rawValueToValueType(rawValue: string, specialString = true): Val
 	return boxValueType;
 }
 
-export function partialBoxToBox(pBox: PartialBox, parent?: PartialBox): Box {
-	const type = rawNameToBoxType(pBox.rawName);
-	const valueType = rawValueToValueType(pBox.rawValue);
-	const noSpace = type === BoxType.Value || valueType === ValueType.Null;
-	const contentWidth = pBox.displayName.length + pBox.displayValue.length + (noSpace ? 0 : 1);
-	const group = parent?.children.filter((child) => child.groupId === pBox.groupId);
-
-	let padding: number;
-	let width: number;
-
-	if (group === undefined) {
-		padding = pBox.displayName.length + 1;
-		width = contentWidth;
-	} else {
-		const maxLength = Math.max(...group.map((child) => child.displayName.length));
-		padding = maxLength + 1; // + (pbt.funcType === FuncType.Literal ? 0 : 1);
-
-		// const getDataWidth = (box: PartialVBox) => padding
-		// 	+ (valueType === VBoxValueType.Null ? 2 : box.displayName.length);
-
-		width = Math.max(...group.map((child: PartialBox) => (
-			padding + (valueType === ValueType.Null ? 2 : child.displayName.length)
-			// child.type < VBoxType.MainFunc ? child.displayName.length : getDataWidth(child)
-		)));
-	}
-
+export function buildBoxTyping(entryData: EntryData): BoxTyping {
 	return {
-		...pBox,
-		type,
-		valueType,
-		contentWidth,
-		padding,
-		width,
-		children: pBox.children.map((child) => partialBoxToBox(child, pBox)),
+		type: getBoxType(entryData.rawName),
+		valueType: getValueType(entryData.rawValue),
 	};
 }
 
-export function entryToBox(entry: Entry): Box {
-	// const arrangedTree = arrangeTree(composition);
-	const partialBoxTree = entryToPartialBox(entry);
-	return partialBoxToBox(partialBoxTree);
+export function buildBoxDisplay(entryData: EntryData): BoxDisplay {
+	return {
+		displayName: entryData.rawName, // TODO
+		displayValue: `${entryData.rawValue}`, // TODO
+	};
+}
+
+export function buildBoxGeometry(
+	boxTyping: BoxTyping,
+	boxDisplay: BoxDisplay,
+	displayNameMaxLen: number,
+	displayMaxLen: number,
+): BoxGeometry {
+	// const noSpace = boxTyping.type === BoxType.Value || boxTyping.valueType === ValueType.Null;
+	// const contentWidth = boxDisplay.displayName.length + boxDisplay.displayValue.length
+	// 	+ (noSpace ? 0 : 1);
+
+	return {
+		padding: displayNameMaxLen + 1,
+		width: displayMaxLen,
+	};
+}
+
+export function entryToBox(entry: Entry, funcId: Array<number> = [], groupId = 0): Box {
+	let paramsGroupId = -1;
+
+	const entryData = <EntryData>entry;
+	const boxTyping = buildBoxTyping(entryData);
+	const boxDisplay = buildBoxDisplay(entryData);
+	const displayNameMaxLen = boxDisplay.displayName.length; // TODO
+	const displayMaxLen = boxDisplay.displayName.length + boxDisplay.displayValue.length; // TODO
+	const boxGeometry = buildBoxGeometry(boxTyping, boxDisplay, displayNameMaxLen, displayMaxLen);
+
+	return {
+		...entryData,
+		...boxTyping,
+		...boxDisplay,
+		...boxGeometry,
+
+		id: funcId.join('-'),
+		groupId,
+
+		// const children = box.children.length <= 1 ? [] : box.children.map((child, i) => {
+		children: entry.children.map((child, i) => {
+			if (child.rawName[0] === c.CHAINED_FUNC_PREFIX) {
+				paramsGroupId += 1;
+			}
+			return entryToBox(
+				child,
+				funcId.concat(i),
+				paramsGroupId,
+			);
+		}),
+	};
 }
 
 export default entryToBox;
