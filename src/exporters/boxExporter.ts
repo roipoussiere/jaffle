@@ -105,7 +105,7 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 		}).map((child) => {
 			const _child = child;
 			_child.padding = paddings[child.groupId];
-			_child.width = widths[child.groupId];
+			_child.width = _child.padding + widths[child.groupId];
 			return _child;
 		});
 
@@ -115,8 +115,7 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 		...boxDisplay,
 
 		padding: boxDisplay.displayName.length + 1,
-		width: boxDisplay.displayName.length + boxDisplay.displayValue.length
-			+ (boxTyping.valueType === ValueType.Null ? 2 : 1),
+		width: boxDisplay.displayValue.length + (boxTyping.valueType === ValueType.Null ? 1 : 0),
 
 		id: id.join('-'),
 		groupId: 0,
