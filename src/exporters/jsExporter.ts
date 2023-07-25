@@ -7,7 +7,7 @@ import entryToAstNode from './astNodeExporter';
  * @param thing the object to serialize
  * @returns a string reprensenting the object in JSON
  */
-function serialize(thing: unknown): string {
+export function serialize(thing: unknown): string {
 	return JSON.stringify(thing);
 }
 
