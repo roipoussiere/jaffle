@@ -283,6 +283,7 @@ describe('Testing BE.entryToBox()', () => {
 
 			id: '',
 			groupId: 0,
+			lastSiblingId: '',
 
 			padding: 2,
 			width: 1, // expected because width is updated only on children
@@ -316,6 +317,7 @@ describe('Testing BE.entryToBox()', () => {
 
 			id: '',
 			groupId: 0,
+			lastSiblingId: '',
 
 			padding: 2,
 			width: 1, // expected because width is updated only on children
@@ -332,6 +334,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				id: '0',
 				groupId: 0,
+				lastSiblingId: '0',
 
 				padding: 2,
 				width: 3,
@@ -376,6 +379,7 @@ describe('Testing BE.entryToBox()', () => {
 
 			id: '',
 			groupId: 0,
+			lastSiblingId: '',
 
 			padding: 2,
 			width: 1, // expected because width is updated only on children
@@ -392,6 +396,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				id: '0',
 				groupId: 0,
+				lastSiblingId: '1',
 
 				padding: 5,
 				width: 15,
@@ -409,6 +414,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				id: '1',
 				groupId: 0,
+				lastSiblingId: '1',
 
 				padding: 5,
 				width: 15,
@@ -426,6 +432,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				id: '2',
 				groupId: 1,
+				lastSiblingId: '2',
 
 				padding: 2,
 				width: 4,

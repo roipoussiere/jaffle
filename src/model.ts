@@ -49,7 +49,8 @@ export interface Entry extends EntryData {
 export interface BoxInternal {
 	id: string,
 	groupId: number,
-	// lastSiblingId: string, // TODO instead Graph.getLastFunc(n) and Graph.getShouldStack(n)
+	lastSiblingId: string,
+	// stack: boolean, // TODO instead of Graph.getShouldStack(n)
 }
 
 export interface BoxDisplay {

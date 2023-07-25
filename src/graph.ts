@@ -135,8 +135,10 @@ class Graph {
 				.filter((n: FuncNode) => n.data.type !== BoxType.ChainedFunc))
 			.join('rect')
 			.attr('width', (node: FuncNode) => (node.data.width - 0.5) * this.charWidth)
-			.attr('height', (node: FuncNode) => Graph.getLastFunc(node).x - node.x)
-			// .attr('height', (node: FuncNode) => this.getNodeById(node.lastSibling).x - node.x)
+			.attr('height', (node: FuncNode) => {
+				const lastSibling = this.getNodeById(node.data.lastSiblingId);
+				return lastSibling === undefined ? 0 : lastSibling.x - node.x;
+			})
 			.attr('x', (node: FuncNode) => node.y + 0.25 * this.charWidth)
 			.attr('y', (node: FuncNode) => node.x)
 			.attr('fill', '#ccc8');
@@ -293,25 +295,6 @@ class Graph {
 			&& nodeB.data.type === BoxType.Value;
 		return nodeA.parent === nodeB.parent
 			&& (bothAreLiteral || nodeB.data.type === BoxType.ChainedFunc);
-	}
-
-	private static getGroup(node: FuncNode): Array<FuncNode> {
-		if (node.parent === null || node.parent.children === undefined) {
-			return [node];
-		}
-		const group = node.parent.children
-			.filter((child: FuncNode) => child.data.groupId === node.data.groupId);
-		return group;
-	}
-
-	private static getFirstFunc(node: FuncNode): FuncNode {
-		return Graph.getGroup(node)[0];
-	}
-
-	// TODO: remove in favor of this.getNodeById(node.lastSibling)
-	private static getLastFunc(node: FuncNode): FuncNode {
-		const group = Graph.getGroup(node);
-		return group[group.length - 1];
 	}
 }
 

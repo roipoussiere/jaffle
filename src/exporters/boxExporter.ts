@@ -82,6 +82,7 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 
 	const paddings: Array<number> = [];
 	const widths: Array<number> = [];
+	const lastSiblingIds: Array<string> = [];
 	let groupId = -1;
 
 	const children = entry.children
@@ -99,6 +100,8 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 					widths[groupId] = child.width;
 				}
 			}
+			lastSiblingIds[groupId] = child.id;
+
 			const _child = child;
 			_child.groupId = groupId;
 			return _child;
@@ -106,6 +109,7 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 			const _child = child;
 			_child.padding = child.type === BoxType.Value ? 1 : paddings[child.groupId];
 			_child.width = paddings[child.groupId] + widths[child.groupId];
+			_child.lastSiblingId = lastSiblingIds[child.groupId];
 			return _child;
 		});
 
@@ -119,6 +123,7 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 
 		id: id.join('-'),
 		groupId: 0,
+		lastSiblingId: '',
 
 		children,
 	};
