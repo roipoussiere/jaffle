@@ -32,4 +32,124 @@ describe('Testing JE.astNodeToJs()', () => {
 		};
 		expect(JE.astNodeToJs(input)).toBe("'a'");
 	});
+
+	test('AstNode of main func without param return js code of the function call', () => {
+		const input: AstNode = {
+			value: 'a',
+			type: BoxType.MainFunc,
+			children: [],
+		};
+		expect(JE.astNodeToJs(input)).toBe('a()');
+	});
+
+	test('AstNode of chained func without param return js code of the function call', () => {
+		const input: AstNode = {
+			value: 'a',
+			type: BoxType.ChainedFunc,
+			children: [],
+		};
+		expect(JE.astNodeToJs(input)).toBe('.a()');
+	});
+
+	test('AstNode of func with one param return js code of the function call', () => {
+		const input: AstNode = {
+			value: 'a',
+			type: BoxType.MainFunc,
+			children: [{
+				value: 42,
+				type: BoxType.Value,
+				children: [],
+			}],
+		};
+		expect(JE.astNodeToJs(input)).toBe('a(42)');
+	});
+
+	test('AstNode of func with literal params return js code of the function call', () => {
+		const input: AstNode = {
+			value: 'a',
+			type: BoxType.MainFunc,
+			children: [{
+				value: true,
+				type: BoxType.Value,
+				children: [],
+			}, {
+				value: 42,
+				type: BoxType.Value,
+				children: [],
+			}, {
+				value: 'b',
+				type: BoxType.Value,
+				children: [],
+			}],
+		};
+		expect(JE.astNodeToJs(input)).toBe("a(true, 42, 'b')");
+	});
+
+	test('AstNode of func with one func param return js code of the function call', () => {
+		const input: AstNode = {
+			value: 'a',
+			type: BoxType.MainFunc,
+			children: [{
+				value: 'b',
+				type: BoxType.MainFunc,
+				children: [],
+			}],
+		};
+		expect(JE.astNodeToJs(input)).toBe('a(b())');
+	});
+
+	test('AstNode of func with several func params return js code of the function call', () => {
+		const input: AstNode = {
+			value: 'a',
+			type: BoxType.MainFunc,
+			children: [{
+				value: 'b',
+				type: BoxType.MainFunc,
+				children: [],
+			}, {
+				value: 'c',
+				type: BoxType.MainFunc,
+				children: [],
+			}],
+		};
+		expect(JE.astNodeToJs(input)).toBe('a(b(), c())');
+	});
+
+	test('AstNode of func with chained func params return js code of the function call', () => {
+		const input: AstNode = {
+			value: 'a',
+			type: BoxType.MainFunc,
+			children: [{
+				value: 'b',
+				type: BoxType.MainFunc,
+				children: [],
+			}, {
+				value: 'c',
+				type: BoxType.ChainedFunc,
+				children: [],
+			}],
+		};
+		expect(JE.astNodeToJs(input)).toBe('a(b().c())');
+	});
+
+	test('AstNode of func with chained func params return js code of the function call', () => {
+		const input: AstNode = {
+			value: 'a',
+			type: BoxType.MainFunc,
+			children: [{
+				value: 'b',
+				type: BoxType.MainFunc,
+				children: [],
+			}, {
+				value: 'c',
+				type: BoxType.ChainedFunc,
+				children: [],
+			}, {
+				value: 'd',
+				type: BoxType.MainFunc,
+				children: [],
+			}],
+		};
+		expect(JE.astNodeToJs(input)).toBe('a(b().c(), d())');
+	});
 });

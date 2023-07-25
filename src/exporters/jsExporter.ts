@@ -12,23 +12,30 @@ export function serialize(thing: unknown): string {
 }
 
 export function astNodeToJs(astNode: AstNode): string {
-	const params = astNode.children.map((param) => astNodeToJs(param));
+	const groups: Array<Array<AstNode>> = [];
+	astNode.children.forEach((child) => {
+		if (child.type !== BoxType.ChainedFunc) {
+			groups.push([child]);
+		} else {
+			groups[groups.length - 1].push(child);
+		}
+	});
 	let js: string;
 
+	const jsParams = groups.map(
+		(group) => group.map((child) => astNodeToJs(child)).join(''),
+	);
+
 	if (astNode.type === BoxType.MainFunc) {
-		js = `${astNode.value}(${params.join(', ')})`;
+		js = `${astNode.value}(${jsParams.join(', ')})`;
 	} else if (astNode.type === BoxType.ChainedFunc) {
-		js = `.${astNode.value}(${params.join(', ')})`;
+		js = `.${astNode.value}(${jsParams.join(', ')})`;
 	} else if (astNode.type === BoxType.ConstantDef) {
-		js = `const ${c.VAR_NAME_PREFIX}${astNode.value} = ${params[0]};`;
+		js = `const ${c.VAR_NAME_PREFIX}${astNode.value} = ${jsParams[0]};`;
 	// } else if (func.type === BoxType.List) {
 	// 	js = `[${params.join(', ')}]`;
 	} else if (astNode.type === BoxType.Value) {
 		js = typeof astNode.value === 'string' ? `'${astNode.value}'` : `${astNode.value}`;
-	// } else if (func.type === BoxType.Expression) {
-	// 	js = `${c.VAR_NAME_PREFIX}${func.value}`;
-	// } else if (func.type === BoxType.Mininotation) {
-	// 	js = `mini(${func.value})`;
 	} else {
 		js = serialize(astNode.value);
 	}
