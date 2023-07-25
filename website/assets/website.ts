@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
 
-import yamlToEntry from './jaffle/importers/yamlImporter';
-import entryToBox from './jaffle/exporters/boxExporter';
-import { transpiler, JaffleEditor, JaffleGraph } from './jaffle';
+import { entryToJs, entryToBox, yamlToEntry, JaffleEditor, JaffleGraph } from './jaffle';
 import StrudelRepl from './strudel_repl';
 
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
@@ -53,7 +51,7 @@ function fillTunesList(): void {
 }
 
 strudel.transpiler = (tuneYml) => {
-	const tuneJs = transpiler(tuneYml);
+	const tuneJs = entryToJs(yamlToEntry(tuneYml));
 	console.log(tuneJs);
 	return tuneJs;
 };
