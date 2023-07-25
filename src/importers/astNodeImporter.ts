@@ -12,7 +12,7 @@ export function getRawName(astNode: AstNode): string {
 	} else if (astNode.type === BoxType.ChainedFunc) {
 		rawName = `${c.CHAINED_FUNC_PREFIX}${astNode.value}`;
 	} else if (astNode.type === BoxType.ConstantDef) {
-		rawName = `${c.CONST_FUNC_PREFIX}${astNode.value}`;
+		rawName = `${c.CONSTANT_DEF_PREFIX}${astNode.value}`;
 	} else if (astNode.type === BoxType.SerializedData) {
 		rawName = `${astNode.value}${c.SERIALIZE_FUNC_SUFFIX}`;
 	} else {
