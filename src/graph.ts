@@ -66,12 +66,19 @@ class Graph {
 			.nodeSize((n: FuncNode) => (
 				[this.charHeight, (n.data.width + this.boxGap) * this.charWidth]
 			))
-			.spacing((a: FuncNode, b: FuncNode) => (
-				Graph.shouldStack(a, b) ? 0 : 0.5 * this.charHeight
-			));
+			.spacing((a: FuncNode, b: FuncNode) => {
+				const bothAreValue = a.data.type === BoxType.Value && b.data.type === BoxType.Value;
+				const shouldStack = a.parent === b.parent
+					&& (bothAreValue || b.data.type === BoxType.ChainedFunc);
+				return shouldStack ? 0 : 0.5 * this.charHeight;
+			});
 
 		layout(this.tree);
+		this.setGraphGeometry();
+		return this;
+	}
 
+	public setGraphGeometry() {
 		let minNodeY = Infinity;
 		let maxNodeY = -Infinity;
 		this.tree.each((node: FuncNode) => {
@@ -86,8 +93,6 @@ class Graph {
 		this.height = maxNodeY - minNodeY + this.charHeight * 2;
 		this.offsetX = ((<FuncNode> this.tree).data.width + this.boxGap) * this.charWidth;
 		this.offsetY = minNodeY - this.charHeight;
-
-		return this;
 	}
 
 	public draw(): Graph {
@@ -288,13 +293,6 @@ class Graph {
 
 	getNodeById(id: string): FuncNode | undefined {
 		return this.tree.find((n: FuncNode) => n.data.id === id);
-	}
-
-	private static shouldStack(nodeA: FuncNode, nodeB: FuncNode): boolean {
-		const bothAreLiteral = nodeA.data.type === BoxType.Value
-			&& nodeB.data.type === BoxType.Value;
-		return nodeA.parent === nodeB.parent
-			&& (bothAreLiteral || nodeB.data.type === BoxType.ChainedFunc);
 	}
 }
 
