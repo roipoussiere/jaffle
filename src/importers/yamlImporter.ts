@@ -65,14 +65,6 @@ export function valueToSerializedEntry(rawValue: unknown): Entry {
 }
 
 export function buildLiteralEntry(rawLiteral: unknown): Entry {
-	if (typeof rawLiteral === 'string'
-		&& (rawLiteral[0] === c.MINI_STR_PREFIX || rawLiteral[0] === c.EXPR_STR_PREFIX)) {
-		return {
-			rawName: `${rawLiteral}`,
-			rawValue: '',
-			children: [],
-		};
-	}
 	return {
 		rawName: '',
 		rawValue: rawLiteral === null ? '' : `${rawLiteral}`,

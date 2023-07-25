@@ -176,14 +176,18 @@ class Graph {
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.style('fill', (n: FuncNode) => BOX_NAME_COLORS[n.data.type])
-			.style('font-weight', (n: FuncNode) => (n.data.type === BoxType.ChainedFunc
-				? 'normal' : 'bold'))
+			.style('font-weight', (n: FuncNode) => (n.data.type !== BoxType.ChainedFunc
+				? 'bold' : 'normal'))
 			.text((d: FuncNode) => d.data.displayName);
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: FuncNode) => d.data.padding * this.charWidth)
 			.style('fill', (d: FuncNode) => BOX_VALUE_COLORS[d.data.valueType])
+			.style('font-weight', (n: FuncNode) => (n.data.type === BoxType.Value
+				&& (n.data.valueType === ValueType.Mininotation
+				|| n.data.valueType === ValueType.Expression)
+				? 'bold' : 'normal'))
 			.text((d: FuncNode) => d.data.displayValue);
 
 		box.append('rect')

@@ -285,7 +285,7 @@ describe('Testing BE.entryToBox()', () => {
 			groupId: 0,
 
 			padding: 2,
-			width: 3,
+			width: 1, // expected because width is updated only on children
 
 			children: [],
 		};
@@ -318,7 +318,7 @@ describe('Testing BE.entryToBox()', () => {
 			groupId: 0,
 
 			padding: 2,
-			width: 3,
+			width: 1, // expected because width is updated only on children
 
 			children: [{
 				rawName: 'b',
@@ -378,7 +378,7 @@ describe('Testing BE.entryToBox()', () => {
 			groupId: 0,
 
 			padding: 2,
-			width: 3,
+			width: 1, // expected because width is updated only on children
 
 			children: [{
 				rawName: 'b123',
@@ -394,7 +394,7 @@ describe('Testing BE.entryToBox()', () => {
 				groupId: 0,
 
 				padding: 5,
-				width: 16,
+				width: 15,
 
 				children: [],
 			}, {
@@ -411,7 +411,7 @@ describe('Testing BE.entryToBox()', () => {
 				groupId: 0,
 
 				padding: 5,
-				width: 16,
+				width: 15,
 
 				children: [],
 			}, {

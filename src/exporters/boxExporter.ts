@@ -58,8 +58,7 @@ export function getDisplayName(entry: Entry) {
 }
 
 export function getDisplayValue(entry: Entry) {
-	if (entry.rawValue === ''
-		&& entry.rawName[0] !== c.MINI_STR_PREFIX && entry.rawName[0] !== c.EXPR_STR_PREFIX) {
+	if (entry.rawValue === '') {
 		return entry.children.length === 0 ? '∅' : ' ';
 	}
 
@@ -105,8 +104,8 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 			return _child;
 		}).map((child) => {
 			const _child = child;
-			_child.padding = paddings[child.groupId];
-			_child.width = _child.padding + widths[child.groupId];
+			_child.padding = child.type === BoxType.Value ? 1 : paddings[child.groupId];
+			_child.width = paddings[child.groupId] + widths[child.groupId];
 			return _child;
 		});
 
