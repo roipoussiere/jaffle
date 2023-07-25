@@ -58,7 +58,8 @@ export function getDisplayName(entry: Entry) {
 }
 
 export function getDisplayValue(entry: Entry) {
-	if (entry.rawValue === '') {
+	if (entry.rawValue === ''
+		&& entry.rawName[0] !== c.MINI_STR_PREFIX && entry.rawName[0] !== c.EXPR_STR_PREFIX) {
 		return entry.children.length === 0 ? '∅' : ' ';
 	}
 
