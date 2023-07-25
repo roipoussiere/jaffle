@@ -1,35 +1,28 @@
 import { describe, expect, test } from '@jest/globals';
 
 import * as YE from '../../src/exporters/yamlExporter';
-import { Box, BoxType, BoxValueType } from '../../src/dataTypes/box';
+import { Entry } from '../../src/model';
 
 describe('Testing YE.boxToYaml()', () => {
 	test('function with literal values are correctly converted', () => {
-		const input: Box = {
-			name: 'a',
-			type: BoxType.MainFunc,
-			value: 'b',
-			valueType: BoxValueType.String,
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: 'b',
 			children: [],
 		};
-		expect(YE.boxToYaml(input)).toBe('a: b');
+		expect(YE.entryToYaml(input)).toBe('a: b\n');
 	});
 
 	test('function with params are correctly converted', () => {
-		const input: Box = {
-			name: 'a',
-			type: BoxType.MainFunc,
-			value: null,
-			valueType: BoxValueType.Empty,
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
 			children: [{
-				name: 'b',
-				type: BoxType.MainFunc,
-				value: 'c',
-				valueType: BoxValueType.String,
+				rawName: 'b',
+				rawValue: 'c',
 				children: [],
 			}],
 		};
-		expect(YE.boxToYaml(input)).toBe(`a:
-  b: c`);
+		expect(YE.entryToYaml(input)).toBe('a:\n  - b: c\n');
 	});
 });
