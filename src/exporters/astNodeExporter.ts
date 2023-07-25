@@ -6,7 +6,7 @@ export function rawNameToBoxType(rawName: string): BoxType {
 	let boxType: BoxType;
 	if (prefix === c.CHAINED_FUNC_PREFIX) {
 		boxType = BoxType.ChainedFunc;
-	} else if (prefix === c.CONST_FUNC_PREFIX) {
+	} else if (prefix === c.CONSTANT_DEF_PREFIX) {
 		boxType = BoxType.ConstantDef;
 	} else if (rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
 		boxType = BoxType.SerializedData;
@@ -15,6 +15,7 @@ export function rawNameToBoxType(rawName: string): BoxType {
 	} else {
 		boxType = BoxType.MainFunc;
 	}
+	// boxType = BoxType.List; // ??
 	return boxType;
 }
 
@@ -23,7 +24,7 @@ export function rawValueToValue(rawValue: string): unknown {
 
 	if (rawValue === '') {
 		value = null;
-	} else if (!Number.isNaN(rawValue)) {
+	} else if (!Number.isNaN(Number(rawValue))) {
 		value = Number(rawValue);
 	} else if (rawValue === 'true') {
 		value = true;
@@ -35,17 +36,32 @@ export function rawValueToValue(rawValue: string): unknown {
 	return value;
 }
 
-export function entryToAstData(entry: Entry): AstNodeData {
+export function entryToAstNodeData(entry: Entry): AstNodeData {
+	const type = rawNameToBoxType(entry.rawName);
+	const value = rawValueToValue(entry.rawValue);
+
 	return {
-		type: rawNameToBoxType(entry.rawName),
-		value: rawValueToValue(entry.rawValue),
+		type,
+		value: type === BoxType.Value ? value : entry.rawName,
 	};
 }
 
 export function entryToAstNode(entry: Entry): AstNode {
+	const astNodeData = entryToAstNodeData(entry);
+	if (astNodeData.type === BoxType.Value) {
+		return {
+			...astNodeData,
+			children: [],
+		};
+	}
+
 	return {
-		...entryToAstData(entry),
-		children: entry.children.map((child) => entryToAstNode(child)),
+		...astNodeData,
+		children: [{
+			value: rawValueToValue(entry.rawValue),
+			type: BoxType.Value,
+			children: entry.children.map((child) => entryToAstNode(child)),
+		}],
 	};
 }
 
