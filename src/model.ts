@@ -7,9 +7,9 @@
       ▲    │                 ▲    │                 ┆    ▲
       │    ▼                 │    ▼                 ▽    │
  ┌────┴─────────┐       ┌────┴─────────┐       ┌─────────┴────┐
- │   Box tree   │       │  Entry tree  │       │ AstNode tree │
+ │   Box tree   │       │  Entry tree  │       │ AstFunc tree │
  ├──────────────┤       ├──────────────┤       ├──────────────┤
- │- EntryData   ├──────▶│- EntryData   ├──────▶│- AstNodeData │
+ │- EntryData   ├──────▶│- EntryData   ├──────▶│- name | value│
  │- BoxInternal │       │              │       │              │
  │- BoxDisplay  │◀──────┤              │◁╌╌╌╌╌╌┤              │
  │- BoxTyping   │       │              │       │              │
@@ -72,15 +72,19 @@ export interface Box extends EntryData, BoxInternal, BoxDisplay, BoxTyping, BoxG
 	children: Array<Box>,
 }
 
-export interface AstNodeData {
-	type: BoxType,
-	value: unknown,
-}
-
-export interface AstNode extends AstNodeData {
-	children: Array<AstNode>,
-}
-
 export interface Dict<T> {
 	[key: string]: T;
+}
+
+// TODO: implement Acorn walker base types:
+// https://github.com/acornjs/acorn/blob/master/acorn-walk/src/index.js#L187
+
+export type AstValue = null | boolean | number | string | Array<AstValue> | Dict<AstValue>;
+
+// eslint-disable-next-line no-use-before-define
+export type AstFuncChain = Array<AstFunction>;
+
+export interface AstFunction {
+	name: string,
+	params: Array<AstFuncChain | AstValue>,
 }
