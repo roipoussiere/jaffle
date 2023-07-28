@@ -1,7 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
 
 import * as JE from '../../src/exporters/jsExporter';
-import { AstNode, BoxType } from '../../src/model';
+import { ExporterError } from '../../src/errors';
+import { Entry } from '../../src/model';
 
 describe('Testing JE.serialize()', () => {
 	test('any value can be serialized', () => {
@@ -14,142 +15,100 @@ describe('Testing JE.serialize()', () => {
 	});
 });
 
-describe('Testing JE.astNodeToJs()', () => {
-	test('AstNode of number value return js code of the number', () => {
-		const input: AstNode = {
-			value: 42,
-			type: BoxType.Value,
-			children: [],
-		};
-		expect(JE.astNodeToJs(input)).toBe('42');
+describe('Testing JE.rawNameToFuncName()', () => {
+	test('empty strings fails', () => {
+		expect(() => JE.rawNameToFuncName('')).toThrow(ExporterError);
 	});
 
-	test('AstNode of string value return js code of the string', () => {
-		const input: AstNode = {
-			value: 'a',
-			type: BoxType.Value,
-			children: [],
-		};
-		expect(JE.astNodeToJs(input)).toBe("'a'");
+	test('prefixes are stripped', () => {
+		expect(JE.rawNameToFuncName('.a')).toBe('a');
+		expect(JE.rawNameToFuncName('$a')).toBe('a');
 	});
 
-	test('AstNode of main func without param return js code of the function call', () => {
-		const input: AstNode = {
-			value: 'a',
-			type: BoxType.MainFunc,
-			children: [],
-		};
-		expect(JE.astNodeToJs(input)).toBe('a()');
+	test('suffixes are stripped', () => {
+		expect(JE.rawNameToFuncName('a^')).toBe('a');
 	});
 
-	test('AstNode of chained func without param return js code of the function call', () => {
-		const input: AstNode = {
-			value: 'a',
-			type: BoxType.ChainedFunc,
-			children: [],
-		};
-		expect(JE.astNodeToJs(input)).toBe('.a()');
+	test('other strings are kept intact', () => {
+		expect(JE.rawNameToFuncName('a')).toBe('a');
+	});
+});
+
+describe('Testing JE.rawValueToJs()', () => {
+	test('common strings are transpiled with quotes', () => {
+		expect(JE.rawValueToJs('abc')).toBe("'abc'");
+		expect(JE.rawValueToJs('ab\ncd')).toBe('`ab\ncd`');
 	});
 
-	test('AstNode of func with one param return js code of the function call', () => {
-		const input: AstNode = {
-			value: 'a',
-			type: BoxType.MainFunc,
-			children: [{
-				value: 42,
-				type: BoxType.Value,
-				children: [],
-			}],
-		};
-		expect(JE.astNodeToJs(input)).toBe('a(42)');
+	test('mini-notation strings are transpiled to a call to mini()', () => {
+		expect(JE.rawValueToJs('_abc')).toBe("mini('abc')");
+		expect(JE.rawValueToJs('_ab\ncd')).toBe('mini(`ab\ncd`)');
 	});
 
-	test('AstNode of func with literal params return js code of the function call', () => {
-		const input: AstNode = {
-			value: 'a',
-			type: BoxType.MainFunc,
-			children: [{
-				value: true,
-				type: BoxType.Value,
-				children: [],
-			}, {
-				value: 42,
-				type: BoxType.Value,
-				children: [],
-			}, {
-				value: 'b',
-				type: BoxType.Value,
-				children: [],
-			}],
-		};
-		expect(JE.astNodeToJs(input)).toBe("a(true, 42, 'b')");
+	test('non-string are transpiled without quotes', () => {
+		expect(JE.rawValueToJs('2.21')).toBe('2.21');
+		expect(JE.rawValueToJs('true')).toBe('true');
+		expect(JE.rawValueToJs('false')).toBe('false');
+		expect(JE.rawValueToJs('')).toBe('');
 	});
 
-	test('AstNode of func with one func param return js code of the function call', () => {
-		const input: AstNode = {
-			value: 'a',
-			type: BoxType.MainFunc,
-			children: [{
-				value: 'b',
-				type: BoxType.MainFunc,
-				children: [],
-			}],
-		};
-		expect(JE.astNodeToJs(input)).toBe('a(b())');
+	test('expression string are transpiled without quotes, with prefixed variables', () => {
+		expect(JE.rawValueToJs('= ab + (42 - cd/2) * 2.21')).toBe('_ab + (42 - _cd/2) * 2.21');
 	});
 
-	test('AstNode of func with several func params return js code of the function call', () => {
-		const input: AstNode = {
-			value: 'a',
-			type: BoxType.MainFunc,
-			children: [{
-				value: 'b',
-				type: BoxType.MainFunc,
-				children: [],
-			}, {
-				value: 'c',
-				type: BoxType.MainFunc,
-				children: [],
-			}],
-		};
-		expect(JE.astNodeToJs(input)).toBe('a(b(), c())');
+	test('non-valid expression string fails', () => {
+		expect(() => JE.rawValueToJs('=$')).toThrow(ExporterError);
+	});
+});
+
+describe('Testing groupFuncParams()', () => {
+	const stringE: Entry = { rawName: '', rawValue: 'a', children: [] };
+	const numberE: Entry = { rawName: '', rawValue: '42', children: [] };
+	const miniE: Entry = { rawName: '', rawValue: '_a', children: [] };
+	const expE: Entry = { rawName: '', rawValue: '=a', children: [] };
+	const listE: Entry = { rawName: '', rawValue: '', children: [stringE, numberE] };
+	const mainFuncE: Entry = { rawName: 'a', rawValue: '', children: [] };
+	const chainedFuncE: Entry = { rawName: '.b', rawValue: 'c', children: [] };
+	const mainFuncParamsE: Entry = { rawName: 'a', rawValue: '', children: [stringE, numberE] };
+	const chainedFuncParamsE: Entry = { rawName: '.b', rawValue: '', children: [stringE, numberE] };
+
+	test('lists of one item are grouped into one group of one item', () => {
+		expect(JE.groupFuncParams([stringE])).toEqual([[stringE]]);
+		expect(JE.groupFuncParams([listE])).toEqual([[listE]]);
+		expect(JE.groupFuncParams([mainFuncE])).toEqual([[mainFuncE]]);
 	});
 
-	test('AstNode of func with chained func params return js code of the function call', () => {
-		const input: AstNode = {
-			value: 'a',
-			type: BoxType.MainFunc,
-			children: [{
-				value: 'b',
-				type: BoxType.MainFunc,
-				children: [],
-			}, {
-				value: 'c',
-				type: BoxType.ChainedFunc,
-				children: [],
-			}],
-		};
-		expect(JE.astNodeToJs(input)).toBe('a(b().c())');
+	test('lists of several items are grouped into groups of one item', () => {
+		expect(JE.groupFuncParams([stringE, numberE])).toEqual([[stringE], [numberE]]);
+		expect(JE.groupFuncParams([listE, mainFuncE])).toEqual([[listE], [mainFuncE]]);
 	});
 
-	test('AstNode of func with chained func params return js code of the function call', () => {
-		const input: AstNode = {
-			value: 'a',
-			type: BoxType.MainFunc,
-			children: [{
-				value: 'b',
-				type: BoxType.MainFunc,
-				children: [],
-			}, {
-				value: 'c',
-				type: BoxType.ChainedFunc,
-				children: [],
-			}, {
-				value: 'd',
-				type: BoxType.MainFunc,
-				children: [],
-			}],
-		};
-		expect(JE.astNodeToJs(input)).toBe('a(b().c(), d())');
+	test('lists of main/chain functions mix are grouped into groups of main functions', () => {
+		expect(JE.groupFuncParams([mainFuncE, chainedFuncE])).toEqual([[mainFuncE, chainedFuncE]]);
+		expect(JE.groupFuncParams([mainFuncE, chainedFuncE, stringE, numberE]))
+			.toEqual([[mainFuncE, chainedFuncE], [stringE], [numberE]]);
+		expect(JE.groupFuncParams([mainFuncE, chainedFuncE, chainedFuncParamsE]))
+			.toEqual([[mainFuncE, chainedFuncE, chainedFuncParamsE]]);
+		expect(JE.groupFuncParams([mainFuncE, chainedFuncE, mainFuncParamsE, chainedFuncParamsE]))
+			.toEqual([[mainFuncE, chainedFuncE], [mainFuncParamsE, chainedFuncParamsE]]);
+		expect(JE.groupFuncParams([miniE, chainedFuncE])).toEqual([[miniE, chainedFuncE]]);
+		expect(JE.groupFuncParams([expE, chainedFuncE])).toEqual([[expE, chainedFuncE]]);
+	});
+
+	// test('serialized parameters are grouped into groups of serialized parameters', () => {
+	// 	expect(JE.groupFuncParams([{ a: 1 }, { '.b': 2 }, { _c: 3 }], -2))
+	// 		.toEqual([[{ a: 1 }], [{ '.b': 2 }], [{ _c: 3 }]]);
+	// 	expect(JE.groupFuncParams([{ a: 1 }, { '.b': 2 }, { _c: 3 }], -1))
+	// 		.toEqual([[{ a: 1 }, { '.b': 2 }], [{ _c: 3 }]]);
+	// 	expect(JE.groupFuncParams([{ a: 1 }, { '.b': 2 }], 1))
+	// 		.toEqual([[{ a: 1 }], [{ '.b': 2 }]]);
+	// });
+
+	test('Trying to group bad groups fails', () => {
+		expect(() => JE.groupFuncParams([])).toThrow(ExporterError);
+		expect(() => JE.groupFuncParams([chainedFuncE])).toThrow(ExporterError);
+		expect(() => JE.groupFuncParams([chainedFuncE, mainFuncE])).toThrow(ExporterError);
+		expect(() => JE.groupFuncParams([stringE, chainedFuncE])).toThrow(ExporterError);
+		expect(() => JE.groupFuncParams([listE, chainedFuncE])).toThrow(ExporterError);
 	});
 });
