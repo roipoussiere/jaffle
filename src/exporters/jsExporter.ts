@@ -1,13 +1,6 @@
-import { load as loadYaml } from 'js-yaml';
 import * as c from '../constants';
-
 import { ExporterError } from '../errors';
-
-type JaffleLiteral = string | number | null;
-// eslint-disable-next-line no-use-before-define
-type JaffleAny = JaffleLiteral | JaffleFunction | JaffleList
-type JaffleList = Array<JaffleAny>
-type JaffleFunction = { [funcName: string]: JaffleAny }
+import { Entry } from '../model';
 
 /**
  * Serialise an object to JSON.
@@ -18,29 +11,17 @@ export function serialize(thing: unknown): string {
 	return JSON.stringify(thing);
 }
 
-/**
- * Check if the passed object is a Jaffle function.
- * @param thing the object to test
- * @returns true if the object is a Jaffle function, false otherwise
- */
-export function isJaffleFunction(thing: JaffleAny): boolean {
-	return thing instanceof Object && !(thing instanceof Array);
-}
-
-/**
- * Returns the Jaffle function name.
- * @param func the function whose name to get
- * @returns the name of the function
- */
-export function getJaffleFuncName(func: JaffleFunction): string {
-	const keys = Object.keys(func);
-	if (keys.length === 0) {
-		throw new ExporterError('could not find function name');
+export function rawNameToFuncName(rawName: string): string {
+	if (rawName === '') {
+		throw new ExporterError('can not get func name from empty raw name');
 	}
-	if (keys.length > 1) {
-		throw new ExporterError(`too many function names: ${keys.join(', ')}`);
+	if (rawName[0] === c.CHAINED_FUNC_PREFIX || rawName[0] === c.CONSTANT_DEF_PREFIX) {
+		return rawName.substring(1);
 	}
-	return keys[0];
+	if (rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
+		return rawName.substring(0, rawName.length - 1);
+	}
+	return rawName;
 }
 
 /**
@@ -48,74 +29,72 @@ export function getJaffleFuncName(func: JaffleFunction): string {
  * @param thing the object to convert
  * @returns the object converted into a function
  */
-export function toJaffleFunction(thing: JaffleAny): JaffleFunction {
-	if (typeof thing === 'string') {
-		if (thing[0] === c.MINI_STR_PREFIX) {
-			return { mini: thing.substring(1) };
-		}
-		if (thing[0] === c.EXPR_STR_PREFIX) {
-			return { expr: thing.substring(1) };
-		}
-	}
-	if (isJaffleFunction(thing)) {
-		const func = <JaffleFunction>thing;
-		if (Object.keys(func).length === 0) {
-			throw new ExporterError('function is empty');
-		}
-		return func;
-	}
-	throw new ExporterError('Not a function');
-}
+// export function toJaffleFunction(thing: JaffleAny): JaffleFunction {
+// 	if (typeof thing === 'string') {
+// 		if (thing[0] === c.MINI_STR_PREFIX) {
+// 			return { mini: thing.substring(1) };
+// 		}
+// 		if (thing[0] === c.EXPR_STR_PREFIX) {
+// 			return { expr: thing.substring(1) };
+// 		}
+// 	}
+// 	if (isFunction(thing)) {
+// 		const func = <JaffleFunction>thing;
+// 		if (Object.keys(func).length === 0) {
+// 			throw new ExporterError('function is empty');
+// 		}
+// 		return func;
+// 	}
+// 	throw new ExporterError('Not a function');
+// }
 
 /**
  * Return the parameters of an object, supposed to come from a Jaffle function.
  * @param thing the object whose parameters to get
  * @returns a list of parameters from the object
  */
-export function getJaffleFuncParams(thing: JaffleAny): JaffleList {
-	let params: JaffleList;
-	if (!(thing instanceof Object)) {
-		params = [thing];
-	} else {
-		params = thing instanceof Array ? thing : [thing];
-	}
-	if (params.length === 1 && params[0] === null) {
-		params = [];
-	}
-	return params;
-}
+// export function getJaffleFuncParams(thing: JaffleAny): JaffleList {
+// 	let params: JaffleList;
+// 	if (!(thing instanceof Object)) {
+// 		params = [thing];
+// 	} else {
+// 		params = thing instanceof Array ? thing : [thing];
+// 	}
+// 	if (params.length === 1 && params[0] === null) {
+// 		params = [];
+// 	}
+// 	return params;
+// }
 
 /**
  * Split a list of functions into several groups, each containing one main function and eventually
  * one or more chained functions.
- * @param list the list of functions to group
+ * @param params the list of functions to group
  * @param serializedParamId the id of a parameter to serialize
  * (-1 to disable serialization, -2 to serialize all parameters)
  * @returns an array of lists of functions
  */
-export function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1): Array<JaffleList> {
-	if (list.length === 0) {
+export function groupFuncParams(params: Array<Entry>, serializedParamId = -1): Array<Array<Entry>> {
+	if (params.length === 0) {
 		throw new ExporterError('group of params is empty');
 	}
-	const groups: Array<JaffleList> = [];
+	const groups: Array<Array<Entry>> = [];
 	let onMainFunc = false;
-	let func: JaffleFunction;
+	let func: Entry;
 
-	list.forEach((item) => {
-		if ([groups.length, -2].includes(serializedParamId)) {
-			groups.push([item]);
+	params.forEach((entry) => {
+		if (serializedParamId === -2 || serializedParamId === groups.length) {
+			groups.push([entry]);
 			return;
 		}
 
-		try {
-			func = toJaffleFunction(item);
-		} catch {
-			groups.push([item]);
+		if (entry.rawName === '') {
+			groups.push([entry]);
 			onMainFunc = false;
 			return;
 		}
 
-		const funcName = getJaffleFuncName(func);
+		const funcName = rawNameToFuncName(func.rawName);
 		if (funcName[0] === c.CHAINED_FUNC_PREFIX) {
 			if (groups.length === 0) {
 				throw new ExporterError('chained function as first entry');
@@ -123,9 +102,9 @@ export function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1):
 			if (!onMainFunc) {
 				throw new ExporterError('orphan chained function');
 			}
-			groups[groups.length - 1].push(item);
+			groups[groups.length - 1].push(entry);
 		} else {
-			groups.push([item]);
+			groups.push([entry]);
 			onMainFunc = true;
 		}
 	});
@@ -135,23 +114,26 @@ export function groupJaffleFuncParams(list: JaffleList, serializedParamId = -1):
 
 /**
  * Convert a Jaffle string into JavaScript code, handling prefixes (`_`, `=`, `/`).
- * @param str the string to convert
+ * @param rawValue the string to convert
  * @returns a string of Javascript code coming from the string
  */
-export function stringValueToJs(str: string): string {
-	const isPrefixed = [c.MINI_STR_PREFIX, c.EXPR_STR_PREFIX].includes(str[0]);
-	const newStr = (isPrefixed ? str.substring(1) : str).trim();
+export function rawValueToJs(rawValue: string): string {
+	const isPrefixed = [c.MINI_STR_PREFIX, c.EXPR_STR_PREFIX].includes(rawValue[0]);
+	const newStr = (isPrefixed ? rawValue.substring(1) : rawValue).trim();
 	const quote = newStr.includes('\n') ? '`' : "'";
 	let js: string;
 
-	if (str[0] === c.EXPR_STR_PREFIX) {
+	if (!Number.isNaN(Number(rawValue)) || rawValue === ''
+		|| rawValue === 'true' || rawValue === 'false') {
+		js = rawValue;
+	} else if (rawValue[0] === c.EXPR_STR_PREFIX) {
 		if (newStr.match(/[^a-zA-Z0-9.+\-*/() ]/g)) {
 			throw new ExporterError(`Not a valid expression string: ${newStr}`);
 		}
 		js = newStr.replace(/[a-z][a-zA-Z0-9]*/g, `${c.VAR_NAME_PREFIX}$&`);
 	} else {
 		js = `${quote}${newStr}${quote}`;
-		js = str[0] === c.MINI_STR_PREFIX ? `mini(${js})` : js;
+		js = rawValue[0] === c.MINI_STR_PREFIX ? `mini(${js})` : js;
 	}
 	return js;
 }
@@ -163,7 +145,7 @@ export function stringValueToJs(str: string): string {
  * which can be undefined, an empty string, or a string representing the parameter id
  * @returns a list of strings of Javascript code, each for one group, which list their parameters.
  */
-export function jaffleParamsToJsGroups(params: JaffleList, serializSuffix?: string): Array<string> {
+export function paramsToJsGroups(params: Array<Entry>, serializSuffix?: string): Array<string> {
 	if (params.length === 0) {
 		return [];
 	}
@@ -173,7 +155,7 @@ export function jaffleParamsToJsGroups(params: JaffleList, serializSuffix?: stri
 		serializedParamId = serializSuffix === '' ? -2 : parseInt(serializSuffix, 10) - 1;
 	}
 
-	const groups = groupJaffleFuncParams(params, serializedParamId);
+	const groups = groupFuncParams(params, serializedParamId);
 	if (serializedParamId >= groups.length) {
 		throw new ExporterError('param identifier out of range');
 	}
@@ -182,7 +164,7 @@ export function jaffleParamsToJsGroups(params: JaffleList, serializSuffix?: stri
 		.map((group, id) => (group
 			.map((param) => (
 				// eslint-disable-next-line no-use-before-define
-				[id, -2].includes(serializedParamId) ? serialize(param) : jaffleParamToJs(param)
+				[id, -2].includes(serializedParamId) ? serialize(param) : entryToJs(param)
 			))
 			.join('.')
 		));
@@ -215,36 +197,24 @@ export function jaffleLambdaToJs(params: Array<string>): string {
  * @param func The Jaffle function to convert
  * @returns a string of JavaScript code which calls the function
  */
-export function jaffleFuncToJs(func: JaffleFunction): string {
-	if (Object.keys(func).length === 0) {
-		throw new ExporterError('Function is empty');
-	}
-
-	const funcName = getJaffleFuncName(func);
-	const fNameAndSuffix = funcName.split(c.SERIALIZE_FUNC_SUFFIX);
-	let [newFuncName] = fNameAndSuffix;
+export function functionEntryToJs(func: Entry): string {
+	const funcName = rawNameToFuncName(func.rawName);
+	const funcSuffix = func.rawName.split(c.SERIALIZE_FUNC_SUFFIX)[1];
 	let js: string;
-	const isVarDef = newFuncName[0] === c.CONSTANT_DEF_PREFIX;
+	const isVarDef = func.rawName[0] === c.CONSTANT_DEF_PREFIX;
 
-	newFuncName = [c.CHAINED_FUNC_PREFIX, c.CONSTANT_DEF_PREFIX].includes(newFuncName[0])
-		? newFuncName.substring(1) : newFuncName;
-
-	if (newFuncName[0] === newFuncName[0].toUpperCase()) {
-		js = newFuncName[0].toLowerCase() + newFuncName.substring(1);
+	if (func.rawName[0] === func.rawName[0].toUpperCase()) {
+		js = func.rawName[0].toLowerCase() + func.rawName.substring(1);
+	} else if (func.rawValue === '') {
+		js = `${funcName}()`;
+	} else if (func.rawName === c.LAMBDA_NAME) {
+		js = jaffleLambdaToJs(func.rawValue.split(','));
 	} else {
-		const params = getJaffleFuncParams(func[funcName]);
-
-		if (funcName === c.LAMBDA_NAME) {
-			js = jaffleLambdaToJs(<Array<string>>params);
-		} else if (params.length === 0) {
-			js = `${newFuncName}()`;
+		const paramsJs = paramsToJsGroups(func.children, funcSuffix[1]).join(', ');
+		if (isVarDef) {
+			js = `const ${c.VAR_NAME_PREFIX}${funcName} = ${paramsJs}`;
 		} else {
-			const paramsJs = jaffleParamsToJsGroups(params, fNameAndSuffix[1]).join(', ');
-			if (isVarDef) {
-				js = `const ${c.VAR_NAME_PREFIX}${newFuncName} = ${paramsJs}`;
-			} else {
-				js = `${newFuncName}(${paramsJs})`;
-			}
+			js = `${funcName}(${paramsJs})`;
 		}
 	}
 
@@ -256,57 +226,27 @@ export function jaffleFuncToJs(func: JaffleFunction): string {
  * @param list the list to convert
  * @returns a string of JavaScript code which declares an array containing the list elements
  */
-export function jaffleListToJs(list: JaffleList): string {
+export function listEntryToJs(list: Entry): string {
 	// eslint-disable-next-line no-use-before-define
-	return `[${list.map((item) => jaffleParamToJs(item)).join(', ')}]`;
+	return `[${list.children.map((item) => entryToJs(item)).join(', ')}]`;
 }
 
-export function jaffleParamToJs(param: JaffleAny): string {
-	if (param instanceof Array) {
-		return jaffleListToJs(param);
-	}
-	if (param instanceof Object) {
-		return jaffleFuncToJs(toJaffleFunction(param));
-	}
-	if (typeof param === 'string') {
-		return stringValueToJs(param);
-	}
-	if (typeof param === 'number') {
-		return `${param}`;
-	}
-	return 'null';
+export function entryToJs(entry: Entry): string {
+	return entry.rawName === '' ? rawValueToJs(entry.rawValue) : functionEntryToJs(entry);
 }
 
-/**
- * Converts a Yaml document reprensenting a tune in Jaffle syntax into Javascript code.
- * @param inputYaml a string containing the yaml document
- * @returns a string of Javascript code that can be used by Strudel to play the tune
- */
-export function jaffleDocumentToJs(inputYaml: string): string {
-	let tune: JaffleAny;
+export function rootEntryToJs(entry: Entry): string {
 	let outputJs = '';
 
-	try {
-		tune = <JaffleList> loadYaml(inputYaml);
-	} catch (err) {
-		throw new ExporterError(err.message);
+	if (entry.children.length === 0) {
+		throw new ExporterError('document must contain at least one function');
 	}
-
-	if (tune instanceof Array) {
-		const tuneGroups = jaffleParamsToJsGroups(tune);
-
-		if (tuneGroups.length === 0) {
-			throw new ExporterError('document must contain at least one function');
-		}
-
-		const tuneMain = tuneGroups.pop();
-		outputJs += tuneGroups.map((group) => `${group};\n`).join('');
-		outputJs += `return ${tuneMain};`;
-	} else {
-		throw new ExporterError(
-			`Document root must be an array, not ${typeof tune}`,
-		);
-	}
+	const groups = paramsToJsGroups(entry.children);
+	const tuneMain = groups.pop();
+	outputJs += groups.map((group) => `${group};\n`).join('');
+	outputJs += `return ${tuneMain};`;
 
 	return outputJs;
 }
+
+export default rootEntryToJs;

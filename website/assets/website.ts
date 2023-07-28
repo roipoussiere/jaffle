@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 
-import { entryToJs, entryToBox, yamlToEntry, JaffleEditor, JaffleGraph } from './jaffle';
+import { entryToJs, entryToBox, yamlToEntry, JaffleEditor, JaffleGraph, entryToString }
+	from './jaffle';
 import StrudelRepl from './strudel_repl';
 
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
@@ -50,17 +51,22 @@ function fillTunesList(): void {
 	});
 }
 
-strudel.transpiler = (tuneYml) => {
-	const tuneJs = entryToJs(yamlToEntry(tuneYml));
-	console.log(tuneJs);
-	return tuneJs;
+strudel.transpiler = (tuneYaml) => {
+	const tuneEntry = yamlToEntry(tuneYaml);
+	return entryToJs(tuneEntry);
 };
 
 strudel.init();
 editor.onPlay = () => {
-	const tune = editor.getText();
-	// console.log(transpiler(tune));
-	strudel.play(tune);
+	const tuneYaml = editor.getText();
+
+	// const tuneEntry = yamlToEntry(tuneYaml);
+	// console.log('entry:', entryToString(tuneEntry));
+
+	// const tuneJs = entryToJs(tuneEntry);
+	// console.log('js:', tuneJs);
+
+	strudel.play(tuneYaml);
 };
 editor.onStop = () => strudel.stop();
 editor.onUpdate = (tuneYml) => graph.load(entryToBox(yamlToEntry(tuneYml))).draw();
