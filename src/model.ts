@@ -79,12 +79,20 @@ export interface Dict<T> {
 // TODO: implement Acorn walker base types:
 // https://github.com/acornjs/acorn/blob/master/acorn-walk/src/index.js#L187
 
-export type AstValue = null | boolean | number | string | Array<AstValue> | Dict<AstValue>;
+export type AstValue = null | boolean | number | string | Array<unknown> | Dict<unknown>;
+
+export interface AstValueNode {
+	value: AstValue,
+}
 
 // eslint-disable-next-line no-use-before-define
-export type AstFuncChain = Array<AstFunction>;
+export type AstFuncChain = Array<AstFuncNode>;
 
-export interface AstFunction {
+export type Param = AstValueNode | AstFuncChain;
+
+export interface AstFuncNode {
 	name: string,
-	params: Array<AstFuncChain | AstValue>,
+	params: Array<Param>,
 }
+
+export type AstNode = AstValueNode | AstFuncNode;

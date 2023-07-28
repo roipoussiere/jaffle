@@ -1,68 +1,57 @@
-import { AstNodeData, AstNode, BoxType, Entry } from '../model';
+import { AstFuncNode, AstNode, Entry, AstValue, Param, AstValueNode } from '../model';
 import * as c from '../constants';
+import { ExporterError } from '../errors';
 
-export function rawNameToBoxType(rawName: string): BoxType {
-	const prefix = rawName[0];
-	let boxType: BoxType;
-	if (prefix === c.CHAINED_FUNC_PREFIX) {
-		boxType = BoxType.ChainedFunc;
-	} else if (prefix === c.CONSTANT_DEF_PREFIX) {
-		boxType = BoxType.ConstantDef;
-	} else if (rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-		boxType = BoxType.SerializedData;
-	} else if (rawName === '') {
-		boxType = BoxType.Value;
-	} else {
-		boxType = BoxType.MainFunc;
-	}
-	// boxType = BoxType.List; // ??
-	return boxType;
-}
+export function entryToAstValueNode(entry: Entry): AstValueNode {
+	let value: AstValue;
 
-export function rawValueToValue(rawValue: string): unknown {
-	let value: unknown;
-
-	if (rawValue === '') {
+	if (entry.rawValue === '') {
 		value = null;
-	} else if (!Number.isNaN(Number(rawValue))) {
-		value = Number(rawValue);
-	} else if (rawValue === 'true') {
+	} else if (!Number.isNaN(Number(entry.rawValue))) {
+		value = Number(entry.rawValue);
+	} else if (entry.rawValue === 'true') {
 		value = true;
-	} else if (rawValue === 'false') {
+	} else if (entry.rawValue === 'false') {
 		value = false;
 	} else {
-		value = rawValue;
+		value = entry.rawValue;
 	}
-	return value;
-}
-
-export function entryToAstNodeData(entry: Entry): AstNodeData {
-	const type = rawNameToBoxType(entry.rawName);
-	const value = rawValueToValue(entry.rawValue);
 
 	return {
-		type,
-		value: type === BoxType.Value ? value : entry.rawName,
+		value,
+	};
+}
+
+export function entryToAstFuncNode(entry: Entry): AstFuncNode {
+	const params: Array<Param> = [];
+	entry.children.forEach((child) => {
+		if (entry.rawName === '') {
+			params.push(entryToAstValueNode(child));
+		} else {
+			const func = entryToAstFuncNode(child);
+			if (child.rawName[0] === c.CHAINED_FUNC_PREFIX) {
+				const funcChain = params[params.length - 1];
+				if (!(funcChain instanceof Array)) {
+					throw new ExporterError('chained function must follow a function');
+				}
+				funcChain.push(func);
+			} else {
+				params.push([func]);
+			}
+		}
+	});
+
+	return {
+		name: entry.rawName,
+		params,
 	};
 }
 
 export function entryToAstNode(entry: Entry): AstNode {
-	const astNodeData = entryToAstNodeData(entry);
-	if (astNodeData.type === BoxType.Value) {
-		return {
-			...astNodeData,
-			children: [],
-		};
+	if (entry.rawName === '') {
+		return entryToAstValueNode(entry);
 	}
-
-	return {
-		...astNodeData,
-		children: [{
-			value: rawValueToValue(entry.rawValue),
-			type: BoxType.Value,
-			children: entry.children.map((child) => entryToAstNode(child)),
-		}],
-	};
+	return entryToAstFuncNode(entry);
 }
 
-export default entryToAstNode;
+export default entryToAstFuncNode;
