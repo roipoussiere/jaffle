@@ -25,100 +25,12 @@ export function rawNameToFuncName(rawName: string): string {
 }
 
 /**
- * Convert an object to a Jaffle function.
- * @param thing the object to convert
- * @returns the object converted into a function
- */
-// export function toJaffleFunction(thing: JaffleAny): JaffleFunction {
-// 	if (typeof thing === 'string') {
-// 		if (thing[0] === c.MINI_STR_PREFIX) {
-// 			return { mini: thing.substring(1) };
-// 		}
-// 		if (thing[0] === c.EXPR_STR_PREFIX) {
-// 			return { expr: thing.substring(1) };
-// 		}
-// 	}
-// 	if (isFunction(thing)) {
-// 		const func = <JaffleFunction>thing;
-// 		if (Object.keys(func).length === 0) {
-// 			throw new ExporterError('function is empty');
-// 		}
-// 		return func;
-// 	}
-// 	throw new ExporterError('Not a function');
-// }
-
-/**
- * Return the parameters of an object, supposed to come from a Jaffle function.
- * @param thing the object whose parameters to get
- * @returns a list of parameters from the object
- */
-// export function getJaffleFuncParams(thing: JaffleAny): JaffleList {
-// 	let params: JaffleList;
-// 	if (!(thing instanceof Object)) {
-// 		params = [thing];
-// 	} else {
-// 		params = thing instanceof Array ? thing : [thing];
-// 	}
-// 	if (params.length === 1 && params[0] === null) {
-// 		params = [];
-// 	}
-// 	return params;
-// }
-
-/**
- * Split a list of functions into several groups, each containing one main function and eventually
- * one or more chained functions.
- * @param params the list of functions to group
- * @param serializedParamId the id of a parameter to serialize
- * (-1 to disable serialization, -2 to serialize all parameters)
- * @returns an array of lists of functions
- */
-export function groupFuncParams(params: Array<Entry>, serializedParamId = -1): Array<Array<Entry>> {
-	if (params.length === 0) {
-		throw new ExporterError('group of params is empty');
-	}
-	const groups: Array<Array<Entry>> = [];
-	let onMainFunc = false;
-	let func: Entry;
-
-	params.forEach((entry) => {
-		if (serializedParamId === -2 || serializedParamId === groups.length) {
-			groups.push([entry]);
-			return;
-		}
-
-		if (entry.rawName === '') {
-			groups.push([entry]);
-			onMainFunc = false;
-			return;
-		}
-
-		const funcName = rawNameToFuncName(func.rawName);
-		if (funcName[0] === c.CHAINED_FUNC_PREFIX) {
-			if (groups.length === 0) {
-				throw new ExporterError('chained function as first entry');
-			}
-			if (!onMainFunc) {
-				throw new ExporterError('orphan chained function');
-			}
-			groups[groups.length - 1].push(entry);
-		} else {
-			groups.push([entry]);
-			onMainFunc = true;
-		}
-	});
-
-	return groups;
-}
-
-/**
  * Convert a Jaffle string into JavaScript code, handling prefixes (`_`, `=`, `/`).
  * @param rawValue the string to convert
  * @returns a string of Javascript code coming from the string
  */
 export function rawValueToJs(rawValue: string): string {
-	const isPrefixed = [c.MINI_STR_PREFIX, c.EXPR_STR_PREFIX].includes(rawValue[0]);
+	const isPrefixed = rawValue[0] === c.MINI_STR_PREFIX || rawValue[0] === c.EXPR_STR_PREFIX;
 	const newStr = (isPrefixed ? rawValue.substring(1) : rawValue).trim();
 	const quote = newStr.includes('\n') ? '`' : "'";
 	let js: string;
@@ -136,6 +48,51 @@ export function rawValueToJs(rawValue: string): string {
 		js = rawValue[0] === c.MINI_STR_PREFIX ? `mini(${js})` : js;
 	}
 	return js;
+}
+
+/**
+ * Split a list of functions into several groups, each containing one main function and eventually
+ * one or more chained functions.
+ * @param params the list of functions to group
+ * @param serializedParamId the id of a parameter to serialize
+ * (-1 to disable serialization, -2 to serialize all parameters)
+ * @returns an array of lists of functions
+ */
+export function groupFuncParams(params: Array<Entry>, serializedParamId = -1): Array<Array<Entry>> {
+	if (params.length === 0) {
+		throw new ExporterError('group of params is empty');
+	}
+	const groups: Array<Array<Entry>> = [];
+	let onMainFunc = false;
+
+	params.forEach((entry) => {
+		if (serializedParamId === -2 || serializedParamId === groups.length) {
+			groups.push([entry]);
+			return;
+		}
+
+		if (entry.rawName === '') {
+			groups.push([entry]);
+			onMainFunc = false;
+			return;
+		}
+
+		const funcName = rawNameToFuncName(entry.rawName);
+		if (funcName[0] === c.CHAINED_FUNC_PREFIX) {
+			if (groups.length === 0) {
+				throw new ExporterError('chained function as first entry');
+			}
+			if (!onMainFunc) {
+				throw new ExporterError('orphan chained function');
+			}
+			groups[groups.length - 1].push(entry);
+		} else {
+			groups.push([entry]);
+			onMainFunc = true;
+		}
+	});
+
+	return groups;
 }
 
 /**
@@ -175,7 +132,7 @@ export function paramsToJsGroups(params: Array<Entry>, serializSuffix?: string):
  * @param params the parameter names coming from a Jaffle lambda function
  * @returns a string of Javascript code used to prefix a call to a lambda function
  */
-export function jaffleLambdaToJs(params: Array<string>): string {
+export function lambdaEntryToJs(params: Array<string>): string {
 	params.forEach((param) => {
 		if (typeof param !== 'string') {
 			throw new ExporterError('lambda parameters must be strings');
@@ -194,23 +151,23 @@ export function jaffleLambdaToJs(params: Array<string>): string {
 
 /**
  * Convert a Jaffle function into Javascript code.
- * @param func The Jaffle function to convert
+ * @param entry The Jaffle function to convert
  * @returns a string of JavaScript code which calls the function
  */
-export function functionEntryToJs(func: Entry): string {
-	const funcName = rawNameToFuncName(func.rawName);
-	const funcSuffix = func.rawName.split(c.SERIALIZE_FUNC_SUFFIX)[1];
+export function functionEntryToJs(entry: Entry): string {
+	const funcName = rawNameToFuncName(entry.rawName);
 	let js: string;
-	const isVarDef = func.rawName[0] === c.CONSTANT_DEF_PREFIX;
+	const isVarDef = entry.rawName[0] === c.CONSTANT_DEF_PREFIX;
 
-	if (func.rawName[0] === func.rawName[0].toUpperCase()) {
-		js = func.rawName[0].toLowerCase() + func.rawName.substring(1);
-	} else if (func.rawValue === '') {
+	if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
+		js = entry.rawName[0].toLowerCase() + entry.rawName.substring(1);
+	} else if (entry.rawValue === '') {
 		js = `${funcName}()`;
-	} else if (func.rawName === c.LAMBDA_NAME) {
-		js = jaffleLambdaToJs(func.rawValue.split(','));
+	} else if (entry.rawName === c.LAMBDA_NAME) {
+		js = lambdaEntryToJs(entry.rawValue.split(','));
 	} else {
-		const paramsJs = paramsToJsGroups(func.children, funcSuffix[1]).join(', ');
+		const serializSuffix = entry.rawName.split(c.SERIALIZE_FUNC_SUFFIX)[1];
+		const paramsJs = paramsToJsGroups(entry.children, serializSuffix).join(', ');
 		if (isVarDef) {
 			js = `const ${c.VAR_NAME_PREFIX}${funcName} = ${paramsJs}`;
 		} else {
