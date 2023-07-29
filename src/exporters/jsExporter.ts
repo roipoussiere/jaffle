@@ -2,6 +2,17 @@ import * as c from '../constants';
 import { ExporterError } from '../errors';
 import { Entry } from '../model';
 
+enum EntryType {
+	Value,
+	Function,
+	MininotationFunction,
+	ChainedFunction,
+	LambdaFunction,
+	Object,
+	List,
+	ConstantDef,
+}
+
 /**
  * Serialise an object to JSON.
  * @param thing the object to serialize
@@ -47,6 +58,83 @@ export function rawValueToJs(rawValue: string): string {
 		js = `${quote}${newStr}${quote}`;
 		js = rawValue[0] === c.MINI_STR_PREFIX ? `mini(${js})` : js;
 	}
+	return js;
+}
+
+/**
+ * Convert a list of Jaffle lambda function parameter names into Javascript code (ie. "x => x").
+ * @param params the parameter names coming from a Jaffle lambda function
+ * @returns a string of Javascript code used to prefix a call to a lambda function
+ */
+export function lambdaEntryToJs(params: Array<string>): string {
+	params.forEach((param) => {
+		if (typeof param !== 'string') {
+			throw new ExporterError('lambda parameters must be strings');
+		}
+		if (param.match(/^[a-z][a-zA-Z0-9_]*$/g) === null) {
+			throw new ExporterError('invalid lambda parameter name');
+		}
+	});
+
+	if (params.length === 0) {
+		return `${c.LAMBDA_VAR} => ${c.LAMBDA_VAR}`;
+	}
+	const varsJs = params.map((varName) => c.VAR_NAME_PREFIX + varName).join(', ');
+	return `(${c.LAMBDA_VAR}, ${varsJs}) => ${c.LAMBDA_VAR}`;
+}
+
+export function entryToEntryType(entry: Entry): EntryType {
+	if (entry.rawName === '' && entry.rawValue === '') {
+		return EntryType.List;
+	}
+	if (entry.rawName === '') {
+		return EntryType.Value;
+	}
+	if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX) {
+		return EntryType.ChainedFunction;
+	}
+	if (entry.rawName[0] === c.MINI_STR_PREFIX) {
+		return EntryType.MininotationFunction;
+	}
+	if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
+		return EntryType.Object;
+	}
+	if (entry.rawName === c.LAMBDA_NAME) {
+		return EntryType.LambdaFunction;
+	}
+	if (entry.rawName[0] === c.CONSTANT_DEF_PREFIX) {
+		return EntryType.ConstantDef;
+	}
+	return EntryType.Function;
+}
+
+/**
+ * Convert a Jaffle function into Javascript code.
+ * @param entry The Jaffle function to convert
+ * @returns a string of JavaScript code which calls the function
+ */
+export function functionEntryToJs(entry: Entry): string {
+	const funcName = rawNameToFuncName(entry.rawName);
+	let js: string;
+	const isVarDef = entry.rawName[0] === c.CONSTANT_DEF_PREFIX;
+
+	if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
+		js = entry.rawName[0].toLowerCase() + entry.rawName.substring(1);
+	} else if (entry.rawValue === '') {
+		js = `${funcName}()`;
+	} else if (entry.rawName === c.LAMBDA_NAME) {
+		js = lambdaEntryToJs(entry.rawValue.split(','));
+	} else {
+		const serializSuffix = entry.rawName.split(c.SERIALIZE_FUNC_SUFFIX)[1];
+		// eslint-disable-next-line no-use-before-define
+		const paramsJs = paramsToJsGroups(entry.children, serializSuffix).join(', ');
+		if (isVarDef) {
+			js = `const ${c.VAR_NAME_PREFIX}${funcName} = ${paramsJs}`;
+		} else {
+			js = `${funcName}(${paramsJs})`;
+		}
+	}
+
 	return js;
 }
 
@@ -124,57 +212,6 @@ export function paramsToJsGroups(params: Array<Entry>, serializSuffix?: string):
 			))
 			.join('.')
 		));
-}
-
-/**
- * Convert a list of Jaffle lambda function parameter names into Javascript code (ie. "x => x").
- * @param params the parameter names coming from a Jaffle lambda function
- * @returns a string of Javascript code used to prefix a call to a lambda function
- */
-export function lambdaEntryToJs(params: Array<string>): string {
-	params.forEach((param) => {
-		if (typeof param !== 'string') {
-			throw new ExporterError('lambda parameters must be strings');
-		}
-		if (param.match(/^[a-z][a-zA-Z0-9_]*$/g) === null) {
-			throw new ExporterError('invalid lambda parameter name');
-		}
-	});
-
-	if (params.length === 0) {
-		return `${c.LAMBDA_VAR} => ${c.LAMBDA_VAR}`;
-	}
-	const varsJs = params.map((varName) => c.VAR_NAME_PREFIX + varName).join(', ');
-	return `(${c.LAMBDA_VAR}, ${varsJs}) => ${c.LAMBDA_VAR}`;
-}
-
-/**
- * Convert a Jaffle function into Javascript code.
- * @param entry The Jaffle function to convert
- * @returns a string of JavaScript code which calls the function
- */
-export function functionEntryToJs(entry: Entry): string {
-	const funcName = rawNameToFuncName(entry.rawName);
-	let js: string;
-	const isVarDef = entry.rawName[0] === c.CONSTANT_DEF_PREFIX;
-
-	if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
-		js = entry.rawName[0].toLowerCase() + entry.rawName.substring(1);
-	} else if (entry.rawValue === '') {
-		js = `${funcName}()`;
-	} else if (entry.rawName === c.LAMBDA_NAME) {
-		js = lambdaEntryToJs(entry.rawValue.split(','));
-	} else {
-		const serializSuffix = entry.rawName.split(c.SERIALIZE_FUNC_SUFFIX)[1];
-		const paramsJs = paramsToJsGroups(entry.children, serializSuffix).join(', ');
-		if (isVarDef) {
-			js = `const ${c.VAR_NAME_PREFIX}${funcName} = ${paramsJs}`;
-		} else {
-			js = `${funcName}(${paramsJs})`;
-		}
-	}
-
-	return js;
 }
 
 /**
