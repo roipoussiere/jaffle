@@ -77,8 +77,7 @@ export function groupFuncParams(params: Array<Entry>, serializedParamId = -1): A
 			return;
 		}
 
-		const funcName = rawNameToFuncName(entry.rawName);
-		if (funcName[0] === c.CHAINED_FUNC_PREFIX) {
+		if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX) {
 			if (groups.length === 0) {
 				throw new ExporterError('chained function as first entry');
 			}
