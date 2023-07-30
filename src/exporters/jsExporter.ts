@@ -88,14 +88,11 @@ export function entryToEntryType(entry: Entry): EntryType {
 	if (entry.rawName === '' && entry.rawValue === '') {
 		return EntryType.List;
 	}
-	if (entry.rawName === '') {
+	if (entry.rawName === '' && entry.rawValue[0] !== c.MINI_STR_PREFIX) {
 		return EntryType.Value;
 	}
 	if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX) {
 		return EntryType.ChainedFunction;
-	}
-	if (entry.rawName[0] === c.MINI_STR_PREFIX) {
-		return EntryType.MininotationFunction;
 	}
 	if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
 		return EntryType.Object;
@@ -109,20 +106,51 @@ export function entryToEntryType(entry: Entry): EntryType {
 	return EntryType.Function;
 }
 
+export function expandEntry(entry: Entry): Entry {
+	if (entry.rawValue[0] === c.MINI_STR_PREFIX) {
+		const miniChild = {
+			rawName: 'mini',
+			rawValue: '',
+			children: [{
+				rawName: '',
+				rawValue: entry.rawValue.substring(1),
+				children: [],
+			}],
+		};
+
+		return entry.rawName === '' ? miniChild : {
+			rawName: entry.rawName,
+			rawValue: '',
+			children: [miniChild],
+		};
+	}
+
+	if (entry.rawValue === '' || entry.rawName === '') {
+		return entry;
+	}
+
+	return {
+		rawName: entry.rawName,
+		rawValue: '',
+		children: [{
+			rawName: '',
+			rawValue: entry.rawValue,
+			children: [],
+		}],
+	};
+}
+
 /**
  * Convert a Jaffle function into Javascript code.
  * @param entry The Jaffle function to convert
  * @returns a string of JavaScript code which calls the function
  */
-export function entryToJs(entry: Entry): string {
+export function entryToJs(_entry: Entry): string {
+	const entry = expandEntry(_entry);
 	const entryType = entryToEntryType(entry);
 
 	if (entryType === EntryType.Value) {
 		return rawValueToJs(entry.rawValue);
-	}
-
-	if (entryType === EntryType.MininotationFunction) {
-		return `mini(${entry.rawName.substring(1)})`;
 	}
 
 	if (entryType === EntryType.List) {
@@ -140,15 +168,8 @@ export function entryToJs(entry: Entry): string {
 	}
 
 	const serializeSuffix = entry.rawName.split(c.SERIALIZE_FUNC_SUFFIX)[1];
-	const children: Array<Entry> = entry.rawValue === ''
-		? entry.children
-		: [{
-			rawName: '',
-			rawValue: entry.rawValue,
-			children: [],
-		}];
 	// eslint-disable-next-line no-use-before-define
-	const jsGroups = paramsToJsGroups(children, serializeSuffix);
+	const jsGroups = paramsToJsGroups(entry.children, serializeSuffix);
 
 	if (entryType === EntryType.ConstantDef) {
 		return `const ${c.VAR_NAME_PREFIX}${funcName} = ${jsGroups[0]}`;
