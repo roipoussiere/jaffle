@@ -13,7 +13,13 @@ export function entryToEntryType(entry: Entry): EntryType {
 		return EntryType.SerializedData;
 	}
 	if (entry.rawName === '') {
-		return entry.rawValue[0] === c.MINI_STR_PREFIX ? EntryType.Function : EntryType.Value;
+		if (entry.rawValue[0] === c.MINI_STR_PREFIX) {
+			return EntryType.MininotationFunction;
+		}
+		if (entry.rawValue[0] === c.EXPR_STR_PREFIX) {
+			return EntryType.ExpressionFunction;
+		}
+		return EntryType.Value;
 	}
 	if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX) {
 		return EntryType.ChainedFunction;

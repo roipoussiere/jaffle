@@ -21,6 +21,7 @@ export enum EntryType {
 	Value,
 	Function,
 	MininotationFunction,
+	ExpressionFunction,
 	ChainedFunction,
 	LambdaFunction,
 	Object,

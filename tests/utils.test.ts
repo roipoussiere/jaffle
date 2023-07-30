@@ -13,13 +13,22 @@ describe('Testing u.entryToEntryType()', () => {
 		expect(u.entryToEntryType(input)).toBe(EntryType.Function);
 	});
 
-	test('mininitation value entry return EntryType.Function', () => {
+	test('mininitation value entry return EntryType.MininotationFunction', () => {
 		const input: Entry = {
 			rawName: '',
 			rawValue: '_a',
 			children: [],
 		};
-		expect(u.entryToEntryType(input)).toBe(EntryType.Function);
+		expect(u.entryToEntryType(input)).toBe(EntryType.MininotationFunction);
+	});
+
+	test('mininitation value entry return EntryType.MininotationFunction', () => {
+		const input: Entry = {
+			rawName: '',
+			rawValue: '=a',
+			children: [],
+		};
+		expect(u.entryToEntryType(input)).toBe(EntryType.ExpressionFunction);
 	});
 
 	test('other value entry return EntryType.Value', () => {

@@ -22,6 +22,16 @@ const miniFuncEntry: Entry = {
 	children: [],
 };
 
+const expandedMiniFuncEntry: Entry = {
+	rawName: 'mini',
+	rawValue: '',
+	children: [{
+		rawName: '',
+		rawValue: 'bar',
+		children: [],
+	}],
+};
+
 const exprFuncEntry: Entry = {
 	rawName: '',
 	rawValue: '=baz',
@@ -44,6 +54,16 @@ const mainFuncParamEntry: Entry = {
 	rawName: 'b',
 	rawValue: '42',
 	children: [],
+};
+
+const expandedMainFuncParamEntry: Entry = {
+	rawName: 'b',
+	rawValue: '',
+	children: [{
+		rawName: '',
+		rawValue: '42',
+		children: [],
+	}],
 };
 
 const mainFuncParamsEntry: Entry = {
@@ -152,6 +172,8 @@ describe('Testing groupFuncParams()', () => {
 	test('lists of main/chain functions mix are grouped into groups of main functions', () => {
 		expect(JE.groupFuncParams([mainFuncEntry, chainedFuncEntry]))
 			.toEqual([[mainFuncEntry, chainedFuncEntry]]);
+		expect(JE.groupFuncParams([mainFuncEntry, chainedFuncEntry], -1))
+			.toEqual([[mainFuncEntry, chainedFuncEntry]]);
 		expect(JE.groupFuncParams([mainFuncEntry, chainedFuncEntry, strValEntry, numberValEntry]))
 			.toEqual([[mainFuncEntry, chainedFuncEntry], [strValEntry], [numberValEntry]]);
 		expect(JE.groupFuncParams([mainFuncEntry, chainedFuncEntry, chainedFuncParamsEntry]))
@@ -160,19 +182,21 @@ describe('Testing groupFuncParams()', () => {
 			mainFuncParamsEntry, chainedFuncParamsEntry]))
 			.toEqual([[mainFuncEntry, chainedFuncEntry],
 				[mainFuncParamsEntry, chainedFuncParamsEntry]]);
-		// expect(JE.groupFuncParams([miniFuncEntry, chainedFuncEntry]))
-		// 	.toEqual([[miniFuncEntry, chainedFuncEntry]]);
-		// expect(JE.groupFuncParams([exprFuncEntry, chainedFuncEntry]))
-		// 	.toEqual([[exprFuncEntry, chainedFuncEntry]]);
+		expect(JE.groupFuncParams([miniFuncEntry, chainedFuncEntry]))
+			.toEqual([[expandedMiniFuncEntry, chainedFuncEntry]]);
+		expect(JE.groupFuncParams([exprFuncEntry, chainedFuncEntry]))
+			.toEqual([[exprFuncEntry, chainedFuncEntry]]);
+		expect(JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry, miniFuncEntry]))
+			.toEqual([[expandedMainFuncParamEntry, chainedFuncEntry], [expandedMiniFuncEntry]]);
 	});
 
 	test('serialized parameters are grouped into groups of serialized parameters', () => {
 		expect(JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry, miniFuncEntry], -2))
 			.toEqual([[mainFuncParamEntry], [chainedFuncEntry], [miniFuncEntry]]);
-		expect(JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry, miniFuncEntry], -1))
-			.toEqual([[mainFuncParamEntry, chainedFuncEntry], [miniFuncEntry]]);
 		expect(JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry], 1))
-			.toEqual([[mainFuncParamEntry], [chainedFuncEntry]]);
+			.toEqual([[expandedMainFuncParamEntry], [chainedFuncEntry]]);
+		expect(() => JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry], 0))
+			.toThrow(ExporterError);
 	});
 
 	test('Trying to group bad groups fails', () => {

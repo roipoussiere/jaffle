@@ -77,7 +77,7 @@ export function expandEntry(entry: Entry): Entry {
 		};
 	}
 
-	if (entry.rawValue === '' || entry.rawName === '') {
+	if (entry.rawName === '' || entry.rawValue === '') {
 		return entry;
 	}
 
@@ -101,7 +101,7 @@ export function entryToJs(_entry: Entry): string {
 	const entry = expandEntry(_entry);
 	const entryType = entryToEntryType(entry);
 
-	if (entryType === EntryType.Value) {
+	if (entryType === EntryType.Value || entryType === EntryType.ExpressionFunction) {
 		return rawValueToJs(entry.rawValue);
 	}
 
@@ -145,24 +145,24 @@ export function groupFuncParams(params: Array<Entry>, serializedParamId = -1): A
 	const groups: Array<Array<Entry>> = [];
 	let onMainFunc = false;
 
-	params.forEach((entry) => {
-		if (serializedParamId === -2 || serializedParamId === groups.length) {
-			groups.push([entry]);
+	params.forEach((_entry, id) => {
+		if (serializedParamId === -2 || serializedParamId === id) {
+			groups.push([_entry]);
 			return;
 		}
 
-		if (entry.rawName === '') {
+		const entry = expandEntry(_entry);
+		const entryType = entryToEntryType(entry);
+
+		if (entryType === EntryType.Value || entryType === EntryType.List) {
 			groups.push([entry]);
 			onMainFunc = false;
 			return;
 		}
 
-		if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX) {
-			if (groups.length === 0) {
-				throw new ExporterError('chained function as first entry');
-			}
-			if (!onMainFunc) {
-				throw new ExporterError('orphan chained function');
+		if (entryType === EntryType.ChainedFunction) {
+			if (groups.length === 0 || !onMainFunc) {
+				throw new ExporterError('chained function must follow a function');
 			}
 			groups[groups.length - 1].push(entry);
 		} else {
