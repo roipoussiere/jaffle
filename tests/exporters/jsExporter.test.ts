@@ -96,6 +96,18 @@ const parentFuncEntry: Entry = {
 	children: [mainFuncParamsEntry],
 };
 
+const objectEntry: Entry = {
+	rawName: 'H',
+	rawValue: '',
+	children: [],
+};
+
+const chainedObjectEntry: Entry = {
+	rawName: '.I',
+	rawValue: '',
+	children: [],
+};
+
 describe('Testing JE.serialize()', () => {
 	test('any value can be serialized', () => {
 		expect(JE.serialize(null)).toBe('null');
@@ -152,6 +164,7 @@ describe('Testing entryToJs()', () => {
 		expect(JE.entryToJs(mainFuncParamsEntry)).toBe("c('foo', 42)");
 		expect(JE.entryToJs(parentFuncEntry)).toBe("g(c('foo', 42))");
 		expect(JE.entryToJs(chainFuncParamsEntry)).toBe('f(a().d())');
+		expect(JE.entryToJs(objectEntry)).toBe('h');
 	});
 });
 
@@ -188,6 +201,10 @@ describe('Testing groupFuncParams()', () => {
 			.toEqual([[exprFuncEntry, chainedFuncEntry]]);
 		expect(JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry, miniFuncEntry]))
 			.toEqual([[expandedMainFuncParamEntry, chainedFuncEntry], [expandedMiniFuncEntry]]);
+		expect(JE.groupFuncParams([mainFuncEntry, objectEntry]))
+			.toEqual([[mainFuncEntry], [objectEntry]]);
+		expect(JE.groupFuncParams([mainFuncEntry, chainedObjectEntry]))
+			.toEqual([[mainFuncEntry, chainedObjectEntry]]);
 	});
 
 	test('serialized parameters are grouped into groups of serialized parameters', () => {
@@ -226,7 +243,8 @@ describe('Testing paramsToJsGroups()', () => {
 		expect(JE.paramsToJsGroups([mainFuncEntry, chainedFuncEntry,
 			mainFuncParamsEntry, chainedFuncParamsEntry]))
 			.toEqual(['a().d()', "c('foo', 42).e('foo', 42)"]);
-		expect(JE.paramsToJsGroups([parentFuncEntry]))
-			.toEqual(["g(c('foo', 42))"]);
+		expect(JE.paramsToJsGroups([parentFuncEntry])).toEqual(["g(c('foo', 42))"]);
+		expect(JE.paramsToJsGroups([mainFuncEntry, objectEntry])).toEqual(['a()', 'h']);
+		expect(JE.paramsToJsGroups([mainFuncEntry, chainedObjectEntry])).toEqual(['a().i']);
 	});
 });

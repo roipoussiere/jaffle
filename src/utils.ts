@@ -24,9 +24,9 @@ export function entryToEntryType(entry: Entry): EntryType {
 	if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX) {
 		return EntryType.ChainedFunction;
 	}
-	if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
-		return EntryType.Object;
-	}
+	// if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
+	// 	return EntryType.Object;
+	// }
 	if (entry.rawName === c.LAMBDA_NAME) {
 		return EntryType.LambdaFunction;
 	}
@@ -43,8 +43,8 @@ export function entryToFuncName(entry: Entry): string {
 	if (entry.rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
 		return entry.rawName.substring(0, entry.rawName.length - 1);
 	}
-	if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
-		return entry.rawName[0].toLowerCase() + entry.rawName.substring(1);
-	}
+	// if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
+	// 	return entry.rawName[0].toLowerCase() + entry.rawName.substring(1);
+	// }
 	return entry.rawName;
 }

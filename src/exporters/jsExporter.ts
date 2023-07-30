@@ -111,10 +111,6 @@ export function entryToJs(_entry: Entry): string {
 
 	const funcName = entryToFuncName(entry);
 
-	if (entryType === EntryType.Object) {
-		return funcName;
-	}
-
 	if (entryType === EntryType.LambdaFunction) {
 		return lambdaParamsToJs(entry.rawValue);
 	}
@@ -125,6 +121,10 @@ export function entryToJs(_entry: Entry): string {
 
 	if (entryType === EntryType.ConstantDef) {
 		return `const ${c.VAR_NAME_PREFIX}${funcName} = ${jsGroups[0]}`;
+	}
+
+	if (funcName[0] === funcName[0].toUpperCase()) {
+		return funcName[0].toLowerCase() + funcName.substring(1);
 	}
 
 	return `${funcName}(${jsGroups.join(', ')})`;
