@@ -110,6 +110,17 @@ describe('Testing JE.rawValueToJs()', () => {
 	});
 });
 
+describe('Testing lambdaEntryToJs()', () => {
+	test('', () => {
+		expect(JE.lambdaParamsToJs('')).toBe('_x_ => _x_');
+		expect(() => JE.lambdaParamsToJs('A')).toThrow(ExporterError);
+		expect(() => JE.lambdaParamsToJs('0')).toThrow(ExporterError);
+		expect(() => JE.lambdaParamsToJs('$')).toThrow(ExporterError);
+		expect(JE.lambdaParamsToJs('foo')).toBe('(_x_, _foo) => _x_');
+		expect(JE.lambdaParamsToJs('foo,bar')).toBe('(_x_, _foo, _bar) => _x_');
+	});
+});
+
 describe('Testing entryToJs()', () => {
 	test('', () => {
 		expect(JE.entryToJs(strValEntry)).toBe("'foo'");

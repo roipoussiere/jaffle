@@ -38,23 +38,23 @@ export function rawValueToJs(rawValue: string): string {
 
 /**
  * Convert a list of Jaffle lambda function parameter names into Javascript code (ie. "x => x").
- * @param params the parameter names coming from a Jaffle lambda function
+ * @param strLambdaParams the parameter names coming from a Jaffle lambda function
  * @returns a string of Javascript code used to prefix a call to a lambda function
  */
-export function lambdaEntryToJs(params: Array<string>): string {
-	params.forEach((param) => {
-		if (typeof param !== 'string') {
-			throw new ExporterError('lambda parameters must be strings');
-		}
+export function lambdaParamsToJs(strLambdaParams: string): string {
+	if (strLambdaParams === '') {
+		return `${c.LAMBDA_VAR} => ${c.LAMBDA_VAR}`;
+	}
+
+	const lambdaParams = strLambdaParams.split(',');
+
+	lambdaParams.forEach((param) => {
 		if (param.match(/^[a-z][a-zA-Z0-9_]*$/g) === null) {
 			throw new ExporterError('invalid lambda parameter name');
 		}
 	});
 
-	if (params.length === 0) {
-		return `${c.LAMBDA_VAR} => ${c.LAMBDA_VAR}`;
-	}
-	const varsJs = params.map((varName) => c.VAR_NAME_PREFIX + varName).join(', ');
+	const varsJs = lambdaParams.map((varName) => c.VAR_NAME_PREFIX + varName).join(', ');
 	return `(${c.LAMBDA_VAR}, ${varsJs}) => ${c.LAMBDA_VAR}`;
 }
 
@@ -116,7 +116,7 @@ export function entryToJs(_entry: Entry): string {
 	}
 
 	if (entryType === EntryType.LambdaFunction) {
-		return lambdaEntryToJs(entry.rawValue.split(','));
+		return lambdaParamsToJs(entry.rawValue);
 	}
 
 	const serializeSuffix = entry.rawName.split(c.SERIALIZE_FUNC_SUFFIX)[1];
