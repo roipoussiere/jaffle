@@ -2,7 +2,6 @@ import JaffleEditor from './editor';
 import JaffleGraph from './graph';
 import * as errors from './errors';
 
-import astNodeToEntry from './importers/astNodeImporter';
 import boxToEntry from './importers/boxImporter';
 import yamlToEntry from './importers/yamlImporter';
 
@@ -16,7 +15,6 @@ export {
 	JaffleGraph,
 	errors,
 
-	astNodeToEntry,
 	boxToEntry,
 	yamlToEntry,
 
