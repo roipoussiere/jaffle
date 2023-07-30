@@ -155,14 +155,14 @@ describe('Testing groupFuncParams()', () => {
 		// 	.toEqual([[exprFuncEntry, chainedFuncEntry]]);
 	});
 
-	// test('serialized parameters are grouped into groups of serialized parameters', () => {
-	// 	expect(JE.groupFuncParams([{ a: 1 }, { '.b': 2 }, { _c: 3 }], -2))
-	// 		.toEqual([[{ a: 1 }], [{ '.b': 2 }], [{ _c: 3 }]]);
-	// 	expect(JE.groupFuncParams([{ a: 1 }, { '.b': 2 }, { _c: 3 }], -1))
-	// 		.toEqual([[{ a: 1 }, { '.b': 2 }], [{ _c: 3 }]]);
-	// 	expect(JE.groupFuncParams([{ a: 1 }, { '.b': 2 }], 1))
-	// 		.toEqual([[{ a: 1 }], [{ '.b': 2 }]]);
-	// });
+	test('serialized parameters are grouped into groups of serialized parameters', () => {
+		expect(JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry, miniFuncEntry], -2))
+			.toEqual([[mainFuncParamEntry], [chainedFuncEntry], [miniFuncEntry]]);
+		expect(JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry, miniFuncEntry], -1))
+			.toEqual([[mainFuncParamEntry, chainedFuncEntry], [miniFuncEntry]]);
+		expect(JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry], 1))
+			.toEqual([[mainFuncParamEntry], [chainedFuncEntry]]);
+	});
 
 	test('Trying to group bad groups fails', () => {
 		expect(() => JE.groupFuncParams([])).toThrow(ExporterError);
