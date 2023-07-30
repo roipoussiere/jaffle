@@ -1,17 +1,7 @@
 import * as c from '../constants';
 import { ExporterError } from '../errors';
-import { Entry } from '../model';
-
-enum EntryType {
-	Value,
-	Function,
-	MininotationFunction,
-	ChainedFunction,
-	LambdaFunction,
-	Object,
-	List,
-	ConstantDef,
-}
+import { Entry, EntryType } from '../model';
+import { entryToEntryType } from '../utils';
 
 /**
  * Serialise an object to JSON.
@@ -82,28 +72,6 @@ export function lambdaEntryToJs(params: Array<string>): string {
 	}
 	const varsJs = params.map((varName) => c.VAR_NAME_PREFIX + varName).join(', ');
 	return `(${c.LAMBDA_VAR}, ${varsJs}) => ${c.LAMBDA_VAR}`;
-}
-
-export function entryToEntryType(entry: Entry): EntryType {
-	if (entry.rawName === '' && entry.rawValue === '') {
-		return EntryType.List;
-	}
-	if (entry.rawName === '' && entry.rawValue[0] !== c.MINI_STR_PREFIX) {
-		return EntryType.Value;
-	}
-	if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX) {
-		return EntryType.ChainedFunction;
-	}
-	if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
-		return EntryType.Object;
-	}
-	if (entry.rawName === c.LAMBDA_NAME) {
-		return EntryType.LambdaFunction;
-	}
-	if (entry.rawName[0] === c.CONSTANT_DEF_PREFIX) {
-		return EntryType.ConstantDef;
-	}
-	return EntryType.Function;
 }
 
 export function expandEntry(entry: Entry): Entry {

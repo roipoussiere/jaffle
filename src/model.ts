@@ -1,30 +1,32 @@
 /*
- ┌──────────────┐       ┌──────────────┐       ┌──────────────┐
- │              │       │              │       │              │
- │   D3 graph   │       │     Yaml     │       │  JavaScript  │
- │              │       │              │       │              │
- └─────────┬────┘       └─────────┬────┘       └────┬─────────┘
-      ▲    │                 ▲    │                 ┆    ▲
-      │    ▼                 │    ▼                 ▽    │
- ┌────┴─────────┐       ┌────┴─────────┐       ┌─────────┴────┐
- │   Box tree   │       │  Entry tree  │       │ AstFunc tree │
- ├──────────────┤       ├──────────────┤       ├──────────────┤
- │- EntryData   ├──────▶│- EntryData   ├──────▶│- name | value│
- │- BoxInternal │       │              │       │              │
- │- BoxDisplay  │◀──────┤              │◁╌╌╌╌╌╌┤              │
- │- BoxTyping   │       │              │       │              │
- │- BoxGeometry │       │              │       │              │
- └──────────────┘       └──────────────┘       └──────────────┘
+ ┌──────────────┐       ┌──────────────┐
+ │              │       │              │
+ │   D3 graph   │       │     Yaml     │
+ │              │       │              │
+ └─────────┬────┘       └─────────┬────┘
+      ▲    │                 ▲    │
+      │    ▼                 │    ▼
+ ┌────┴─────────┐       ┌────┴─────────┐
+ │   Box tree   │       │  Entry tree  │
+ ├──────────────┤       ├──────────────┤       ┌──────────────┐
+ │- EntryData   ├──────▶│- EntryData   │       │              │
+ │- BoxInternal │       │              ├──────▶│  JavaScript  │
+ │- BoxDisplay  │◀──────┤              │       │              │
+ │- BoxTyping   │       │              │       └──────────────┘
+ │- BoxGeometry │       │              │
+ └──────────────┘       └──────────────┘
 */
 
-export enum BoxType {
-	MainFunc,
-	ChainedFunc,
-	// Object,
+export enum EntryType {
+	Value,
+	Function,
+	MininotationFunction,
+	ChainedFunction,
+	LambdaFunction,
+	Object,
+	List,
 	ConstantDef,
 	SerializedData,
-	List,
-	Value,
 }
 
 export enum ValueType {
@@ -59,7 +61,7 @@ export interface BoxDisplay {
 }
 
 export interface BoxTyping {
-	type: BoxType,
+	type: EntryType,
 	valueType: ValueType,
 }
 

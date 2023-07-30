@@ -1,24 +1,6 @@
-import { Entry, Box, BoxType, ValueType, BoxTyping, EntryData, BoxDisplay }
-	from '../model';
+import { Entry, Box, ValueType, BoxTyping, EntryData, BoxDisplay, EntryType } from '../model';
 import * as c from '../constants';
-
-export function getBoxType(rawName: string): BoxType {
-	let vBoxType: BoxType;
-	if (rawName === '') {
-		vBoxType = BoxType.Value;
-	} else if (rawName[0] === c.CHAINED_FUNC_PREFIX) {
-		vBoxType = BoxType.ChainedFunc;
-	} else if (rawName[0] === c.CONSTANT_DEF_PREFIX) {
-		vBoxType = BoxType.ConstantDef;
-	} else if (rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-		vBoxType = BoxType.SerializedData;
-	// } else if () {
-	// 	vBoxType = VBoxType.List;
-	} else {
-		vBoxType = BoxType.MainFunc;
-	}
-	return vBoxType;
-}
+import { entryToEntryType } from '../utils';
 
 export function getValueType(entry: Entry): ValueType {
 	let boxValueType: ValueType;
@@ -42,7 +24,7 @@ export function getValueType(entry: Entry): ValueType {
 
 export function buildBoxTyping(entry: Entry): BoxTyping {
 	return {
-		type: getBoxType(entry.rawName),
+		type: entryToEntryType(entry),
 		valueType: getValueType(entry),
 	};
 }
@@ -107,7 +89,7 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 			return _child;
 		}).map((child) => {
 			const _child = child;
-			_child.padding = child.type === BoxType.Value ? 1 : paddings[child.groupId];
+			_child.padding = child.type === EntryType.Value ? 1 : paddings[child.groupId];
 			_child.width = paddings[child.groupId] + widths[child.groupId];
 			_child.lastSiblingId = lastSiblingIds[child.groupId];
 			return _child;

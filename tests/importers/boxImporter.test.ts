@@ -1,14 +1,14 @@
 import { describe, expect, test } from '@jest/globals';
 
 import * as BI from '../../src/importers/boxImporter';
-import { Box, BoxType, Entry, ValueType } from '../../src/model';
+import { Box, EntryType, Entry, ValueType } from '../../src/model';
 
 describe('Testing BI.boxToEntry()', () => {
 	test('box without children can be converted to an Entry', () => {
 		const input: Box = {
 			rawName: 'a',
 			rawValue: 'b',
-			type: BoxType.MainFunc,
+			type: EntryType.Function,
 			valueType: ValueType.String,
 			id: '',
 			groupId: 0,
@@ -33,7 +33,7 @@ describe('Testing BI.boxToEntry()', () => {
 		const child: Box = {
 			rawName: 'b',
 			rawValue: 'c',
-			type: BoxType.MainFunc,
+			type: EntryType.Function,
 			valueType: ValueType.String,
 			id: '0',
 			groupId: 0,
@@ -48,7 +48,7 @@ describe('Testing BI.boxToEntry()', () => {
 		const input: Box = {
 			rawName: 'a',
 			rawValue: '',
-			type: BoxType.MainFunc,
+			type: EntryType.Function,
 			valueType: ValueType.String,
 			id: '',
 			groupId: 0,

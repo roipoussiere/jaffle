@@ -1,29 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
 import * as BE from '../../src/exporters/boxExporter';
-import { Box, BoxDisplay, BoxType, BoxTyping, Entry, ValueType } from '../../src/model';
-
-describe('Testing BE.getBoxType()', () => {
-	test('empty string return BoxType.Value', () => {
-		expect(BE.getBoxType('')).toBe(BoxType.Value);
-	});
-
-	test('string with chained prefix return BoxType.ChainedFunc', () => {
-		expect(BE.getBoxType('.a')).toBe(BoxType.ChainedFunc);
-	});
-
-	test('string with constant def prefix return BoxType.ChainedFunc', () => {
-		expect(BE.getBoxType('$a')).toBe(BoxType.ConstantDef);
-	});
-
-	test('string with serialized sufix return BoxType.SerializedData', () => {
-		expect(BE.getBoxType('a^')).toBe(BoxType.SerializedData);
-	});
-
-	test('other string return BoxType.MainFunc', () => {
-		expect(BE.getBoxType('a')).toBe(BoxType.MainFunc);
-	});
-});
+import { Box, BoxDisplay, EntryType, BoxTyping, Entry, ValueType } from '../../src/model';
 
 describe('Testing BE.getBoxValue()', () => {
 	test('Entry with mininotation value return ValueType.Mininotation', () => {
@@ -109,7 +87,7 @@ describe('Testing BE.buildBoxTyping()', () => {
 			children: [],
 		};
 		const expected: BoxTyping = {
-			type: BoxType.MainFunc,
+			type: EntryType.Function,
 			valueType: ValueType.Number,
 		};
 		expect(BE.buildBoxTyping(input)).toEqual(expected);
@@ -126,7 +104,7 @@ describe('Testing BE.buildBoxTyping()', () => {
 			}],
 		};
 		const expected: BoxTyping = {
-			type: BoxType.MainFunc,
+			type: EntryType.Function,
 			valueType: ValueType.Empty,
 		};
 		expect(BE.buildBoxTyping(input)).toEqual(expected);
@@ -275,7 +253,7 @@ describe('Testing BE.entryToBox()', () => {
 			rawName: '.a',
 			rawValue: '_b',
 
-			type: BoxType.ChainedFunc,
+			type: EntryType.ChainedFunction,
 			valueType: ValueType.Mininotation,
 
 			displayName: 'a',
@@ -309,7 +287,7 @@ describe('Testing BE.entryToBox()', () => {
 			rawName: 'a',
 			rawValue: '',
 
-			type: BoxType.MainFunc,
+			type: EntryType.Function,
 			valueType: ValueType.Empty,
 
 			displayName: 'a',
@@ -326,7 +304,7 @@ describe('Testing BE.entryToBox()', () => {
 				rawName: 'b',
 				rawValue: 'c',
 
-				type: BoxType.MainFunc,
+				type: EntryType.Function,
 				valueType: ValueType.String,
 
 				displayName: 'b',
@@ -371,7 +349,7 @@ describe('Testing BE.entryToBox()', () => {
 			rawName: 'a',
 			rawValue: '',
 
-			type: BoxType.MainFunc,
+			type: EntryType.Function,
 			valueType: ValueType.Empty,
 
 			displayName: 'a',
@@ -388,7 +366,7 @@ describe('Testing BE.entryToBox()', () => {
 				rawName: 'b123',
 				rawValue: 'true',
 
-				type: BoxType.MainFunc,
+				type: EntryType.Function,
 				valueType: ValueType.Boolean,
 
 				displayName: 'b123',
@@ -406,7 +384,7 @@ describe('Testing BE.entryToBox()', () => {
 				rawName: '.c',
 				rawValue: '1234567890',
 
-				type: BoxType.ChainedFunc,
+				type: EntryType.ChainedFunction,
 				valueType: ValueType.Number,
 
 				displayName: 'c',
@@ -424,7 +402,7 @@ describe('Testing BE.entryToBox()', () => {
 				rawName: 'd',
 				rawValue: '',
 
-				type: BoxType.MainFunc,
+				type: EntryType.Function,
 				valueType: ValueType.Null,
 
 				displayName: 'd',

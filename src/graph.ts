@@ -4,7 +4,7 @@ import { flextree } from 'd3-flextree';
 import entryToBox from './exporters/boxExporter';
 import boxToEntry from './importers/boxImporter';
 
-import { Box, BoxType, ValueType } from './model';
+import { Box, EntryType, ValueType } from './model';
 
 export type FuncNode = d3.id<Box> & {
 	x: number,
@@ -12,9 +12,10 @@ export type FuncNode = d3.id<Box> & {
 }
 
 const BOX_NAME_COLORS = {
-	[BoxType.MainFunc]: 'black',
-	[BoxType.ConstantDef]: 'blue',
-	[BoxType.SerializedData]: 'darkRed',
+	[EntryType.Function]: 'black',
+	[EntryType.ChainedFunction]: 'black',
+	[EntryType.ConstantDef]: 'blue',
+	[EntryType.SerializedData]: 'darkRed',
 };
 
 const BOX_VALUE_COLORS = {
@@ -67,9 +68,10 @@ class Graph {
 				[this.charHeight, (n.data.width + this.boxGap) * this.charWidth]
 			))
 			.spacing((a: FuncNode, b: FuncNode) => {
-				const bothAreValue = a.data.type === BoxType.Value && b.data.type === BoxType.Value;
+				const bothAreValue = a.data.type === EntryType.Value
+					&& b.data.type === EntryType.Value;
 				const shouldStack = a.parent === b.parent
-					&& (bothAreValue || b.data.type === BoxType.ChainedFunc);
+					&& (bothAreValue || b.data.type === EntryType.ChainedFunction);
 				return shouldStack ? 0 : 0.5 * this.charHeight;
 			});
 
@@ -123,7 +125,7 @@ class Graph {
 			.attr('stroke-width', 2)
 			.selectAll()
 			.data(this.tree.links().filter((d: d3.HierarchyLink<Box>) => (
-				d.source.depth >= 1 && d.target.data.type !== BoxType.ChainedFunc
+				d.source.depth >= 1 && d.target.data.type !== EntryType.ChainedFunction
 			)))
 			.join('path')
 			.attr('d', (link: d3.HierarchyLink<Box>) => d3.linkHorizontal()
@@ -137,7 +139,7 @@ class Graph {
 		this.svg.append('g')
 			.selectAll()
 			.data(this.tree.descendants()
-				.filter((n: FuncNode) => n.data.type !== BoxType.ChainedFunc))
+				.filter((n: FuncNode) => n.data.type !== EntryType.ChainedFunction))
 			.join('rect')
 			.attr('width', (node: FuncNode) => (node.data.width - 0.5) * this.charWidth)
 			.attr('height', (node: FuncNode) => {
@@ -183,7 +185,7 @@ class Graph {
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.style('fill', (n: FuncNode) => BOX_NAME_COLORS[n.data.type])
-			.style('font-weight', (n: FuncNode) => (n.data.type !== BoxType.ChainedFunc
+			.style('font-weight', (n: FuncNode) => (n.data.type !== EntryType.ChainedFunction
 				? 'bold' : 'normal'))
 			.text((d: FuncNode) => d.data.displayName);
 
@@ -191,7 +193,7 @@ class Graph {
 			.attr('y', 0.27 * this.charHeight)
 			.attr('x', (d: FuncNode) => d.data.padding * this.charWidth)
 			.style('fill', (d: FuncNode) => BOX_VALUE_COLORS[d.data.valueType])
-			.style('font-weight', (n: FuncNode) => (n.data.type === BoxType.Value
+			.style('font-weight', (n: FuncNode) => (n.data.type === EntryType.Value
 				&& (n.data.valueType === ValueType.Mininotation
 				|| n.data.valueType === ValueType.Expression)
 				? 'bold' : 'normal'))
@@ -281,7 +283,8 @@ class Graph {
 			.style('color', isValueSelected
 				? BOX_VALUE_COLORS[focusedNode.data.valueType]
 				: BOX_NAME_COLORS[focusedNode.data.type])
-			.style('font-weight', isValueSelected || focusedNode.data.type === BoxType.ChainedFunc
+			.style('font-weight', isValueSelected
+				|| focusedNode.data.type === EntryType.ChainedFunction
 				? 'normal' : 'bold')
 			.style('border', 'none')
 			.style('border-radius', '3px');
