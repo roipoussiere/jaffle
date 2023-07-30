@@ -5,11 +5,25 @@ import { entryToEntryType, entryToFuncName } from '../utils';
 
 /**
  * Serialise an object to JSON.
- * @param thing the object to serialize
+ * @param entry the object to serialize
  * @returns a string reprensenting the object in JSON
  */
-export function serialize(thing: unknown): string {
-	return JSON.stringify(thing);
+export function serializedEntryToJs(entry: Entry): string {
+	if (entry.children.length === 0) {
+		let value: string;
+		if (entry.rawValue === '') {
+			value = 'null';
+		} else if (!Number.isNaN(Number(entry.rawValue))
+				|| entry.rawValue === 'true' || entry.rawValue === 'false') {
+			value = entry.rawValue;
+		} else {
+			value = `'${entry.rawValue}'`;
+		}
+		return entry.rawName === '' ? value : `{'${entry.rawName}': ${value}}`;
+	}
+
+	const strList = `[${entry.children.map((child) => serializedEntryToJs(child)).join(', ')}]`;
+	return entry.rawName === '' ? strList : `{'${entry.rawName}': ${strList}}`;
 }
 
 /**
@@ -199,7 +213,7 @@ export function paramsToJsGroups(params: Array<Entry>, serializSuffix?: string):
 	return groups
 		.map((group, id) => (group
 			.map((param) => (
-				[id, -2].includes(serializedParamId) ? serialize(param) : entryToJs(param)
+				[id, -2].includes(serializedParamId) ? serializedEntryToJs(param) : entryToJs(param)
 			))
 			.join('.')
 		));

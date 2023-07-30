@@ -108,14 +108,21 @@ const chainedObjectEntry: Entry = {
 	children: [],
 };
 
-describe('Testing JE.serialize()', () => {
+const serializedFuncEntry: Entry = {
+	rawName: 'a^',
+	rawValue: '',
+	children: [miniFuncEntry, chainedFuncEntry],
+};
+
+describe('Testing JE.serializedEntryToJs()', () => {
 	test('any value can be serialized', () => {
-		expect(JE.serialize(null)).toBe('null');
-		expect(JE.serialize(true)).toBe('true');
-		expect(JE.serialize(42)).toBe('42');
-		expect(JE.serialize('abc')).toBe('"abc"');
-		expect(JE.serialize([1, 2])).toBe('[1,2]');
-		expect(JE.serialize({ a: 1 })).toBe('{"a":1}');
+		expect(JE.serializedEntryToJs(strValEntry)).toBe("'foo'");
+		expect(JE.serializedEntryToJs(numberValEntry)).toBe('42');
+		expect(JE.serializedEntryToJs(miniFuncEntry)).toBe("'_bar'");
+		expect(JE.serializedEntryToJs(listEntry)).toBe("['foo', 42]");
+		expect(JE.serializedEntryToJs(mainFuncEntry)).toBe("{'a': null}");
+		expect(JE.serializedEntryToJs(mainFuncParamEntry)).toBe("{'b': 42}");
+		expect(JE.serializedEntryToJs(mainFuncParamsEntry)).toBe("{'c': ['foo', 42]}");
 	});
 });
 
@@ -165,6 +172,7 @@ describe('Testing entryToJs()', () => {
 		expect(JE.entryToJs(parentFuncEntry)).toBe("g(c('foo', 42))");
 		expect(JE.entryToJs(chainFuncParamsEntry)).toBe('f(a().d())');
 		expect(JE.entryToJs(objectEntry)).toBe('h');
+		expect(JE.entryToJs(serializedFuncEntry)).toBe("a('_bar', {'.d': null})");
 	});
 });
 
