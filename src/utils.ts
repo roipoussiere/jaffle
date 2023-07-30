@@ -1,7 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import { Entry, EntryType } from './model';
 import * as c from './constants';
-import { ExporterError } from './errors';
 
 export function entryToEntryType(entry: Entry): EntryType {
 	if (entry.rawName === '' && entry.rawValue === '') {
@@ -30,7 +29,7 @@ export function entryToEntryType(entry: Entry): EntryType {
 
 export function entryToFuncName(entry: Entry): string {
 	if (entry.rawName === '') {
-		throw new ExporterError('can not get func name from empty raw name');
+		return '';
 	}
 	if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX || entry.rawName[0] === c.CONSTANT_DEF_PREFIX) {
 		return entry.rawName.substring(1);

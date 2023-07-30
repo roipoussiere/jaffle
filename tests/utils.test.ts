@@ -2,7 +2,6 @@ import { describe, expect, test } from '@jest/globals';
 
 import * as u from '../src/utils';
 import { Entry, EntryType } from '../src/model';
-import { JaffleError } from '../src/errors';
 
 describe('Testing u.entryToEntryType()', () => {
 	test('function entry return EntryType.Function', () => {
@@ -76,7 +75,7 @@ describe('Testing u.entryToFuncName()', () => {
 			rawValue: '42',
 			children: [],
 		};
-		expect(() => u.entryToFuncName(input)).toThrow(JaffleError);
+		expect(u.entryToFuncName(input)).toBe('');
 	});
 
 	test('Entry of chained func return stripped func name', () => {
