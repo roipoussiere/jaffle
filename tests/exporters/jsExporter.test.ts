@@ -87,25 +87,6 @@ describe('Testing JE.serialize()', () => {
 	});
 });
 
-describe('Testing JE.rawNameToFuncName()', () => {
-	test('empty strings fails', () => {
-		expect(() => JE.rawNameToFuncName('')).toThrow(ExporterError);
-	});
-
-	test('prefixes are stripped', () => {
-		expect(JE.rawNameToFuncName('.a')).toBe('a');
-		expect(JE.rawNameToFuncName('$a')).toBe('a');
-	});
-
-	test('suffixes are stripped', () => {
-		expect(JE.rawNameToFuncName('a^')).toBe('a');
-	});
-
-	test('other strings are kept intact', () => {
-		expect(JE.rawNameToFuncName('a')).toBe('a');
-	});
-});
-
 describe('Testing JE.rawValueToJs()', () => {
 	test('common strings are transpiled with quotes', () => {
 		expect(JE.rawValueToJs('abc')).toBe("'abc'");

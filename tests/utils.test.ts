@@ -2,6 +2,7 @@ import { describe, expect, test } from '@jest/globals';
 
 import * as u from '../src/utils';
 import { Entry, EntryType } from '../src/model';
+import { JaffleError } from '../src/errors';
 
 describe('Testing u.entryToEntryType()', () => {
 	test('function entry return EntryType.Function', () => {
@@ -56,5 +57,52 @@ describe('Testing u.entryToEntryType()', () => {
 			children: [],
 		};
 		expect(u.entryToEntryType(input)).toBe(EntryType.SerializedData);
+	});
+});
+
+describe('Testing u.entryToFuncName()', () => {
+	test('Entry of main func return func name', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [],
+		};
+		expect(u.entryToFuncName(input)).toBe('a');
+	});
+
+	test('Entry of value return empty string', () => {
+		const input: Entry = {
+			rawName: '',
+			rawValue: '42',
+			children: [],
+		};
+		expect(() => u.entryToFuncName(input)).toThrow(JaffleError);
+	});
+
+	test('Entry of chained func return stripped func name', () => {
+		const input: Entry = {
+			rawName: '.a',
+			rawValue: '',
+			children: [],
+		};
+		expect(u.entryToFuncName(input)).toBe('a');
+	});
+
+	test('Entry of constant def return stripped func name', () => {
+		const input: Entry = {
+			rawName: '$a',
+			rawValue: '',
+			children: [],
+		};
+		expect(u.entryToFuncName(input)).toBe('a');
+	});
+
+	test('Entry of serialized data return stripped func name', () => {
+		const input: Entry = {
+			rawName: 'a^',
+			rawValue: '',
+			children: [],
+		};
+		expect(u.entryToFuncName(input)).toBe('a');
 	});
 });

@@ -111,53 +111,6 @@ describe('Testing BE.buildBoxTyping()', () => {
 	});
 });
 
-describe('Testing BE.getDisplayName()', () => {
-	test('Entry of main func return func name', () => {
-		const input: Entry = {
-			rawName: 'a',
-			rawValue: '',
-			children: [],
-		};
-		expect(BE.getDisplayName(input)).toBe('a');
-	});
-
-	test('Entry of value return empty string', () => {
-		const input: Entry = {
-			rawName: '',
-			rawValue: '42',
-			children: [],
-		};
-		expect(BE.getDisplayName(input)).toBe('');
-	});
-
-	test('Entry of chained func return stripped func name', () => {
-		const input: Entry = {
-			rawName: '.a',
-			rawValue: '',
-			children: [],
-		};
-		expect(BE.getDisplayName(input)).toBe('a');
-	});
-
-	test('Entry of constant def return stripped func name', () => {
-		const input: Entry = {
-			rawName: '$a',
-			rawValue: '',
-			children: [],
-		};
-		expect(BE.getDisplayName(input)).toBe('a');
-	});
-
-	test('Entry of serialized data return stripped func name', () => {
-		const input: Entry = {
-			rawName: 'a^',
-			rawValue: '',
-			children: [],
-		};
-		expect(BE.getDisplayName(input)).toBe('a');
-	});
-});
-
 describe('Testing BE.getDisplayValue()', () => {
 	test('Entry with string value return the string', () => {
 		const input: Entry = {

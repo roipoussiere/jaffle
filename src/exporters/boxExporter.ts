@@ -1,6 +1,6 @@
 import { Entry, Box, ValueType, BoxTyping, EntryData, BoxDisplay, EntryType } from '../model';
 import * as c from '../constants';
-import { entryToEntryType } from '../utils';
+import { entryToEntryType, entryToFuncName } from '../utils';
 
 export function getValueType(entry: Entry): ValueType {
 	let boxValueType: ValueType;
@@ -29,16 +29,6 @@ export function buildBoxTyping(entry: Entry): BoxTyping {
 	};
 }
 
-export function getDisplayName(entry: Entry) {
-	if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX || entry.rawName[0] === c.CONSTANT_DEF_PREFIX) {
-		return entry.rawName.substring(1);
-	}
-	if (entry.rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-		return entry.rawName.substring(0, entry.rawName.length - 1);
-	}
-	return entry.rawName;
-}
-
 export function getDisplayValue(entry: Entry) {
 	if (entry.rawValue === '') {
 		return entry.children.length === 0 ? '∅' : ' ';
@@ -52,7 +42,7 @@ export function getDisplayValue(entry: Entry) {
 
 export function buildBoxDisplay(entry: Entry): BoxDisplay {
 	return {
-		displayName: getDisplayName(entry),
+		displayName: entryToFuncName(entry),
 		displayValue: getDisplayValue(entry),
 	};
 }

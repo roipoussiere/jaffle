@@ -1,7 +1,7 @@
 import * as c from '../constants';
 import { ExporterError } from '../errors';
 import { Entry, EntryType } from '../model';
-import { entryToEntryType } from '../utils';
+import { entryToEntryType, entryToFuncName } from '../utils';
 
 /**
  * Serialise an object to JSON.
@@ -10,22 +10,6 @@ import { entryToEntryType } from '../utils';
  */
 export function serialize(thing: unknown): string {
 	return JSON.stringify(thing);
-}
-
-export function rawNameToFuncName(rawName: string): string {
-	if (rawName === '') {
-		throw new ExporterError('can not get func name from empty raw name');
-	}
-	if (rawName[0] === c.CHAINED_FUNC_PREFIX || rawName[0] === c.CONSTANT_DEF_PREFIX) {
-		return rawName.substring(1);
-	}
-	if (rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-		return rawName.substring(0, rawName.length - 1);
-	}
-	if (rawName[0] === rawName[0].toUpperCase()) {
-		return rawName[0].toLowerCase() + rawName.substring(1);
-	}
-	return rawName;
 }
 
 /**
@@ -125,7 +109,7 @@ export function entryToJs(_entry: Entry): string {
 		return `[${entry.children.map((item) => entryToJs(item)).join(', ')}]`;
 	}
 
-	const funcName = rawNameToFuncName(entry.rawName);
+	const funcName = entryToFuncName(entry);
 
 	if (entryType === EntryType.Object) {
 		return funcName;
