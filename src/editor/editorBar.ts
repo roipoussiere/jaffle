@@ -1,72 +1,54 @@
 type OnButtonClick = () => void;
 
-type ButtonConfig = {
+type Button = {
 	id: string,
 	label: string,
 	tooltip: string,
+	onClick: OnButtonClick,
 }
 
 export default class EditorBar {
 	dom: HTMLElement;
 
-	_onPlay: OnButtonClick;
+	buttons: Array<Button>;
 
-	_onStop: OnButtonClick;
+	constructor() {
+		this.buttons = [];
+	}
+
+	addButton(button: Button) {
+		this.buttons.unshift(button);
+	}
 
 	build(container: HTMLElement) {
 		this.dom = document.createElement('div');
-
 		this.dom.id = 'jaffle-editor-bar';
-		this.dom.appendChild(EditorBar.buildTitle());
-		this.dom.appendChild(EditorBar.buildStopButton(this._onStop));
-		this.dom.appendChild(EditorBar.buildPlayButton(this._onPlay));
+
+		this.buildTitle();
+		this.buttons.forEach((button) => this.buildButton(button));
 
 		container.appendChild(this.dom);
 	}
 
-	onPlay(onPlayFn: OnButtonClick) {
-		this._onPlay = onPlayFn;
-	}
-
-	onStop(onStopFn: OnButtonClick) {
-		this._onStop = onStopFn;
-	}
-
-	private static buildTitle(): HTMLParagraphElement {
+	private buildTitle(): void {
 		const domTitle = document.createElement('p');
 
 		domTitle.id = 'jaffle-title';
 		domTitle.innerText = 'Jaffle - live coding in Yaml';
 
-		return domTitle;
+		this.dom.appendChild(domTitle);
 	}
 
-	private static buildPlayButton(onClick: OnButtonClick): HTMLButtonElement {
-		return EditorBar.buildButton(onClick, {
-			id: 'jaffle-play',
-			label: 'Play',
-			tooltip: 'Play/update tune (Ctrl-Enter)',
-		});
-	}
+	private buildButton(button: Button): void {
+		const domButton = document.createElement('button');
 
-	private static buildStopButton(onClick: OnButtonClick): HTMLButtonElement {
-		return EditorBar.buildButton(onClick, {
-			id: 'jaffle-stop',
-			label: 'Stop',
-			tooltip: 'Stop tune (Ctrl-.)',
-		});
-	}
+		domButton.id = button.id;
+		domButton.className = 'jaffle-btn';
+		domButton.title = button.tooltip;
+		domButton.innerText = button.label;
+		domButton.addEventListener('click', button.onClick);
 
-	private static buildButton(onClick: OnButtonClick, config: ButtonConfig): HTMLButtonElement {
-		const domBtnStop = document.createElement('button');
-
-		domBtnStop.id = config.id;
-		domBtnStop.className = 'jaffle-btn';
-		domBtnStop.title = config.tooltip;
-		domBtnStop.innerText = config.label;
-		domBtnStop.addEventListener('click', onClick);
-
-		return domBtnStop;
+		this.dom.appendChild(domButton);
 	}
 
 	static getStyle(): CSSStyleSheet {

@@ -32,8 +32,18 @@ export default class Editor {
 		this.dom = container;
 		this.dom.classList.add('jaffle-editor');
 
-		this.editorBar.onPlay(this._onPlay);
-		this.editorBar.onStop(this._onStop);
+		this.editorBar.addButton({
+			id: 'jaffle-play',
+			label: 'Play',
+			tooltip: 'Play/update tune (Ctrl-Enter)',
+			onClick: this._onPlay,
+		});
+		this.editorBar.addButton({
+			id: 'jaffle-stop',
+			label: 'Stop',
+			tooltip: 'Stop tune (Ctrl-.)',
+			onClick: this._onStop,
+		});
 		this.editorBar.build(container);
 
 		this.errorBar.build(container);
