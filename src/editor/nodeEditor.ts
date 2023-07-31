@@ -1,10 +1,10 @@
 import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
-import entryToBox from './exporters/boxExporter';
-import boxToEntry from './importers/boxImporter';
+import entryToBox from '../exporters/boxExporter';
+import boxToEntry from '../importers/boxImporter';
 
-import { Box, EntryType, ValueType } from './model';
+import { Box, EntryType, ValueType } from '../model';
 
 export type FuncNode = d3.id<Box> & {
 	x: number,

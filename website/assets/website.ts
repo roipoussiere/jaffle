@@ -1,8 +1,7 @@
 /* eslint-disable no-console */
 
-import { entryToJs, entryToBox, yamlToEntry, JaffleEditor, JaffleGraph, entryToString }
-	from './jaffle';
-import StrudelRepl from './strudel_repl';
+import { entryToJs, entryToBox, yamlToEntry, JaffleEditor, JaffleGraph } from './jaffle';
+import StrudelRepl from './strudelRepl';
 
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
 	'bridge_is_over', 'caverave', 'chop', 'csound_demo', 'delay', 'dino_funk', 'echo_piano',
