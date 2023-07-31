@@ -28,7 +28,7 @@ export function buildTopBar(onPlay: OnPlay, onStop: OnStop): HTMLDivElement {
 	return domTopBar;
 }
 
-export function getStyleSheet(): string {
+export function getEditorBarCSS(): string {
 	return `
 		#jaffle_topbar {
 			position: absolute;

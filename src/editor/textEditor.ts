@@ -7,7 +7,8 @@ import { closeBrackets } from '@codemirror/autocomplete';
 import { Extension } from '@codemirror/state';
 import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
-import { buildTopBar, getStyleSheet } from './editorBar';
+import { buildTopBar, getEditorBarCSS } from './editorBar';
+import { buildErrorBar, getErrorBarCSS } from './errorBar';
 import { OnPlay, OnStop } from './editor';
 
 type OnUpdate = (text: string) => void
@@ -66,7 +67,8 @@ class JaffleEditor {
 		this.domContainer.classList.add('jaffle_container');
 		this.buildEditor();
 		this.domContainer.appendChild(buildTopBar(this.onPlay, this.onStop));
-		this.buildErrorBar();
+		this.domErrorBar = buildErrorBar();
+		this.domContainer.appendChild(this.domErrorBar);
 		this.buildStyleSheet();
 	}
 
@@ -101,49 +103,29 @@ class JaffleEditor {
 		});
 	}
 
-	private buildErrorBar(): void {
-		this.domErrorBar = document.createElement('p');
-		this.domErrorBar.id = 'jaffle_error';
-		this.domErrorBar.style.display = 'none';
-
-		this.domContainer.appendChild(this.domErrorBar);
-	}
-
 	private buildStyleSheet() {
 		this.style = new CSSStyleSheet();
 		this.style.replaceSync(`
-		.jaffle_container {
-			position: relative;
-		}
+			.jaffle_container {
+				position: relative;
+			}
 
-		#jaffle_error {
-			display: block;
-			position: absolute;
-			bottom: 0;
-			width: 92%;
-			margin: 2%;
-			padding: 2%;
-			overflow: auto;
-			max-height: 33%;
-			background-color: darksalmon;
-			border-radius: 3px;
-			box-shadow: 0 0 7px black;
-		}
+			.cm-editor {
+				padding-top: 35px;
+				height: 100%;
+			}
 
-		.cm-editor {
-			padding-top: 35px;
-			height: 100%;
-		}
+			.cm-content {
+				font-size: 15px;
+			}
 
-		.cm-content {
-			font-size: 15px;
-		}
+			#test-canvas {
+				opacity: 0.5;
+			}
 
-		#test-canvas {
-			opacity: 0.5;
-		}
-
-		${getStyleSheet()}`);
+			${getEditorBarCSS()}
+			${getErrorBarCSS()}
+			`);
 		document.adoptedStyleSheets = [this.style];
 	}
 }
