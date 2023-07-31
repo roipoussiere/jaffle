@@ -1,5 +1,5 @@
 import Editor from './editor/editor';
-import TextEditor from './editor/textEditor';
+import YamlEditor from './editor/yamlEditor';
 import NodeEditor from './editor/nodeEditor';
 
 import * as errors from './errors';
@@ -14,7 +14,7 @@ import { boxToString, entryToString } from './utils';
 
 export {
 	Editor,
-	TextEditor,
+	YamlEditor,
 	NodeEditor,
 	errors,
 

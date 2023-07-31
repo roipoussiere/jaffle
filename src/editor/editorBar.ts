@@ -9,13 +9,27 @@ type ButtonConfig = {
 export default class EditorBar {
 	dom: HTMLElement;
 
-	constructor(onPlay: OnButtonClick, onStop: OnButtonClick) {
-		this.dom = document.createElement('div');
-		this.dom.id = 'jaffle-editor-bar';
+	_onPlay: OnButtonClick;
 
+	_onStop: OnButtonClick;
+
+	build(container: HTMLElement) {
+		this.dom = document.createElement('div');
+
+		this.dom.id = 'jaffle-editor-bar';
 		this.dom.appendChild(EditorBar.buildTitle());
-		this.dom.appendChild(EditorBar.buildStopButton(onStop));
-		this.dom.appendChild(EditorBar.buildPlayButton(onPlay));
+		this.dom.appendChild(EditorBar.buildStopButton(this._onStop));
+		this.dom.appendChild(EditorBar.buildPlayButton(this._onPlay));
+
+		container.appendChild(this.dom);
+	}
+
+	onPlay(onPlayFn: OnButtonClick) {
+		this._onPlay = onPlayFn;
+	}
+
+	onStop(onStopFn: OnButtonClick) {
+		this._onStop = onStopFn;
 	}
 
 	private static buildTitle(): HTMLParagraphElement {

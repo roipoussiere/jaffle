@@ -1,10 +1,13 @@
 export default class ErrorBar {
 	dom: HTMLElement;
 
-	constructor() {
+	build(container: HTMLElement) {
 		this.dom = document.createElement('p');
+
 		this.dom.id = 'jaffle-error';
 		this.dom.style.display = 'none';
+
+		container.appendChild(this.dom);
 	}
 
 	setError(text?: string): void {

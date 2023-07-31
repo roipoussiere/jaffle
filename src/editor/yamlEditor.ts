@@ -7,18 +7,17 @@ import { closeBrackets } from '@codemirror/autocomplete';
 import { Extension } from '@codemirror/state';
 import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
-import { OnPlay, OnStop, OnUpdate } from './editor';
+import AbstractEditor from './abstractEditor';
 
-class TextEditor {
-	public onPlay: OnPlay;
+type OnPlay = () => void;
+type OnStop = () => void;
 
-	public onStop: OnStop;
+class YamlEditor extends AbstractEditor {
+	public _onPlay: OnPlay;
 
-	public onUpdate: OnUpdate;
+	public _onStop: OnStop;
 
 	private editorView: EditorView;
-
-	private style: string;
 
 	private extensions: Extension = (() => [
 		solarizedDark,
@@ -32,7 +31,7 @@ class TextEditor {
 		highlightActiveLine(),
 		EditorView.updateListener.of((update) => {
 			if (update.docChanged) {
-				this.onUpdate(update.state.doc.toString());
+				this._onUpdate(update.state.doc.toString());
 			}
 		}),
 		keymap.of([
@@ -41,35 +40,39 @@ class TextEditor {
 			{
 				key: 'Ctrl-Enter',
 				run: () => {
-					this.onPlay();
+					this._onPlay();
 					return false;
 				},
 			}, {
 				key: 'Ctrl-.',
 				run: () => {
-					this.onStop();
+					this._onStop();
 					return false;
 				},
 			},
 		]),
 	])();
 
-	constructor(parentDom: HTMLElement, onPlay: OnPlay, onStop: OnStop, onUpdate: OnUpdate) {
-		this.onPlay = onPlay;
-		this.onStop = onStop;
-		this.onUpdate = onUpdate;
+	onPlay(onPlayFn: OnPlay) {
+		this._onPlay = onPlayFn;
+	}
 
+	onStop(onStopFn: OnStop) {
+		this._onStop = onStopFn;
+	}
+
+	build(parentDom: HTMLElement) {
 		this.editorView = new EditorView({
 			extensions: this.extensions,
 			parent: parentDom,
 		});
 	}
 
-	public getText(): string {
+	public getContent(): string {
 		return this.editorView.state.doc.toString();
 	}
 
-	public setText(text: string): void {
+	public setContent(text: string): void {
 		this.editorView.dispatch({
 			changes: {
 				from: 0,
@@ -94,4 +97,4 @@ class TextEditor {
 	}
 }
 
-export default TextEditor;
+export default YamlEditor;
