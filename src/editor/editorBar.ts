@@ -1,9 +1,15 @@
-import { OnPlay, OnStop } from './editor';
+type OnButtonClick = () => void;
+
+type ButtonConfig = {
+	id: string,
+	label: string,
+	tooltip: string,
+}
 
 export default class EditorBar {
 	dom: HTMLElement;
 
-	constructor(onPlay: OnPlay, onStop: OnStop) {
+	constructor(onPlay: OnButtonClick, onStop: OnButtonClick) {
 		this.dom = document.createElement('div');
 		this.dom.id = 'jaffle-editor-bar';
 
@@ -21,26 +27,30 @@ export default class EditorBar {
 		return domTitle;
 	}
 
-	private static buildPlayButton(onPlay: OnPlay): HTMLButtonElement {
-		const domBtnStart = document.createElement('button');
-
-		domBtnStart.id = 'jaffle-play';
-		domBtnStart.className = 'jaffle-btn';
-		domBtnStart.title = 'Play/update tune (Ctrl-Enter)';
-		domBtnStart.innerText = 'Play';
-		domBtnStart.addEventListener('click', onPlay);
-
-		return domBtnStart;
+	private static buildPlayButton(onClick: OnButtonClick): HTMLButtonElement {
+		return EditorBar.buildButton(onClick, {
+			id: 'jaffle-play',
+			label: 'Play',
+			tooltip: 'Play/update tune (Ctrl-Enter)',
+		});
 	}
 
-	private static buildStopButton(onStop: OnStop): HTMLButtonElement {
+	private static buildStopButton(onClick: OnButtonClick): HTMLButtonElement {
+		return EditorBar.buildButton(onClick, {
+			id: 'jaffle-stop',
+			label: 'Stop',
+			tooltip: 'Stop tune (Ctrl-.)',
+		});
+	}
+
+	private static buildButton(onClick: OnButtonClick, config: ButtonConfig): HTMLButtonElement {
 		const domBtnStop = document.createElement('button');
 
-		domBtnStop.id = 'jaffle-stop';
+		domBtnStop.id = config.id;
 		domBtnStop.className = 'jaffle-btn';
-		domBtnStop.title = 'Stop tune (Ctrl-.)';
-		domBtnStop.innerText = 'Stop';
-		domBtnStop.addEventListener('click', onStop);
+		domBtnStop.title = config.tooltip;
+		domBtnStop.innerText = config.label;
+		domBtnStop.addEventListener('click', onClick);
 
 		return domBtnStop;
 	}
