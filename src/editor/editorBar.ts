@@ -1,10 +1,17 @@
-type OnButtonClick = () => void;
+type OnClick = () => void;
 
 type Button = {
 	id: string,
 	label: string,
 	tooltip: string,
-	onClick: OnButtonClick,
+	onClick: OnClick,
+}
+
+type Tab = {
+	id: string,
+	label: string,
+	tooltip: string,
+	onClick: OnClick,
 }
 
 export default class EditorBar {
@@ -14,7 +21,10 @@ export default class EditorBar {
 
 	buttons: Array<Button>;
 
+	tabs: Array<Tab>;
+
 	constructor() {
+		this.tabs = [];
 		this.buttons = [];
 	}
 
@@ -22,11 +32,16 @@ export default class EditorBar {
 		this.buttons.unshift(button);
 	}
 
+	addTab(tab: Tab) {
+		this.tabs.push(tab);
+	}
+
 	build(container: HTMLElement) {
 		this.dom = document.createElement('div');
 		this.dom.id = 'jaffle-editor-bar';
 
 		this.buildTitle();
+		this.tabs.forEach((tab) => this.buildTab(tab));
 		this.buttons.forEach((button) => this.buildButton(button));
 
 		container.appendChild(this.dom);
@@ -43,10 +58,22 @@ export default class EditorBar {
 		this.dom.appendChild(this.domTitle);
 	}
 
+	private buildTab(tab: Tab): void {
+		const domtab = document.createElement('button');
+
+		domtab.id = `jaffle-tab-${tab.id}`;
+		domtab.className = 'jaffle-tab';
+		domtab.title = tab.tooltip;
+		domtab.innerText = tab.label;
+		domtab.addEventListener('click', tab.onClick);
+
+		this.dom.appendChild(domtab);
+	}
+
 	private buildButton(button: Button): void {
 		const domButton = document.createElement('button');
 
-		domButton.id = button.id;
+		domButton.id = `jaffle-btn-${button.id}`;
 		domButton.className = 'jaffle-btn';
 		domButton.title = button.tooltip;
 		domButton.innerText = button.label;
@@ -69,11 +96,33 @@ export default class EditorBar {
 	
 			#jaffle-title {
 				position: absolute;
+				text-align: center;
 				color: darkseagreen;
-				margin: 9px;
+				left: 45%;
+				width: 10%;
+				margin-top: 9px;
+				font-weight: bold;
+				z-index: 0;
+			}
+
+			.jaffle-tab {
+				margin: 0;
+				margin-right: 5px;
+				cursor: pointer;
+				width: 4em;
+				height: 35px;
+				float: left;
+				background-color: transparent;
+				border: none;
+				color: white;
+				text-shadow: 1px 1px 2px black;
 				font-weight: bold;
 			}
-	
+
+			.jaffle-tab:hover {
+				background-color: cadetblue;
+			}
+
 			.jaffle-btn {
 				margin: 0;
 				margin-left: 5px;

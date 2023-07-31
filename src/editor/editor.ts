@@ -32,20 +32,34 @@ export default class Editor {
 		this.dom = container;
 		this.dom.classList.add('jaffle-editor');
 
+		this.editorBar.addTab({
+			id: 'node',
+			label: 'Node',
+			tooltip: 'Switch to node editor',
+			onClick: () => console.log('node tab clicked'),
+		});
+		this.editorBar.addTab({
+			id: 'yaml',
+			label: 'Yaml',
+			tooltip: 'Switch to yaml editor',
+			onClick: () => console.log('yaml tab clicked'),
+		});
+
 		this.editorBar.addButton({
-			id: 'jaffle-play',
+			id: 'play',
 			label: 'Play',
 			tooltip: 'Play/update tune (Ctrl-Enter)',
 			onClick: this._onPlay,
 		});
 		this.editorBar.addButton({
-			id: 'jaffle-stop',
+			id: 'stop',
 			label: 'Stop',
 			tooltip: 'Stop tune (Ctrl-.)',
 			onClick: this._onStop,
 		});
+
 		this.editorBar.build(container);
-		this.editorBar.setTitle('Jaffle - live coding in Yaml');
+		this.editorBar.setTitle('Jaffle');
 
 		this.errorBar.build(container);
 
