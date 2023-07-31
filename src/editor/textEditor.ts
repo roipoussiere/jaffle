@@ -7,8 +7,9 @@ import { closeBrackets } from '@codemirror/autocomplete';
 import { Extension } from '@codemirror/state';
 import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
-type OnPlay = () => void
-type OnStop = () => void
+import { buildTopBar, getStyleSheet } from './editorBar';
+import { OnPlay, OnStop } from './editor';
+
 type OnUpdate = (text: string) => void
 
 class JaffleEditor {
@@ -64,7 +65,7 @@ class JaffleEditor {
 		this.domContainer = container;
 		this.domContainer.classList.add('jaffle_container');
 		this.buildEditor();
-		this.buildTopBar();
+		this.domContainer.appendChild(buildTopBar(this.onPlay, this.onStop));
 		this.buildErrorBar();
 		this.buildStyleSheet();
 	}
@@ -108,73 +109,11 @@ class JaffleEditor {
 		this.domContainer.appendChild(this.domErrorBar);
 	}
 
-	private buildTopBar(): void {
-		const domTitle = document.createElement('p');
-		domTitle.id = 'jaffle_title';
-		domTitle.innerText = 'Jaffle - live coding in Yaml';
-
-		const domBtnStart = document.createElement('button');
-		domBtnStart.id = 'jaffle_play';
-		domBtnStart.className = 'jaffle_btn';
-		domBtnStart.title = 'Play/update tune (Ctrl-Enter)';
-		domBtnStart.innerText = 'Play';
-		domBtnStart.addEventListener('click', this.onPlay);
-
-		const domBtnStop = document.createElement('button');
-		domBtnStop.id = 'jaffle_stop';
-		domBtnStop.className = 'jaffle_btn';
-		domBtnStop.title = 'Stop tune (Ctrl-.)';
-		domBtnStop.innerText = 'Stop';
-		domBtnStop.addEventListener('click', this.onStop);
-
-		const domTopBar = document.createElement('div');
-		domTopBar.id = 'jaffle_topbar';
-		domTopBar.appendChild(domTitle);
-		domTopBar.appendChild(domBtnStop);
-		domTopBar.appendChild(domBtnStart);
-
-		this.domContainer.appendChild(domTopBar);
-	}
-
 	private buildStyleSheet() {
 		this.style = new CSSStyleSheet();
 		this.style.replaceSync(`
 		.jaffle_container {
 			position: relative;
-		}
-
-		#jaffle_topbar {
-			position: absolute;
-			width: 100%;
-			top: 0px;
-			background-color: #0A813F;
-			z-index: 6;
-			height: 35px;
-		}
-
-		#jaffle_title {
-			position: absolute;
-			color: darkseagreen;
-			margin: 9px;
-			font-weight: bold;
-		}
-
-		.jaffle_btn {
-			margin: 0;
-			margin-left: 5px;
-			cursor: pointer;
-			width: 4em;
-			height: 35px;
-			float: right;
-			background-color: darkseagreen;
-			border: none;
-			color: white;
-			text-shadow: 1px 1px 2px black;
-			font-weight: bold;
-		}
-
-		.jaffle_btn:hover {
-			background-color: cadetblue;
 		}
 
 		#jaffle_error {
@@ -203,7 +142,8 @@ class JaffleEditor {
 		#test-canvas {
 			opacity: 0.5;
 		}
-		`);
+
+		${getStyleSheet()}`);
 		document.adoptedStyleSheets = [this.style];
 	}
 }
