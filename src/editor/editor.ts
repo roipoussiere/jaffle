@@ -45,6 +45,7 @@ export default class Editor {
 			onClick: this._onStop,
 		});
 		this.editorBar.build(container);
+		this.editorBar.setTitle('Jaffle - live coding in Yaml');
 
 		this.errorBar.build(container);
 

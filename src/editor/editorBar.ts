@@ -10,6 +10,8 @@ type Button = {
 export default class EditorBar {
 	dom: HTMLElement;
 
+	domTitle: HTMLParagraphElement;
+
 	buttons: Array<Button>;
 
 	constructor() {
@@ -30,13 +32,15 @@ export default class EditorBar {
 		container.appendChild(this.dom);
 	}
 
+	setTitle(title: string): void {
+		this.domTitle.innerText = title;
+	}
+
 	private buildTitle(): void {
-		const domTitle = document.createElement('p');
+		this.domTitle = document.createElement('p');
+		this.domTitle.id = 'jaffle-title';
 
-		domTitle.id = 'jaffle-title';
-		domTitle.innerText = 'Jaffle - live coding in Yaml';
-
-		this.dom.appendChild(domTitle);
+		this.dom.appendChild(this.domTitle);
 	}
 
 	private buildButton(button: Button): void {
