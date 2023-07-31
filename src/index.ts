@@ -1,5 +1,7 @@
-import JaffleEditor from './editor/textEditor';
-import JaffleGraph from './editor/nodeEditor';
+import Editor from './editor/editor';
+import TextEditor from './editor/textEditor';
+import NodeEditor from './editor/nodeEditor';
+
 import * as errors from './errors';
 
 import boxToEntry from './importers/boxImporter';
@@ -11,8 +13,9 @@ import entryToYaml from './exporters/yamlExporter';
 import { boxToString, entryToString } from './utils';
 
 export {
-	JaffleEditor,
-	JaffleGraph,
+	Editor,
+	TextEditor,
+	NodeEditor,
 	errors,
 
 	boxToEntry,

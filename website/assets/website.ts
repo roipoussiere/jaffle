@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { entryToJs, entryToBox, yamlToEntry, JaffleEditor, JaffleGraph } from './jaffle';
+import { entryToJs, entryToBox, yamlToEntry, Editor, NodeEditor } from './jaffle';
 import StrudelRepl from './strudelRepl';
 
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
@@ -13,11 +13,11 @@ const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub',
 
 const DEFAULT_TUNE = 'ws2_stack';
 const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune');
-const editor = new JaffleEditor();
-const graph = new JaffleGraph();
+const editor = new Editor();
+const graph = new NodeEditor();
 const strudel = new StrudelRepl(
-	(error) => editor.setError(error.message),
-	() => editor.setError(),
+	(error) => editor.errorBar.setError(error.message),
+	() => editor.errorBar.setError(),
 );
 let tunesPath = '../tunes/';
 
@@ -28,7 +28,7 @@ function loadTune(tuneName: string): void {
 	fetch(`${tunesPath}${tuneName}.yml`)
 		.then((response) => response.text())
 		.then((data) => {
-			editor.setText(data);
+			editor.textEditor.setText(data);
 			console.log(`Tune loaded (${Math.round((data.length / 1024) * 100) / 100}kB)`);
 		});
 	if (domSelectTune !== null) {
@@ -57,7 +57,7 @@ strudel.transpiler = (tuneYaml) => {
 
 strudel.init();
 editor.onPlay = () => {
-	const tuneYaml = editor.getText();
+	const tuneYaml = editor.textEditor.getText();
 
 	// const tuneEntry = yamlToEntry(tuneYaml);
 	// console.log('entry:', entryToString(tuneEntry));

@@ -7,13 +7,9 @@ import { closeBrackets } from '@codemirror/autocomplete';
 import { Extension } from '@codemirror/state';
 import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
-import { buildTopBar, getEditorBarCSS } from './editorBar';
-import { buildErrorBar, getErrorBarCSS } from './errorBar';
-import { OnPlay, OnStop } from './editor';
+import { OnPlay, OnStop, OnUpdate } from './editor';
 
-type OnUpdate = (text: string) => void
-
-class JaffleEditor {
+class TextEditor {
 	public onPlay: OnPlay;
 
 	public onStop: OnStop;
@@ -22,11 +18,7 @@ class JaffleEditor {
 
 	private editorView: EditorView;
 
-	private style: CSSStyleSheet;
-
-	private domContainer: HTMLElement;
-
-	private domErrorBar: HTMLParagraphElement;
+	private style: string;
 
 	private extensions: Extension = (() => [
 		solarizedDark,
@@ -62,14 +54,15 @@ class JaffleEditor {
 		]),
 	])();
 
-	public build(container: HTMLElement) {
-		this.domContainer = container;
-		this.domContainer.classList.add('jaffle_container');
-		this.buildEditor();
-		this.domContainer.appendChild(buildTopBar(this.onPlay, this.onStop));
-		this.domErrorBar = buildErrorBar();
-		this.domContainer.appendChild(this.domErrorBar);
-		this.buildStyleSheet();
+	constructor(parentDom: HTMLElement, onPlay: OnPlay, onStop: OnStop, onUpdate: OnUpdate) {
+		this.onPlay = onPlay;
+		this.onStop = onStop;
+		this.onUpdate = onUpdate;
+
+		this.editorView = new EditorView({
+			extensions: this.extensions,
+			parent: parentDom,
+		});
 	}
 
 	public getText(): string {
@@ -86,30 +79,9 @@ class JaffleEditor {
 		});
 	}
 
-	public setError(text?: string): void {
-		if (text === undefined) {
-			this.domErrorBar.innerText = '';
-			this.domErrorBar.style.display = 'none';
-		} else {
-			this.domErrorBar.innerText = text;
-			this.domErrorBar.style.display = 'block';
-		}
-	}
-
-	private buildEditor(): void {
-		this.editorView = new EditorView({
-			extensions: this.extensions,
-			parent: this.domContainer,
-		});
-	}
-
-	private buildStyleSheet() {
-		this.style = new CSSStyleSheet();
-		this.style.replaceSync(`
-			.jaffle_container {
-				position: relative;
-			}
-
+	static getStyle(): CSSStyleSheet {
+		const style = new CSSStyleSheet();
+		style.replaceSync(`
 			.cm-editor {
 				padding-top: 35px;
 				height: 100%;
@@ -117,17 +89,9 @@ class JaffleEditor {
 
 			.cm-content {
 				font-size: 15px;
-			}
-
-			#test-canvas {
-				opacity: 0.5;
-			}
-
-			${getEditorBarCSS()}
-			${getErrorBarCSS()}
-			`);
-		document.adoptedStyleSheets = [this.style];
+			}`);
+		return style;
 	}
 }
 
-export default JaffleEditor;
+export default TextEditor;

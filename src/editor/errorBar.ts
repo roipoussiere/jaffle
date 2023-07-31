@@ -1,24 +1,38 @@
-export function buildErrorBar(): HTMLParagraphElement {
-	const domErrorBar = document.createElement('p');
-	domErrorBar.id = 'jaffle_error';
-	domErrorBar.style.display = 'none';
+export default class ErrorBar {
+	dom: HTMLElement;
 
-	return domErrorBar;
-}
+	constructor() {
+		this.dom = document.createElement('p');
+		this.dom.id = 'jaffle-error';
+		this.dom.style.display = 'none';
+	}
 
-export function getErrorBarCSS(): string {
-	return `		
-		#jaffle_error {
-			display: block;
-			position: absolute;
-			bottom: 0;
-			width: 92%;
-			margin: 2%;
-			padding: 2%;
-			overflow: auto;
-			max-height: 33%;
-			background-color: darksalmon;
-			border-radius: 3px;
-			box-shadow: 0 0 7px black;
-		}`;
+	setError(text?: string): void {
+		if (text === undefined) {
+			this.dom.innerText = '';
+			this.dom.style.display = 'none';
+		} else {
+			this.dom.innerText = text;
+			this.dom.style.display = 'block';
+		}
+	}
+
+	static getStyle(): CSSStyleSheet {
+		const style = new CSSStyleSheet();
+		style.replaceSync(`		
+			#jaffle-error {
+				display: block;
+				position: absolute;
+				bottom: 0;
+				width: 92%;
+				margin: 2%;
+				padding: 2%;
+				overflow: auto;
+				max-height: 33%;
+				background-color: darksalmon;
+				border-radius: 3px;
+				box-shadow: 0 0 7px black;
+			}`);
+		return style;
+	}
 }
