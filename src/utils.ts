@@ -1,5 +1,4 @@
-/* eslint-disable import/prefer-default-export */
-import { Entry, EntryType } from './model';
+import { Entry, EntryType, Box } from './model';
 import * as c from './constants';
 
 export function entryToEntryType(entry: Entry): EntryType {
@@ -47,4 +46,23 @@ export function entryToFuncName(entry: Entry): string {
 	// 	return entry.rawName[0].toLowerCase() + entry.rawName.substring(1);
 	// }
 	return entry.rawName;
+}
+
+export function entryToString(entry: Entry, indentLvl = 1): string {
+	const keyVal = `'${entry.rawName}': '${entry.rawValue}'`.replace(/\n/g, ' ').substring(0, 50);
+	const childrenStr = entry.children.map(
+		(child) => `\n${'  '.repeat(indentLvl)}${entryToString(child, indentLvl + 1)}`,
+	);
+
+	return `${keyVal}${childrenStr.join('')}`;
+}
+
+export function boxToString(box: Box, indentLvl = 1): string {
+	const keyVal = `'${box.displayName}': '${box.displayValue}'`
+		.replace(/\n/g, ' ').substring(0, 50);
+	const childrenStr = box.children.map(
+		(child) => `\n${'  '.repeat(indentLvl)}${boxToString(child, indentLvl + 1)}`,
+	);
+
+	return `${keyVal}${childrenStr.join('')}`;
 }
