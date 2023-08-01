@@ -1,5 +1,5 @@
 type OnButtonClick = () => void;
-type OnTabSwitch = (tabId: string) => void;
+type OnTabSwitch = (oldTabId: string, newTabId: string) => void;
 
 export type Button = {
 	id: string,
@@ -61,8 +61,8 @@ export class EditorBar {
 	private switchTab(newActiveTabId: string): void {
 		this.domTabs[this.activeTabId].classList.remove('jaffle-tab-active');
 		this.domTabs[newActiveTabId].classList.add('jaffle-tab-active');
+		this.onTabSwitch(this.activeTabId, newActiveTabId);
 		this.activeTabId = newActiveTabId;
-		this.onTabSwitch(newActiveTabId);
 	}
 
 	private buildTitle(): void {

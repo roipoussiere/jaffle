@@ -55,7 +55,13 @@ export default class Editor {
 		}];
 
 		this.editorBar = new EditorBar('Jaffle', tabs, buttons, 'yaml');
-		this.editorBar.onTabSwitch = (tabId: string) => this.editors[tabId].build(this.container);
+		this.editorBar.onTabSwitch = (oldTabId: string, newTabId: string) => {
+			const content = this.editors[oldTabId].getContent();
+			this.editors[newTabId].setContent(content);
+
+			this.editors[oldTabId].getDom().style.setProperty('display', 'none', 'important');
+			this.editors[newTabId].getDom().style.display = 'block';
+		};
 		this.errorBar = new ErrorBar();
 
 		this.editors = {
@@ -70,6 +76,10 @@ export default class Editor {
 		};
 	}
 
+	public getActiveEditor(): AbstractEditor {
+		return this.editors[this.editorBar.activeTabId];
+	}
+
 	public build(container: HTMLElement) {
 		this.container = container;
 		this.container.classList.add('jaffle-editor');
@@ -77,6 +87,7 @@ export default class Editor {
 		this.editorBar.build(container);
 		this.errorBar.build(container);
 		Object.values(this.editors).forEach((editor) => editor.build(container));
+		// this.getActiveEditor().setContent();
 
 		document.adoptedStyleSheets = [
 			Editor.getStyle(),
@@ -84,6 +95,10 @@ export default class Editor {
 			ErrorBar.getStyle(),
 			YamlEditor.getStyle(),
 		];
+	}
+
+	setContent(content: Entry): void {
+		this.editors[this.editorBar.activeTabId].setContent(content);
 	}
 
 	getContent(): Entry {
@@ -95,6 +110,7 @@ export default class Editor {
 		style.replaceSync(`
 		.jaffle-editor {
 			position: relative;
+			background-color: #002b36;
 		}
 
 		#test-canvas {

@@ -12,7 +12,7 @@ export function entryToObject(entry: Entry): Dict<unknown> {
 
 export function entryToYaml(entry: Entry): string {
 	const object = entryToObject(entry);
-	return dumpYaml(object);
+	return dumpYaml(object.root);
 }
 
 export default entryToYaml;

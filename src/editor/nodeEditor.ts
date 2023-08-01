@@ -38,7 +38,7 @@ const BOX_VALUE_COLORS = {
 class NodeEditor extends AbstractEditor {
 	config: NodeEditorConfig;
 
-	container: HTMLElement;
+	domContainer: HTMLDivElement;
 
 	domSvg: SVGElement;
 
@@ -67,8 +67,17 @@ class NodeEditor extends AbstractEditor {
 		this.config = config;
 	}
 
-	build(container: HTMLElement) {
-		this.container = container;
+	build(domEditor: HTMLElement) {
+		this.domContainer = document.createElement('div');
+		this.domContainer.classList.add('jaffle-graph-container');
+		this.domContainer.style.position = 'absolute';
+		this.domContainer.style.top = '30px';
+		this.domContainer.style.left = '5px';
+		domEditor.appendChild(this.domContainer);
+	}
+
+	getDom(): HTMLElement {
+		return this.domContainer;
 	}
 
 	getContent(): Entry {
@@ -128,13 +137,13 @@ class NodeEditor extends AbstractEditor {
 		this.drawSvg();
 		this.domSvg?.remove();
 		this.domSvg = <SVGElement> this.svg.node();
-		this.container.appendChild(this.domSvg);
+		this.domContainer.appendChild(this.domSvg);
 		return this;
 	}
 
 	private drawSvg() {
 		this.svg = d3.create('svg')
-			.attr('class', 'jaffle_graph')
+			.attr('class', 'jaffle-graph')
 			.attr('width', this.width)
 			.attr('height', this.height)
 			.attr('viewBox', [this.offsetX, this.offsetY, this.width, this.height])
@@ -148,7 +157,7 @@ class NodeEditor extends AbstractEditor {
 	private drawLinks() {
 		this.svg.append('g')
 			.attr('fill', 'none')
-			.attr('stroke', '#333')
+			.attr('stroke', '#777')
 			.attr('stroke-width', 2)
 			.selectAll()
 			.data(this.tree.links().filter((d: d3.HierarchyLink<Box>) => (

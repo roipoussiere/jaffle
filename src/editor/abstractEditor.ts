@@ -1,9 +1,9 @@
 import { Entry } from '../model';
 
 export abstract class AbstractEditor {
-	domContainer: HTMLElement;
+	abstract build(domEditor: HTMLElement): void;
 
-	abstract build(domContainer: HTMLElement): void;
+	abstract getDom(): HTMLElement;
 
 	abstract getContent(): Entry;
 

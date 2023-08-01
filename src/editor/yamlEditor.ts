@@ -67,12 +67,17 @@ class YamlEditor extends AbstractEditor {
 		this.config = config;
 	}
 
-	build(domContainer: HTMLElement) {
-		this.domContainer = domContainer;
-		this.editorView = new EditorView({
-			extensions: this.extensions,
-			parent: domContainer,
-		});
+	build(domEditor: HTMLElement) {
+		if (this.editorView === undefined) {
+			this.editorView = new EditorView({
+				extensions: this.extensions,
+				parent: domEditor,
+			});
+		}
+	}
+
+	getDom(): HTMLElement {
+		return this.editorView.contentDOM.parentElement?.parentElement as HTMLElement;
 	}
 
 	public getContent(): Entry {

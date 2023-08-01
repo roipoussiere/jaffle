@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { entryToJs, Editor } from './jaffle';
+import { entryToJs, Editor, yamlToEntry } from './jaffle';
 import StrudelRepl from './strudelRepl';
 
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
@@ -30,7 +30,7 @@ function loadTune(tuneName: string): void {
 	fetch(`${tunesPath}${tuneName}.yml`)
 		.then((response) => response.text())
 		.then((tuneYaml) => {
-			editor.editors.yaml.setRawContent(tuneYaml);
+			editor.setContent(yamlToEntry(tuneYaml));
 			console.log(`Tune loaded (${Math.round((tuneYaml.length / 1024) * 100) / 100}kB)`);
 		});
 	if (domSelectTune !== null) {
