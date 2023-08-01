@@ -1,10 +1,11 @@
-type OnClick = () => void;
+type OnButtonClick = () => void;
+type OnTabSwitch = (tabId: string) => void;
 
 export type Button = {
 	id: string,
 	label: string,
 	tooltip: string,
-	onClick: OnClick,
+	onClick: OnButtonClick,
 }
 
 export type Tab = {
@@ -22,6 +23,8 @@ export class EditorBar {
 
 	activeTabId: string;
 
+	onTabSwitch: OnTabSwitch;
+
 	dom: HTMLElement;
 
 	domTitle: HTMLParagraphElement;
@@ -34,6 +37,8 @@ export class EditorBar {
 		this.buttons = buttons;
 		this.activeTabId = activeTabId || this.tabs[0].id;
 
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
+		this.onTabSwitch = () => {};
 		this.domTabs = {};
 	}
 
@@ -53,10 +58,11 @@ export class EditorBar {
 		this.domTitle.innerText = title;
 	}
 
-	private switchTab(newActiveTab: string): void {
+	private switchTab(newActiveTabId: string): void {
 		this.domTabs[this.activeTabId].classList.remove('jaffle-tab-active');
-		this.domTabs[newActiveTab].classList.add('jaffle-tab-active');
-		this.activeTabId = newActiveTab;
+		this.domTabs[newActiveTabId].classList.add('jaffle-tab-active');
+		this.activeTabId = newActiveTabId;
+		this.onTabSwitch(newActiveTabId);
 	}
 
 	private buildTitle(): void {

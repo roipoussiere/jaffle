@@ -55,6 +55,7 @@ export default class Editor {
 		}];
 
 		this.editorBar = new EditorBar('Jaffle', tabs, buttons, 'yaml');
+		this.editorBar.onTabSwitch = (tabId: string) => this.editors[tabId].build(this.container);
 		this.errorBar = new ErrorBar();
 
 		this.editors = {
