@@ -27,9 +27,9 @@ function loadTune(tuneName: string): void {
 	console.log(`Loading tune ${tuneName}...`);
 	fetch(`${tunesPath}${tuneName}.yml`)
 		.then((response) => response.text())
-		.then((data) => {
-			editor.yamlEditor.setContent(data);
-			console.log(`Tune loaded (${Math.round((data.length / 1024) * 100) / 100}kB)`);
+		.then((tuneYaml) => {
+			editor.editors.yaml.setRawContent(tuneYaml);
+			console.log(`Tune loaded (${Math.round((tuneYaml.length / 1024) * 100) / 100}kB)`);
 		});
 	if (domSelectTune !== null) {
 		domSelectTune.value = tuneName;
@@ -50,23 +50,8 @@ function fillTunesList(): void {
 	});
 }
 
-strudel.transpiler = (tuneYaml) => {
-	const tuneEntry = yamlToEntry(tuneYaml);
-	return entryToJs(tuneEntry);
-};
-
 strudel.init();
-editor.onPlay(() => {
-	const tuneYaml = editor.yamlEditor.getContent();
-
-	// const tuneEntry = yamlToEntry(tuneYaml);
-	// console.log('entry:', entryToString(tuneEntry));
-
-	// const tuneJs = entryToJs(tuneEntry);
-	// console.log('js:', tuneJs);
-
-	strudel.play(tuneYaml);
-});
+editor.onPlay(() => strudel.play(entryToJs(editor.getContent())));
 editor.onStop(() => strudel.stop());
 editor.onUpdate((tuneYml) => graph.load(entryToBox(yamlToEntry(tuneYml))).draw());
 

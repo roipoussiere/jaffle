@@ -5,6 +5,8 @@ import entryToBox from '../exporters/boxExporter';
 import boxToEntry from '../importers/boxImporter';
 import { Box, EntryType, ValueType } from '../model';
 
+// import AbstractEditor from './abstractEditor';
+
 export type Coordinates = [number, number];
 
 export type FuncNode = d3.id<Box> & {
@@ -27,7 +29,8 @@ const BOX_VALUE_COLORS = {
 	[ValueType.Expression]: 'blue',
 };
 
-class Graph {
+// class NodeEditor extends AbstractEditor {
+class NodeEditor {
 	public container: HTMLElement;
 
 	public domSvg: SVGElement;
@@ -52,18 +55,18 @@ class Graph {
 
 	private tree: FuncNode;
 
-	public init(container: HTMLElement): Graph {
+	public init(container: HTMLElement): NodeEditor {
 		this.container = container;
 		return this;
 	}
 
-	public load(rawComposition: Box): Graph {
+	public load(rawComposition: Box): NodeEditor {
 		this.tree = <FuncNode> d3.hierarchy(rawComposition);
 		this.initTree();
 		return this;
 	}
 
-	public initTree(): Graph {
+	public initTree(): NodeEditor {
 		const layout = flextree({})
 			.nodeSize((n: FuncNode) => (
 				[this.charHeight, (n.data.width + this.boxGap) * this.charWidth]
@@ -98,7 +101,7 @@ class Graph {
 		this.offsetY = minNodeY - this.charHeight;
 	}
 
-	public draw(): Graph {
+	public draw(): NodeEditor {
 		this.drawSvg();
 		this.domSvg?.remove();
 		this.domSvg = <SVGElement> this.svg.node();
@@ -304,4 +307,4 @@ class Graph {
 	}
 }
 
-export default Graph;
+export default NodeEditor;

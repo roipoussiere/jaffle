@@ -11,7 +11,6 @@ export type Tab = {
 	id: string,
 	label: string,
 	tooltip: string,
-	onClick: OnClick,
 }
 
 export class EditorBar {
@@ -82,7 +81,6 @@ export class EditorBar {
 		domTab.addEventListener('click', () => {
 			if (tab.id !== this.activeTabId) {
 				this.switchTab(tab.id);
-				tab.onClick();
 			}
 		});
 

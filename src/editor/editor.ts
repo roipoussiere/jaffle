@@ -1,3 +1,5 @@
+import { Entry } from '../model';
+import AbstractEditor from './abstractEditor';
 import { EditorBar, Button, Tab } from './editorBar';
 import ErrorBar from './errorBar';
 import YamlEditor from './yamlEditor';
@@ -13,7 +15,7 @@ export default class Editor {
 
 	errorBar: ErrorBar;
 
-	yamlEditor: YamlEditor;
+	editors: { [key: string]: AbstractEditor };
 
 	_onPlay: OnPlay;
 
@@ -26,12 +28,10 @@ export default class Editor {
 			id: 'node',
 			label: 'Node',
 			tooltip: 'Switch to node editor',
-			onClick: () => console.log('node tab clicked'),
 		}, {
 			id: 'yaml',
 			label: 'Yaml',
 			tooltip: 'Switch to yaml editor',
-			onClick: () => console.log('yaml tab clicked'),
 		}];
 
 		const buttons: Array<Button> = [{
@@ -49,7 +49,13 @@ export default class Editor {
 		this.editorBar = new EditorBar('Jaffle', tabs, buttons);
 		this.errorBar = new ErrorBar();
 
-		this.yamlEditor = new YamlEditor();
+		this.editors = {
+			yaml: new YamlEditor({
+				onPlay: () => this._onPlay(),
+				onStop: () => this._onStop(),
+				onUpdate: (content: string) => this._onUpdate(content),
+			}),
+		};
 	}
 
 	public build(container: HTMLElement) {
@@ -58,11 +64,7 @@ export default class Editor {
 
 		this.editorBar.build(container);
 		this.errorBar.build(container);
-
-		this.yamlEditor.onPlay(this._onPlay);
-		this.yamlEditor.onStop(this._onStop);
-		this.yamlEditor.onUpdate(this._onUpdate);
-		this.yamlEditor.build(container);
+		Object.values(this.editors).forEach((editor) => editor.build(container));
 
 		document.adoptedStyleSheets = [
 			Editor.getStyle(),
@@ -70,6 +72,11 @@ export default class Editor {
 			ErrorBar.getStyle(),
 			YamlEditor.getStyle(),
 		];
+	}
+
+	getContent(): Entry {
+		// return this.editors[this.editorBar.activeTabId].getContent();
+		return this.editors.yaml.getContent();
 	}
 
 	onPlay(onPlayFn: OnPlay) {

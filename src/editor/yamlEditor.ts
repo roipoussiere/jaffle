@@ -7,15 +7,23 @@ import { closeBrackets } from '@codemirror/autocomplete';
 import { Extension } from '@codemirror/state';
 import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
-import AbstractEditor from './abstractEditor';
+import { Entry } from '../model';
+import entryToYaml from '../exporters/yamlExporter';
+import yamlToEntry from '../importers/yamlImporter';
+
+import { AbstractEditor, OnUpdate } from './abstractEditor';
 
 type OnPlay = () => void;
 type OnStop = () => void;
 
-class YamlEditor extends AbstractEditor {
-	public _onPlay: OnPlay;
+type YamlEditorConfig = {
+	onPlay: OnPlay,
+	onStop: OnStop,
+	onUpdate: OnUpdate,
+}
 
-	public _onStop: OnStop;
+class YamlEditor extends AbstractEditor {
+	config: YamlEditorConfig;
 
 	private editorView: EditorView;
 
@@ -40,25 +48,22 @@ class YamlEditor extends AbstractEditor {
 			{
 				key: 'Ctrl-Enter',
 				run: () => {
-					this._onPlay();
+					this.config.onPlay();
 					return false;
 				},
 			}, {
 				key: 'Ctrl-.',
 				run: () => {
-					this._onStop();
+					this.config.onStop();
 					return false;
 				},
 			},
 		]),
 	])();
 
-	onPlay(onPlayFn: OnPlay) {
-		this._onPlay = onPlayFn;
-	}
-
-	onStop(onStopFn: OnStop) {
-		this._onStop = onStopFn;
+	constructor(config: YamlEditorConfig) {
+		super(config.onUpdate);
+		this.config = config;
 	}
 
 	build(parentDom: HTMLElement) {
@@ -68,18 +73,26 @@ class YamlEditor extends AbstractEditor {
 		});
 	}
 
-	public getContent(): string {
+	public getContent(): Entry {
+		return yamlToEntry(this.getRawContent());
+	}
+
+	public getRawContent(): string {
 		return this.editorView.state.doc.toString();
 	}
 
-	public setContent(text: string): void {
+	public setRawContent(yaml: string): void {
 		this.editorView.dispatch({
 			changes: {
 				from: 0,
 				to: this.editorView.state.doc.length,
-				insert: text,
+				insert: yaml,
 			},
 		});
+	}
+
+	public setContent(entry: Entry): void {
+		this.setRawContent(entryToYaml(entry));
 	}
 
 	static getStyle(): CSSStyleSheet {
