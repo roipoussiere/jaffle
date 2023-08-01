@@ -3,8 +3,9 @@ import { flextree } from 'd3-flextree';
 
 import entryToBox from '../exporters/boxExporter';
 import boxToEntry from '../importers/boxImporter';
-
 import { Box, EntryType, ValueType } from '../model';
+
+export type Coordinates = [number, number];
 
 export type FuncNode = d3.id<Box> & {
 	x: number,
@@ -129,10 +130,14 @@ class Graph {
 			)))
 			.join('path')
 			.attr('d', (link: d3.HierarchyLink<Box>) => d3.linkHorizontal()
-				.x((n: FuncNode) => (
-					n.y === link.source.y ? n.y + n.data.width * this.charWidth : n.y
-				))
-				.y((n: FuncNode) => n.x)(link));
+				.x((_n: Coordinates) => {
+					const n = _n as unknown as FuncNode;
+					return n.y === (link.source as unknown as FuncNode).y
+						? n.y + n.data.width * this.charWidth : n.y;
+				})
+				.y(
+					(n: Coordinates) => (n as unknown as FuncNode).x,
+				)(link as unknown as d3.DefaultLinkObject));
 	}
 
 	private drawGroupArea() {
