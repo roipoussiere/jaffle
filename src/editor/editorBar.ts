@@ -15,20 +15,27 @@ export type Tab = {
 }
 
 export class EditorBar {
+	title: string;
+
+	tabs: Array<Tab>;
+
+	buttons: Array<Button>;
+
+	activeTabId: string;
+
 	dom: HTMLElement;
 
 	domTitle: HTMLParagraphElement;
 
-	buttons: Array<Button>;
+	domTabs: { [key: string]: HTMLButtonElement };
 
-	tabs: Array<Tab>;
-
-	title: string;
-
-	constructor(title: string, tabs: Array<Tab>, buttons: Array<Button>) {
+	constructor(title: string, tabs: Array<Tab>, buttons: Array<Button>, activeTabId?: string) {
 		this.title = title;
 		this.tabs = tabs;
 		this.buttons = buttons;
+		this.activeTabId = activeTabId || this.tabs[0].id;
+
+		this.domTabs = {};
 	}
 
 	build(container: HTMLElement) {
@@ -37,7 +44,7 @@ export class EditorBar {
 
 		this.buildTitle();
 		this.tabs.forEach((tab) => this.buildTab(tab));
-		this.buttons.forEach((button) => this.buildButton(button));
+		this.buttons.reverse().forEach((button) => this.buildButton(button));
 
 		container.appendChild(this.dom);
 	}
@@ -45,6 +52,12 @@ export class EditorBar {
 	setTitle(title: string): void {
 		this.title = title;
 		this.domTitle.innerText = title;
+	}
+
+	private switchTab(newActiveTab: string): void {
+		this.domTabs[this.activeTabId].classList.remove('jaffle-tab-active');
+		this.domTabs[newActiveTab].classList.add('jaffle-tab-active');
+		this.activeTabId = newActiveTab;
 	}
 
 	private buildTitle(): void {
@@ -56,15 +69,25 @@ export class EditorBar {
 	}
 
 	private buildTab(tab: Tab): void {
-		const domtab = document.createElement('button');
+		const domTab = document.createElement('button');
 
-		domtab.id = `jaffle-tab-${tab.id}`;
-		domtab.className = 'jaffle-tab';
-		domtab.title = tab.tooltip;
-		domtab.innerText = tab.label;
-		domtab.addEventListener('click', tab.onClick);
+		domTab.id = `jaffle-tab-${tab.id}`;
+		domTab.classList.add('jaffle-tab');
+		if (tab.id === this.activeTabId) {
+			domTab.classList.add('jaffle-tab-active');
+		}
 
-		this.dom.appendChild(domtab);
+		domTab.title = tab.tooltip;
+		domTab.innerText = tab.label;
+		domTab.addEventListener('click', () => {
+			if (tab.id !== this.activeTabId) {
+				this.switchTab(tab.id);
+				tab.onClick();
+			}
+		});
+
+		this.domTabs[tab.id] = domTab;
+		this.dom.appendChild(domTab);
 	}
 
 	private buildButton(button: Button): void {
@@ -114,6 +137,11 @@ export class EditorBar {
 				color: white;
 				text-shadow: 1px 1px 2px black;
 				font-weight: bold;
+			}
+
+			.jaffle-tab-active {
+				background-color: #002b36 !important;
+				cursor: default;
 			}
 
 			.jaffle-tab:hover {
