@@ -3,13 +3,15 @@ import { Entry } from '../model';
 export type OnUpdate = (text: string) => void
 
 export abstract class AbstractEditor {
-	_onUpdate: OnUpdate;
+	domContainer: HTMLElement;
 
-	constructor(onUpdateFn: OnUpdate) {
-		this._onUpdate = onUpdateFn;
+	onUpdate: OnUpdate;
+
+	constructor(onUpdate: OnUpdate) {
+		this.onUpdate = onUpdate;
 	}
 
-	abstract build(container: HTMLElement): void;
+	abstract build(domContainer: HTMLElement);
 
 	abstract getContent(): Entry;
 

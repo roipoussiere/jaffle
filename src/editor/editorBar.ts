@@ -37,7 +37,7 @@ export class EditorBar {
 		this.domTabs = {};
 	}
 
-	build(container: HTMLElement) {
+	build(domContainer: HTMLElement) {
 		this.dom = document.createElement('div');
 		this.dom.id = 'jaffle-editor-bar';
 
@@ -45,7 +45,7 @@ export class EditorBar {
 		this.tabs.forEach((tab) => this.buildTab(tab));
 		this.buttons.reverse().forEach((button) => this.buildButton(button));
 
-		container.appendChild(this.dom);
+		domContainer.appendChild(this.dom);
 	}
 
 	setTitle(title: string): void {

@@ -9,7 +9,7 @@ type OnStop = () => void;
 type OnUpdate = (text: string) => void
 
 export default class Editor {
-	dom: HTMLElement;
+	container: HTMLElement;
 
 	editorBar: EditorBar;
 
@@ -59,8 +59,8 @@ export default class Editor {
 	}
 
 	public build(container: HTMLElement) {
-		this.dom = container;
-		this.dom.classList.add('jaffle-editor');
+		this.container = container;
+		this.container.classList.add('jaffle-editor');
 
 		this.editorBar.build(container);
 		this.errorBar.build(container);

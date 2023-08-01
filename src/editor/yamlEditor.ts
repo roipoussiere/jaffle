@@ -39,7 +39,7 @@ class YamlEditor extends AbstractEditor {
 		highlightActiveLine(),
 		EditorView.updateListener.of((update) => {
 			if (update.docChanged) {
-				this._onUpdate(update.state.doc.toString());
+				this.onUpdate(update.state.doc.toString());
 			}
 		}),
 		keymap.of([
@@ -66,10 +66,11 @@ class YamlEditor extends AbstractEditor {
 		this.config = config;
 	}
 
-	build(parentDom: HTMLElement) {
+	build(domContainer: HTMLElement) {
+		this.domContainer = domContainer;
 		this.editorView = new EditorView({
 			extensions: this.extensions,
-			parent: parentDom,
+			parent: domContainer,
 		});
 	}
 
