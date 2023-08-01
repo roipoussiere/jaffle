@@ -3,15 +3,21 @@ import { flextree } from 'd3-flextree';
 
 import entryToBox from '../exporters/boxExporter';
 import boxToEntry from '../importers/boxImporter';
-import { Box, EntryType, ValueType } from '../model';
+import { Box, Entry, EntryType, ValueType } from '../model';
 
-// import AbstractEditor from './abstractEditor';
+import { AbstractEditor } from './abstractEditor';
 
-export type Coordinates = [number, number];
+type Coordinates = [number, number];
 
-export type FuncNode = d3.id<Box> & {
+type FuncNode = d3.id<Box> & {
 	x: number,
 	y: number,
+}
+
+type OnUpdate = (rawContent: Box) => void
+
+type NodeEditorConfig = {
+	onUpdate: OnUpdate,
 }
 
 const BOX_NAME_COLORS = {
@@ -29,41 +35,58 @@ const BOX_VALUE_COLORS = {
 	[ValueType.Expression]: 'blue',
 };
 
-// class NodeEditor extends AbstractEditor {
-class NodeEditor {
-	public container: HTMLElement;
+class NodeEditor extends AbstractEditor {
+	config: NodeEditorConfig;
 
-	public domSvg: SVGElement;
+	container: HTMLElement;
 
-	public width = 800;
+	domSvg: SVGElement;
 
-	public height: number;
+	width = 800;
 
-	public offsetX: number;
+	height: number;
 
-	public offsetY: number;
+	offsetX: number;
 
-	public fontSize = 14;
+	offsetY: number;
 
-	public boxGap = 3;
+	fontSize = 14;
 
-	public charWidth = this.fontSize * 0.6;
+	boxGap = 3;
 
-	public charHeight = this.fontSize * 1.4;
+	charWidth = this.fontSize * 0.6;
 
-	private svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
+	charHeight = this.fontSize * 1.4;
 
-	private tree: FuncNode;
+	svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
 
-	public init(container: HTMLElement): NodeEditor {
-		this.container = container;
-		return this;
+	tree: FuncNode;
+
+	constructor(config: NodeEditorConfig) {
+		super();
+		this.config = config;
 	}
 
-	public load(rawComposition: Box): NodeEditor {
-		this.tree = <FuncNode> d3.hierarchy(rawComposition);
+	build(container: HTMLElement) {
+		this.container = container;
+	}
+
+	getContent(): Entry {
+		return boxToEntry(this.tree.data);
+	}
+
+	getRawContent(): Box {
+		return this.tree.data;
+	}
+
+	setContent(content: Entry): void {
+		this.setRawContent(entryToBox(content));
+	}
+
+	setRawContent(content: Box): void {
+		this.tree = <FuncNode> d3.hierarchy(content);
 		this.initTree();
-		return this;
+		this.draw();
 	}
 
 	public initTree(): NodeEditor {
@@ -264,8 +287,8 @@ class NodeEditor {
 			.attr('id', 'jaffle_ne_input')
 			.attr('type', 'text')
 			.attr('value', isValueSelected ? focusedNode.data.rawValue : focusedNode.data.rawName)
-			// .on('input', (event: Event) => {})
 
+			.on('input', () => this.config.onUpdate(this.tree.data))
 			.on('change', (event: Event) => {
 				const rawText = (<HTMLInputElement>event.target).value;
 
@@ -275,7 +298,7 @@ class NodeEditor {
 					focusedNode.data.rawName = rawText;
 				}
 
-				this.load(entryToBox(boxToEntry(this.tree.data)));
+				this.reload();
 				this.draw();
 			})
 			.on('focusout', (event: Event) => {

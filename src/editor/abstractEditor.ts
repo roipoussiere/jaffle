@@ -1,17 +1,9 @@
 import { Entry } from '../model';
 
-export type OnUpdate = (text: string) => void
-
 export abstract class AbstractEditor {
 	domContainer: HTMLElement;
 
-	onUpdate: OnUpdate;
-
-	constructor(onUpdate: OnUpdate) {
-		this.onUpdate = onUpdate;
-	}
-
-	abstract build(domContainer: HTMLElement);
+	abstract build(domContainer: HTMLElement): void;
 
 	abstract getContent(): Entry;
 
@@ -20,6 +12,10 @@ export abstract class AbstractEditor {
 	abstract setContent(content: Entry): void;
 
 	abstract setRawContent(content: unknown): void;
+
+	reload(): void {
+		this.setContent(this.getContent());
+	}
 }
 
 export default AbstractEditor;

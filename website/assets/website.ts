@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { entryToJs, entryToBox, yamlToEntry, Editor, NodeEditor } from './jaffle';
+import { entryToJs, Editor } from './jaffle';
 import StrudelRepl from './strudelRepl';
 
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
@@ -12,16 +12,18 @@ const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub',
 	'ws2_stack', 'ws3_stack_in_stack', 'ws3_dub_tune', 'ws4_add_stack'];
 
 const DEFAULT_TUNE = 'ws2_stack';
+let tunesPath = '../tunes/';
+
 const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune');
+
 const editor = new Editor();
-const graph = new NodeEditor();
 const strudel = new StrudelRepl(
 	(error) => editor.errorBar.setError(error.message),
 	() => editor.errorBar.setError(),
 );
-let tunesPath = '../tunes/';
-
-const getContainer = () => <HTMLDivElement> document.getElementById('jaffle_editor');
+editor.onPlay = () => strudel.play(entryToJs(editor.getContent()));
+editor.onStop = () => strudel.stop();
+// editor.onUpdate = (tuneYml) => graph.load(entryToBox(yamlToEntry(tuneYml))).draw();
 
 function loadTune(tuneName: string): void {
 	console.log(`Loading tune ${tuneName}...`);
@@ -51,13 +53,9 @@ function fillTunesList(): void {
 }
 
 strudel.init();
-editor.onPlay(() => strudel.play(entryToJs(editor.getContent())));
-editor.onStop(() => strudel.stop());
-editor.onUpdate((tuneYml) => graph.load(entryToBox(yamlToEntry(tuneYml))).draw());
 
 window.addEventListener('DOMContentLoaded', () => {
-	editor.build(getContainer());
-	graph.init(getContainer());
+	editor.build(<HTMLDivElement> document.getElementById('jaffle_editor'));
 	if (domSelectTune !== null) {
 		fillTunesList();
 		tunesPath = 'tunes/';

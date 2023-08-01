@@ -1,12 +1,14 @@
-import { Entry } from '../model';
+import { Box, Entry } from '../model';
+
 import AbstractEditor from './abstractEditor';
 import { EditorBar, Button, Tab } from './editorBar';
 import ErrorBar from './errorBar';
+import NodeEditor from './nodeEditor';
 import YamlEditor from './yamlEditor';
 
 type OnPlay = () => void;
 type OnStop = () => void;
-type OnUpdate = (text: string) => void
+type OnUpdate = (content: unknown) => void
 
 export default class Editor {
 	container: HTMLElement;
@@ -17,13 +19,19 @@ export default class Editor {
 
 	editors: { [key: string]: AbstractEditor };
 
-	_onPlay: OnPlay;
+	onPlay: OnPlay;
 
-	_onStop: OnStop;
+	onStop: OnStop;
 
-	_onUpdate: OnUpdate;
+	onUpdate: OnUpdate;
 
 	constructor() {
+		/* eslint-disable @typescript-eslint/no-empty-function */
+		this.onPlay = () => {};
+		this.onStop = () => {};
+		this.onUpdate = () => {};
+		/* eslint-enable @typescript-eslint/no-empty-function */
+
 		const tabs: Array<Tab> = [{
 			id: 'node',
 			label: 'Node',
@@ -38,22 +46,25 @@ export default class Editor {
 			id: 'play',
 			label: 'Play',
 			tooltip: 'Play/update tune (Ctrl-Enter)',
-			onClick: () => this._onPlay(),
+			onClick: () => this.onPlay(),
 		}, {
 			id: 'stop',
 			label: 'Stop',
 			tooltip: 'Stop tune (Ctrl-.)',
-			onClick: () => this._onStop(),
+			onClick: () => this.onStop(),
 		}];
 
-		this.editorBar = new EditorBar('Jaffle', tabs, buttons);
+		this.editorBar = new EditorBar('Jaffle', tabs, buttons, 'yaml');
 		this.errorBar = new ErrorBar();
 
 		this.editors = {
 			yaml: new YamlEditor({
-				onPlay: () => this._onPlay(),
-				onStop: () => this._onStop(),
-				onUpdate: (content: string) => this._onUpdate(content),
+				onPlay: () => this.onPlay(),
+				onStop: () => this.onStop(),
+				onUpdate: (content: string) => this.onUpdate(content),
+			}),
+			node: new NodeEditor({
+				onUpdate: (content: Box) => this.onUpdate(content),
 			}),
 		};
 	}
@@ -75,20 +86,7 @@ export default class Editor {
 	}
 
 	getContent(): Entry {
-		// return this.editors[this.editorBar.activeTabId].getContent();
-		return this.editors.yaml.getContent();
-	}
-
-	onPlay(onPlayFn: OnPlay) {
-		this._onPlay = onPlayFn;
-	}
-
-	onStop(onStopFn: OnStop) {
-		this._onStop = onStopFn;
-	}
-
-	onUpdate(onUpdateFn: OnUpdate) {
-		this._onUpdate = onUpdateFn;
+		return this.editors[this.editorBar.activeTabId].getContent();
 	}
 
 	static getStyle() {

@@ -11,10 +11,11 @@ import { Entry } from '../model';
 import entryToYaml from '../exporters/yamlExporter';
 import yamlToEntry from '../importers/yamlImporter';
 
-import { AbstractEditor, OnUpdate } from './abstractEditor';
+import AbstractEditor from './abstractEditor';
 
 type OnPlay = () => void;
 type OnStop = () => void;
+type OnUpdate = (content: string) => void;
 
 type YamlEditorConfig = {
 	onPlay: OnPlay,
@@ -39,7 +40,7 @@ class YamlEditor extends AbstractEditor {
 		highlightActiveLine(),
 		EditorView.updateListener.of((update) => {
 			if (update.docChanged) {
-				this.onUpdate(update.state.doc.toString());
+				this.config.onUpdate(update.state.doc.toString());
 			}
 		}),
 		keymap.of([
@@ -62,7 +63,7 @@ class YamlEditor extends AbstractEditor {
 	])();
 
 	constructor(config: YamlEditorConfig) {
-		super(config.onUpdate);
+		super();
 		this.config = config;
 	}
 
