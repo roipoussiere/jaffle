@@ -1,4 +1,4 @@
-import EditorBar from './editorBar';
+import { EditorBar, Button, Tab } from './editorBar';
 import ErrorBar from './errorBar';
 import YamlEditor from './yamlEditor';
 
@@ -22,7 +22,31 @@ export default class Editor {
 	_onUpdate: OnUpdate;
 
 	constructor() {
-		this.editorBar = new EditorBar();
+		const tabs: Array<Tab> = [{
+			id: 'node',
+			label: 'Node',
+			tooltip: 'Switch to node editor',
+			onClick: () => console.log('node tab clicked'),
+		}, {
+			id: 'yaml',
+			label: 'Yaml',
+			tooltip: 'Switch to yaml editor',
+			onClick: () => console.log('yaml tab clicked'),
+		}];
+
+		const buttons: Array<Button> = [{
+			id: 'play',
+			label: 'Play',
+			tooltip: 'Play/update tune (Ctrl-Enter)',
+			onClick: () => this._onPlay(),
+		}, {
+			id: 'stop',
+			label: 'Stop',
+			tooltip: 'Stop tune (Ctrl-.)',
+			onClick: () => this._onStop(),
+		}];
+
+		this.editorBar = new EditorBar('Jaffle', tabs, buttons);
 		this.errorBar = new ErrorBar();
 
 		this.yamlEditor = new YamlEditor();
@@ -32,35 +56,7 @@ export default class Editor {
 		this.dom = container;
 		this.dom.classList.add('jaffle-editor');
 
-		this.editorBar.addTab({
-			id: 'node',
-			label: 'Node',
-			tooltip: 'Switch to node editor',
-			onClick: () => console.log('node tab clicked'),
-		});
-		this.editorBar.addTab({
-			id: 'yaml',
-			label: 'Yaml',
-			tooltip: 'Switch to yaml editor',
-			onClick: () => console.log('yaml tab clicked'),
-		});
-
-		this.editorBar.addButton({
-			id: 'play',
-			label: 'Play',
-			tooltip: 'Play/update tune (Ctrl-Enter)',
-			onClick: this._onPlay,
-		});
-		this.editorBar.addButton({
-			id: 'stop',
-			label: 'Stop',
-			tooltip: 'Stop tune (Ctrl-.)',
-			onClick: this._onStop,
-		});
-
 		this.editorBar.build(container);
-		this.editorBar.setTitle('Jaffle');
-
 		this.errorBar.build(container);
 
 		this.yamlEditor.onPlay(this._onPlay);

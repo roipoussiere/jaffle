@@ -1,20 +1,20 @@
 type OnClick = () => void;
 
-type Button = {
+export type Button = {
 	id: string,
 	label: string,
 	tooltip: string,
 	onClick: OnClick,
 }
 
-type Tab = {
+export type Tab = {
 	id: string,
 	label: string,
 	tooltip: string,
 	onClick: OnClick,
 }
 
-export default class EditorBar {
+export class EditorBar {
 	dom: HTMLElement;
 
 	domTitle: HTMLParagraphElement;
@@ -23,17 +23,12 @@ export default class EditorBar {
 
 	tabs: Array<Tab>;
 
-	constructor() {
-		this.tabs = [];
-		this.buttons = [];
-	}
+	title: string;
 
-	addButton(button: Button) {
-		this.buttons.unshift(button);
-	}
-
-	addTab(tab: Tab) {
-		this.tabs.push(tab);
+	constructor(title: string, tabs: Array<Tab>, buttons: Array<Button>) {
+		this.title = title;
+		this.tabs = tabs;
+		this.buttons = buttons;
 	}
 
 	build(container: HTMLElement) {
@@ -48,12 +43,14 @@ export default class EditorBar {
 	}
 
 	setTitle(title: string): void {
+		this.title = title;
 		this.domTitle.innerText = title;
 	}
 
 	private buildTitle(): void {
 		this.domTitle = document.createElement('p');
 		this.domTitle.id = 'jaffle-title';
+		this.domTitle.innerText = this.title;
 
 		this.dom.appendChild(this.domTitle);
 	}
@@ -143,3 +140,5 @@ export default class EditorBar {
 		return style;
 	}
 }
+
+export default EditorBar;
