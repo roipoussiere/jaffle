@@ -73,6 +73,7 @@ class YamlEditor extends AbstractEditor {
 				extensions: this.extensions,
 				parent: domEditor,
 			});
+			this.getDom().style.setProperty('display', 'none', 'important');
 		}
 	}
 

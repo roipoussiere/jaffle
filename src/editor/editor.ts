@@ -1,4 +1,5 @@
 import { Box, Entry } from '../model';
+import entryToJs from '../exporters/jsExporter';
 
 import AbstractEditor from './abstractEditor';
 import { EditorBar, Button, Tab } from './editorBar';
@@ -123,6 +124,17 @@ export default class Editor {
 	getContent(): Entry {
 		this.content = this.editors[this.editorBar.activeTabId].getContent();
 		return this.content;
+	}
+
+	getRawContent(): unknown {
+		return this.editors[this.editorBar.activeTabId].getRawContent();
+	}
+
+	getJs(): string {
+		if (this.editorBar.activeTabId === 'js') {
+			return this.getRawContent() as string;
+		}
+		return entryToJs(this.getContent());
 	}
 
 	static getStyle() {

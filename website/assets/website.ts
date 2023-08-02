@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { entryToJs, Editor, yamlToEntry } from './jaffle';
+import { Editor, yamlToEntry } from './jaffle';
 import StrudelRepl from './strudelRepl';
 
 const TUNES = ['amen_sister', 'arpoon', 'barry_harris', 'bass_fuge', 'bell_dub', 'blippy_rhodes',
@@ -18,10 +18,13 @@ const domSelectTune = <HTMLSelectElement> document.getElementById('select_tune')
 
 const editor = new Editor();
 const strudel = new StrudelRepl(
-	(error) => editor.errorBar.setError(error.message),
+	(error) => {
+		console.error(error);
+		editor.errorBar.setError(error.message);
+	},
 	() => editor.errorBar.setError(),
 );
-editor.onPlay = () => strudel.play(entryToJs(editor.getContent()));
+editor.onPlay = () => strudel.play(editor.getJs());
 editor.onStop = () => strudel.stop();
 // editor.onUpdate = (tuneYml) => graph.load(entryToBox(yamlToEntry(tuneYml))).draw();
 

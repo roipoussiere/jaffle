@@ -111,7 +111,7 @@ export function expandEntry(entry: Entry): Entry {
  * @param entry The Jaffle function to convert
  * @returns a string of JavaScript code which calls the function
  */
-export function entryToJs(_entry: Entry): string {
+export function childEntryToJs(_entry: Entry): string {
 	const entry = expandEntry(_entry);
 	const entryType = entryToEntryType(entry);
 
@@ -120,7 +120,7 @@ export function entryToJs(_entry: Entry): string {
 	}
 
 	if (entryType === EntryType.List) {
-		return `[${entry.children.map((item) => entryToJs(item)).join(', ')}]`;
+		return `[${entry.children.map((item) => childEntryToJs(item)).join(', ')}]`;
 	}
 
 	const funcName = entryToFuncName(entry);
@@ -213,13 +213,15 @@ export function paramsToJsGroups(params: Array<Entry>, serializSuffix?: string):
 	return groups
 		.map((group, id) => (group
 			.map((param) => (
-				[id, -2].includes(serializedParamId) ? serializedEntryToJs(param) : entryToJs(param)
+				[id, -2].includes(serializedParamId)
+					? serializedEntryToJs(param)
+					: childEntryToJs(param)
 			))
 			.join('.')
 		));
 }
 
-export function rootEntryToJs(entry: Entry): string {
+export function entryToJs(entry: Entry): string {
 	let outputJs = '';
 
 	if (entry.children.length === 0) {
@@ -233,4 +235,4 @@ export function rootEntryToJs(entry: Entry): string {
 	return outputJs;
 }
 
-export default rootEntryToJs;
+export default entryToJs;
