@@ -85,7 +85,7 @@ export default class Editor {
 			}),
 			node: new NodeEditor({
 				onUpdate: (content: Box) => this.onUpdate(content),
-				width: 800,
+				width: 790,
 				height: 365,
 			}),
 			js: new JsEditor({

@@ -95,6 +95,7 @@ class NodeEditor extends AbstractEditor {
 		this.domContainer.style.position = 'absolute';
 		this.domContainer.style.top = '35px';
 		this.domContainer.style.left = '10px';
+		this.domContainer.style.width = `${this.config.width}px`;
 		this.domContainer.style.height = `${this.config.height}px`;
 		this.domContainer.style.overflow = 'scroll';
 		domEditor.appendChild(this.domContainer);
@@ -143,7 +144,12 @@ class NodeEditor extends AbstractEditor {
 	public setGraphGeometry() {
 		let minNodeY = Infinity;
 		let maxNodeY = -Infinity;
+		let svgWidth = 0;
+
 		this.tree.each((node: FuncNode) => {
+			if (node.y + node.data.width * this.charWidth > svgWidth) {
+				svgWidth = node.y + (node.data.width - this.config.hBoxGap) * this.charWidth;
+			}
 			if (node.x > maxNodeY) {
 				maxNodeY = node.x;
 			}
@@ -152,7 +158,7 @@ class NodeEditor extends AbstractEditor {
 			}
 		});
 
-		this.svgWidth = this.config.width - 10;
+		this.svgWidth = svgWidth;
 		this.svgHeight = maxNodeY - minNodeY + this.charHeight * 2;
 		this.offsetX = ((<FuncNode> this.tree).data.width + this.config.hBoxGap) * this.charWidth;
 		this.offsetY = minNodeY - this.charHeight;
