@@ -2,4 +2,4 @@
 title: "Editor"
 ---
 
-{{< jaffle_editor "large" >}}
+{{< jaffle_editor "jaffle-fs" >}}

@@ -95,12 +95,12 @@ a:hover {
 	box-shadow: 0 0 10px black;
 }
 
-#jaffle_editor.large {
-	height: 90vh;
-	width: 100vw;
-	position: absolute;
-	top: 60px;
+.jaffle-fs {
+	position: absolute !important;
+	top: 0;
 	left: 0;
+	height: 100vh !important;
+	width: 100vw;
 	margin: 0;
 }
 
