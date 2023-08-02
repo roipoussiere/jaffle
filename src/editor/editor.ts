@@ -5,6 +5,7 @@ import { EditorBar, Button, Tab } from './editorBar';
 import ErrorBar from './errorBar';
 import NodeEditor from './nodeEditor';
 import YamlEditor from './yamlEditor';
+import JsEditor from './jsEditor';
 
 type OnPlay = () => void;
 type OnStop = () => void;
@@ -18,6 +19,8 @@ export default class Editor {
 	errorBar: ErrorBar;
 
 	editors: { [key: string]: AbstractEditor };
+
+	content: Entry;
 
 	onPlay: OnPlay;
 
@@ -40,6 +43,10 @@ export default class Editor {
 			id: 'yaml',
 			label: 'Yaml',
 			tooltip: 'Switch to yaml editor',
+		}, {
+			id: 'js',
+			label: 'JS',
+			tooltip: 'Switch to JavaScript editor',
 		}];
 
 		const buttons: Array<Button> = [{
@@ -54,10 +61,15 @@ export default class Editor {
 			onClick: () => this.onStop(),
 		}];
 
-		this.editorBar = new EditorBar('Jaffle', tabs, buttons, 'yaml');
+		this.editorBar = new EditorBar('Jaffle', tabs, buttons, 'node');
 		this.editorBar.onTabSwitch = (oldTabId: string, newTabId: string) => {
-			const content = this.editors[oldTabId].getContent();
-			this.editors[newTabId].setContent(content);
+			try {
+				this.content = this.editors[oldTabId].getContent();
+			} catch {
+				// eslint-disable-next-line no-console
+				console.warn('Importing JS code is not yet implemented, loading last content.');
+			}
+			this.editors[newTabId].setContent(this.content);
 
 			this.editors[oldTabId].getDom().style.setProperty('display', 'none', 'important');
 			this.editors[newTabId].getDom().style.display = 'block';
@@ -73,6 +85,11 @@ export default class Editor {
 			node: new NodeEditor({
 				onUpdate: (content: Box) => this.onUpdate(content),
 			}),
+			js: new JsEditor({
+				onPlay: () => this.onPlay(),
+				onStop: () => this.onStop(),
+				onUpdate: (content: string) => this.onUpdate(content),
+			}),
 		};
 	}
 
@@ -87,6 +104,7 @@ export default class Editor {
 		this.editorBar.build(container);
 		this.errorBar.build(container);
 		Object.values(this.editors).forEach((editor) => editor.build(container));
+		this.getActiveEditor().getDom().style.display = 'block';
 		// this.getActiveEditor().setContent();
 
 		document.adoptedStyleSheets = [
@@ -99,10 +117,12 @@ export default class Editor {
 
 	setContent(content: Entry): void {
 		this.editors[this.editorBar.activeTabId].setContent(content);
+		this.content = content;
 	}
 
 	getContent(): Entry {
-		return this.editors[this.editorBar.activeTabId].getContent();
+		this.content = this.editors[this.editorBar.activeTabId].getContent();
+		return this.content;
 	}
 
 	static getStyle() {
