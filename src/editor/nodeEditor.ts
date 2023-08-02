@@ -12,13 +12,27 @@ type Coordinates = [number, number];
 type FuncNode = d3.id<Box> & {
 	x: number,
 	y: number,
-}
+};
 
-type OnUpdate = (rawContent: Box) => void
+type OnUpdate = (rawContent: Box) => void;
 
 type NodeEditorConfig = {
 	onUpdate: OnUpdate,
-}
+	width: number,
+	height: number,
+	fontSize: number,
+	hBoxGap: number,
+	vBoxGap: number,
+};
+
+type NodeEditorPartialConfig = {
+	onUpdate?: OnUpdate,
+	width?: number,
+	height?: number,
+	fontSize?: number,
+	hBoxGap?: number,
+	vBoxGap?: number,
+};
 
 const BOX_NAME_COLORS = {
 	[EntryType.Function]: 'black',
@@ -42,29 +56,37 @@ class NodeEditor extends AbstractEditor {
 
 	domSvg: SVGElement;
 
-	width = 800;
+	svgWidth: number;
 
-	height: number;
+	svgHeight: number;
 
 	offsetX: number;
 
 	offsetY: number;
 
-	fontSize = 14;
-
-	boxGap = 3;
-
-	charWidth = this.fontSize * 0.6;
-
-	charHeight = this.fontSize * 1.4;
-
 	svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
 
 	tree: FuncNode;
 
-	constructor(config: NodeEditorConfig) {
+	constructor(config: NodeEditorPartialConfig) {
 		super();
-		this.config = config;
+		this.config = {
+			// eslint-disable-next-line @typescript-eslint/no-empty-function
+			onUpdate: config.onUpdate || (() => {}),
+			width: config.width || 800,
+			height: config.height || 600,
+			fontSize: config.fontSize || 16,
+			hBoxGap: config.hBoxGap || 3,
+			vBoxGap: config.vBoxGap || 1,
+		};
+	}
+
+	get charWidth(): number {
+		return this.config.fontSize * 0.6;
+	}
+
+	get charHeight(): number {
+		return this.config.fontSize * 1.4;
 	}
 
 	build(domEditor: HTMLElement) {
@@ -101,7 +123,7 @@ class NodeEditor extends AbstractEditor {
 	public initTree(): NodeEditor {
 		const layout = flextree({})
 			.nodeSize((n: FuncNode) => (
-				[this.charHeight, (n.data.width + this.boxGap) * this.charWidth]
+				[this.charHeight, (n.data.width + this.config.hBoxGap) * this.charWidth]
 			))
 			.spacing((a: FuncNode, b: FuncNode) => {
 				const bothAreValue = a.data.type === EntryType.Value
@@ -128,8 +150,9 @@ class NodeEditor extends AbstractEditor {
 			}
 		});
 
-		this.height = maxNodeY - minNodeY + this.charHeight * 2;
-		this.offsetX = ((<FuncNode> this.tree).data.width + this.boxGap) * this.charWidth;
+		this.svgWidth = this.config.width - 10;
+		this.svgHeight = maxNodeY - minNodeY + this.charHeight * 2;
+		this.offsetX = ((<FuncNode> this.tree).data.width + this.config.hBoxGap) * this.charWidth;
 		this.offsetY = minNodeY - this.charHeight;
 	}
 
@@ -144,10 +167,10 @@ class NodeEditor extends AbstractEditor {
 	private drawSvg() {
 		this.svg = d3.create('svg')
 			.attr('class', 'jaffle-graph')
-			.attr('width', this.width)
-			.attr('height', this.height)
-			.attr('viewBox', [this.offsetX, this.offsetY, this.width, this.height])
-			.style('font', `${this.fontSize}px mono`);
+			.attr('width', this.svgWidth)
+			.attr('height', this.svgHeight)
+			.attr('viewBox', [this.offsetX, this.offsetY, this.svgWidth, this.svgHeight])
+			.style('font', `${this.config.fontSize}px mono`);
 
 		this.drawLinks();
 		this.drawGroupArea();
@@ -317,7 +340,7 @@ class NodeEditor extends AbstractEditor {
 
 			.style('width', '100%')
 			.style('padding', '0')
-			.style('font-size', `${this.fontSize}px`)
+			.style('font-size', `${this.config.fontSize}px`)
 			.style('font-family', 'monospace')
 			.style('background-color', '#aaa')
 			.style('color', isValueSelected
