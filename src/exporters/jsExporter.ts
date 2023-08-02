@@ -3,12 +3,16 @@ import { ExporterError } from '../errors';
 import { Entry, EntryType } from '../model';
 import { entryToEntryType, entryToFuncName } from '../utils';
 
+function indent(indentLevel: number): string {
+	return '  '.repeat(indentLevel);
+}
+
 /**
  * Serialise an object to JSON.
  * @param entry the object to serialize
  * @returns a string reprensenting the object in JSON
  */
-export function serializedEntryToJs(entry: Entry): string {
+export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 	if (entry.children.length === 0) {
 		let value: string;
 		if (entry.rawValue === '') {
@@ -22,7 +26,9 @@ export function serializedEntryToJs(entry: Entry): string {
 		return entry.rawName === '' ? value : `{'${entry.rawName}': ${value}}`;
 	}
 
-	const strList = `[${entry.children.map((child) => serializedEntryToJs(child)).join(', ')}]`;
+	const strList = `[${entry.children.map(
+		(child) => serializedEntryToJs(child, iLvl + 1),
+	).join(`,\n${indent(iLvl)}`)}]`;
 	return entry.rawName === '' ? strList : `{'${entry.rawName}': ${strList}}`;
 }
 
@@ -111,7 +117,7 @@ export function expandEntry(entry: Entry): Entry {
  * @param entry The Jaffle function to convert
  * @returns a string of JavaScript code which calls the function
  */
-export function childEntryToJs(_entry: Entry): string {
+export function childEntryToJs(_entry: Entry, iLvl = 0): string {
 	const entry = expandEntry(_entry);
 	const entryType = entryToEntryType(entry);
 
@@ -120,7 +126,8 @@ export function childEntryToJs(_entry: Entry): string {
 	}
 
 	if (entryType === EntryType.List) {
-		return `[${entry.children.map((item) => childEntryToJs(item)).join(', ')}]`;
+		const listJs = entry.children.map((item) => childEntryToJs(item, iLvl + 1));
+		return `[${listJs.join(`,\n${indent(iLvl)}`)}]`;
 	}
 
 	const funcName = entryToFuncName(entry);
@@ -131,7 +138,7 @@ export function childEntryToJs(_entry: Entry): string {
 
 	const serializeSuffix = entry.rawName.split(c.SERIALIZE_FUNC_SUFFIX)[1];
 	// eslint-disable-next-line no-use-before-define
-	const jsGroups = paramsToJsGroups(entry.children, serializeSuffix);
+	const jsGroups = paramsToJsGroups(entry.children, serializeSuffix, iLvl + 1);
 
 	if (entryType === EntryType.ConstantDef) {
 		return `const ${c.VAR_NAME_PREFIX}${funcName} = ${jsGroups[0]}`;
@@ -141,7 +148,8 @@ export function childEntryToJs(_entry: Entry): string {
 		return funcName[0].toLowerCase() + funcName.substring(1);
 	}
 
-	return `${funcName}(${jsGroups.join(', ')})`;
+	const lb = entry.children.length > 1 ? `\n${indent(iLvl)}` : '';
+	return `${funcName}(${lb}${jsGroups.join(`,\n${indent(iLvl)}`)})`;
 }
 
 /**
@@ -191,18 +199,19 @@ export function groupFuncParams(params: Array<Entry>, serializedParamId = -1): A
 /**
  * convert Jaffle function parameters into several groups, converted into Javascript code.
  * @param params a list of Jaffle function parameters
- * @param serializSuffix the serialization suffix, coming after the `^` sign,
+ * @param serializeSuffix the serialization suffix, coming after the `^` sign,
  * which can be undefined, an empty string, or a string representing the parameter id
  * @returns a list of strings of Javascript code, each for one group, which list their parameters.
  */
-export function paramsToJsGroups(params: Array<Entry>, serializSuffix?: string): Array<string> {
+export function
+paramsToJsGroups(params: Array<Entry>, serializeSuffix?: string, iLvl = 0): Array<string> {
 	if (params.length === 0) {
 		return [];
 	}
 
 	let serializedParamId = -1;
-	if (serializSuffix !== undefined) {
-		serializedParamId = serializSuffix === '' ? -2 : parseInt(serializSuffix, 10) - 1;
+	if (serializeSuffix !== undefined) {
+		serializedParamId = serializeSuffix === '' ? -2 : parseInt(serializeSuffix, 10) - 1;
 	}
 
 	const groups = groupFuncParams(params, serializedParamId);
@@ -214,10 +223,10 @@ export function paramsToJsGroups(params: Array<Entry>, serializSuffix?: string):
 		.map((group, id) => (group
 			.map((param) => (
 				[id, -2].includes(serializedParamId)
-					? serializedEntryToJs(param)
-					: childEntryToJs(param)
+					? serializedEntryToJs(param, iLvl + 1)
+					: childEntryToJs(param, iLvl + 1)
 			))
-			.join('.')
+			.join(`\n${indent(iLvl)}.`)
 		));
 }
 

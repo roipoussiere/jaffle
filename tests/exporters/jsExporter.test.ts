@@ -119,10 +119,10 @@ describe('Testing JE.serializedEntryToJs()', () => {
 		expect(JE.serializedEntryToJs(strValEntry)).toBe("'foo'");
 		expect(JE.serializedEntryToJs(numberValEntry)).toBe('42');
 		expect(JE.serializedEntryToJs(miniFuncEntry)).toBe("'_bar'");
-		expect(JE.serializedEntryToJs(listEntry)).toBe("['foo', 42]");
+		expect(JE.serializedEntryToJs(listEntry)).toBe("['foo',\n42]");
 		expect(JE.serializedEntryToJs(mainFuncEntry)).toBe("{'a': null}");
 		expect(JE.serializedEntryToJs(mainFuncParamEntry)).toBe("{'b': 42}");
-		expect(JE.serializedEntryToJs(mainFuncParamsEntry)).toBe("{'c': ['foo', 42]}");
+		expect(JE.serializedEntryToJs(mainFuncParamsEntry)).toBe("{'c': ['foo',\n42]}");
 	});
 });
 
@@ -166,13 +166,13 @@ describe('Testing childEntryToJs()', () => {
 		expect(JE.childEntryToJs(numberValEntry)).toBe('42');
 		expect(JE.childEntryToJs(miniFuncEntry)).toBe("mini('bar')");
 		expect(JE.childEntryToJs(exprFuncEntry)).toBe('_baz');
-		expect(JE.childEntryToJs(listEntry)).toBe("['foo', 42]");
+		expect(JE.childEntryToJs(listEntry)).toBe("['foo',\n42]");
 		expect(JE.childEntryToJs(mainFuncEntry)).toBe('a()');
-		expect(JE.childEntryToJs(mainFuncParamsEntry)).toBe("c('foo', 42)");
-		expect(JE.childEntryToJs(parentFuncEntry)).toBe("g(c('foo', 42))");
-		expect(JE.childEntryToJs(chainFuncParamsEntry)).toBe('f(a().d())');
+		expect(JE.childEntryToJs(mainFuncParamsEntry)).toBe("c(\n'foo',\n42)");
+		expect(JE.childEntryToJs(parentFuncEntry)).toBe("g(c(\n    'foo',\n    42))");
+		expect(JE.childEntryToJs(chainFuncParamsEntry)).toBe('f(\na()\n  .d())');
 		expect(JE.childEntryToJs(objectEntry)).toBe('h');
-		expect(JE.childEntryToJs(serializedFuncEntry)).toBe("a('_bar', {'.d': null})");
+		expect(JE.childEntryToJs(serializedFuncEntry)).toBe("a(\n'_bar',\n{'.d': null})");
 	});
 });
 
@@ -242,17 +242,17 @@ describe('Testing paramsToJsGroups()', () => {
 		expect(JE.paramsToJsGroups([mainFuncEntry])).toEqual(['a()']);
 		expect(JE.paramsToJsGroups([mainFuncParamEntry])).toEqual(['b(42)']);
 		expect(JE.paramsToJsGroups([mainFuncEntry, strValEntry])).toEqual(['a()', "'foo'"]);
-		expect(JE.paramsToJsGroups([mainFuncParamsEntry])).toEqual(["c('foo', 42)"]);
-		expect(JE.paramsToJsGroups([mainFuncEntry, chainedFuncEntry])).toEqual(['a().d()']);
+		expect(JE.paramsToJsGroups([mainFuncParamsEntry])).toEqual(["c(\n  'foo',\n  42)"]);
+		expect(JE.paramsToJsGroups([mainFuncEntry, chainedFuncEntry])).toEqual(['a()\n.d()']);
 		expect(JE.paramsToJsGroups([mainFuncEntry, chainedFuncEntry, numberValEntry]))
-			.toEqual(['a().d()', '42']);
+			.toEqual(['a()\n.d()', '42']);
 		expect(JE.paramsToJsGroups([mainFuncEntry, chainedFuncEntry, chainedFuncParamsEntry]))
-			.toEqual(["a().d().e('foo', 42)"]);
+			.toEqual(["a()\n.d()\n.e(\n  'foo',\n  42)"]);
 		expect(JE.paramsToJsGroups([mainFuncEntry, chainedFuncEntry,
 			mainFuncParamsEntry, chainedFuncParamsEntry]))
-			.toEqual(['a().d()', "c('foo', 42).e('foo', 42)"]);
-		expect(JE.paramsToJsGroups([parentFuncEntry])).toEqual(["g(c('foo', 42))"]);
+			.toEqual(['a()\n.d()', "c(\n  'foo',\n  42)\n.e(\n  'foo',\n  42)"]);
+		expect(JE.paramsToJsGroups([parentFuncEntry])).toEqual(["g(c(\n      'foo',\n      42))"]);
 		expect(JE.paramsToJsGroups([mainFuncEntry, objectEntry])).toEqual(['a()', 'h']);
-		expect(JE.paramsToJsGroups([mainFuncEntry, chainedObjectEntry])).toEqual(['a().i']);
+		expect(JE.paramsToJsGroups([mainFuncEntry, chainedObjectEntry])).toEqual(['a()\n.i']);
 	});
 });
