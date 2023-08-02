@@ -4,25 +4,34 @@ import * as YE from '../../src/exporters/yamlExporter';
 import { Entry } from '../../src/model';
 
 describe('Testing YE.boxToYaml()', () => {
-	test('function with literal values are correctly converted', () => {
+	test('non-root entry is converted to an empty yaml document', () => {
 		const input: Entry = {
-			rawName: 'a',
-			rawValue: 'b',
+			rawName: '',
+			rawValue: 'foo',
 			children: [],
 		};
-		expect(YE.entryToYaml(input)).toBe('a: b\n');
+		expect(YE.entryToYaml(input)).toBe('');
 	});
 
-	test('function with params are correctly converted', () => {
+	test('root entry with value returns a yaml doc containing the value', () => {
 		const input: Entry = {
-			rawName: 'a',
+			rawName: 'root',
+			rawValue: 'foo',
+			children: [],
+		};
+		expect(YE.entryToYaml(input)).toBe('foo\n');
+	});
+
+	test('root entry with params returns a yaml doc containing the params', () => {
+		const input: Entry = {
+			rawName: 'root',
 			rawValue: '',
 			children: [{
-				rawName: 'b',
-				rawValue: 'c',
+				rawName: 'foo',
+				rawValue: 'bar',
 				children: [],
 			}],
 		};
-		expect(YE.entryToYaml(input)).toBe('a:\n  - b: c\n');
+		expect(YE.entryToYaml(input)).toBe('- foo: bar\n');
 	});
 });
