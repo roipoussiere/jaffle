@@ -48,8 +48,8 @@ export class EditorBar {
 
 		this.buildTitle();
 		this.tabs.forEach((tab) => this.buildTab(tab));
+		this.buildMenuButton();
 		this.buttons.reverse().forEach((button) => this.buildButton(button));
-
 		domContainer.appendChild(this.dom);
 	}
 
@@ -94,6 +94,48 @@ export class EditorBar {
 		this.dom.appendChild(domTab);
 	}
 
+	private buildMenuButton(): void {
+		let timer: NodeJS.Timeout;
+
+		const domMenu = document.createElement('div');
+		domMenu.id = 'jaffle-menu';
+		domMenu.addEventListener('mouseover', () => {
+			clearTimeout(timer);
+		});
+		domMenu.addEventListener('mouseout', () => {
+			timer = setTimeout(() => {
+				domMenu.style.display = 'none';
+			}, 200);
+		});
+
+		const menuItem1 = document.createElement('p');
+		menuItem1.className = 'jaffle-menu-item';
+		menuItem1.innerText = 'Visit Jaffle website';
+		domMenu.appendChild(menuItem1);
+
+		const menuItem2 = document.createElement('p');
+		menuItem2.className = 'jaffle-menu-item';
+		menuItem2.innerText = 'Load examples';
+		domMenu.appendChild(menuItem2);
+
+		const domButton = document.createElement('button');
+		domButton.id = 'jaffle-menu-btn';
+		domButton.className = 'jaffle-btn';
+		domButton.innerText = '≡';
+		domButton.addEventListener('mouseover', () => {
+			clearTimeout(timer);
+			domMenu.style.display = 'block';
+		});
+		domButton.addEventListener('mouseout', () => {
+			timer = setTimeout(() => {
+				domMenu.style.display = 'none';
+			}, 200);
+		});
+
+		this.dom.appendChild(domButton);
+		this.dom.appendChild(domMenu);
+	}
+
 	private buildButton(button: Button): void {
 		const domButton = document.createElement('button');
 
@@ -127,6 +169,26 @@ export class EditorBar {
 				margin-top: 9px;
 				font-weight: bold;
 				z-index: 0;
+			}
+
+			#jaffle-menu-btn {
+				font-size: 22px;
+				width: 1.8em;
+			}
+
+			#jaffle-menu {
+				display: none;
+				position: absolute;
+				right: 0px;
+				top: 35px;
+				background-color: darkseagreen;
+			}
+
+			.jaffle-menu-item {
+				margin: 0;
+				padding: 5px;
+				text-align: right;
+				border-top: 3px solid #002b36;
 			}
 
 			.jaffle-tab {
