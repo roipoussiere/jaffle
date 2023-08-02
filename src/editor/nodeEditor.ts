@@ -93,8 +93,10 @@ class NodeEditor extends AbstractEditor {
 		this.domContainer = document.createElement('div');
 		this.domContainer.classList.add('jaffle-graph-container');
 		this.domContainer.style.position = 'absolute';
-		this.domContainer.style.top = '30px';
-		this.domContainer.style.left = '5px';
+		this.domContainer.style.top = '35px';
+		this.domContainer.style.left = '10px';
+		this.domContainer.style.height = `${this.config.height}px`;
+		this.domContainer.style.overflow = 'scroll';
 		domEditor.appendChild(this.domContainer);
 	}
 
