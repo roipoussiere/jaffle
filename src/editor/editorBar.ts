@@ -1,5 +1,6 @@
 type OnButtonClick = () => void;
 type OnTabSwitch = (oldTabId: string, newTabId: string) => void;
+type OnExampleSelected = (example: string) => void;
 
 export type Tab = {
 	id: string,
@@ -47,17 +48,25 @@ export class EditorBar {
 
 	menuTimer: NodeJS.Timeout;
 
+	examples: Array<string>;
+
+	onExampleSelected: OnExampleSelected;
+
 	constructor(
 		title: string,
 		tabs: Array<Tab>,
 		buttons: Array<Button>,
 		menu: Array<MenuItem>,
+		examples: Array<string>,
+		onExampleSelected: OnExampleSelected,
 		activeTabId?: string,
 	) {
 		this.title = title;
 		this.tabs = tabs;
 		this.buttons = buttons;
 		this.menu = menu;
+		this.examples = examples;
+		this.onExampleSelected = onExampleSelected;
 		this.activeTabId = activeTabId || this.tabs[0].id;
 
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -73,7 +82,9 @@ export class EditorBar {
 		this.tabs.forEach((tab) => this.buildTab(tab));
 		this.buildMenu();
 		this.buttons.reverse().forEach((button) => this.buildButton(button));
-		this.buildExamplesMenu();
+		if (this.examples.length > 1) {
+			this.buildExamplesMenu();
+		}
 		domContainer.appendChild(this.dom);
 	}
 
@@ -183,14 +194,11 @@ export class EditorBar {
 	}
 
 	private buildExamplesMenu(): void {
-		const tunes = ['Amen Sister', 'Arpoon', 'Barry Harris', 'Bass Fuge',
-			'Bell Dub', 'Blippy Rhodes', 'Bridge Is Over'];
-
 		this.domExamplesMenu = document.createElement('div');
 		this.domExamplesMenu.id = 'jaffle-examples-menu';
 
 		// const domButtons: Array<HTMLButtonElement> = [];
-		tunes.forEach((tune) => {
+		this.examples.forEach((tune) => {
 			const domButton = document.createElement('p');
 			domButton.className = 'jaffle-example-btn';
 			domButton.innerText = tune;
@@ -203,6 +211,9 @@ export class EditorBar {
 					this.domExamplesMenu.style.display = 'none';
 					this.domMenu.style.display = 'none';
 				}, 200);
+			});
+			domButton.addEventListener('click', () => {
+				this.onExampleSelected(tune);
 			});
 
 			this.domExamplesMenu.appendChild(domButton);
@@ -309,6 +320,7 @@ export class EditorBar {
 				background-color: #002b36;
 				padding: 3px;
 				padding-bottom: 0;
+				padding-left: 0;
 			}
 
 			.jaffle-example-btn {

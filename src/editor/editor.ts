@@ -1,5 +1,6 @@
 import { Box, Entry } from '../model';
 import entryToJs from '../exporters/jsExporter';
+import tunes from '../tunes/tuneIndex';
 
 import AbstractEditor from './abstractEditor';
 import { EditorBar, Button, Tab, MenuItem } from './editorBar';
@@ -7,6 +8,7 @@ import ErrorBar from './errorBar';
 import NodeEditor from './nodeEditor';
 import YamlEditor from './yamlEditor';
 import JsEditor from './jsEditor';
+import yamlToEntry from '../importers/yamlImporter';
 
 type OnPlay = () => void;
 type OnStop = () => void;
@@ -68,7 +70,16 @@ export default class Editor {
 			onClick: () => { window.location.href = '/jaffle'; },
 		}];
 
-		this.editorBar = new EditorBar('Jaffle', tabs, buttons, menu, 'node');
+		this.editorBar = new EditorBar(
+			'Jaffle',
+			tabs,
+			buttons,
+			menu,
+			Object.keys(tunes),
+			(example) => this.setContent(yamlToEntry(tunes[example])),
+			'node',
+		);
+
 		this.editorBar.onTabSwitch = (oldTabId: string, newTabId: string) => {
 			try {
 				this.content = this.editors[oldTabId].getContent();
