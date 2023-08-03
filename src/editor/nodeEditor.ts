@@ -18,20 +18,6 @@ type OnUpdate = (rawContent: Box) => void;
 
 type NodeEditorConfig = {
 	onUpdate: OnUpdate,
-	width: number,
-	height: number,
-	fontSize: number,
-	hBoxGap: number,
-	vBoxGap: number,
-};
-
-type NodeEditorPartialConfig = {
-	onUpdate?: OnUpdate,
-	width?: number,
-	height?: number,
-	fontSize?: number,
-	hBoxGap?: number,
-	vBoxGap?: number,
 };
 
 const BOX_NAME_COLORS = {
@@ -68,37 +54,44 @@ class NodeEditor extends AbstractEditor {
 
 	tree: FuncNode;
 
-	constructor(config: NodeEditorPartialConfig) {
+	constructor(config: NodeEditorConfig) {
 		super();
 		this.config = {
 			// eslint-disable-next-line @typescript-eslint/no-empty-function
 			onUpdate: config.onUpdate || (() => {}),
-			width: config.width || 800,
-			height: config.height || 600,
-			fontSize: config.fontSize || 16,
-			hBoxGap: config.hBoxGap || 3,
-			vBoxGap: config.vBoxGap || 1,
+		};
+
+		this.uiConfig = {
+			width: 800,
+			height: 600,
+			fontSize: 16,
+			hBoxGap: 3,
+			vBoxGap: 1,
 		};
 	}
 
 	get charWidth(): number {
-		return this.config.fontSize * 0.6;
+		return this.uiConfig.fontSize * 0.6;
 	}
 
 	get charHeight(): number {
-		return this.config.fontSize * 1.4;
+		return this.uiConfig.fontSize * 1.4;
 	}
 
-	build(domEditor: HTMLElement) {
+	build() {
+		const width = (this.uiConfig.width === 0 ? window.innerWidth : this.uiConfig.width) - 10;
+		const height = (this.uiConfig.height === 0
+			? window.innerHeight : this.uiConfig.height) - 35;
+
 		this.domContainer = document.createElement('div');
 		this.domContainer.classList.add('jaffle-graph-container');
 		this.domContainer.style.position = 'absolute';
 		this.domContainer.style.top = '35px';
 		this.domContainer.style.left = '10px';
-		this.domContainer.style.width = `${this.config.width}px`;
-		this.domContainer.style.height = `${this.config.height}px`;
+		this.domContainer.style.width = `${width}px`;
+		this.domContainer.style.height = `${height}px`;
 		this.domContainer.style.overflow = 'scroll';
-		domEditor.appendChild(this.domContainer);
+		this.domEditor.appendChild(this.domContainer);
 	}
 
 	getDom(): HTMLElement {
@@ -126,14 +119,14 @@ class NodeEditor extends AbstractEditor {
 	public initTree(): NodeEditor {
 		const layout = flextree({})
 			.nodeSize((n: FuncNode) => (
-				[this.charHeight, (n.data.width + this.config.hBoxGap) * this.charWidth]
+				[this.charHeight, (n.data.width + this.uiConfig.hBoxGap) * this.charWidth]
 			))
 			.spacing((a: FuncNode, b: FuncNode) => {
 				const bothAreValue = a.data.type === EntryType.Value
 					&& b.data.type === EntryType.Value;
 				const shouldStack = a.parent === b.parent
 					&& (bothAreValue || b.data.type === EntryType.ChainedFunction);
-				return shouldStack ? 0 : 0.5 * this.charHeight;
+				return shouldStack ? 0 : this.uiConfig.vBoxGap * this.charHeight;
 			});
 
 		layout(this.tree);
@@ -148,7 +141,7 @@ class NodeEditor extends AbstractEditor {
 
 		this.tree.each((node: FuncNode) => {
 			if (node.y + node.data.width * this.charWidth > svgWidth) {
-				svgWidth = node.y + (node.data.width - this.config.hBoxGap) * this.charWidth;
+				svgWidth = node.y + (node.data.width - this.uiConfig.hBoxGap) * this.charWidth;
 			}
 			if (node.x > maxNodeY) {
 				maxNodeY = node.x;
@@ -160,7 +153,7 @@ class NodeEditor extends AbstractEditor {
 
 		this.svgWidth = svgWidth;
 		this.svgHeight = maxNodeY - minNodeY + this.charHeight * 2;
-		this.offsetX = ((<FuncNode> this.tree).data.width + this.config.hBoxGap) * this.charWidth;
+		this.offsetX = ((<FuncNode> this.tree).data.width + this.uiConfig.hBoxGap) * this.charWidth;
 		this.offsetY = minNodeY - this.charHeight;
 	}
 
@@ -178,7 +171,7 @@ class NodeEditor extends AbstractEditor {
 			.attr('width', this.svgWidth)
 			.attr('height', this.svgHeight)
 			.attr('viewBox', [this.offsetX, this.offsetY, this.svgWidth, this.svgHeight])
-			.style('font', `${this.config.fontSize}px mono`);
+			.style('font', `${this.uiConfig.fontSize}px mono`);
 
 		this.drawLinks();
 		this.drawGroupArea();
@@ -324,7 +317,7 @@ class NodeEditor extends AbstractEditor {
 			.attr('height', this.charHeight)
 
 			.append('xhtml:input')
-			.attr('id', 'jaffle_ne_input')
+			.attr('id', 'jaffle-ne-input')
 			.attr('type', 'text')
 			.attr('value', isValueSelected ? focusedNode.data.rawValue : focusedNode.data.rawName)
 
@@ -348,7 +341,7 @@ class NodeEditor extends AbstractEditor {
 
 			.style('width', '100%')
 			.style('padding', '0')
-			.style('font-size', `${this.config.fontSize}px`)
+			.style('font-size', `${this.uiConfig.fontSize}px`)
 			.style('font-family', 'monospace')
 			.style('background-color', '#aaa')
 			.style('color', isValueSelected
@@ -360,7 +353,7 @@ class NodeEditor extends AbstractEditor {
 			.style('border', 'none')
 			.style('border-radius', '3px');
 
-		const domInput = <HTMLInputElement>document.getElementById('jaffle_ne_input');
+		const domInput = <HTMLInputElement>document.getElementById('jaffle-ne-input');
 		domInput.focus();
 		domInput.selectionStart = 9999;
 	}

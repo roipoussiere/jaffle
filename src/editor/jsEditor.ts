@@ -67,7 +67,7 @@ class JsEditor extends AbstractEditor {
 		this.config = config;
 	}
 
-	build(domEditor: HTMLElement) {
+	load(domEditor: HTMLElement) {
 		if (this.editorView === undefined) {
 			this.editorView = new EditorView({
 				extensions: this.extensions,

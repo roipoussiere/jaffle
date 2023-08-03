@@ -58,7 +58,10 @@ function fillTunesList(): void {
 strudel.init();
 
 window.addEventListener('DOMContentLoaded', () => {
-	editor.build(<HTMLDivElement> document.getElementById('jaffle_editor'));
+	const domEditor = document.getElementById('jaffle-editor') as HTMLDivElement;
+	editor.build(domEditor, {
+		fullScreen: domEditor.classList.contains('jaffle-fs'),
+	});
 	if (domSelectTune !== null) {
 		fillTunesList();
 		tunesPath = 'tunes/';

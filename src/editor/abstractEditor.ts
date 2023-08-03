@@ -1,7 +1,25 @@
 import { Entry } from '../model';
 
+export type EditorUiConfig = {
+	width: number,
+	height: number,
+	fontSize: number,
+	hBoxGap: number,
+	vBoxGap: number,
+};
+
 export abstract class AbstractEditor {
-	abstract build(domEditor: HTMLElement): void;
+	domEditor: HTMLElement;
+
+	uiConfig: EditorUiConfig;
+
+	load(domEditor: HTMLElement, uiConfig: EditorUiConfig): void {
+		this.domEditor = domEditor;
+		this.uiConfig = uiConfig;
+		this.build();
+	}
+
+	abstract build(): void;
 
 	abstract getDom(): HTMLElement;
 

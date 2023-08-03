@@ -1,6 +1,7 @@
 import { Box, Entry } from '../model';
 import entryToJs from '../exporters/jsExporter';
 import tunes from '../tunes/tuneIndex';
+import yamlToEntry from '../importers/yamlImporter';
 
 import AbstractEditor from './abstractEditor';
 import { EditorBar, Button, Tab, MenuItem } from './editorBar';
@@ -8,11 +9,14 @@ import ErrorBar from './errorBar';
 import NodeEditor from './nodeEditor';
 import YamlEditor from './yamlEditor';
 import JsEditor from './jsEditor';
-import yamlToEntry from '../importers/yamlImporter';
 
 type OnPlay = () => void;
 type OnStop = () => void;
-type OnUpdate = (content: unknown) => void
+type OnUpdate = (content: unknown) => void;
+
+type EditorPartialConfig = {
+	fullScreen: boolean,
+};
 
 export default class Editor {
 	container: HTMLElement;
@@ -102,8 +106,6 @@ export default class Editor {
 			}),
 			node: new NodeEditor({
 				onUpdate: (content: Box) => this.onUpdate(content),
-				width: 790,
-				height: 365,
 			}),
 			js: new JsEditor({
 				onPlay: () => this.onPlay(),
@@ -117,13 +119,21 @@ export default class Editor {
 		return this.editors[this.editorBar.activeTabId];
 	}
 
-	public build(container: HTMLElement) {
+	public build(container: HTMLElement, uiConfig?: EditorPartialConfig) {
+		const _uiConfig = {
+			width: uiConfig?.fullScreen ? 0 : 800,
+			height: uiConfig?.fullScreen ? 0 : 400,
+			fontSize: 16,
+			hBoxGap: 3,
+			vBoxGap: 0.5,
+		};
+
 		this.container = container;
 		this.container.classList.add('jaffle-editor');
 
 		this.editorBar.build(container);
 		this.errorBar.build(container);
-		Object.values(this.editors).forEach((editor) => editor.build(container));
+		Object.values(this.editors).forEach((editor) => editor.load(container, _uiConfig));
 		this.getActiveEditor().getDom().style.display = 'block';
 		// this.getActiveEditor().setContent();
 
