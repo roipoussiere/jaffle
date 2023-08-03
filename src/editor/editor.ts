@@ -66,10 +66,6 @@ export default class Editor {
 			id: 'website',
 			label: 'Visit website',
 			onClick: () => { window.location.href = '/jaffle'; },
-		}, {
-			id: 'examples',
-			label: 'Load examples',
-			onClick: () => { window.location.href = '/jaffle'; }, // todo
 		}];
 
 		this.editorBar = new EditorBar('Jaffle', tabs, buttons, menu, 'node');

@@ -39,7 +39,13 @@ export class EditorBar {
 
 	domTabs: { [key: string]: HTMLButtonElement };
 
-	btnTimer: NodeJS.Timeout;
+	domExamplesMenu: HTMLDivElement;
+
+	domMenu: HTMLDivElement;
+
+	examplesTimer: NodeJS.Timeout;
+
+	menuTimer: NodeJS.Timeout;
 
 	constructor(
 		title: string,
@@ -67,6 +73,7 @@ export class EditorBar {
 		this.tabs.forEach((tab) => this.buildTab(tab));
 		this.buildMenu();
 		this.buttons.reverse().forEach((button) => this.buildButton(button));
+		this.buildExamplesMenu();
 		domContainer.appendChild(this.dom);
 	}
 
@@ -112,30 +119,46 @@ export class EditorBar {
 	}
 
 	private buildMenu(): void {
-		const onMouseOut = (dom: HTMLElement) => {
-			this.btnTimer = setTimeout(() => {
-				// eslint-disable-next-line no-param-reassign
-				dom.style.display = 'none';
+		this.domMenu = document.createElement('div');
+
+		const onMouseOut = () => {
+			this.menuTimer = setTimeout(() => {
+				this.domMenu.style.display = 'none';
 			}, 200);
 		};
 
-		const domMenu = document.createElement('div');
-		domMenu.id = 'jaffle-menu';
-		domMenu.addEventListener('mouseover', () => clearTimeout(this.btnTimer));
-		domMenu.addEventListener('mouseout', () => onMouseOut(domMenu));
-		this.menu.forEach((item) => domMenu.appendChild(EditorBar.buildMenuItem(item)));
-		this.dom.appendChild(domMenu);
+		this.domMenu.id = 'jaffle-menu';
+		this.domMenu.addEventListener('mouseover', () => clearTimeout(this.menuTimer));
+		this.domMenu.addEventListener('mouseout', () => onMouseOut());
+		this.menu.forEach((item) => this.domMenu.appendChild(EditorBar.buildMenuItem(item)));
+		this.dom.appendChild(this.domMenu);
 
-		const domButton = document.createElement('button');
-		domButton.id = 'jaffle-menu-btn';
-		domButton.className = 'jaffle-btn';
-		domButton.innerText = '≡';
-		domButton.addEventListener('mouseover', () => {
-			clearTimeout(this.btnTimer);
-			domMenu.style.display = 'block';
+		const domMenuItemExamples = document.createElement('p');
+		domMenuItemExamples.id = 'jaffle-menu-item-examples';
+		domMenuItemExamples.className = 'jaffle-menu-item';
+		domMenuItemExamples.innerText = 'Load example';
+		domMenuItemExamples.addEventListener('mouseover', () => {
+			clearTimeout(this.menuTimer);
+			this.domExamplesMenu.style.display = 'block';
 		});
-		domButton.addEventListener('mouseout', () => onMouseOut(domMenu));
-		this.dom.appendChild(domButton);
+		domMenuItemExamples.addEventListener('mouseout', () => {
+			this.examplesTimer = setTimeout(() => {
+				// eslint-disable-next-line no-param-reassign
+				this.domExamplesMenu.style.display = 'none';
+			}, 200);
+		});
+		this.domMenu.appendChild(domMenuItemExamples);
+
+		const domMenuButton = document.createElement('button');
+		domMenuButton.id = 'jaffle-menu-btn';
+		domMenuButton.className = 'jaffle-btn';
+		domMenuButton.innerText = '≡';
+		domMenuButton.addEventListener('mouseover', () => {
+			clearTimeout(this.menuTimer);
+			this.domMenu.style.display = 'block';
+		});
+		domMenuButton.addEventListener('mouseout', () => onMouseOut());
+		this.dom.appendChild(domMenuButton);
 	}
 
 	private static buildMenuItem(item: MenuItem): HTMLParagraphElement {
@@ -159,9 +182,38 @@ export class EditorBar {
 		this.dom.appendChild(domButton);
 	}
 
+	private buildExamplesMenu(): void {
+		const tunes = ['Amen Sister', 'Arpoon', 'Barry Harris', 'Bass Fuge',
+			'Bell Dub', 'Blippy Rhodes', 'Bridge Is Over'];
+
+		this.domExamplesMenu = document.createElement('div');
+		this.domExamplesMenu.id = 'jaffle-examples-menu';
+
+		// const domButtons: Array<HTMLButtonElement> = [];
+		tunes.forEach((tune) => {
+			const domButton = document.createElement('p');
+			domButton.className = 'jaffle-example-btn';
+			domButton.innerText = tune;
+			domButton.addEventListener('mouseover', () => {
+				clearTimeout(this.examplesTimer);
+				clearTimeout(this.menuTimer);
+			});
+			domButton.addEventListener('mouseout', () => {
+				this.examplesTimer = setTimeout(() => {
+					this.domExamplesMenu.style.display = 'none';
+					this.domMenu.style.display = 'none';
+				}, 200);
+			});
+
+			this.domExamplesMenu.appendChild(domButton);
+		});
+
+		this.dom.appendChild(this.domExamplesMenu);
+	}
+
 	static getStyle(): CSSStyleSheet {
 		const style = new CSSStyleSheet();
-		style.replaceSync(`		
+		style.replaceSync(`
 			#jaffle-editor-bar {
 				position: absolute;
 				width: 100%;
@@ -196,6 +248,7 @@ export class EditorBar {
 			}
 
 			.jaffle-menu-item {
+				width: 6.5em;
 				margin: 0;
 				padding: 5px;
 				text-align: right;
@@ -246,7 +299,34 @@ export class EditorBar {
 	
 			.jaffle-btn:hover {
 				background-color: cadetblue;
-			}`);
+			}
+			
+			#jaffle-examples-menu {
+				display: none;
+				position: absolute;
+				top: 67px;
+				right: 7.1em;
+				background-color: #002b36;
+				padding: 3px;
+				padding-bottom: 0;
+			}
+
+			.jaffle-example-btn {
+				display: inline-block;
+				float: right;
+				background-color: darkseagreen;
+				border: none;
+				margin: 0;
+				padding: 5px;
+				margin-left: 3px;
+				margin-bottom: 3px;
+				cursor: pointer;
+			}
+
+			.jaffle-example-btn:hover {
+				background-color: cadetblue;
+			}
+			`);
 		return style;
 	}
 }
