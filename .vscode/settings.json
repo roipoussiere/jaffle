@@ -6,4 +6,10 @@
     "editor.rulers": [
         100
     ],
+    "files.exclude": {
+        "website/assets/jaffle": true,
+        "public": true,
+        "coverage": true,
+        "dist": true
+    },
 }
