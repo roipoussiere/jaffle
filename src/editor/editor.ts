@@ -1,6 +1,6 @@
 import { Box, Entry } from '../model';
 import entryToJs from '../exporters/jsExporter';
-import tunes from '../tunes/tuneIndex';
+import tunes from '../tunes/_tuneIndex';
 import yamlToEntry from '../importers/yamlImporter';
 
 import AbstractEditor from './abstractEditor';

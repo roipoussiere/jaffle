@@ -1,4 +1,4 @@
-const arpoon = `
+const tune = `
 # "Arpoon"
 # @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
 # @by Felix Roos
@@ -49,6 +49,7 @@ const arpoon = `
   - s: _bd*4, [~ [hh hh? hh?]]*2,~ [sd ~ [sd:2? bd?]]
   - .bank: RolandTR909
   - .gain: .5
-  - .slow: 2`;
+  - .slow: 2
+`;
 
-export default arpoon;
+export default tune;

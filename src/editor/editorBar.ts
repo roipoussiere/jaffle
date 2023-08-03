@@ -315,6 +315,7 @@ export class EditorBar {
 			#jaffle-examples-menu {
 				display: none;
 				position: absolute;
+				max-width: 600px;
 				top: 67px;
 				right: 7.1em;
 				background-color: #002b36;
@@ -325,7 +326,7 @@ export class EditorBar {
 
 			.jaffle-example-btn {
 				display: inline-block;
-				float: right;
+				float: left;
 				background-color: darkseagreen;
 				border: none;
 				margin: 0;

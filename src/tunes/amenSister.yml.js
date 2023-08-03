@@ -1,4 +1,4 @@
-const amenSister = `
+const tune = `
 # "Amensister"
 # @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
 # @by Felix Roos
@@ -83,4 +83,4 @@ const amenSister = `
 - .reset: _<x@7 x(5,8,-1)>
 `;
 
-export default amenSister;
+export default tune;
