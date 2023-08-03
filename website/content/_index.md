@@ -17,6 +17,4 @@ You can start to discover some tunes below (translated from the [Strudel example
 
 The node editor is not editable and only acts as tune visualization for now. Soon it will be possible to switch between yaml and node editor.
 
-Select tune: {{< select_tune >}}
-
 {{< jaffle_editor >}}

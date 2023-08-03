@@ -84,12 +84,6 @@ a:hover {
 	color: whitesmoke;
 }
 
-#select_tune {
-	margin: 5px;
-	display: inline-block;
-	height: 2em;
-}
-
 #jaffle-editor {
 	height: 400px;
 	box-shadow: 0 0 10px black;
