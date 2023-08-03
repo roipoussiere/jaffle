@@ -2,7 +2,7 @@ import { Box, Entry } from '../model';
 import entryToJs from '../exporters/jsExporter';
 
 import AbstractEditor from './abstractEditor';
-import { EditorBar, Button, Tab } from './editorBar';
+import { EditorBar, Button, Tab, MenuItem } from './editorBar';
 import ErrorBar from './errorBar';
 import NodeEditor from './nodeEditor';
 import YamlEditor from './yamlEditor';
@@ -62,7 +62,17 @@ export default class Editor {
 			onClick: () => this.onStop(),
 		}];
 
-		this.editorBar = new EditorBar('Jaffle', tabs, buttons, 'node');
+		const menu: Array<MenuItem> = [{
+			id: 'website',
+			label: 'Visit website',
+			onClick: () => { window.location.href = '/jaffle'; },
+		}, {
+			id: 'examples',
+			label: 'Load examples',
+			onClick: () => { window.location.href = '/jaffle'; }, // todo
+		}];
+
+		this.editorBar = new EditorBar('Jaffle', tabs, buttons, menu, 'node');
 		this.editorBar.onTabSwitch = (oldTabId: string, newTabId: string) => {
 			try {
 				this.content = this.editors[oldTabId].getContent();

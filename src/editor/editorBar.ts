@@ -1,18 +1,24 @@
 type OnButtonClick = () => void;
 type OnTabSwitch = (oldTabId: string, newTabId: string) => void;
 
+export type Tab = {
+	id: string,
+	label: string,
+	tooltip: string,
+};
+
 export type Button = {
 	id: string,
 	label: string,
 	tooltip: string,
 	onClick: OnButtonClick,
-}
+};
 
-export type Tab = {
+export type MenuItem = {
 	id: string,
 	label: string,
-	tooltip: string,
-}
+	onClick: OnButtonClick,
+};
 
 export class EditorBar {
 	title: string;
@@ -20,6 +26,8 @@ export class EditorBar {
 	tabs: Array<Tab>;
 
 	buttons: Array<Button>;
+
+	menu: Array<MenuItem>;
 
 	activeTabId: string;
 
@@ -31,10 +39,19 @@ export class EditorBar {
 
 	domTabs: { [key: string]: HTMLButtonElement };
 
-	constructor(title: string, tabs: Array<Tab>, buttons: Array<Button>, activeTabId?: string) {
+	btnTimer: NodeJS.Timeout;
+
+	constructor(
+		title: string,
+		tabs: Array<Tab>,
+		buttons: Array<Button>,
+		menu: Array<MenuItem>,
+		activeTabId?: string,
+	) {
 		this.title = title;
 		this.tabs = tabs;
 		this.buttons = buttons;
+		this.menu = menu;
 		this.activeTabId = activeTabId || this.tabs[0].id;
 
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -48,7 +65,7 @@ export class EditorBar {
 
 		this.buildTitle();
 		this.tabs.forEach((tab) => this.buildTab(tab));
-		this.buildMenuButton();
+		this.buildMenu();
 		this.buttons.reverse().forEach((button) => this.buildButton(button));
 		domContainer.appendChild(this.dom);
 	}
@@ -94,46 +111,40 @@ export class EditorBar {
 		this.dom.appendChild(domTab);
 	}
 
-	private buildMenuButton(): void {
-		let timer: NodeJS.Timeout;
+	private buildMenu(): void {
+		const onMouseOut = (dom: HTMLElement) => {
+			this.btnTimer = setTimeout(() => {
+				// eslint-disable-next-line no-param-reassign
+				dom.style.display = 'none';
+			}, 200);
+		};
 
 		const domMenu = document.createElement('div');
 		domMenu.id = 'jaffle-menu';
-		domMenu.addEventListener('mouseover', () => {
-			clearTimeout(timer);
-		});
-		domMenu.addEventListener('mouseout', () => {
-			timer = setTimeout(() => {
-				domMenu.style.display = 'none';
-			}, 200);
-		});
-
-		const menuItem1 = document.createElement('p');
-		menuItem1.className = 'jaffle-menu-item';
-		menuItem1.innerText = 'Visit Jaffle website';
-		domMenu.appendChild(menuItem1);
-
-		const menuItem2 = document.createElement('p');
-		menuItem2.className = 'jaffle-menu-item';
-		menuItem2.innerText = 'Load examples';
-		domMenu.appendChild(menuItem2);
+		domMenu.addEventListener('mouseover', () => clearTimeout(this.btnTimer));
+		domMenu.addEventListener('mouseout', () => onMouseOut(domMenu));
+		this.menu.forEach((item) => domMenu.appendChild(EditorBar.buildMenuItem(item)));
+		this.dom.appendChild(domMenu);
 
 		const domButton = document.createElement('button');
 		domButton.id = 'jaffle-menu-btn';
 		domButton.className = 'jaffle-btn';
 		domButton.innerText = '≡';
 		domButton.addEventListener('mouseover', () => {
-			clearTimeout(timer);
+			clearTimeout(this.btnTimer);
 			domMenu.style.display = 'block';
 		});
-		domButton.addEventListener('mouseout', () => {
-			timer = setTimeout(() => {
-				domMenu.style.display = 'none';
-			}, 200);
-		});
-
+		domButton.addEventListener('mouseout', () => onMouseOut(domMenu));
 		this.dom.appendChild(domButton);
-		this.dom.appendChild(domMenu);
+	}
+
+	private static buildMenuItem(item: MenuItem): HTMLParagraphElement {
+		const domMenuItem = document.createElement('p');
+		domMenuItem.id = `jaffle-menu-item-${item.id}`;
+		domMenuItem.className = 'jaffle-menu-item';
+		domMenuItem.innerText = item.label;
+		domMenuItem.addEventListener('click', item.onClick);
+		return domMenuItem;
 	}
 
 	private buildButton(button: Button): void {
@@ -189,6 +200,11 @@ export class EditorBar {
 				padding: 5px;
 				text-align: right;
 				border-top: 3px solid #002b36;
+				cursor: pointer;
+			}
+
+			.jaffle-menu-item:hover {
+				background-color: cadetblue;
 			}
 
 			.jaffle-tab {
