@@ -115,6 +115,10 @@ export default class Editor {
 		};
 	}
 
+	public loadExample(tuneExample: string): void {
+		this.setContent(yamlToEntry(tunes[tuneExample]));
+	}
+
 	public getActiveEditor(): AbstractEditor {
 		return this.editors[this.editorBar.activeTabId];
 	}

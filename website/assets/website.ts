@@ -62,11 +62,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	editor.build(domEditor, {
 		fullScreen: domEditor.classList.contains('jaffle-fs'),
 	});
-	if (domSelectTune !== null) {
-		fillTunesList();
-		tunesPath = 'tunes/';
-	}
-	loadTune(window.location.hash.substring(1) || DEFAULT_TUNE);
+	editor.loadExample('amen_sister');
 });
 
 domSelectTune?.addEventListener('change', (event) => {
