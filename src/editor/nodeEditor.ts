@@ -3,7 +3,8 @@ import { flextree } from 'd3-flextree';
 
 import entryToBox from '../exporters/boxExporter';
 import boxToEntry from '../importers/boxImporter';
-import { Box, Entry, EntryType, ValueType } from '../model';
+import { Box, Entry, EntryType, ValueType, StringDict } from '../model';
+import { JaffleError } from '../errors';
 
 import { AbstractEditor } from './abstractEditor';
 
@@ -20,14 +21,14 @@ type NodeEditorConfig = {
 	onUpdate: OnUpdate,
 };
 
-const BOX_NAME_COLORS = {
+const BOX_NAME_COLORS: StringDict = {
 	[EntryType.Function]: 'black',
 	[EntryType.ChainedFunction]: 'black',
 	[EntryType.ConstantDef]: 'blue',
 	[EntryType.SerializedData]: 'darkRed',
 };
 
-const BOX_VALUE_COLORS = {
+const BOX_VALUE_COLORS: StringDict = {
 	[ValueType.String]: 'darkSlateGray',
 	[ValueType.Number]: 'darkRed',
 	[ValueType.Boolean]: 'darkGreen',
@@ -50,9 +51,9 @@ class NodeEditor extends AbstractEditor {
 
 	offsetY: number;
 
-	svg: d3.Selection<SVGSVGElement, undefined, null, undefined>;
+	_svg: d3.Selection<SVGSVGElement, undefined, null, undefined> | null;
 
-	tree: FuncNode;
+	_tree: FuncNode | null;
 
 	constructor(config: NodeEditorConfig) {
 		super();
@@ -87,7 +88,7 @@ class NodeEditor extends AbstractEditor {
 		return this.uiConfig.fontSize * 1.4;
 	}
 
-	build() {
+	build(): void {
 		const width = (this.uiConfig.width === 0 ? window.innerWidth : this.uiConfig.width) - 10;
 		const height = (this.uiConfig.height === 0
 			? window.innerHeight : this.uiConfig.height) - 35;
@@ -101,6 +102,20 @@ class NodeEditor extends AbstractEditor {
 		this.domContainer.style.height = `${height}px`;
 		this.domContainer.style.overflow = 'scroll';
 		this.domEditor.appendChild(this.domContainer);
+	}
+
+	get svg(): d3.Selection<SVGSVGElement, undefined, null, undefined> {
+		if (this._svg === null) {
+			throw new JaffleError('svg is not initialized');
+		}
+		return this._svg;
+	}
+
+	get tree(): FuncNode {
+		if (this._tree === null) {
+			throw new JaffleError('tree is not initialized');
+		}
+		return this._tree;
 	}
 
 	getDom(): HTMLElement {
@@ -120,12 +135,12 @@ class NodeEditor extends AbstractEditor {
 	}
 
 	setRawContent(content: Box): void {
-		this.tree = <FuncNode> d3.hierarchy(content);
+		this._tree = <FuncNode> d3.hierarchy(content);
 		this.initTree();
 		this.draw();
 	}
 
-	public initTree(): NodeEditor {
+	public initTree(): void {
 		const layout = flextree({})
 			.nodeSize((n: FuncNode) => (
 				[this.charHeight, (n.data.width + this.uiConfig.hBoxGap) * this.charWidth]
@@ -140,10 +155,9 @@ class NodeEditor extends AbstractEditor {
 
 		layout(this.tree);
 		this.setGraphGeometry();
-		return this;
 	}
 
-	public setGraphGeometry() {
+	public setGraphGeometry(): void {
 		let minNodeY = Infinity;
 		let maxNodeY = -Infinity;
 		let svgWidth = 0;
@@ -174,8 +188,8 @@ class NodeEditor extends AbstractEditor {
 		return this;
 	}
 
-	private drawSvg() {
-		this.svg = d3.create('svg')
+	private drawSvg(): void {
+		this._svg = d3.create('svg')
 			.attr('class', 'jaffle-graph')
 			.attr('width', this.svgWidth)
 			.attr('height', this.svgHeight)
@@ -187,7 +201,7 @@ class NodeEditor extends AbstractEditor {
 		this.drawBoxes();
 	}
 
-	private drawLinks() {
+	private drawLinks(): void {
 		this.svg.append('g')
 			.attr('fill', 'none')
 			.attr('stroke', '#777')
@@ -208,7 +222,7 @@ class NodeEditor extends AbstractEditor {
 				)(link as unknown as d3.DefaultLinkObject));
 	}
 
-	private drawGroupArea() {
+	private drawGroupArea(): void {
 		this.svg.append('g')
 			.selectAll()
 			.data(this.tree.descendants()
@@ -224,7 +238,7 @@ class NodeEditor extends AbstractEditor {
 			.attr('fill', '#ccc8');
 	}
 
-	private drawBoxes() {
+	private drawBoxes(): void {
 		const onMouseOver = (target: HTMLElement) => {
 			d3.select(<HTMLElement>target)
 				.style('opacity', 0.2);
@@ -310,7 +324,7 @@ class NodeEditor extends AbstractEditor {
 	// width: ${d.data.width}`);
 	}
 
-	private drawInput(selectedBoxId: string, isValueSelected: boolean) {
+	private drawInput(selectedBoxId: string, isValueSelected: boolean): void {
 		const focusedNode = this.getNodeById(selectedBoxId);
 		if (focusedNode === undefined) {
 			return;

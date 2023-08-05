@@ -40,6 +40,8 @@ export enum ValueType {
 	Empty,
 }
 
+export type StringDict = { [key: string]: string };
+
 export interface EntryData {
 	rawName: string,
 	rawValue: string,

@@ -1,3 +1,5 @@
+import { StringDict } from '../model';
+
 import amenSister from './amenSister.yml';
 import arpoon from './arpoon.yml';
 import festivalOfFingers3 from './festivalOfFingers3.yml';
@@ -37,7 +39,7 @@ import echoPiano from './echoPiano.yml';
 import randomBells from './randomBells.yml';
 import zeldaRescue from './zeldaRescue.yml';
 
-const tunes = {
+const tunes: StringDict = {
 	amen_sister: amenSister,
 	arpoon,
 	barry_harris: barryHarris,
