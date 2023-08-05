@@ -68,6 +68,15 @@ class NodeEditor extends AbstractEditor {
 			hBoxGap: 3,
 			vBoxGap: 1,
 		};
+
+		this.domContainer = new HTMLDivElement();
+		this.domSvg = new SVGElement();
+		this.svgWidth = 0;
+		this.svgHeight = 0;
+		this.offsetX = 0;
+		this.offsetY = 0;
+		this._svg = null;
+		this._tree = null;
 	}
 
 	get charWidth(): number {

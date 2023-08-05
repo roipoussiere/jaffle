@@ -19,7 +19,7 @@ type EditorPartialConfig = {
 };
 
 export default class Editor {
-	container: HTMLElement;
+	domContainer: HTMLElement;
 
 	editorBar: EditorBar;
 
@@ -36,6 +36,13 @@ export default class Editor {
 	onUpdate: OnUpdate;
 
 	constructor() {
+		this.domContainer = new HTMLElement();
+		this.content = {
+			rawName: '',
+			rawValue: '',
+			children: [],
+		};
+
 		/* eslint-disable @typescript-eslint/no-empty-function */
 		this.onPlay = () => {};
 		this.onStop = () => {};
@@ -132,8 +139,8 @@ export default class Editor {
 			vBoxGap: 0.5,
 		};
 
-		this.container = container;
-		this.container.classList.add('jaffle-editor');
+		this.domContainer = container;
+		this.domContainer.classList.add('jaffle-editor');
 
 		this.editorBar.build(container);
 		this.errorBar.build(container);

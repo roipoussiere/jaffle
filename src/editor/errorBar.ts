@@ -1,5 +1,9 @@
 export default class ErrorBar {
-	dom: HTMLElement;
+	dom: HTMLParagraphElement;
+
+	constructor() {
+		this.dom = new HTMLParagraphElement();
+	}
 
 	build(domContainer: HTMLElement) {
 		this.dom = document.createElement('p');

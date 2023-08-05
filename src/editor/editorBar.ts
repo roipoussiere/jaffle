@@ -69,6 +69,13 @@ export class EditorBar {
 		this.onExampleSelected = onExampleSelected;
 		this.activeTabId = activeTabId || this.tabs[0].id;
 
+		this.dom = new HTMLElement();
+		this.domTitle = new HTMLParagraphElement();
+		this.domExamplesMenu = new HTMLDivElement();
+		this.domMenu = new HTMLDivElement();
+		this.menuTimer = new NodeJS.Timeout();
+		this.examplesTimer = new NodeJS.Timeout();
+
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		this.onTabSwitch = () => {};
 		this.domTabs = {};
