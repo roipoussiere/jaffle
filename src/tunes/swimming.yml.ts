@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const tune = `
 # "Swimming (Super Mario World)"
 # @by Koji Kondo
