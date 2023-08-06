@@ -14,4 +14,7 @@ module.exports = {
 	slowTestThreshold: 1,
 	testEnvironment: 'jsdom',
 	testMatch: ['**/tests/**/*.test.ts'],
+	moduleNameMapper: {
+		d3: '<rootDir>/node_modules/d3/dist/d3.min.js',
+	},
 };
