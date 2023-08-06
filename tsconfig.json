@@ -11,6 +11,7 @@
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"useUnknownInCatchVariables": false,
+		"esModuleInterop": true,
 	},
 	"include": [
 		"node_modules/@codemirror/legacy-modes/mode/yaml.d.ts"	
