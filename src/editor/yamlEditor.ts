@@ -1,4 +1,4 @@
-import { EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine }
+import { EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine, ViewUpdate }
 	from '@codemirror/view';
 import { solarizedDark } from '@uiw/codemirror-theme-solarized';
 import { yaml as yamlMode } from '@codemirror/legacy-modes/mode/yaml';
@@ -38,7 +38,7 @@ class YamlEditor extends AbstractEditor {
 		bracketMatching(),
 		closeBrackets(),
 		highlightActiveLine(),
-		EditorView.updateListener.of((update) => {
+		EditorView.updateListener.of((update: ViewUpdate) => {
 			if (update.docChanged) {
 				this.config.onUpdate(update.state.doc.toString());
 			}
@@ -65,6 +65,7 @@ class YamlEditor extends AbstractEditor {
 	constructor(config: YamlEditorConfig) {
 		super();
 		this.config = config;
+		this.editorView = new EditorView();
 	}
 
 	build() {

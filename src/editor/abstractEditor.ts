@@ -8,10 +8,23 @@ export type EditorUiConfig = {
 	vBoxGap: number,
 };
 
+const DEFAULT_UI_CONFIG: EditorUiConfig = {
+	width: 800,
+	height: 600,
+	fontSize: 16,
+	hBoxGap: 3,
+	vBoxGap: 1,
+};
+
 export abstract class AbstractEditor {
 	domEditor: HTMLElement;
 
 	uiConfig: EditorUiConfig;
+
+	constructor() {
+		this.domEditor = new HTMLElement();
+		this.uiConfig = DEFAULT_UI_CONFIG;
+	}
 
 	load(domEditor: HTMLElement, uiConfig: EditorUiConfig): void {
 		this.domEditor = domEditor;
