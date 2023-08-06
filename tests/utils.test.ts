@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 
-import * as u from '../src/utils';
+import * as u from '../src/transpilers/utils';
 import { Entry, EntryType } from '../src/model';
 
 describe('Testing u.entryToEntryType()', () => {

@@ -1,6 +1,6 @@
-import * as c from '../constants';
-import { ExporterError } from '../errors';
-import { Entry, EntryType } from '../model';
+import * as c from '../../constants';
+import { ExporterError } from '../../errors';
+import { Entry, EntryType } from '../../model';
 import { entryToEntryType, entryToFuncName } from '../utils';
 
 function indent(indentLevel: number): string {

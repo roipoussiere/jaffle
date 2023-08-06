@@ -1,44 +1,44 @@
-import { EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine, ViewUpdate }
+import { EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine }
 	from '@codemirror/view';
 import { solarizedDark } from '@uiw/codemirror-theme-solarized';
-import { yaml as yamlMode } from '@codemirror/legacy-modes/mode/yaml';
-import { StreamLanguage, LanguageSupport, bracketMatching } from '@codemirror/language';
+import { javascriptLanguage } from '@codemirror/lang-javascript';
+import { bracketMatching, indentOnInput } from '@codemirror/language';
 import { closeBrackets } from '@codemirror/autocomplete';
 import { Extension } from '@codemirror/state';
 import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
-import { Entry } from '../model';
-import entryToYaml from '../exporters/yamlExporter';
-import yamlToEntry from '../importers/yamlImporter';
+import { Entry } from '../../model';
+import entryToJs from '../../transpilers/js/jsExporter';
 
 import AbstractEditor from './abstractEditor';
+import { NotImplementedError } from '../../errors';
 
 type OnPlay = () => void;
 type OnStop = () => void;
 type OnUpdate = (content: string) => void;
 
-type YamlEditorConfig = {
+type JsEditorConfig = {
 	onPlay: OnPlay,
 	onStop: OnStop,
 	onUpdate: OnUpdate,
 }
 
-class YamlEditor extends AbstractEditor {
-	config: YamlEditorConfig;
+class JsEditor extends AbstractEditor {
+	config: JsEditorConfig;
 
 	private editorView: EditorView;
 
 	private extensions: Extension = (() => [
 		solarizedDark,
-		new LanguageSupport(StreamLanguage.define(yamlMode)),
+		javascriptLanguage,
 		history(),
 		lineNumbers(),
 		drawSelection(),
-		// indentOnInput(), // not working with yamlLang
+		indentOnInput(),
 		bracketMatching(),
 		closeBrackets(),
 		highlightActiveLine(),
-		EditorView.updateListener.of((update: ViewUpdate) => {
+		EditorView.updateListener.of((update) => {
 			if (update.docChanged) {
 				this.config.onUpdate(update.state.doc.toString());
 			}
@@ -62,10 +62,9 @@ class YamlEditor extends AbstractEditor {
 		]),
 	])();
 
-	constructor(config: YamlEditorConfig) {
+	constructor(config: JsEditorConfig) {
 		super();
 		this.config = config;
-		this.editorView = new EditorView();
 	}
 
 	build() {
@@ -82,8 +81,9 @@ class YamlEditor extends AbstractEditor {
 		return this.editorView.contentDOM.parentElement?.parentElement as HTMLElement;
 	}
 
+	// eslint-disable-next-line class-methods-use-this
 	public getContent(): Entry {
-		return yamlToEntry(this.getRawContent());
+		throw new NotImplementedError('JsEditor.getContent()');
 	}
 
 	public getRawContent(): string {
@@ -101,7 +101,7 @@ class YamlEditor extends AbstractEditor {
 	}
 
 	public setContent(entry: Entry): void {
-		this.setRawContent(entryToYaml(entry));
+		this.setRawContent(entryToJs(entry));
 	}
 
 	static getStyle(): CSSStyleSheet {
@@ -119,4 +119,4 @@ class YamlEditor extends AbstractEditor {
 	}
 }
 
-export default YamlEditor;
+export default JsEditor;

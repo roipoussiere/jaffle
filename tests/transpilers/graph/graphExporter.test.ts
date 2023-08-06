@@ -1,7 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
 
-import * as BE from '../../src/exporters/boxExporter';
-import { Box, BoxDisplay, EntryType, BoxTyping, Entry, ValueType } from '../../src/model';
+import { Box, BoxDisplay, BoxTyping } from '../../../src/transpilers/graph/graphModel';
+import { EntryType, Entry, ValueType } from '../../../src/model';
+import * as GE from '../../../src/transpilers/graph/graphExporter';
 
 describe('Testing BE.getBoxValue()', () => {
 	test('Entry with mininotation value return ValueType.Mininotation', () => {
@@ -10,7 +11,7 @@ describe('Testing BE.getBoxValue()', () => {
 			rawValue: '_a',
 			children: [],
 		};
-		expect(BE.getValueType(input)).toBe(ValueType.Mininotation);
+		expect(GE.getValueType(input)).toBe(ValueType.Mininotation);
 	});
 
 	test('Entry with expression value return ValueType.Expression', () => {
@@ -19,7 +20,7 @@ describe('Testing BE.getBoxValue()', () => {
 			rawValue: '=a',
 			children: [],
 		};
-		expect(BE.getValueType(input)).toBe(ValueType.Expression);
+		expect(GE.getValueType(input)).toBe(ValueType.Expression);
 	});
 
 	test('Entry with number value return ValueType.Number', () => {
@@ -28,7 +29,7 @@ describe('Testing BE.getBoxValue()', () => {
 			rawValue: '42',
 			children: [],
 		};
-		expect(BE.getValueType(input)).toBe(ValueType.Number);
+		expect(GE.getValueType(input)).toBe(ValueType.Number);
 	});
 
 	test('Entry with boolean value return ValueType.Boolean', () => {
@@ -37,14 +38,14 @@ describe('Testing BE.getBoxValue()', () => {
 			rawValue: 'true',
 			children: [],
 		};
-		expect(BE.getValueType(inputTrue)).toBe(ValueType.Boolean);
+		expect(GE.getValueType(inputTrue)).toBe(ValueType.Boolean);
 
 		const inputFalse: Entry = {
 			rawName: 'a',
 			rawValue: 'false',
 			children: [],
 		};
-		expect(BE.getValueType(inputFalse)).toBe(ValueType.Boolean);
+		expect(GE.getValueType(inputFalse)).toBe(ValueType.Boolean);
 	});
 
 	test('Entry with null value return ValueType.Null', () => {
@@ -53,7 +54,7 @@ describe('Testing BE.getBoxValue()', () => {
 			rawValue: '',
 			children: [],
 		};
-		expect(BE.getValueType(input)).toBe(ValueType.Null);
+		expect(GE.getValueType(input)).toBe(ValueType.Null);
 	});
 
 	test('Entry with string value return ValueType.String', () => {
@@ -62,7 +63,7 @@ describe('Testing BE.getBoxValue()', () => {
 			rawValue: 'b',
 			children: [],
 		};
-		expect(BE.getValueType(input)).toBe(ValueType.String);
+		expect(GE.getValueType(input)).toBe(ValueType.String);
 	});
 
 	test('Entry with children return ValueType.Empty', () => {
@@ -75,7 +76,7 @@ describe('Testing BE.getBoxValue()', () => {
 				children: [],
 			}],
 		};
-		expect(BE.getValueType(input)).toBe(ValueType.Empty);
+		expect(GE.getValueType(input)).toBe(ValueType.Empty);
 	});
 });
 
@@ -90,7 +91,7 @@ describe('Testing BE.buildBoxTyping()', () => {
 			type: EntryType.Function,
 			valueType: ValueType.Number,
 		};
-		expect(BE.buildBoxTyping(input)).toEqual(expected);
+		expect(GE.buildBoxTyping(input)).toEqual(expected);
 	});
 
 	test('Entry with children can be used to build BoxTyping', () => {
@@ -107,7 +108,7 @@ describe('Testing BE.buildBoxTyping()', () => {
 			type: EntryType.Function,
 			valueType: ValueType.Empty,
 		};
-		expect(BE.buildBoxTyping(input)).toEqual(expected);
+		expect(GE.buildBoxTyping(input)).toEqual(expected);
 	});
 });
 
@@ -118,7 +119,7 @@ describe('Testing BE.getDisplayValue()', () => {
 			rawValue: 'b',
 			children: [],
 		};
-		expect(BE.getDisplayValue(input)).toBe('b');
+		expect(GE.getDisplayValue(input)).toBe('b');
 	});
 
 	test('Entry with mininotation value return the stripped string', () => {
@@ -127,7 +128,7 @@ describe('Testing BE.getDisplayValue()', () => {
 			rawValue: '_b',
 			children: [],
 		};
-		expect(BE.getDisplayValue(input)).toBe('b');
+		expect(GE.getDisplayValue(input)).toBe('b');
 	});
 
 	test('Entry with expression value return the stripped string', () => {
@@ -136,7 +137,7 @@ describe('Testing BE.getDisplayValue()', () => {
 			rawValue: '=b',
 			children: [],
 		};
-		expect(BE.getDisplayValue(input)).toBe('b');
+		expect(GE.getDisplayValue(input)).toBe('b');
 	});
 
 	test('Entry with null value return the ∅ symbol', () => {
@@ -145,7 +146,7 @@ describe('Testing BE.getDisplayValue()', () => {
 			rawValue: '',
 			children: [],
 		};
-		expect(BE.getDisplayValue(input)).toBe('∅');
+		expect(GE.getDisplayValue(input)).toBe('∅');
 	});
 
 	test('Entry with children return an empty string', () => {
@@ -158,7 +159,7 @@ describe('Testing BE.getDisplayValue()', () => {
 				children: [],
 			}],
 		};
-		expect(BE.getDisplayValue(input)).toBe(' ');
+		expect(GE.getDisplayValue(input)).toBe(' ');
 	});
 });
 
@@ -173,7 +174,7 @@ describe('Testing BE.buildBoxDisplay()', () => {
 			displayName: 'a',
 			displayValue: 'b',
 		};
-		expect(BE.buildBoxDisplay(input)).toEqual(expected);
+		expect(GE.buildBoxDisplay(input)).toEqual(expected);
 	});
 
 	test('Entry with children can be used to build BoxDisplay', () => {
@@ -190,7 +191,7 @@ describe('Testing BE.buildBoxDisplay()', () => {
 			displayName: 'a',
 			displayValue: ' ',
 		};
-		expect(BE.buildBoxDisplay(input)).toEqual(expected);
+		expect(GE.buildBoxDisplay(input)).toEqual(expected);
 	});
 });
 
@@ -222,7 +223,7 @@ describe('Testing BE.entryToBox()', () => {
 			children: [],
 		};
 
-		expect(BE.entryToBox(input)).toEqual(expected);
+		expect(GE.entryToBox(input)).toEqual(expected);
 	});
 
 	test('Entry with one child can be used to build Box', () => {
@@ -274,7 +275,7 @@ describe('Testing BE.entryToBox()', () => {
 			}],
 		};
 
-		expect(BE.entryToBox(input)).toEqual(expected);
+		expect(GE.entryToBox(input)).toEqual(expected);
 	});
 
 	test('Entry with several children can be used to build Box', () => {
@@ -372,6 +373,6 @@ describe('Testing BE.entryToBox()', () => {
 			}],
 		};
 
-		expect(BE.entryToBox(input)).toEqual(expected);
+		expect(GE.entryToBox(input)).toEqual(expected);
 	});
 });

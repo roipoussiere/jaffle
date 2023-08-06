@@ -1,8 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
 
-import * as JE from '../../src/exporters/jsExporter';
-import { ExporterError } from '../../src/errors';
-import { Entry } from '../../src/model';
+import * as JE from '../../../src/transpilers/js/jsExporter';
+import { ExporterError } from '../../../src/errors';
+import { Entry } from '../../../src/model';
 
 const strValEntry: Entry = {
 	rawName: '',

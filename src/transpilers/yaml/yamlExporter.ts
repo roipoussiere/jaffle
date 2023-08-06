@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { dump as dumpYaml } from 'js-yaml';
 
-import { Dict, Entry } from '../model';
+import { Dict, Entry } from '../../model';
 
 export function entryToObject(entry: Entry): Dict<unknown> {
 	return {

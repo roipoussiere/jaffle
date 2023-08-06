@@ -1,44 +1,44 @@
-import { EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine }
+import { EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine, ViewUpdate }
 	from '@codemirror/view';
 import { solarizedDark } from '@uiw/codemirror-theme-solarized';
-import { javascriptLanguage } from '@codemirror/lang-javascript';
-import { bracketMatching, indentOnInput } from '@codemirror/language';
+import { yaml as yamlMode } from '@codemirror/legacy-modes/mode/yaml';
+import { StreamLanguage, LanguageSupport, bracketMatching } from '@codemirror/language';
 import { closeBrackets } from '@codemirror/autocomplete';
 import { Extension } from '@codemirror/state';
 import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
-import { Entry } from '../model';
-import entryToJs from '../exporters/jsExporter';
-
+import { Entry } from '../../model';
 import AbstractEditor from './abstractEditor';
-import { NotImplementedError } from '../errors';
+
+import entryToYaml from '../../transpilers/yaml/yamlExporter';
+import yamlToEntry from '../../transpilers/yaml/yamlImporter';
 
 type OnPlay = () => void;
 type OnStop = () => void;
 type OnUpdate = (content: string) => void;
 
-type JsEditorConfig = {
+type YamlEditorConfig = {
 	onPlay: OnPlay,
 	onStop: OnStop,
 	onUpdate: OnUpdate,
 }
 
-class JsEditor extends AbstractEditor {
-	config: JsEditorConfig;
+class YamlEditor extends AbstractEditor {
+	config: YamlEditorConfig;
 
 	private editorView: EditorView;
 
 	private extensions: Extension = (() => [
 		solarizedDark,
-		javascriptLanguage,
+		new LanguageSupport(StreamLanguage.define(yamlMode)),
 		history(),
 		lineNumbers(),
 		drawSelection(),
-		indentOnInput(),
+		// indentOnInput(), // not working with yamlLang
 		bracketMatching(),
 		closeBrackets(),
 		highlightActiveLine(),
-		EditorView.updateListener.of((update) => {
+		EditorView.updateListener.of((update: ViewUpdate) => {
 			if (update.docChanged) {
 				this.config.onUpdate(update.state.doc.toString());
 			}
@@ -62,16 +62,17 @@ class JsEditor extends AbstractEditor {
 		]),
 	])();
 
-	constructor(config: JsEditorConfig) {
+	constructor(config: YamlEditorConfig) {
 		super();
 		this.config = config;
+		this.editorView = new EditorView();
 	}
 
-	load(domEditor: HTMLElement) {
+	build() {
 		if (this.editorView === undefined) {
 			this.editorView = new EditorView({
 				extensions: this.extensions,
-				parent: domEditor,
+				parent: this.domEditor,
 			});
 			this.getDom().style.setProperty('display', 'none', 'important');
 		}
@@ -81,9 +82,8 @@ class JsEditor extends AbstractEditor {
 		return this.editorView.contentDOM.parentElement?.parentElement as HTMLElement;
 	}
 
-	// eslint-disable-next-line class-methods-use-this
 	public getContent(): Entry {
-		throw new NotImplementedError('JsEditor.getContent()');
+		return yamlToEntry(this.getRawContent());
 	}
 
 	public getRawContent(): string {
@@ -101,7 +101,7 @@ class JsEditor extends AbstractEditor {
 	}
 
 	public setContent(entry: Entry): void {
-		this.setRawContent(entryToJs(entry));
+		this.setRawContent(entryToYaml(entry));
 	}
 
 	static getStyle(): CSSStyleSheet {
@@ -119,4 +119,4 @@ class JsEditor extends AbstractEditor {
 	}
 }
 
-export default JsEditor;
+export default YamlEditor;

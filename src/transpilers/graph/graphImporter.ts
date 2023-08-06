@@ -1,4 +1,6 @@
-import { Box, Entry } from '../model';
+import { Entry } from '../../model';
+
+import { Box } from './graphModel';
 
 export function boxToEntry(box: Box): Entry {
 	return {

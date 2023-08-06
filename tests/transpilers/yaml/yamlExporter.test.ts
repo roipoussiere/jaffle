@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
-import * as YE from '../../src/exporters/yamlExporter';
-import { Entry } from '../../src/model';
+import * as YE from '../../../src/transpilers/yaml/yamlExporter';
+import { Entry } from '../../../src/model';
 
 describe('Testing YE.boxToYaml()', () => {
 	test('non-root entry is converted to an empty yaml document', () => {

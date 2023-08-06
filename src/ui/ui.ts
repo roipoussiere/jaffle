@@ -1,14 +1,15 @@
-import { Box, Entry } from '../model';
-import entryToJs from '../exporters/jsExporter';
+import { Entry } from '../model';
+import { Box } from '../transpilers/graph/graphModel';
+import entryToJs from '../transpilers/js/jsExporter';
 import tunes from '../tunes/_tuneIndex';
-import yamlToEntry from '../importers/yamlImporter';
+import yamlToEntry from '../transpilers/yaml/yamlImporter';
 
-import AbstractEditor from './abstractEditor';
-import { EditorBar, Button, Tab, MenuItem } from './editorBar';
-import ErrorBar from './errorBar';
-import NodeEditor from './nodeEditor';
-import YamlEditor from './yamlEditor';
-import JsEditor from './jsEditor';
+import AbstractEditor from './editors/abstractEditor';
+import { EditorBar, Button, Tab, MenuItem } from './widgets/editorBar';
+import ErrorBar from './widgets/errorBar';
+import NodeEditor from './editors/nodeEditor';
+import YamlEditor from './editors/yamlEditor';
+import JsEditor from './editors/jsEditor';
 
 type OnPlay = () => void;
 type OnStop = () => void;

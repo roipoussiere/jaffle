@@ -1,6 +1,8 @@
-import { Entry, Box, ValueType, BoxTyping, EntryData, BoxDisplay, EntryType } from '../model';
-import * as c from '../constants';
+import { Entry, ValueType, EntryData, EntryType } from '../../model';
+import * as c from '../../constants';
 import { entryToEntryType, entryToFuncName } from '../utils';
+
+import { Box, BoxTyping, BoxDisplay } from './graphModel';
 
 export function getValueType(entry: Entry): ValueType {
 	let boxValueType: ValueType;

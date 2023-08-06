@@ -1,4 +1,4 @@
-import { Entry } from '../model';
+import { Entry } from '../../model';
 
 export type EditorUiConfig = {
 	width: number,

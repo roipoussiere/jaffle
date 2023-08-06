@@ -1,7 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
 
-import * as BI from '../../src/importers/boxImporter';
-import { Box, EntryType, Entry, ValueType } from '../../src/model';
+import * as GI from '../../../src/transpilers/graph/graphImporter';
+import { EntryType, Entry, ValueType } from '../../../src/model';
+import { Box } from '../../../src/transpilers/graph/graphModel';
 
 describe('Testing BI.boxToEntry()', () => {
 	test('box without children can be converted to an Entry', () => {
@@ -26,7 +27,7 @@ describe('Testing BI.boxToEntry()', () => {
 			children: [],
 		};
 
-		expect(BI.boxToEntry(input)).toEqual(expected);
+		expect(GI.boxToEntry(input)).toEqual(expected);
 	});
 
 	test('box with children can be converted to an Entry', () => {
@@ -70,6 +71,6 @@ describe('Testing BI.boxToEntry()', () => {
 			}],
 		};
 
-		expect(BI.boxToEntry(input)).toEqual(expected);
+		expect(GI.boxToEntry(input)).toEqual(expected);
 	});
 });

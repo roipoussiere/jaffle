@@ -1,12 +1,13 @@
 import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
-import entryToBox from '../exporters/boxExporter';
-import boxToEntry from '../importers/boxImporter';
-import { Box, Entry, EntryType, ValueType, StringDict } from '../model';
-import { JaffleError } from '../errors';
-
+import { JaffleError } from '../../errors';
 import { AbstractEditor } from './abstractEditor';
+import { Entry, EntryType, ValueType, StringDict } from '../../model';
+
+import entryToBox from '../../transpilers/graph/graphExporter';
+import boxToEntry from '../../transpilers/graph/graphImporter';
+import { Box } from '../../transpilers/graph/graphModel';
 
 type Coordinates = [number, number];
 

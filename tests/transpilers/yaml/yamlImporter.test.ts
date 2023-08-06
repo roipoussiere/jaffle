@@ -1,8 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
 
-import * as YI from '../../src/importers/yamlImporter';
-import { ImporterError } from '../../src/errors';
-import { Entry } from '../../src/model';
+import * as YI from '../../../src/transpilers/yaml/yamlImporter';
+import { ImporterError } from '../../../src/errors';
+import { Entry } from '../../../src/model';
 
 describe('Testing YI.getEntryName()', () => {
 	test('bad functions fails', () => {

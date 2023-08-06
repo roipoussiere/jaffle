@@ -1,9 +1,9 @@
 import { load as loadYaml } from 'js-yaml';
 
-import * as c from '../constants';
-import { Entry, Dict } from '../model';
+import * as c from '../../constants';
+import { Entry, Dict } from '../../model';
 
-import { ImporterError } from '../errors';
+import { ImporterError } from '../../errors';
 
 export function getEntryName(rawFunc: Dict<unknown>) {
 	const keys = Object.keys(rawFunc);
