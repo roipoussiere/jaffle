@@ -68,7 +68,8 @@ class JsEditor extends AbstractEditor {
 		this.config = config;
 	}
 
-	static get tab(): Tab {
+	// eslint-disable-next-line class-methods-use-this
+	get tab(): Tab {
 		return {
 			id: 'js',
 			label: 'JS',

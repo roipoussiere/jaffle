@@ -1,4 +1,4 @@
-import { NotImplementedError, UndefError } from '../../errors';
+import { UndefError } from '../../errors';
 import { Entry } from '../../model';
 import { Tab } from '../widgets/editorBar';
 
@@ -27,9 +27,7 @@ export abstract class AbstractEditor {
 		this.uiConfig = DEFAULT_UI_CONFIG;
 	}
 
-	static get tab(): Tab {
-		throw new NotImplementedError('tab');
-	}
+	abstract get tab(): Tab;
 
 	get domEditor() { return this._domEditor || (function t() { throw new UndefError(); }()); }
 

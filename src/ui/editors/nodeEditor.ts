@@ -84,7 +84,8 @@ class NodeEditor extends AbstractEditor {
 
 	get domContainer() { return this._domContainer || (function t() { throw new UndefErr(); }()); }
 
-	static get tab(): Tab {
+	// eslint-disable-next-line class-methods-use-this
+	get tab(): Tab {
 		return {
 			id: 'node',
 			label: 'Node',

@@ -69,7 +69,8 @@ class YamlEditor extends AbstractEditor {
 		this.config = config;
 	}
 
-	static get tab(): Tab {
+	// eslint-disable-next-line class-methods-use-this
+	get tab(): Tab {
 		return {
 			id: 'yaml',
 			label: 'Yaml',
