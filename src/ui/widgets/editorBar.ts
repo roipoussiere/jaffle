@@ -1,3 +1,5 @@
+import { UndefError } from '../../errors';
+
 type OnButtonClick = () => void;
 type OnTabSwitch = (oldTabId: string, newTabId: string) => void;
 type OnExampleSelected = (example: string) => void;
@@ -32,25 +34,25 @@ export class EditorBar {
 
 	activeTabId: string;
 
+	examples: Array<string>;
+
 	onTabSwitch: OnTabSwitch;
 
-	dom: HTMLElement;
-
-	domTitle: HTMLParagraphElement;
+	onExampleSelected: OnExampleSelected;
 
 	domTabs: { [key: string]: HTMLButtonElement };
 
-	domExamplesMenu: HTMLDivElement;
+	private _dom?: HTMLElement;
 
-	domMenu: HTMLDivElement;
+	private _domTitle?: HTMLParagraphElement;
 
-	examplesTimer: NodeJS.Timeout;
+	private _domExplMenu?: HTMLDivElement;
 
-	menuTimer: NodeJS.Timeout;
+	private _domMenu?: HTMLDivElement;
 
-	examples: Array<string>;
+	private examplesTimer?: NodeJS.Timeout;
 
-	onExampleSelected: OnExampleSelected;
+	private menuTimer?: NodeJS.Timeout;
 
 	constructor(
 		title: string,
@@ -69,20 +71,21 @@ export class EditorBar {
 		this.onExampleSelected = onExampleSelected;
 		this.activeTabId = activeTabId || this.tabs[0].id;
 
-		this.dom = new HTMLElement();
-		this.domTitle = new HTMLParagraphElement();
-		this.domExamplesMenu = new HTMLDivElement();
-		this.domMenu = new HTMLDivElement();
-		this.menuTimer = new NodeJS.Timeout();
-		this.examplesTimer = new NodeJS.Timeout();
-
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		this.onTabSwitch = () => {};
 		this.domTabs = {};
 	}
 
+	get dom() { return this._dom || (function t() { throw new UndefError(); }()); }
+
+	get domTitle() { return this._domTitle || (function t() { throw new UndefError(); }()); }
+
+	get domMenu() { return this._domMenu || (function t() { throw new UndefError(); }()); }
+
+	get domExplMenu() { return this._domExplMenu || (function t() { throw new UndefError(); }()); }
+
 	build(domContainer: HTMLElement) {
-		this.dom = document.createElement('div');
+		this._dom = document.createElement('div');
 		this.dom.id = 'jaffle-editor-bar';
 
 		this.buildTitle();
@@ -108,7 +111,7 @@ export class EditorBar {
 	}
 
 	private buildTitle(): void {
-		this.domTitle = document.createElement('p');
+		this._domTitle = document.createElement('p');
 		this.domTitle.id = 'jaffle-title';
 		this.domTitle.innerText = this.title;
 
@@ -116,6 +119,9 @@ export class EditorBar {
 	}
 
 	private buildTab(tab: Tab): void {
+		if (this.dom === undefined) {
+			throw new UndefError('dom');
+		}
 		const domTab = document.createElement('button');
 
 		domTab.id = `jaffle-tab-${tab.id}`;
@@ -137,7 +143,7 @@ export class EditorBar {
 	}
 
 	private buildMenu(): void {
-		this.domMenu = document.createElement('div');
+		this._domMenu = document.createElement('div');
 
 		const onMouseOut = () => {
 			this.menuTimer = setTimeout(() => {
@@ -157,12 +163,12 @@ export class EditorBar {
 		domMenuItemExamples.innerText = 'Load example';
 		domMenuItemExamples.addEventListener('mouseover', () => {
 			clearTimeout(this.menuTimer);
-			this.domExamplesMenu.style.display = 'block';
+			this.domExplMenu.style.display = 'block';
 		});
 		domMenuItemExamples.addEventListener('mouseout', () => {
 			this.examplesTimer = setTimeout(() => {
 				// eslint-disable-next-line no-param-reassign
-				this.domExamplesMenu.style.display = 'none';
+				this.domExplMenu.style.display = 'none';
 			}, 200);
 		});
 		this.domMenu.appendChild(domMenuItemExamples);
@@ -201,8 +207,8 @@ export class EditorBar {
 	}
 
 	private buildExamplesMenu(): void {
-		this.domExamplesMenu = document.createElement('div');
-		this.domExamplesMenu.id = 'jaffle-examples-menu';
+		this._domExplMenu = document.createElement('div');
+		this.domExplMenu.id = 'jaffle-examples-menu';
 
 		// const domButtons: Array<HTMLButtonElement> = [];
 		this.examples.forEach((tune) => {
@@ -215,7 +221,7 @@ export class EditorBar {
 			});
 			domButton.addEventListener('mouseout', () => {
 				this.examplesTimer = setTimeout(() => {
-					this.domExamplesMenu.style.display = 'none';
+					this.domExplMenu.style.display = 'none';
 					this.domMenu.style.display = 'none';
 				}, 200);
 			});
@@ -223,10 +229,10 @@ export class EditorBar {
 				this.onExampleSelected(tune);
 			});
 
-			this.domExamplesMenu.appendChild(domButton);
+			this.domExplMenu.appendChild(domButton);
 		});
 
-		this.dom.appendChild(this.domExamplesMenu);
+		this.dom.appendChild(this.domExplMenu);
 	}
 
 	static getStyle(): CSSStyleSheet {

@@ -1,3 +1,4 @@
+import { UndefError } from '../../errors';
 import { Entry } from '../../model';
 
 export type EditorUiConfig = {
@@ -17,17 +18,18 @@ const DEFAULT_UI_CONFIG: EditorUiConfig = {
 };
 
 export abstract class AbstractEditor {
-	domEditor: HTMLElement;
-
 	uiConfig: EditorUiConfig;
 
+	private _domEditor?: HTMLElement;
+
 	constructor() {
-		this.domEditor = new HTMLElement();
 		this.uiConfig = DEFAULT_UI_CONFIG;
 	}
 
+	get domEditor() { return this._domEditor || (function t() { throw new UndefError(); }()); }
+
 	load(domEditor: HTMLElement, uiConfig: EditorUiConfig): void {
-		this.domEditor = domEditor;
+		this._domEditor = domEditor;
 		this.uiConfig = uiConfig;
 		this.build();
 	}

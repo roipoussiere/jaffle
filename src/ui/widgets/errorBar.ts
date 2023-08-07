@@ -1,12 +1,12 @@
-export default class ErrorBar {
-	dom: HTMLParagraphElement;
+import { UndefError } from '../../errors';
 
-	constructor() {
-		this.dom = new HTMLParagraphElement();
-	}
+export default class ErrorBar {
+	private _dom?: HTMLParagraphElement;
+
+	get dom() { return this._dom || (function t() { throw new UndefError(); }()); }
 
 	build(domContainer: HTMLElement) {
-		this.dom = document.createElement('p');
+		this._dom = document.createElement('p');
 
 		this.dom.id = 'jaffle-error';
 		this.dom.style.display = 'none';

@@ -1,13 +1,13 @@
 import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
-import { JaffleError } from '../../errors';
-import { AbstractEditor } from './abstractEditor';
 import { Entry, EntryType, ValueType, StringDict } from '../../model';
-
+import { UndefError as UndefErr } from '../../errors';
 import entryToBox from '../../transpilers/graph/graphExporter';
 import boxToEntry from '../../transpilers/graph/graphImporter';
 import { Box } from '../../transpilers/graph/graphModel';
+
+import { AbstractEditor } from './abstractEditor';
 
 type Coordinates = [number, number];
 
@@ -40,10 +40,6 @@ const BOX_VALUE_COLORS: StringDict = {
 class NodeEditor extends AbstractEditor {
 	config: NodeEditorConfig;
 
-	domContainer: HTMLDivElement;
-
-	domSvg: SVGElement;
-
 	svgWidth: number;
 
 	svgHeight: number;
@@ -52,9 +48,13 @@ class NodeEditor extends AbstractEditor {
 
 	offsetY: number;
 
-	_svg: d3.Selection<SVGSVGElement, undefined, null, undefined> | null;
+	domSvg?: SVGElement;
 
-	_tree: FuncNode | null;
+	private _domContainer: HTMLDivElement;
+
+	private _svg?: d3.Selection<SVGSVGElement, undefined, null, undefined>;
+
+	private _tree?: FuncNode;
 
 	constructor(config: NodeEditorConfig) {
 		super();
@@ -71,15 +71,17 @@ class NodeEditor extends AbstractEditor {
 			vBoxGap: 1,
 		};
 
-		this.domContainer = new HTMLDivElement();
-		this.domSvg = new SVGElement();
 		this.svgWidth = 0;
 		this.svgHeight = 0;
 		this.offsetX = 0;
 		this.offsetY = 0;
-		this._svg = null;
-		this._tree = null;
 	}
+
+	get svg() { return this._svg || (function t() { throw new UndefErr(); }()); }
+
+	get tree() { return this._tree || (function t() { throw new UndefErr(); }()); }
+
+	get domContainer() { return this._domContainer || (function t() { throw new UndefErr(); }()); }
 
 	get charWidth(): number {
 		return this.uiConfig.fontSize * 0.6;
@@ -94,7 +96,7 @@ class NodeEditor extends AbstractEditor {
 		const height = (this.uiConfig.height === 0
 			? window.innerHeight : this.uiConfig.height) - 35;
 
-		this.domContainer = document.createElement('div');
+		this._domContainer = document.createElement('div');
 		this.domContainer.classList.add('jaffle-graph-container');
 		this.domContainer.style.position = 'absolute';
 		this.domContainer.style.top = '35px';
@@ -103,20 +105,6 @@ class NodeEditor extends AbstractEditor {
 		this.domContainer.style.height = `${height}px`;
 		this.domContainer.style.overflow = 'scroll';
 		this.domEditor.appendChild(this.domContainer);
-	}
-
-	get svg(): d3.Selection<SVGSVGElement, undefined, null, undefined> {
-		if (this._svg === null) {
-			throw new JaffleError('svg is not initialized');
-		}
-		return this._svg;
-	}
-
-	get tree(): FuncNode {
-		if (this._tree === null) {
-			throw new JaffleError('tree is not initialized');
-		}
-		return this._tree;
 	}
 
 	getDom(): HTMLElement {

@@ -8,10 +8,11 @@ import { Extension } from '@codemirror/state';
 import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
 import { Entry } from '../../model';
-import AbstractEditor from './abstractEditor';
-
+import { UndefError } from '../../errors';
 import entryToYaml from '../../transpilers/yaml/yamlExporter';
 import yamlToEntry from '../../transpilers/yaml/yamlImporter';
+
+import AbstractEditor from './abstractEditor';
 
 type OnPlay = () => void;
 type OnStop = () => void;
@@ -26,7 +27,7 @@ type YamlEditorConfig = {
 class YamlEditor extends AbstractEditor {
 	config: YamlEditorConfig;
 
-	private editorView: EditorView;
+	private _editorView?: EditorView;
 
 	private extensions: Extension = (() => [
 		solarizedDark,
@@ -65,12 +66,13 @@ class YamlEditor extends AbstractEditor {
 	constructor(config: YamlEditorConfig) {
 		super();
 		this.config = config;
-		this.editorView = new EditorView();
 	}
 
+	get editorView() { return this._editorView || (function t() { throw new UndefError(); }()); }
+
 	build() {
-		if (this.editorView === undefined) {
-			this.editorView = new EditorView({
+		if (this._editorView === undefined) {
+			this._editorView = new EditorView({
 				extensions: this.extensions,
 				parent: this.domEditor,
 			});

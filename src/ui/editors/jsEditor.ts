@@ -8,10 +8,10 @@ import { Extension } from '@codemirror/state';
 import { history, indentWithTab, historyKeymap } from '@codemirror/commands';
 
 import { Entry } from '../../model';
+import { NotImplementedError } from '../../errors';
 import entryToJs from '../../transpilers/js/jsExporter';
 
 import AbstractEditor from './abstractEditor';
-import { NotImplementedError } from '../../errors';
 
 type OnPlay = () => void;
 type OnStop = () => void;

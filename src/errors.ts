@@ -14,6 +14,13 @@ export class NotImplementedError extends JaffleError {
 	}
 }
 
+export class UndefError extends JaffleError {
+	constructor(thingName = '') {
+		super(`${thingName === '' ? 'class attribute' : thingName} is not defined`);
+		this.name = UndefError.name;
+	}
+}
+
 export class ExporterError extends JaffleError {
 	constructor(message: string) {
 		super(message);

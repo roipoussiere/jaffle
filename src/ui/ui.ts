@@ -20,7 +20,7 @@ type EditorPartialConfig = {
 };
 
 export default class Editor {
-	domContainer: HTMLElement;
+	domContainer?: HTMLElement;
 
 	editorBar: EditorBar;
 
@@ -37,7 +37,6 @@ export default class Editor {
 	onUpdate: OnUpdate;
 
 	constructor() {
-		this.domContainer = new HTMLElement();
 		this.content = {
 			rawName: '',
 			rawValue: '',
