@@ -54,3 +54,9 @@ export interface Entry extends EntryData {
 export interface Dict<T> {
 	[key: string]: T;
 }
+
+export const EMPTY_ENTRY = {
+	rawName: '',
+	rawValue: '',
+	children: [],
+};

@@ -1,4 +1,4 @@
-import { Entry } from '../model';
+import { Entry, EMPTY_ENTRY } from '../model';
 import { Box } from '../transpilers/graph/graphModel';
 import entryToJs from '../transpilers/js/jsExporter';
 import tunes from '../tunes/_tuneIndex';
@@ -37,11 +37,7 @@ export default class Editor {
 	onUpdate: OnUpdate;
 
 	constructor() {
-		this.content = {
-			rawName: '',
-			rawValue: '',
-			children: [],
-		};
+		this.content = EMPTY_ENTRY;
 
 		/* eslint-disable @typescript-eslint/no-empty-function */
 		this.onPlay = () => {};
@@ -87,7 +83,7 @@ export default class Editor {
 			buttons,
 			menu,
 			Object.keys(tunes),
-			(example) => this.setContent(yamlToEntry(tunes[example])),
+			(example) => this.loadExample(example),
 			'node',
 		);
 
