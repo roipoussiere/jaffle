@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
 
+import { PlayButton, StopButton, WebsiteButton } from './jaffle/ui/ui';
 import { Editor } from './jaffle';
 import StrudelRepl from './strudelRepl';
 
-const editor = new Editor();
+const editor = new Editor([PlayButton, StopButton], [WebsiteButton]);
 const strudel = new StrudelRepl(
 	(error) => {
 		console.error(error);

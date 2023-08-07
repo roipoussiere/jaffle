@@ -17,12 +17,6 @@ export type Button = {
 	onClick: OnButtonClick,
 };
 
-export type MenuItem = {
-	id: string,
-	label: string,
-	onClick: OnButtonClick,
-};
-
 export class EditorBar {
 	title: string;
 
@@ -30,7 +24,7 @@ export class EditorBar {
 
 	buttons: Array<Button>;
 
-	menu: Array<MenuItem>;
+	menu: Array<Button>;
 
 	activeTabId: string;
 
@@ -58,7 +52,7 @@ export class EditorBar {
 		title: string,
 		tabs: Array<Tab>,
 		buttons: Array<Button>,
-		menu: Array<MenuItem>,
+		menu: Array<Button>,
 		examples: Array<string>,
 		onExampleSelected: OnExampleSelected,
 		activeTabId?: string,
@@ -185,7 +179,7 @@ export class EditorBar {
 		this.dom.appendChild(domMenuButton);
 	}
 
-	private static buildMenuItem(item: MenuItem): HTMLParagraphElement {
+	private static buildMenuItem(item: Button): HTMLParagraphElement {
 		const domMenuItem = document.createElement('p');
 		domMenuItem.id = `jaffle-menu-item-${item.id}`;
 		domMenuItem.className = 'jaffle-menu-item';

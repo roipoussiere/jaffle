@@ -6,7 +6,7 @@ import tunes from '../tunes/_tuneIndex';
 import yamlToEntry from '../transpilers/yaml/yamlImporter';
 
 import AbstractEditor from './editors/abstractEditor';
-import { EditorBar, Button, MenuItem } from './widgets/editorBar';
+import { EditorBar, Button } from './widgets/editorBar';
 import ErrorBar from './widgets/errorBar';
 import NodeEditor from './editors/nodeEditor';
 import YamlEditor from './editors/yamlEditor';
@@ -20,7 +20,34 @@ type EditorPartialConfig = {
 	fullScreen: boolean,
 };
 
+export const PlayButton: Button = {
+	id: 'play',
+	label: 'Play',
+	tooltip: 'Play/update tune (Ctrl-Enter)',
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	onClick: () => {},
+};
+
+export const StopButton: Button = {
+	id: 'stop',
+	label: 'Stop',
+	tooltip: 'Stop tune (Ctrl-.)',
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	onClick: () => {},
+};
+
+export const WebsiteButton: Button = {
+	id: 'website',
+	label: 'Website',
+	tooltip: 'Visit Jaffle website',
+	onClick: () => { window.location.href = '/jaffle'; },
+};
+
 export default class Editor {
+	buttons: Array<Button>;
+
+	menu: Array<Button>;
+
 	domContainer?: HTMLElement;
 
 	editorBar: EditorBar;
@@ -37,7 +64,17 @@ export default class Editor {
 
 	onUpdate: OnUpdate;
 
-	constructor() {
+	constructor(buttons: Array<Button>, menu: Array<Button>) {
+		this.buttons = buttons;
+		this.buttons.forEach((button, id) => {
+			if (button.id === 'play') {
+				this.buttons[id].onClick = () => this.onPlay();
+			} else if (button.id === 'stop') {
+				this.buttons[id].onClick = () => this.onStop();
+			}
+		});
+		this.menu = menu;
+
 		this.content = EMPTY_ENTRY;
 
 		/* eslint-disable @typescript-eslint/no-empty-function */
@@ -45,24 +82,6 @@ export default class Editor {
 		this.onStop = () => {};
 		this.onUpdate = () => {};
 		/* eslint-enable @typescript-eslint/no-empty-function */
-
-		const buttons: Array<Button> = [{
-			id: 'play',
-			label: 'Play',
-			tooltip: 'Play/update tune (Ctrl-Enter)',
-			onClick: () => this.onPlay(),
-		}, {
-			id: 'stop',
-			label: 'Stop',
-			tooltip: 'Stop tune (Ctrl-.)',
-			onClick: () => this.onStop(),
-		}];
-
-		const menu: Array<MenuItem> = [{
-			id: 'website',
-			label: 'Visit website',
-			onClick: () => { window.location.href = '/jaffle'; },
-		}];
 
 		this.editors = [
 			new NodeEditor({
