@@ -1,11 +1,12 @@
 import { Entry, EMPTY_ENTRY } from '../model';
+import { UndefError } from '../errors';
 import { Box } from '../transpilers/graph/graphModel';
 import entryToJs from '../transpilers/js/jsExporter';
 import tunes from '../tunes/_tuneIndex';
 import yamlToEntry from '../transpilers/yaml/yamlImporter';
 
 import AbstractEditor from './editors/abstractEditor';
-import { EditorBar, Button, Tab, MenuItem } from './widgets/editorBar';
+import { EditorBar, Button, MenuItem } from './widgets/editorBar';
 import ErrorBar from './widgets/errorBar';
 import NodeEditor from './editors/nodeEditor';
 import YamlEditor from './editors/yamlEditor';
@@ -26,7 +27,7 @@ export default class Editor {
 
 	errorBar: ErrorBar;
 
-	editors: { [key: string]: AbstractEditor };
+	editors: Array<AbstractEditor>;
 
 	content: Entry;
 
@@ -44,8 +45,6 @@ export default class Editor {
 		this.onStop = () => {};
 		this.onUpdate = () => {};
 		/* eslint-enable @typescript-eslint/no-empty-function */
-
-		const tabs: Array<Tab> = [NodeEditor.tab, YamlEditor.tab, JsEditor.tab];
 
 		const buttons: Array<Button> = [{
 			id: 'play',
@@ -65,9 +64,25 @@ export default class Editor {
 			onClick: () => { window.location.href = '/jaffle'; },
 		}];
 
+		this.editors = [
+			new NodeEditor({
+				onUpdate: (content: Box) => this.onUpdate(content),
+			}),
+			new YamlEditor({
+				onPlay: () => this.onPlay(),
+				onStop: () => this.onStop(),
+				onUpdate: (content: string) => this.onUpdate(content),
+			}),
+			new JsEditor({
+				onPlay: () => this.onPlay(),
+				onStop: () => this.onStop(),
+				onUpdate: (content: string) => this.onUpdate(content),
+			}),
+		];
+
 		this.editorBar = new EditorBar(
 			'Jaffle',
-			tabs,
+			this.editors.map((editor) => editor.tab),
 			buttons,
 			menu,
 			Object.keys(tunes),
@@ -76,42 +91,37 @@ export default class Editor {
 		);
 
 		this.editorBar.onTabSwitch = (oldTabId: string, newTabId: string) => {
+			const oldEditor = this.getEditor(oldTabId);
+			const newEditor = this.getEditor(newTabId);
+
 			try {
-				this.content = this.editors[oldTabId].getContent();
+				this.content = oldEditor.getContent();
 			} catch {
 				// eslint-disable-next-line no-console
 				console.warn('Importing JS code is not yet implemented, loading last content.');
 			}
-			this.editors[newTabId].setContent(this.content);
+			newEditor.setContent(this.content);
 
-			this.editors[oldTabId].getDom().style.setProperty('display', 'none', 'important');
-			this.editors[newTabId].getDom().style.display = 'block';
+			oldEditor.getDom().style.setProperty('display', 'none', 'important');
+			newEditor.getDom().style.display = 'block';
 		};
 		this.errorBar = new ErrorBar();
-
-		this.editors = {
-			yaml: new YamlEditor({
-				onPlay: () => this.onPlay(),
-				onStop: () => this.onStop(),
-				onUpdate: (content: string) => this.onUpdate(content),
-			}),
-			node: new NodeEditor({
-				onUpdate: (content: Box) => this.onUpdate(content),
-			}),
-			js: new JsEditor({
-				onPlay: () => this.onPlay(),
-				onStop: () => this.onStop(),
-				onUpdate: (content: string) => this.onUpdate(content),
-			}),
-		};
 	}
 
 	public loadExample(tuneExample: string): void {
 		this.setContent(yamlToEntry(tunes[tuneExample]));
 	}
 
+	public getEditor(tabId: string): AbstractEditor {
+		const editor = this.editors.find((_editor) => _editor.tab.id === tabId);
+		if (editor === undefined) {
+			throw new UndefError('editor');
+		}
+		return editor;
+	}
+
 	public getActiveEditor(): AbstractEditor {
-		return this.editors[this.editorBar.activeTabId];
+		return this.getEditor(this.editorBar.activeTabId);
 	}
 
 	public build(container: HTMLElement, uiConfig?: EditorPartialConfig) {
@@ -128,7 +138,7 @@ export default class Editor {
 
 		this.editorBar.build(container);
 		this.errorBar.build(container);
-		Object.values(this.editors).forEach((editor) => editor.load(container, _uiConfig));
+		this.editors.forEach((editor) => editor.load(container, _uiConfig));
 		this.getActiveEditor().getDom().style.display = 'block';
 		// this.getActiveEditor().setContent();
 
@@ -141,17 +151,17 @@ export default class Editor {
 	}
 
 	setContent(content: Entry): void {
-		this.editors[this.editorBar.activeTabId].setContent(content);
+		this.getActiveEditor().setContent(content);
 		this.content = content;
 	}
 
 	getContent(): Entry {
-		this.content = this.editors[this.editorBar.activeTabId].getContent();
+		this.content = this.getActiveEditor().getContent();
 		return this.content;
 	}
 
 	getRawContent(): unknown {
-		return this.editors[this.editorBar.activeTabId].getRawContent();
+		return this.getActiveEditor().getRawContent();
 	}
 
 	getJs(): string {
