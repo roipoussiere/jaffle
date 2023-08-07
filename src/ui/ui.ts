@@ -58,9 +58,9 @@ export default class Editor {
 
 	content: Entry;
 
-	onPlay: OnPlay;
+	play: OnPlay;
 
-	onStop: OnStop;
+	stop: OnStop;
 
 	onUpdate: OnUpdate;
 
@@ -68,18 +68,27 @@ export default class Editor {
 		this.buttons = buttons;
 		this.buttons.forEach((button, id) => {
 			if (button.id === 'play') {
-				this.buttons[id].onClick = () => this.onPlay();
+				this.buttons[id].onClick = () => this.play();
 			} else if (button.id === 'stop') {
-				this.buttons[id].onClick = () => this.onStop();
+				this.buttons[id].onClick = () => this.stop();
 			}
 		});
 		this.menu = menu;
 
+		document.addEventListener('keydown', (event) => {
+			if (event.ctrlKey && event.key === 'Enter') {
+				this.play();
+			}
+			if (event.ctrlKey && event.key === '.') {
+				this.stop();
+			}
+		}, false);
+
 		this.content = EMPTY_ENTRY;
 
 		/* eslint-disable @typescript-eslint/no-empty-function */
-		this.onPlay = () => {};
-		this.onStop = () => {};
+		this.play = () => {};
+		this.stop = () => {};
 		this.onUpdate = () => {};
 		/* eslint-enable @typescript-eslint/no-empty-function */
 
@@ -88,13 +97,9 @@ export default class Editor {
 				onUpdate: (content: Box) => this.onUpdate(content),
 			}),
 			new YamlEditor({
-				onPlay: () => this.onPlay(),
-				onStop: () => this.onStop(),
 				onUpdate: (content: string) => this.onUpdate(content),
 			}),
 			new JsEditor({
-				onPlay: () => this.onPlay(),
-				onStop: () => this.onStop(),
 				onUpdate: (content: string) => this.onUpdate(content),
 			}),
 		];

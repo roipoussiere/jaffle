@@ -14,13 +14,9 @@ import entryToJs from '../../transpilers/js/jsExporter';
 import AbstractEditor from './abstractEditor';
 import { Tab } from '../widgets/editorBar';
 
-type OnPlay = () => void;
-type OnStop = () => void;
 type OnUpdate = (content: string) => void;
 
 type JsEditorConfig = {
-	onPlay: OnPlay,
-	onStop: OnStop,
 	onUpdate: OnUpdate,
 }
 
@@ -44,23 +40,7 @@ class JsEditor extends AbstractEditor {
 				this.config.onUpdate(update.state.doc.toString());
 			}
 		}),
-		keymap.of([
-			indentWithTab,
-			...historyKeymap,
-			{
-				key: 'Ctrl-Enter',
-				run: () => {
-					this.config.onPlay();
-					return false;
-				},
-			}, {
-				key: 'Ctrl-.',
-				run: () => {
-					this.config.onStop();
-					return false;
-				},
-			},
-		]),
+		keymap.of([indentWithTab, ...historyKeymap]),
 	])();
 
 	constructor(config: JsEditorConfig) {

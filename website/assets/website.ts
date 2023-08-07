@@ -12,8 +12,8 @@ const strudel = new StrudelRepl(
 	},
 	() => editor.errorBar.setError(),
 );
-editor.onPlay = () => strudel.play(editor.getJs());
-editor.onStop = () => strudel.stop();
+editor.play = () => strudel.play(editor.getJs());
+editor.stop = () => strudel.stop();
 strudel.init();
 
 window.addEventListener('DOMContentLoaded', () => {
