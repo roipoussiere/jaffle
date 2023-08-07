@@ -12,6 +12,7 @@ import { NotImplementedError } from '../../errors';
 import entryToJs from '../../transpilers/js/jsExporter';
 
 import AbstractEditor from './abstractEditor';
+import { Tab } from '../widgets/editorBar';
 
 type OnPlay = () => void;
 type OnStop = () => void;
@@ -65,6 +66,14 @@ class JsEditor extends AbstractEditor {
 	constructor(config: JsEditorConfig) {
 		super();
 		this.config = config;
+	}
+
+	static get tab(): Tab {
+		return {
+			id: 'js',
+			label: 'JS',
+			tooltip: 'Switch to JavaScript editor',
+		};
 	}
 
 	build() {

@@ -13,6 +13,7 @@ import entryToYaml from '../../transpilers/yaml/yamlExporter';
 import yamlToEntry from '../../transpilers/yaml/yamlImporter';
 
 import AbstractEditor from './abstractEditor';
+import { Tab } from '../widgets/editorBar';
 
 type OnPlay = () => void;
 type OnStop = () => void;
@@ -66,6 +67,14 @@ class YamlEditor extends AbstractEditor {
 	constructor(config: YamlEditorConfig) {
 		super();
 		this.config = config;
+	}
+
+	static get tab(): Tab {
+		return {
+			id: 'yaml',
+			label: 'Yaml',
+			tooltip: 'Switch to yaml editor',
+		};
 	}
 
 	get editorView() { return this._editorView || (function t() { throw new UndefError(); }()); }

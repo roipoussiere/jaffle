@@ -8,6 +8,7 @@ import boxToEntry from '../../transpilers/graph/graphImporter';
 import { Box } from '../../transpilers/graph/graphModel';
 
 import { AbstractEditor } from './abstractEditor';
+import { Tab } from '../widgets/editorBar';
 
 type Coordinates = [number, number];
 
@@ -82,6 +83,14 @@ class NodeEditor extends AbstractEditor {
 	get tree() { return this._tree || (function t() { throw new UndefErr(); }()); }
 
 	get domContainer() { return this._domContainer || (function t() { throw new UndefErr(); }()); }
+
+	static get tab(): Tab {
+		return {
+			id: 'node',
+			label: 'Node',
+			tooltip: 'Switch to node editor',
+		};
+	}
 
 	get charWidth(): number {
 		return this.uiConfig.fontSize * 0.6;

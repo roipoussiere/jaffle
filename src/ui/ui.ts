@@ -45,19 +45,7 @@ export default class Editor {
 		this.onUpdate = () => {};
 		/* eslint-enable @typescript-eslint/no-empty-function */
 
-		const tabs: Array<Tab> = [{
-			id: 'node',
-			label: 'Node',
-			tooltip: 'Switch to node editor',
-		}, {
-			id: 'yaml',
-			label: 'Yaml',
-			tooltip: 'Switch to yaml editor',
-		}, {
-			id: 'js',
-			label: 'JS',
-			tooltip: 'Switch to JavaScript editor',
-		}];
+		const tabs: Array<Tab> = [NodeEditor.tab, YamlEditor.tab, JsEditor.tab];
 
 		const buttons: Array<Button> = [{
 			id: 'play',
