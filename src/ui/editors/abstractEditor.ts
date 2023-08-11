@@ -2,38 +2,37 @@ import { UndefError } from '../../errors';
 import { Entry } from '../../model';
 import { Tab } from '../widgets/editorBar';
 
-export type EditorUiConfig = {
+export type EditorConfig = {
 	width: number,
 	height: number,
 	fontSize: number,
-	hBoxGap: number,
-	vBoxGap: number,
+	onUpdate: (content: unknown) => void,
 };
 
-const DEFAULT_UI_CONFIG: EditorUiConfig = {
+export const DEFAULT_EDITOR_CONFIG: EditorConfig = {
 	width: 800,
 	height: 600,
 	fontSize: 16,
-	hBoxGap: 3,
-	vBoxGap: 1,
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	onUpdate: () => {},
 };
 
 export abstract class AbstractEditor {
-	uiConfig: EditorUiConfig;
+	config: EditorConfig;
 
 	private _domEditor?: HTMLElement;
 
 	constructor() {
-		this.uiConfig = DEFAULT_UI_CONFIG;
+		this.config = DEFAULT_EDITOR_CONFIG;
 	}
 
 	abstract get tab(): Tab;
 
 	get domEditor() { return this._domEditor || (function t() { throw new UndefError(); }()); }
 
-	load(domEditor: HTMLElement, uiConfig: EditorUiConfig): void {
+	load(domEditor: HTMLElement, config: EditorConfig): void {
 		this._domEditor = domEditor;
-		this.uiConfig = uiConfig;
+		this.config = config;
 		this.build();
 	}
 

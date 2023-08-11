@@ -17,10 +17,14 @@ type FuncNode = d3.id<Box> & {
 	y: number,
 };
 
-type OnUpdate = (rawContent: Box) => void;
+type NodeConfig = {
+	hBoxGap: number,
+	vBoxGap: number,
+};
 
-type NodeEditorConfig = {
-	onUpdate: OnUpdate,
+const DEFAULT_NODE_CONFIG: NodeConfig = {
+	hBoxGap: 3,
+	vBoxGap: 1,
 };
 
 const BOX_NAME_COLORS: StringDict = {
@@ -38,8 +42,8 @@ const BOX_VALUE_COLORS: StringDict = {
 	[ValueType.Expression]: 'blue',
 };
 
-class NodeEditor extends AbstractEditor {
-	config: NodeEditorConfig;
+export class NodeEditor extends AbstractEditor {
+	nodeConfig: NodeConfig;
 
 	svgWidth: number;
 
@@ -57,20 +61,9 @@ class NodeEditor extends AbstractEditor {
 
 	private _tree?: FuncNode;
 
-	constructor(config: NodeEditorConfig) {
+	constructor(nodeConfig: Partial<NodeConfig>) {
 		super();
-		this.config = {
-			// eslint-disable-next-line @typescript-eslint/no-empty-function
-			onUpdate: config.onUpdate || (() => {}),
-		};
-
-		this.uiConfig = {
-			width: 800,
-			height: 600,
-			fontSize: 16,
-			hBoxGap: 3,
-			vBoxGap: 1,
-		};
+		this.nodeConfig = { ...DEFAULT_NODE_CONFIG, ...nodeConfig };
 
 		this.svgWidth = 0;
 		this.svgHeight = 0;
@@ -94,25 +87,21 @@ class NodeEditor extends AbstractEditor {
 	}
 
 	get charWidth(): number {
-		return this.uiConfig.fontSize * 0.6;
+		return this.config.fontSize * 0.6;
 	}
 
 	get charHeight(): number {
-		return this.uiConfig.fontSize * 1.4;
+		return this.config.fontSize * 1.4;
 	}
 
 	build(): void {
-		const width = (this.uiConfig.width === 0 ? window.innerWidth : this.uiConfig.width) - 10;
-		const height = (this.uiConfig.height === 0
-			? window.innerHeight : this.uiConfig.height) - 35;
-
 		this._domContainer = document.createElement('div');
 		this.domContainer.classList.add('jaffle-graph-container');
 		this.domContainer.style.position = 'absolute';
 		this.domContainer.style.top = '35px';
 		this.domContainer.style.left = '10px';
-		this.domContainer.style.width = `${width}px`;
-		this.domContainer.style.height = `${height}px`;
+		this.domContainer.style.width = `${this.config.width - 10}px`;
+		this.domContainer.style.height = `${this.config.height - 35}px`;
 		this.domContainer.style.overflow = 'scroll';
 		this.domEditor.appendChild(this.domContainer);
 	}
@@ -142,14 +131,14 @@ class NodeEditor extends AbstractEditor {
 	public initTree(): void {
 		const layout = flextree({})
 			.nodeSize((n: FuncNode) => (
-				[this.charHeight, (n.data.width + this.uiConfig.hBoxGap) * this.charWidth]
+				[this.charHeight, (n.data.width + this.nodeConfig.hBoxGap) * this.charWidth]
 			))
 			.spacing((a: FuncNode, b: FuncNode) => {
 				const bothAreValue = a.data.type === EntryType.Value
 					&& b.data.type === EntryType.Value;
 				const shouldStack = a.parent === b.parent
 					&& (bothAreValue || b.data.type === EntryType.ChainedFunction);
-				return shouldStack ? 0 : this.uiConfig.vBoxGap * this.charHeight;
+				return shouldStack ? 0 : this.nodeConfig.vBoxGap * this.charHeight;
 			});
 
 		layout(this.tree);
@@ -163,7 +152,7 @@ class NodeEditor extends AbstractEditor {
 
 		this.tree.each((node: FuncNode) => {
 			if (node.y + node.data.width * this.charWidth > svgWidth) {
-				svgWidth = node.y + (node.data.width - this.uiConfig.hBoxGap) * this.charWidth;
+				svgWidth = node.y + (node.data.width - this.nodeConfig.hBoxGap) * this.charWidth;
 			}
 			if (node.x > maxNodeY) {
 				maxNodeY = node.x;
@@ -175,7 +164,8 @@ class NodeEditor extends AbstractEditor {
 
 		this.svgWidth = svgWidth;
 		this.svgHeight = maxNodeY - minNodeY + this.charHeight * 2;
-		this.offsetX = ((<FuncNode> this.tree).data.width + this.uiConfig.hBoxGap) * this.charWidth;
+		this.offsetX = ((this.tree as FuncNode).data.width + this.nodeConfig.hBoxGap)
+			* this.charWidth;
 		this.offsetY = minNodeY - this.charHeight;
 	}
 
@@ -193,7 +183,7 @@ class NodeEditor extends AbstractEditor {
 			.attr('width', this.svgWidth)
 			.attr('height', this.svgHeight)
 			.attr('viewBox', [this.offsetX, this.offsetY, this.svgWidth, this.svgHeight])
-			.style('font', `${this.uiConfig.fontSize}px mono`);
+			.style('font', `${this.config.fontSize}px mono`);
 
 		this.drawLinks();
 		this.drawGroupArea();
@@ -363,7 +353,7 @@ class NodeEditor extends AbstractEditor {
 
 			.style('width', '100%')
 			.style('padding', '0')
-			.style('font-size', `${this.uiConfig.fontSize}px`)
+			.style('font-size', `${this.config.fontSize}px`)
 			.style('font-family', 'monospace')
 			.style('background-color', '#aaa')
 			.style('color', isValueSelected

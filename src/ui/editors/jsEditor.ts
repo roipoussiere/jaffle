@@ -11,18 +11,10 @@ import { Entry } from '../../model';
 import { NotImplementedError } from '../../errors';
 import entryToJs from '../../transpilers/js/jsExporter';
 
-import AbstractEditor from './abstractEditor';
 import { Tab } from '../widgets/editorBar';
-
-type OnUpdate = (content: string) => void;
-
-type JsEditorConfig = {
-	onUpdate: OnUpdate,
-}
+import AbstractEditor from './abstractEditor';
 
 class JsEditor extends AbstractEditor {
-	config: JsEditorConfig;
-
 	private editorView: EditorView;
 
 	private extensions: Extension = (() => [
@@ -42,11 +34,6 @@ class JsEditor extends AbstractEditor {
 		}),
 		keymap.of([indentWithTab, ...historyKeymap]),
 	])();
-
-	constructor(config: JsEditorConfig) {
-		super();
-		this.config = config;
-	}
 
 	// eslint-disable-next-line class-methods-use-this
 	get tab(): Tab {
@@ -94,6 +81,7 @@ class JsEditor extends AbstractEditor {
 		this.setRawContent(entryToJs(entry));
 	}
 
+	// todo: set font-size dynamically
 	static getStyle(): CSSStyleSheet {
 		const style = new CSSStyleSheet();
 		style.replaceSync(`

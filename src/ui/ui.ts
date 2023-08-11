@@ -1,24 +1,16 @@
 import { Entry, EMPTY_ENTRY } from '../model';
 import { UndefError } from '../errors';
-import { Box } from '../transpilers/graph/graphModel';
 import entryToJs from '../transpilers/js/jsExporter';
 import tunes from '../tunes/_tuneIndex';
 import yamlToEntry from '../transpilers/yaml/yamlImporter';
 
-import AbstractEditor from './editors/abstractEditor';
+import { AbstractEditor, EditorConfig, DEFAULT_EDITOR_CONFIG } from './editors/abstractEditor';
 import { EditorBar, Button } from './widgets/editorBar';
 import ErrorBar from './widgets/errorBar';
-import NodeEditor from './editors/nodeEditor';
 import YamlEditor from './editors/yamlEditor';
-import JsEditor from './editors/jsEditor';
 
 type OnPlay = () => void;
 type OnStop = () => void;
-type OnUpdate = (content: unknown) => void;
-
-type EditorPartialConfig = {
-	fullScreen: boolean,
-};
 
 export const PlayButton: Button = {
 	id: 'play',
@@ -43,7 +35,9 @@ export const WebsiteButton: Button = {
 	onClick: () => { window.location.href = '/jaffle'; },
 };
 
-export default class Editor {
+export class Editor {
+	editorConfig: EditorConfig;
+
 	buttons: Array<Button>;
 
 	menu: Array<Button>;
@@ -62,10 +56,18 @@ export default class Editor {
 
 	stop: OnStop;
 
-	onUpdate: OnUpdate;
-
-	constructor(buttons: Array<Button>, menu: Array<Button>) {
+	constructor(
+		editorConfig: Partial<EditorConfig>,
+		editors: Array<AbstractEditor>,
+		buttons: Array<Button>, // todo: one array of buttons, with ButtonLocation enum
+		menu: Array<Button>,
+	) {
+		this.editorConfig = { ...DEFAULT_EDITOR_CONFIG, ...editorConfig };
+		this.editors = editors;
 		this.buttons = buttons;
+		this.menu = menu;
+
+		// todo: move to EditorBar?
 		this.buttons.forEach((button, id) => {
 			if (button.id === 'play') {
 				this.buttons[id].onClick = () => this.play();
@@ -73,8 +75,8 @@ export default class Editor {
 				this.buttons[id].onClick = () => this.stop();
 			}
 		});
-		this.menu = menu;
 
+		// todo: move to dedicated method
 		document.addEventListener('keydown', (event) => {
 			if (event.ctrlKey && event.key === 'Enter') {
 				this.play();
@@ -89,21 +91,9 @@ export default class Editor {
 		/* eslint-disable @typescript-eslint/no-empty-function */
 		this.play = () => {};
 		this.stop = () => {};
-		this.onUpdate = () => {};
 		/* eslint-enable @typescript-eslint/no-empty-function */
 
-		this.editors = [
-			new NodeEditor({
-				onUpdate: (content: Box) => this.onUpdate(content),
-			}),
-			new YamlEditor({
-				onUpdate: (content: string) => this.onUpdate(content),
-			}),
-			new JsEditor({
-				onUpdate: (content: string) => this.onUpdate(content),
-			}),
-		];
-
+		// todo: move to dedicated method
 		this.editorBar = new EditorBar(
 			'Jaffle',
 			this.editors.map((editor) => editor.tab),
@@ -113,7 +103,6 @@ export default class Editor {
 			(example) => this.loadExample(example),
 			'node',
 		);
-
 		this.editorBar.onTabSwitch = (oldTabId: string, newTabId: string) => {
 			const oldEditor = this.getEditor(oldTabId);
 			const newEditor = this.getEditor(newTabId);
@@ -148,21 +137,19 @@ export default class Editor {
 		return this.getEditor(this.editorBar.activeTabId);
 	}
 
-	public build(container: HTMLElement, uiConfig?: EditorPartialConfig) {
-		const _uiConfig = {
-			width: uiConfig?.fullScreen ? 0 : 800,
-			height: uiConfig?.fullScreen ? 0 : 400,
-			fontSize: 16,
-			hBoxGap: 3,
-			vBoxGap: 0.5,
-		};
-
+	public build(container: HTMLElement, fullScreen = false) {
 		this.domContainer = container;
 		this.domContainer.classList.add('jaffle-editor');
 
 		this.editorBar.build(container);
 		this.errorBar.build(container);
-		this.editors.forEach((editor) => editor.load(container, _uiConfig));
+
+		if (fullScreen) {
+			this.editorConfig.width = window.innerWidth;
+			this.editorConfig.height = window.innerHeight;
+		}
+
+		this.editors.forEach((editor) => editor.load(container, this.editorConfig));
 		this.getActiveEditor().getDom().style.display = 'block';
 		// this.getActiveEditor().setContent();
 
@@ -209,3 +196,5 @@ export default class Editor {
 		return style;
 	}
 }
+
+export default Editor;

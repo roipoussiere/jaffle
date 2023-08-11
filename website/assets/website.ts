@@ -1,10 +1,26 @@
 /* eslint-disable no-console */
 
-import { PlayButton, StopButton, WebsiteButton } from './jaffle/ui/ui';
-import { Editor } from './jaffle';
+import { Editor, NodeEditor, YamlEditor, JsEditor, PlayButton, StopButton, WebsiteButton }
+	from './jaffle';
+
 import StrudelRepl from './strudelRepl';
 
-const editor = new Editor([PlayButton, StopButton], [WebsiteButton]);
+const editorConfig = {
+	width: 800,
+	height: 400,
+	fontSize: 16,
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	onUpdate: () => {},
+};
+
+const editors = [
+	new NodeEditor({ hBoxGap: 3, vBoxGap: 0.5 }),
+	new YamlEditor(),
+	new JsEditor(),
+];
+
+const editor = new Editor(editorConfig, editors, [PlayButton, StopButton], [WebsiteButton]);
+
 const strudel = new StrudelRepl(
 	(error) => {
 		console.error(error);
@@ -18,8 +34,6 @@ strudel.init();
 
 window.addEventListener('DOMContentLoaded', () => {
 	const domEditor = document.getElementById('jaffle-editor') as HTMLDivElement;
-	editor.build(domEditor, {
-		fullScreen: domEditor.classList.contains('jaffle-fs'),
-	});
+	editor.build(domEditor, domEditor.classList.contains('jaffle-fs'));
 	editor.loadExample('amen_sister');
 });

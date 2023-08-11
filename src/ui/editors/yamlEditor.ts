@@ -11,19 +11,11 @@ import { Entry } from '../../model';
 import { UndefError } from '../../errors';
 import entryToYaml from '../../transpilers/yaml/yamlExporter';
 import yamlToEntry from '../../transpilers/yaml/yamlImporter';
-
-import AbstractEditor from './abstractEditor';
 import { Tab } from '../widgets/editorBar';
 
-type OnUpdate = (content: string) => void;
-
-type YamlEditorConfig = {
-	onUpdate: OnUpdate,
-}
+import AbstractEditor from './abstractEditor';
 
 class YamlEditor extends AbstractEditor {
-	config: YamlEditorConfig;
-
 	private _editorView?: EditorView;
 
 	private extensions: Extension = (() => [
@@ -43,11 +35,6 @@ class YamlEditor extends AbstractEditor {
 		}),
 		keymap.of([indentWithTab, ...historyKeymap]),
 	])();
-
-	constructor(config: YamlEditorConfig) {
-		super();
-		this.config = config;
-	}
 
 	// eslint-disable-next-line class-methods-use-this
 	get tab(): Tab {
@@ -96,6 +83,7 @@ class YamlEditor extends AbstractEditor {
 		this.setRawContent(entryToYaml(entry));
 	}
 
+	// todo: set font-size dynamically
 	static getStyle(): CSSStyleSheet {
 		const style = new CSSStyleSheet();
 		style.replaceSync(`
