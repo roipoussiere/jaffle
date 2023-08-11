@@ -66,34 +66,10 @@ export class Editor {
 		this.editors = editors;
 		this.buttons = buttons;
 		this.menu = menu;
-
-		// todo: move to EditorBar?
-		this.buttons.forEach((button, id) => {
-			if (button.id === 'play') {
-				this.buttons[id].onClick = () => this.play();
-			} else if (button.id === 'stop') {
-				this.buttons[id].onClick = () => this.stop();
-			}
-		});
-
-		// todo: move to dedicated method
-		document.addEventListener('keydown', (event) => {
-			if (event.ctrlKey && event.key === 'Enter') {
-				this.play();
-			}
-			if (event.ctrlKey && event.key === '.') {
-				this.stop();
-			}
-		}, false);
-
 		this.content = EMPTY_ENTRY;
-
-		/* eslint-disable @typescript-eslint/no-empty-function */
-		this.play = () => {};
-		this.stop = () => {};
-		/* eslint-enable @typescript-eslint/no-empty-function */
-
-		// todo: move to dedicated method
+		this.play = () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
+		this.stop = () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
+		this.errorBar = new ErrorBar();
 		this.editorBar = new EditorBar(
 			'Jaffle',
 			this.editors.map((editor) => editor.tab),
@@ -103,29 +79,16 @@ export class Editor {
 			(example) => this.loadExample(example),
 			'node',
 		);
-		this.editorBar.onTabSwitch = (oldTabId: string, newTabId: string) => {
-			const oldEditor = this.getEditor(oldTabId);
-			const newEditor = this.getEditor(newTabId);
 
-			try {
-				this.content = oldEditor.getContent();
-			} catch {
-				// eslint-disable-next-line no-console
-				console.warn('Importing JS code is not yet implemented, loading last content.');
-			}
-			newEditor.setContent(this.content);
-
-			oldEditor.getDom().style.setProperty('display', 'none', 'important');
-			newEditor.getDom().style.display = 'block';
-		};
-		this.errorBar = new ErrorBar();
+		this.addButtonsEvents();
+		this.addKeyboardEvents();
 	}
 
-	public loadExample(tuneExample: string): void {
+	loadExample(tuneExample: string): void {
 		this.setContent(yamlToEntry(tunes[tuneExample]));
 	}
 
-	public getEditor(tabId: string): AbstractEditor {
+	getEditor(tabId: string): AbstractEditor {
 		const editor = this.editors.find((_editor) => _editor.tab.id === tabId);
 		if (editor === undefined) {
 			throw new UndefError('editor');
@@ -133,11 +96,11 @@ export class Editor {
 		return editor;
 	}
 
-	public getActiveEditor(): AbstractEditor {
+	getActiveEditor(): AbstractEditor {
 		return this.getEditor(this.editorBar.activeTabId);
 	}
 
-	public build(container: HTMLElement, fullScreen = false) {
+	build(container: HTMLElement, fullScreen = false) {
 		this.domContainer = container;
 		this.domContainer.classList.add('jaffle-editor');
 
@@ -180,6 +143,43 @@ export class Editor {
 			return this.getRawContent() as string;
 		}
 		return entryToJs(this.getContent());
+	}
+
+	private addButtonsEvents() {
+		this.buttons.forEach((button, id) => {
+			if (button.id === 'play') {
+				this.buttons[id].onClick = () => this.play();
+			} else if (button.id === 'stop') {
+				this.buttons[id].onClick = () => this.stop();
+			}
+		});
+
+		this.editorBar.onTabSwitch = (oldTabId: string, newTabId: string) => {
+			const oldEditor = this.getEditor(oldTabId);
+			const newEditor = this.getEditor(newTabId);
+
+			try {
+				this.content = oldEditor.getContent();
+			} catch {
+				// eslint-disable-next-line no-console
+				console.warn('Importing JS code is not yet implemented, loading last content.');
+			}
+			newEditor.setContent(this.content);
+
+			oldEditor.getDom().style.setProperty('display', 'none', 'important');
+			newEditor.getDom().style.display = 'block';
+		};
+	}
+
+	private addKeyboardEvents() {
+		document.addEventListener('keydown', (event) => {
+			if (event.ctrlKey && event.key === 'Enter') {
+				this.play();
+			}
+			if (event.ctrlKey && event.key === '.') {
+				this.stop();
+			}
+		}, false);
 	}
 
 	static getStyle() {
