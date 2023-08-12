@@ -197,32 +197,24 @@ export class NodeEditor extends AbstractEditor {
 	private addKeyboardEvents() {
 		document.addEventListener('keydown', (event) => {
 			// console.log(event);
+			const isKey = this.focusedBoxId[0] === 'k';
 			const boxId = this.focusedBoxId.substring(1);
 			const path = boxId.split('-');
-			const lastId = path.pop();
+			const index = Number(path.pop());
 
+			let newId = '';
 			if (event.key === 'ArrowRight') {
-				if (this.focusedBoxId[0] === 'k') {
-					this.focusBox(`v${boxId}`);
-				} else if (this.getNodeById(`${boxId}-0`) !== undefined) {
-					this.focusBox(`k${boxId}-0`);
-				}
-			} else if (event.key === 'ArrowLeft') {
-				if (this.focusedBoxId[0] === 'v') {
-					this.focusBox(`k${boxId}`);
-				} else if (path.length > 0) {
-					this.focusBox(`v${path.join('-')}`);
-				}
-			} else if (event.key === 'ArrowUp') {
-				if (lastId !== '0') {
-					const newBoxId = `${path.map((id) => `${id}-`).join('')}${Number(lastId) - 1}`;
-					this.focusBox(`${this.focusedBoxId[0]}${newBoxId}`);
-				}
+				newId = isKey ? `v${boxId}` : `k${boxId}-0`;
+			} else if (event.key === 'ArrowLeft' && (path.length > 0 || !isKey)) {
+				newId = isKey ? `v${path.join('-')}` : `k${boxId}`;
+			} else if (event.key === 'ArrowUp' && index !== 0) {
+				newId = `${isKey ? 'k' : 'v'}${path.map((id) => `${id}-`).join('')}${index - 1}`;
 			} else if (event.key === 'ArrowDown') {
-				const newBoxId = `${path.map((id) => `${id}-`).join('')}${Number(lastId) + 1}`;
-				if (this.getNodeById(newBoxId) !== undefined) {
-					this.focusBox(`${this.focusedBoxId[0]}${newBoxId}`);
-				}
+				newId = `${isKey ? 'k' : 'v'}${path.map((id) => `${id}-`).join('')}${index + 1}`;
+			}
+
+			if (newId !== '' && this.getNodeById(newId.substring(1)) !== undefined) {
+				this.focusBox(newId);
 			} else if (event.key === 'Enter') {
 				if (this.isTyping) {
 					this.validateInput();
