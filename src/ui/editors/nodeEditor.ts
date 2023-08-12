@@ -198,19 +198,30 @@ export class NodeEditor extends AbstractEditor {
 		document.addEventListener('keydown', (event) => {
 			// console.log(event);
 			const boxId = this.focusedBoxId.substring(1);
-			const box = this.getNodeById(boxId);
+			const path = boxId.split('-');
+			const lastId = path.pop();
 
 			if (event.key === 'ArrowRight') {
 				if (this.focusedBoxId[0] === 'k') {
 					this.focusBox(`v${boxId}`);
-				} else if (box?.children !== undefined && box.children.length > 0) {
-					this.focusBox(`k${box.children[0].data.id}`);
+				} else if (this.getNodeById(`${boxId}-0`) !== undefined) {
+					this.focusBox(`k${boxId}-0`);
 				}
 			} else if (event.key === 'ArrowLeft') {
 				if (this.focusedBoxId[0] === 'v') {
 					this.focusBox(`k${boxId}`);
-				} else if (box !== undefined && box?.parent !== null) {
-					this.focusBox(`v${box.parent.data.id}`);
+				} else if (path.length > 0) {
+					this.focusBox(`v${path.join('-')}`);
+				}
+			} else if (event.key === 'ArrowUp') {
+				if (lastId !== '0') {
+					const newBoxId = `${path.map((id) => `${id}-`).join('')}${Number(lastId) - 1}`;
+					this.focusBox(`${this.focusedBoxId[0]}${newBoxId}`);
+				}
+			} else if (event.key === 'ArrowDown') {
+				const newBoxId = `${path.map((id) => `${id}-`).join('')}${Number(lastId) + 1}`;
+				if (this.getNodeById(newBoxId) !== undefined) {
+					this.focusBox(`${this.focusedBoxId[0]}${newBoxId}`);
 				}
 			} else if (event.key === 'Enter') {
 				if (this.isTyping) {
