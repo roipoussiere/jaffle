@@ -212,6 +212,19 @@ export class NodeEditor extends AbstractEditor {
 				event.preventDefault();
 			}
 
+			if (event.ctrlKey) {
+				if (event.key === 'ArrowUp') {
+					this.domContainer.scrollBy(0, -100);
+				} else if (event.key === 'ArrowDown') {
+					this.domContainer.scrollBy(0, 100);
+				} else if (event.key === 'ArrowLeft') {
+					this.domContainer.scrollBy(-100, 0);
+				} else if (event.key === 'ArrowRight') {
+					this.domContainer.scrollBy(100, 0);
+				}
+				return;
+			}
+
 			const isKey = this.focusedBoxId[0] === 'k';
 			const boxId = this.focusedBoxId.substring(1);
 			const path = boxId.split('-');
