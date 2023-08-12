@@ -194,12 +194,25 @@ export class NodeEditor extends AbstractEditor {
 		}
 	}
 
-	// eslint-disable-next-line class-methods-use-this
 	private addKeyboardEvents() {
 		document.addEventListener('keydown', (event) => {
 			// console.log(event);
+			const boxId = this.focusedBoxId.substring(1);
+			const box = this.getNodeById(boxId);
 
-			if (event.key === 'Enter') {
+			if (event.key === 'ArrowRight') {
+				if (this.focusedBoxId[0] === 'k') {
+					this.focusBox(`v${boxId}`);
+				} else if (box?.children !== undefined && box.children.length > 0) {
+					this.focusBox(`k${box.children[0].data.id}`);
+				}
+			} else if (event.key === 'ArrowLeft') {
+				if (this.focusedBoxId[0] === 'v') {
+					this.focusBox(`k${boxId}`);
+				} else if (box !== undefined && box?.parent !== null) {
+					this.focusBox(`v${box.parent.data.id}`);
+				}
+			} else if (event.key === 'Enter') {
 				if (this.isTyping) {
 					this.validateInput();
 				} else {
@@ -381,7 +394,6 @@ export class NodeEditor extends AbstractEditor {
 	}
 
 	private validateInput(): void {
-		console.log('validating');
 		const domInput = document.getElementById('jaffle-ne-input') as HTMLInputElement;
 
 		if (domInput === null) {
