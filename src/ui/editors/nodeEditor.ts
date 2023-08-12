@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
 import { Entry, EntryType, ValueType, StringDict } from '../../model';
-import { UndefError as UndefErr } from '../../errors';
+import { JaffleError, UndefError as UndefErr } from '../../errors';
 import entryToBox from '../../transpilers/graph/graphExporter';
 import boxToEntry from '../../transpilers/graph/graphImporter';
 import { Box } from '../../transpilers/graph/graphModel';
@@ -55,6 +55,8 @@ export class NodeEditor extends AbstractEditor {
 
 	focusedBoxId: string;
 
+	isTyping: boolean;
+
 	domSvg?: SVGElement;
 
 	private _domContainer: HTMLDivElement;
@@ -72,6 +74,7 @@ export class NodeEditor extends AbstractEditor {
 		this.offsetX = 0;
 		this.offsetY = 0;
 		this.focusedBoxId = '';
+		this.isTyping = false;
 	}
 
 	get svg() { return this._svg || (function t() { throw new UndefErr(); }()); }
@@ -107,6 +110,7 @@ export class NodeEditor extends AbstractEditor {
 		this.domContainer.style.height = `${this.config.height - 35}px`;
 		this.domContainer.style.overflow = 'scroll';
 		this.domEditor.appendChild(this.domContainer);
+		this.addKeyboardEvents();
 	}
 
 	getDom(): HTMLElement {
@@ -190,6 +194,21 @@ export class NodeEditor extends AbstractEditor {
 		}
 	}
 
+	// eslint-disable-next-line class-methods-use-this
+	private addKeyboardEvents() {
+		document.addEventListener('keydown', (event) => {
+			// console.log(event);
+
+			if (event.key === 'Enter') {
+				if (this.isTyping) {
+					this.validateInput();
+				} else {
+					this.drawInput();
+				}
+			}
+		});
+	}
+
 	private drawSvg(): void {
 		this._svg = d3.create('svg')
 			.attr('class', 'jaffle-graph')
@@ -243,9 +262,6 @@ export class NodeEditor extends AbstractEditor {
 	private drawBoxes(): void {
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const self = this;
-		const onClick = (node: FuncNode, isValue: boolean) => {
-			self.drawInput(node.data.id, isValue);
-		};
 
 		const box = this.svg.append('g')
 			.selectAll()
@@ -287,7 +303,7 @@ export class NodeEditor extends AbstractEditor {
 			.attr('ry', 3)
 			.attr('opacity', 0)
 			.on('mouseover', (event, n: FuncNode) => this.focusBox(`k${n.data.id}`))
-			.on('click', (event, n: FuncNode) => onClick(n, false));
+			.on('click', () => self.drawInput());
 
 		box.append('rect')
 			.attr('id', (n: FuncNode) => `v${n.data.id}`)
@@ -299,7 +315,7 @@ export class NodeEditor extends AbstractEditor {
 			.attr('ry', 3)
 			.attr('opacity', 0)
 			.on('mouseover', (event, n: FuncNode) => this.focusBox(`v${n.data.id}`))
-			.on('click', (event, n: FuncNode) => onClick(n, true));
+			.on('click', () => self.drawInput());
 
 	// 		box.append('title')
 	// 			.text((d: FuncNode) => `id: ${d.data.id}
@@ -316,53 +332,41 @@ export class NodeEditor extends AbstractEditor {
 	// width: ${d.data.width}`);
 	}
 
-	private drawInput(selectedBoxId: string, isValueSelected: boolean): void {
-		const focusedNode = this.getNodeById(selectedBoxId);
+	private drawInput(): void {
+		const isKey = this.focusedBoxId[0] === 'k';
+		const focusedNode = this.getNodeById(this.focusedBoxId.substring(1));
 		if (focusedNode === undefined) {
 			return;
 		}
 
+		this.isTyping = true;
+
 		this.svg.append('foreignObject')
-			.attr('x', isValueSelected
-				? focusedNode.y + focusedNode.data.padding * this.charWidth
-				: focusedNode.y)
+			.attr('x', isKey ? focusedNode.y
+				: focusedNode.y + focusedNode.data.padding * this.charWidth)
 			.attr('y', focusedNode.x - 0.5 * this.charHeight)
-			.attr('width', this.charWidth * (3 + (isValueSelected
-				? (focusedNode.data.width - focusedNode.data.padding) : focusedNode.data.padding)))
+			.attr('width', this.charWidth * (3 + (isKey
+				? focusedNode.data.padding : (focusedNode.data.width - focusedNode.data.padding))))
 			.attr('height', this.charHeight)
 
 			.append('xhtml:input')
 			.attr('id', 'jaffle-ne-input')
 			.attr('type', 'text')
-			.attr('value', isValueSelected ? focusedNode.data.rawValue : focusedNode.data.rawName)
+			.attr('value', isKey ? focusedNode.data.rawName : focusedNode.data.rawValue)
 
 			.on('input', () => this.config.onUpdate(this.tree.data))
-			.on('change', (event: Event) => {
-				const rawText = (event.target as HTMLInputElement).value;
-
-				if (isValueSelected) {
-					focusedNode.data.rawValue = rawText;
-				} else {
-					focusedNode.data.rawName = rawText;
-				}
-
-				this.reload();
-				this.draw();
-			})
-			.on('focusout', (event: Event) => {
-				(event.target as HTMLInputElement).parentElement?.remove();
-			})
+			// .on('change', (event: Event) => {})
+			.on('focusout', () => this.validateInput())
 
 			.style('width', '100%')
 			.style('padding', '0')
 			.style('font-size', `${this.config.fontSize}px`)
 			.style('font-family', 'monospace')
 			.style('background-color', '#aaa')
-			.style('color', isValueSelected
-				? BOX_VALUE_COLORS[focusedNode.data.valueType]
-				: BOX_NAME_COLORS[focusedNode.data.type])
-			.style('font-weight', isValueSelected
-				|| focusedNode.data.type === EntryType.ChainedFunction
+			.style('color', isKey
+				? BOX_NAME_COLORS[focusedNode.data.type]
+				: BOX_VALUE_COLORS[focusedNode.data.valueType])
+			.style('font-weight', !isKey || focusedNode.data.type === EntryType.ChainedFunction
 				? 'normal' : 'bold')
 			.style('border', 'none')
 			.style('border-radius', '3px');
@@ -372,8 +376,35 @@ export class NodeEditor extends AbstractEditor {
 		domInput.selectionStart = 9999;
 	}
 
-	getNodeById(id: string): FuncNode | undefined {
+	private getNodeById(id: string): FuncNode | undefined {
 		return this.tree.find((n: FuncNode) => n.data.id === id);
+	}
+
+	private validateInput(): void {
+		console.log('validating');
+		const domInput = document.getElementById('jaffle-ne-input') as HTMLInputElement;
+
+		if (domInput === null) {
+			throw new JaffleError('input dom not found');
+		}
+
+		this.isTyping = false;
+		const isKey = this.focusedBoxId[0] === 'k';
+		const focusedNode = this.getNodeById(this.focusedBoxId.substring(1));
+
+		if (focusedNode === undefined) {
+			throw new JaffleError('focused box dom not found');
+		}
+
+		if (isKey) {
+			focusedNode.data.rawName = domInput.value;
+		} else {
+			focusedNode.data.rawValue = domInput.value;
+		}
+
+		this.reload();
+		this.draw();
+		domInput.parentElement?.remove();
 	}
 }
 
