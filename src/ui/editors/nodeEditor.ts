@@ -53,6 +53,8 @@ export class NodeEditor extends AbstractEditor {
 
 	offsetY: number;
 
+	focusedBoxId: string;
+
 	domSvg?: SVGElement;
 
 	private _domContainer: HTMLDivElement;
@@ -69,6 +71,7 @@ export class NodeEditor extends AbstractEditor {
 		this.svgHeight = 0;
 		this.offsetX = 0;
 		this.offsetY = 0;
+		this.focusedBoxId = '';
 	}
 
 	get svg() { return this._svg || (function t() { throw new UndefErr(); }()); }
@@ -123,12 +126,12 @@ export class NodeEditor extends AbstractEditor {
 	}
 
 	setRawContent(content: Box): void {
-		this._tree = <FuncNode> d3.hierarchy(content);
+		this._tree = d3.hierarchy(content) as FuncNode;
 		this.initTree();
 		this.draw();
 	}
 
-	public initTree(): void {
+	initTree(): void {
 		const layout = flextree({})
 			.nodeSize((n: FuncNode) => (
 				[this.charHeight, (n.data.width + this.nodeConfig.hBoxGap) * this.charWidth]
@@ -145,7 +148,15 @@ export class NodeEditor extends AbstractEditor {
 		this.setGraphGeometry();
 	}
 
-	public setGraphGeometry(): void {
+	focusBox(boxId: string): void {
+		if (this.focusedBoxId !== '') {
+			d3.select(`#${this.focusedBoxId}`).style('opacity', 0);
+		}
+		this.focusedBoxId = boxId;
+		d3.select(`#${this.focusedBoxId}`).style('opacity', 0.2);
+	}
+
+	setGraphGeometry(): void {
 		let minNodeY = Infinity;
 		let maxNodeY = -Infinity;
 		let svgWidth = 0;
@@ -169,12 +180,14 @@ export class NodeEditor extends AbstractEditor {
 		this.offsetY = minNodeY - this.charHeight;
 	}
 
-	public draw(): NodeEditor {
+	draw(): void {
 		this.drawSvg();
 		this.domSvg?.remove();
-		this.domSvg = <SVGElement> this.svg.node();
+		this.domSvg = this.svg.node() as SVGElement;
 		this.domContainer.appendChild(this.domSvg);
-		return this;
+		if (this.tree.children && this.tree.children.length > 0) {
+			this.focusBox(`k${this.tree.children[0].data.id}`);
+		}
 	}
 
 	private drawSvg(): void {
@@ -228,16 +241,6 @@ export class NodeEditor extends AbstractEditor {
 	}
 
 	private drawBoxes(): void {
-		const onMouseOver = (target: HTMLElement) => {
-			d3.select(<HTMLElement>target)
-				.style('opacity', 0.2);
-		};
-
-		const onMouseOut = (target: HTMLElement) => {
-			d3.select(<HTMLElement>target)
-				.style('opacity', 0);
-		};
-
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const self = this;
 		const onClick = (node: FuncNode, isValue: boolean) => {
@@ -276,17 +279,18 @@ export class NodeEditor extends AbstractEditor {
 			.text((d: FuncNode) => d.data.displayValue);
 
 		box.append('rect')
+			.attr('id', (n: FuncNode) => `k${n.data.id}`)
 			.attr('width', (n: FuncNode) => n.data.padding * this.charWidth)
 			.attr('height', 1 * this.charHeight)
 			.attr('y', -0.5 * this.charHeight)
 			.attr('rx', 3)
 			.attr('ry', 3)
 			.attr('opacity', 0)
-			.on('mouseover', (event) => onMouseOver(event.target))
-			.on('mouseout', (event) => onMouseOut(event.target))
-			.on('click', (event, node: FuncNode) => onClick(node, false));
+			.on('mouseover', (event, n: FuncNode) => this.focusBox(`k${n.data.id}`))
+			.on('click', (event, n: FuncNode) => onClick(n, false));
 
 		box.append('rect')
+			.attr('id', (n: FuncNode) => `v${n.data.id}`)
 			.attr('width', (n: FuncNode) => (n.data.width - n.data.padding) * this.charWidth)
 			.attr('height', 1 * this.charHeight)
 			.attr('x', (n: FuncNode) => n.data.padding * this.charWidth)
@@ -294,9 +298,8 @@ export class NodeEditor extends AbstractEditor {
 			.attr('rx', 3)
 			.attr('ry', 3)
 			.attr('opacity', 0)
-			.on('mouseover', (event) => onMouseOver(event.target))
-			.on('mouseout', (event) => onMouseOut(event.target))
-			.on('click', (event, node: FuncNode) => onClick(node, true));
+			.on('mouseover', (event, n: FuncNode) => this.focusBox(`v${n.data.id}`))
+			.on('click', (event, n: FuncNode) => onClick(n, true));
 
 	// 		box.append('title')
 	// 			.text((d: FuncNode) => `id: ${d.data.id}
@@ -335,7 +338,7 @@ export class NodeEditor extends AbstractEditor {
 
 			.on('input', () => this.config.onUpdate(this.tree.data))
 			.on('change', (event: Event) => {
-				const rawText = (<HTMLInputElement>event.target).value;
+				const rawText = (event.target as HTMLInputElement).value;
 
 				if (isValueSelected) {
 					focusedNode.data.rawValue = rawText;
@@ -347,8 +350,7 @@ export class NodeEditor extends AbstractEditor {
 				this.draw();
 			})
 			.on('focusout', (event: Event) => {
-				const target = <HTMLInputElement>event.target;
-				target.parentElement?.remove();
+				(event.target as HTMLInputElement).parentElement?.remove();
 			})
 
 			.style('width', '100%')
@@ -365,7 +367,7 @@ export class NodeEditor extends AbstractEditor {
 			.style('border', 'none')
 			.style('border-radius', '3px');
 
-		const domInput = <HTMLInputElement>document.getElementById('jaffle-ne-input');
+		const domInput = document.getElementById('jaffle-ne-input') as HTMLInputElement;
 		domInput.focus();
 		domInput.selectionStart = 9999;
 	}
