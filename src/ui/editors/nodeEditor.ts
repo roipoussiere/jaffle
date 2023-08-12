@@ -197,6 +197,23 @@ export class NodeEditor extends AbstractEditor {
 	private addKeyboardEvents() {
 		document.addEventListener('keydown', (event) => {
 			// console.log(event);
+
+			if (event.key === 'Enter') {
+				if (this.isTyping) {
+					this.validateInput();
+				} else {
+					this.drawInput();
+				}
+			}
+
+			if (this.isTyping) {
+				return;
+			}
+
+			if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(event.code) > -1) {
+				event.preventDefault();
+			}
+
 			const isKey = this.focusedBoxId[0] === 'k';
 			const boxId = this.focusedBoxId.substring(1);
 			const path = boxId.split('-');
@@ -215,12 +232,6 @@ export class NodeEditor extends AbstractEditor {
 
 			if (newId !== '' && this.getNodeById(newId.substring(1)) !== undefined) {
 				this.focusBox(newId);
-			} else if (event.key === 'Enter') {
-				if (this.isTyping) {
-					this.validateInput();
-				} else {
-					this.drawInput();
-				}
 			}
 		});
 	}
