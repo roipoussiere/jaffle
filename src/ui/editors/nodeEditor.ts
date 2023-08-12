@@ -73,7 +73,7 @@ export class NodeEditor extends AbstractEditor {
 		this.svgHeight = 0;
 		this.offsetX = 0;
 		this.offsetY = 0;
-		this.focusedBoxId = '';
+		this.focusedBoxId = 'k0';
 		this.isTyping = false;
 	}
 
@@ -153,11 +153,9 @@ export class NodeEditor extends AbstractEditor {
 	}
 
 	focusBox(boxId: string): void {
-		if (this.focusedBoxId !== '') {
-			d3.select(`#${this.focusedBoxId}`).style('opacity', 0);
-		}
+		(document.getElementById(this.focusedBoxId) as HTMLElement).style.opacity = '0';
 		this.focusedBoxId = boxId;
-		d3.select(`#${this.focusedBoxId}`).style('opacity', 0.2);
+		(document.getElementById(this.focusedBoxId) as HTMLElement).style.opacity = '0.2';
 	}
 
 	setGraphGeometry(): void {
@@ -190,7 +188,7 @@ export class NodeEditor extends AbstractEditor {
 		this.domSvg = this.svg.node() as SVGElement;
 		this.domContainer.appendChild(this.domSvg);
 		if (this.tree.children && this.tree.children.length > 0) {
-			this.focusBox(`k${this.tree.children[0].data.id}`);
+			this.focusBox(this.focusedBoxId);
 		}
 	}
 
