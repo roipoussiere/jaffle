@@ -219,7 +219,7 @@ export class NodeEditor extends AbstractEditor {
 				return;
 			}
 
-			if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab']
+			if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Space']
 				.indexOf(event.code) > -1) {
 				event.preventDefault();
 			}
@@ -242,6 +242,18 @@ export class NodeEditor extends AbstractEditor {
 			const path = boxId.split('-');
 			const index = Number(path.pop());
 
+			if (event.shiftKey) {
+				if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+					const funcNode = this.getNodeById(boxId) as FuncNode;
+					const { children } = (funcNode.parent as FuncNode).data;
+					const entry = entryToBox(EMPTY_ENTRY);
+					entry.rawName = '.…';
+					children.splice(event.key === 'ArrowUp' ? index : index + 1, 0, entry);
+					this.reload();
+					return;
+				}
+			}
+
 			let newId = '';
 			if (event.key === 'ArrowRight') {
 				newId = isKey ? `v${boxId}` : `k${boxId}-0`;
@@ -258,8 +270,9 @@ export class NodeEditor extends AbstractEditor {
 				return;
 			}
 
+			const funcNode = this.getNodeById(boxId) as FuncNode;
+
 			if (event.key === 'Tab') {
-				const funcNode = this.getNodeById(boxId) as FuncNode;
 				if (funcNode.data.children.length === 0) {
 					funcNode.data.children = [entryToBox(EMPTY_ENTRY)];
 					this.reload();
@@ -268,8 +281,6 @@ export class NodeEditor extends AbstractEditor {
 			}
 
 			if (event.key === 'Delete') {
-				const funcNode = this.getNodeById(boxId) as FuncNode;
-
 				if (event.shiftKey) {
 					(funcNode.parent as FuncNode).data.children.splice(index, 1);
 				} else if (isKey) {
@@ -280,8 +291,6 @@ export class NodeEditor extends AbstractEditor {
 				}
 				this.reload();
 			}
-
-			// TODO: tab=new child, space=new sibling
 		});
 	}
 
