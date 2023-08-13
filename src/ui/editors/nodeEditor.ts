@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { flextree } from 'd3-flextree';
 
-import { Entry, EntryType, ValueType, StringDict } from '../../model';
+import { Entry, EntryType, ValueType, StringDict, EMPTY_ENTRY } from '../../model';
 import { JaffleError, UndefError as UndefErr } from '../../errors';
 import entryToBox from '../../transpilers/graph/graphExporter';
 import boxToEntry from '../../transpilers/graph/graphImporter';
@@ -211,7 +211,8 @@ export class NodeEditor extends AbstractEditor {
 				return;
 			}
 
-			if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(event.code) > -1) {
+			if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab']
+				.indexOf(event.code) > -1) {
 				event.preventDefault();
 			}
 
@@ -246,6 +247,15 @@ export class NodeEditor extends AbstractEditor {
 
 			if (newId !== '' && this.getNodeById(newId.substring(1)) !== undefined) {
 				this.focusBox(newId);
+				return;
+			}
+
+			if (event.key === 'Tab') {
+				const funcNode = this.getNodeById(boxId) as FuncNode;
+				if (funcNode.data.children.length === 0) {
+					funcNode.data.children = [entryToBox(EMPTY_ENTRY)];
+					this.reload();
+				}
 				return;
 			}
 
