@@ -15,6 +15,7 @@ export interface BoxDisplay {
 export interface BoxTyping {
 	type: EntryType,
 	valueType: ValueType,
+	error: boolean,
 }
 
 export interface BoxGeometry {

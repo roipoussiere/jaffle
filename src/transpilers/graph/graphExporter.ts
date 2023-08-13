@@ -28,6 +28,7 @@ export function buildBoxTyping(entry: Entry): BoxTyping {
 	return {
 		type: entryToEntryType(entry),
 		valueType: getValueType(entry),
+		error: false,
 	};
 }
 
@@ -62,21 +63,23 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 	const children = entry.children
 		.map((child, i) => entryToBox(child, id.concat(i)))
 		.map((child) => {
-			if (child.rawName[0] !== c.CHAINED_FUNC_PREFIX) {
-				groupId += 1;
-				paddings[groupId] = child.padding;
-				widths[groupId] = child.width;
-			} else {
+			const _child = child;
+
+			if (child.rawName[0] === c.CHAINED_FUNC_PREFIX && groupId !== -1) {
 				if (child.padding > paddings[groupId]) {
 					paddings[groupId] = child.padding;
 				}
 				if (child.width > widths[groupId]) {
 					widths[groupId] = child.width;
 				}
+			} else {
+				groupId += 1;
+				paddings[groupId] = child.padding;
+				widths[groupId] = child.width;
+				_child.error = child.rawName[0] === c.CHAINED_FUNC_PREFIX && groupId === 0;
 			}
 			lastSiblingIds[groupId] = child.id;
 
-			const _child = child;
 			_child.groupId = groupId;
 			return _child;
 		}).map((child) => {

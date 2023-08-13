@@ -261,10 +261,9 @@ export class NodeEditor extends AbstractEditor {
 					funcNode.data.children = [];
 				}
 				this.reload();
-				this.draw();
 			}
 
-			// TODO: tab=new child, space=new sibling, maj+suppr=remove box
+			// TODO: tab=new child, space=new sibling
 		});
 	}
 
@@ -334,7 +333,7 @@ export class NodeEditor extends AbstractEditor {
 			.attr('y', -0.5 * this.charHeight)
 			.attr('rx', 3)
 			.attr('ry', 3)
-			.attr('fill', '#ccc');
+			.attr('fill', (n: FuncNode) => (n.data.error ? 'tomato' : '#ccc'));
 
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
@@ -461,7 +460,6 @@ export class NodeEditor extends AbstractEditor {
 		}
 
 		this.reload();
-		this.draw();
 		domInput.parentElement?.remove();
 	}
 }
