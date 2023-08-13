@@ -243,7 +243,22 @@ export class NodeEditor extends AbstractEditor {
 
 			if (newId !== '' && this.getNodeById(newId.substring(1)) !== undefined) {
 				this.focusBox(newId);
+				return;
 			}
+
+			if (event.key === 'Delete') {
+				const funcNode = this.getNodeById(boxId) as FuncNode;
+				if (isKey) {
+					funcNode.data.rawName = '';
+				} else {
+					funcNode.data.rawValue = '';
+					funcNode.data.children = [];
+				}
+				this.reload();
+				this.draw();
+			}
+
+			// TODO: tab=new child, space=new sibling, maj+suppr=remove box
 		});
 	}
 
