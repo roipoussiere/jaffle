@@ -153,7 +153,10 @@ export class NodeEditor extends AbstractEditor {
 	}
 
 	focusBox(boxId: string): void {
-		(document.getElementById(this.focusedBoxId) as HTMLElement).style.opacity = '0';
+		const oldBox = document.getElementById(this.focusedBoxId);
+		if (oldBox !== null) {
+			oldBox.style.opacity = '0';
+		}
 		this.focusedBoxId = boxId;
 		(document.getElementById(this.focusedBoxId) as HTMLElement).style.opacity = '0.2';
 	}
@@ -248,7 +251,10 @@ export class NodeEditor extends AbstractEditor {
 
 			if (event.key === 'Delete') {
 				const funcNode = this.getNodeById(boxId) as FuncNode;
-				if (isKey) {
+
+				if (event.shiftKey) {
+					(funcNode.parent as FuncNode).data.children.splice(index, 1);
+				} else if (isKey) {
 					funcNode.data.rawName = '';
 				} else {
 					funcNode.data.rawValue = '';
