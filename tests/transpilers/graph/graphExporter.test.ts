@@ -90,6 +90,7 @@ describe('Testing BE.buildBoxTyping()', () => {
 		const expected: BoxTyping = {
 			type: EntryType.Function,
 			valueType: ValueType.Number,
+			error: false,
 		};
 		expect(GE.buildBoxTyping(input)).toEqual(expected);
 	});
@@ -107,6 +108,7 @@ describe('Testing BE.buildBoxTyping()', () => {
 		const expected: BoxTyping = {
 			type: EntryType.Function,
 			valueType: ValueType.Empty,
+			error: false,
 		};
 		expect(GE.buildBoxTyping(input)).toEqual(expected);
 	});
@@ -209,6 +211,7 @@ describe('Testing BE.entryToBox()', () => {
 
 			type: EntryType.ChainedFunction,
 			valueType: ValueType.Mininotation,
+			error: false,
 
 			displayName: 'a',
 			displayValue: 'b',
@@ -243,6 +246,7 @@ describe('Testing BE.entryToBox()', () => {
 
 			type: EntryType.Function,
 			valueType: ValueType.Empty,
+			error: false,
 
 			displayName: 'a',
 			displayValue: ' ',
@@ -260,6 +264,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				type: EntryType.Function,
 				valueType: ValueType.String,
+				error: false,
 
 				displayName: 'b',
 				displayValue: 'c',
@@ -305,6 +310,7 @@ describe('Testing BE.entryToBox()', () => {
 
 			type: EntryType.Function,
 			valueType: ValueType.Empty,
+			error: false,
 
 			displayName: 'a',
 			displayValue: ' ',
@@ -322,6 +328,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				type: EntryType.Function,
 				valueType: ValueType.Boolean,
+				error: false,
 
 				displayName: 'b123',
 				displayValue: 'true',
@@ -340,6 +347,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				type: EntryType.ChainedFunction,
 				valueType: ValueType.Number,
+				error: false,
 
 				displayName: 'c',
 				displayValue: '1234567890',
@@ -358,6 +366,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				type: EntryType.Function,
 				valueType: ValueType.Null,
+				error: false,
 
 				displayName: 'd',
 				displayValue: '∅',
