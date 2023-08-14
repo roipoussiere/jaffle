@@ -24,15 +24,17 @@ function serializedRawValuetoJs(rawValue: string): string {
  */
 export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 	if (entry.children.length === 0) {
-		const value = serializedRawValuetoJs(entry.rawValue);
-		return entry.rawName === '' ? value : `{'${entry.rawName}': ${value}}`;
+		const jsValue = serializedRawValuetoJs(entry.rawValue);
+		return entry.rawName === '' ? jsValue : `'${entry.rawName}': ${jsValue}`;
 	}
 
-	if (entry.rawName === '{}') { // todo: use suffix ('{'?) instead
+	if (entry.rawName.slice(-1) === '{') {
 		const jsValues = entry.children.map((child) => {
 			const jsValue = child.children.length === 0
 				? serializedRawValuetoJs(child.rawValue)
-				: child.children.map((_child) => serializedEntryToJs(_child)).join(', ');
+				: `{${child.children
+					.map((_child) => `\n${indent(iLvl)}${serializedEntryToJs(_child)}`)
+					.join(', ')}\n${indent(iLvl - 1)}}`;
 			return `\n${indent(iLvl - 1)}'${child.rawName}': ${jsValue},`;
 		});
 		return `{${jsValues.join('')}\n${indent(iLvl - 2)}}`;

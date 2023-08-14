@@ -16,50 +16,51 @@ export function getEntryName(rawFunc: Dict<unknown>) {
 	return keys[0];
 }
 
-export function keyValToSerializedEntry(key: string, rawValue: unknown): Entry {
-	if (rawValue instanceof Object) {
+export function keyValToSerializedEntry(key: string, value: unknown): Entry {
+	if (value instanceof Object) {
 		return {
-			rawName: key,
+			rawName: value instanceof Array ? key : `${key}{`,
 			rawValue: '',
-			// eslint-disable-next-line no-use-before-define
-			children: Object.keys(rawValue).map((chKey) => valueToSerializedEntry(
-				rawValue instanceof Array ? rawValue[Number(chKey)] : {
-					[chKey]: (<Dict<unknown>>rawValue)[chKey],
-				},
-			)),
+			children: Object.keys(value).map((childKey) => {
+				const childValue = value instanceof Array
+					? value[Number(childKey)]
+					: { [childKey]: (<Dict<unknown>>value)[childKey] };
+				// eslint-disable-next-line no-use-before-define
+				return valueToSerializedEntry(childValue);
+			}),
 		};
 	}
 	return {
 		rawName: key,
-		rawValue: rawValue === null ? '' : `${rawValue}`,
+		rawValue: value === null ? '' : `${value}`,
 		children: [],
 	};
 }
 
-export function valueToSerializedEntry(rawValue: unknown): Entry {
-	if (rawValue instanceof Array) {
+export function valueToSerializedEntry(value: unknown): Entry {
+	if (value instanceof Array) {
 		return {
 			rawName: '',
 			rawValue: '',
-			children: rawValue.map((rawChild) => valueToSerializedEntry(rawChild)),
+			children: value.map((rawChild) => valueToSerializedEntry(rawChild)),
 		};
 	}
-	if (rawValue instanceof Object) {
-		const keys = Object.keys(rawValue);
+	if (value instanceof Object) {
+		const keys = Object.keys(value);
 		if (keys.length === 1) {
-			return keyValToSerializedEntry(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
+			return keyValToSerializedEntry(keys[0], (<Dict<unknown>>value)[keys[0]]);
 		}
 		return {
-			rawName: '{}',
+			rawName: '{',
 			rawValue: '',
 			children: keys.map((key) => valueToSerializedEntry({
-				[key]: (<Dict<unknown>>rawValue)[key],
+				[key]: (<Dict<unknown>>value)[key],
 			})),
 		};
 	}
 	return {
 		rawName: '',
-		rawValue: rawValue === null ? '' : `${rawValue}`,
+		rawValue: value === null ? '' : `${value}`,
 		children: [],
 	};
 }
