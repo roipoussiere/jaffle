@@ -31,7 +31,6 @@ const BOX_NAME_COLORS: StringDict = {
 	[EntryType.Function]: 'black',
 	[EntryType.ChainedFunction]: 'black',
 	[EntryType.ConstantDef]: 'blue',
-	[EntryType.SerializedData]: 'darkRed',
 };
 
 const BOX_VALUE_COLORS: StringDict = {
@@ -365,8 +364,9 @@ export class NodeEditor extends AbstractEditor {
 		box.append('text')
 			.attr('y', 0.27 * this.charHeight)
 			.style('fill', (n: FuncNode) => BOX_NAME_COLORS[n.data.type])
-			.style('font-weight', (n: FuncNode) => (n.data.type !== EntryType.ChainedFunction
-				? 'bold' : 'normal'))
+			.style('font-weight', (n: FuncNode) => (n.data.type === EntryType.ChainedFunction
+				? 'normal' : 'bold'))
+			.style('font-style', (n: FuncNode) => (n.data.isSerialized ? 'italic' : 'normal'))
 			.text((d: FuncNode) => d.data.displayName);
 
 		box.append('text')

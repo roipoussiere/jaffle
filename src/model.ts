@@ -27,7 +27,6 @@ export enum EntryType {
 	Object,
 	List,
 	ConstantDef,
-	SerializedData,
 }
 
 export enum ValueType {

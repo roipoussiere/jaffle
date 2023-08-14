@@ -8,9 +8,6 @@ export function entryToEntryType(entry: Entry): EntryType {
 	if (entry.rawName[0] === c.CONSTANT_DEF_PREFIX) {
 		return EntryType.ConstantDef;
 	}
-	if (entry.rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-		return EntryType.SerializedData;
-	}
 	if (entry.rawName === '') {
 		if (entry.rawValue[0] === c.MINI_STR_PREFIX) {
 			return EntryType.MininotationFunction;

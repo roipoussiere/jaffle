@@ -24,10 +24,15 @@ export function getValueType(entry: Entry): ValueType {
 	return boxValueType;
 }
 
+function isSerialized(entry: Entry): boolean {
+	return entry.rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX;
+}
+
 export function buildBoxTyping(entry: Entry): BoxTyping {
 	return {
 		type: entryToEntryType(entry),
 		valueType: getValueType(entry),
+		isSerialized: isSerialized(entry),
 		error: false,
 	};
 }
