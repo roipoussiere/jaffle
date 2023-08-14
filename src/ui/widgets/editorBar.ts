@@ -1,6 +1,6 @@
 import { UndefError } from '../../errors';
 
-import { Button } from './buttons';
+import { Button, buildButton } from './buttons';
 
 type OnTabSwitch = (oldTabId: string, newTabId: string) => void;
 type OnExampleSelected = (example: string) => void;
@@ -79,7 +79,9 @@ export class EditorBar {
 		this.buildTitle();
 		this.tabs.forEach((tab) => this.buildTab(tab));
 		this.buildMenu();
-		this.buttons.reverse().forEach((button) => this.buildButton(button));
+		this.buttons.reverse().forEach((button) => {
+			this.dom.appendChild(buildButton(button));
+		});
 		if (this.examples.length > 1) {
 			this.buildExamplesMenu();
 		}
@@ -180,18 +182,6 @@ export class EditorBar {
 		domMenuItem.innerText = item.label;
 		domMenuItem.addEventListener('click', item.onClick);
 		return domMenuItem;
-	}
-
-	private buildButton(button: Button): void {
-		const domButton = document.createElement('button');
-
-		domButton.id = `jaffle-btn-${button.id}`;
-		domButton.className = 'jaffle-btn';
-		domButton.title = button.tooltip;
-		domButton.innerText = button.label;
-		domButton.addEventListener('click', button.onClick);
-
-		this.dom.appendChild(domButton);
 	}
 
 	private buildExamplesMenu(): void {

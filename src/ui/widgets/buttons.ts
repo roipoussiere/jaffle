@@ -33,3 +33,15 @@ export const WebsiteButton: Button = {
 	tooltip: 'Visit Jaffle website',
 	onClick: () => { window.location.href = '/jaffle'; },
 };
+
+export function buildButton(button: Button): HTMLButtonElement {
+	const domButton = document.createElement('button');
+
+	domButton.id = `jaffle-btn-${button.id}`;
+	domButton.className = 'jaffle-btn';
+	domButton.title = button.tooltip;
+	domButton.innerText = button.label;
+	domButton.addEventListener('click', button.onClick);
+
+	return domButton;
+}
