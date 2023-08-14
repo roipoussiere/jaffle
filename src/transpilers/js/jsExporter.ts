@@ -26,9 +26,8 @@ export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 		return entry.rawName === '' ? value : `{'${entry.rawName}': ${value}}`;
 	}
 
-	const strList = `[${entry.children.map(
-		(child) => serializedEntryToJs(child, iLvl + 1),
-	).join(`,\n${indent(iLvl)}`)}]`;
+	const strList = `[${entry.children.map((child) => serializedEntryToJs(child, iLvl + 1))
+		.join(`,\n${indent(iLvl)}`)}]`;
 	return entry.rawName === '' ? strList : `{'${entry.rawName}': ${strList}}`;
 }
 
@@ -97,7 +96,7 @@ export function expandEntry(entry: Entry): Entry {
 		};
 	}
 
-	if (entry.rawName === '' || entry.rawValue === '') {
+	if (entry.rawName === '' || entry.rawValue === '' || entry.rawName === 'set') {
 		return entry;
 	}
 
@@ -148,8 +147,8 @@ export function childEntryToJs(_entry: Entry, iLvl = 0): string {
 		return funcName[0].toLowerCase() + funcName.substring(1);
 	}
 
-	const lb = entry.children.length > 1 ? `\n${indent(iLvl)}` : '';
-	return `${funcName}(${lb}${jsGroups.join(`,\n${indent(iLvl)}`)})`;
+	const lineBreak = entry.children.length > 1 ? `\n${indent(iLvl)}` : '';
+	return `${funcName}(${lineBreak}${jsGroups.join(`,\n${indent(iLvl)}`)})`;
 }
 
 /**
