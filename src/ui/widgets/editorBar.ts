@@ -1,6 +1,7 @@
 import { UndefError } from '../../errors';
 
-type OnButtonClick = () => void;
+import { Button } from './buttons';
+
 type OnTabSwitch = (oldTabId: string, newTabId: string) => void;
 type OnExampleSelected = (example: string) => void;
 
@@ -8,13 +9,6 @@ export type Tab = {
 	id: string,
 	label: string,
 	tooltip: string,
-};
-
-export type Button = {
-	id: string,
-	label: string,
-	tooltip: string,
-	onClick: OnButtonClick,
 };
 
 export class EditorBar {

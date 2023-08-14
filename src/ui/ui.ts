@@ -5,35 +5,13 @@ import tunes from '../tunes/_tuneIndex';
 import yamlToEntry from '../transpilers/yaml/yamlImporter';
 
 import { AbstractEditor, EditorConfig, DEFAULT_EDITOR_CONFIG } from './editors/abstractEditor';
-import { EditorBar, Button } from './widgets/editorBar';
+import { EditorBar } from './widgets/editorBar';
 import ErrorBar from './widgets/errorBar';
 import YamlEditor from './editors/yamlEditor';
+import { Button } from './widgets/buttons';
 
 type OnPlay = () => void;
 type OnStop = () => void;
-
-export const PlayButton: Button = {
-	id: 'play',
-	label: 'Play',
-	tooltip: 'Play/update tune (Ctrl-Enter)',
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	onClick: () => {},
-};
-
-export const StopButton: Button = {
-	id: 'stop',
-	label: 'Stop',
-	tooltip: 'Stop tune (Ctrl-.)',
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	onClick: () => {},
-};
-
-export const WebsiteButton: Button = {
-	id: 'website',
-	label: 'Website',
-	tooltip: 'Visit Jaffle website',
-	onClick: () => { window.location.href = '/jaffle'; },
-};
 
 export class Editor {
 	editorConfig: EditorConfig;

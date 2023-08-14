@@ -1,4 +1,5 @@
-import { Editor, PlayButton, StopButton, WebsiteButton } from './ui/ui';
+import Editor from './ui/ui';
+import { PlayButton, StopButton, WebsiteButton } from './ui/widgets/buttons';
 
 import NodeEditor from './ui/editors/nodeEditor';
 import YamlEditor from './ui/editors/yamlEditor';
