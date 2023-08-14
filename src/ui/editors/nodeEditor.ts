@@ -157,15 +157,23 @@ export class NodeEditor extends AbstractEditor {
 			oldBox.style.opacity = '0';
 		}
 
-		this.focusedBoxId = boxId;
+		let newBoxId = boxId;
+		let domNewBox = document.getElementById(newBoxId);
 
-		let newBox = document.getElementById(this.focusedBoxId);
-		if (newBox === null) {
-			const path = this.focusedBoxId.substring(1).split('-');
+		if (domNewBox === null) {
+			const path = boxId.substring(1).split('-');
 			path.pop();
-			newBox = document.getElementById(`v${path.join('-')}`);
+			newBoxId = `v${path.join('-')}`;
+			domNewBox = document.getElementById(newBoxId);
 		}
-		(newBox as HTMLElement).style.opacity = '0.2';
+
+		if (domNewBox === null) {
+			newBoxId = 'k0';
+			domNewBox = document.getElementById(newBoxId);
+		}
+
+		(domNewBox as HTMLElement).style.opacity = '0.2';
+		this.focusedBoxId = newBoxId;
 	}
 
 	setGraphGeometry(): void {
