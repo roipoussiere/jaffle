@@ -36,16 +36,18 @@ export function entryToFuncName(entry: Entry): string {
 	if (entry.rawName === '') {
 		return '';
 	}
-	if (entry.rawName[0] === c.CHAINED_FUNC_PREFIX || entry.rawName[0] === c.CONSTANT_DEF_PREFIX) {
-		return entry.rawName.substring(1);
+
+	let funcName = entry.rawName;
+	if (funcName[0] === c.CHAINED_FUNC_PREFIX || funcName[0] === c.CONSTANT_DEF_PREFIX) {
+		funcName = funcName.substring(1);
 	}
-	if (entry.rawName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
-		return entry.rawName.substring(0, entry.rawName.length - 1);
+	if (funcName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
+		funcName = funcName.substring(0, funcName.length - 1);
 	}
-	// if (entry.rawName[0] === entry.rawName[0].toUpperCase()) {
-	// 	return entry.rawName[0].toLowerCase() + entry.rawName.substring(1);
+	// if (funcName[0] === funcName[0].toUpperCase()) {
+	// 	return funcName[0].toLowerCase() + funcName.substring(1);
 	// }
-	return entry.rawName;
+	return funcName;
 }
 
 export function entryToString(entry: Entry, indentLvl = 1): string {
