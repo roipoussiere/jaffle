@@ -7,6 +7,16 @@ function indent(indentLevel: number): string {
 	return '  '.repeat(indentLevel);
 }
 
+function serializedRawValuetoJs(rawValue: string): string {
+	if (rawValue === '') {
+		return 'null';
+	}
+	if (!Number.isNaN(Number(rawValue)) || rawValue === 'true' || rawValue === 'false') {
+		return rawValue;
+	}
+	return `'${rawValue}'`;
+}
+
 /**
  * Serialise an object to JSON.
  * @param entry the object to serialize
@@ -14,16 +24,18 @@ function indent(indentLevel: number): string {
  */
 export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 	if (entry.children.length === 0) {
-		let value: string;
-		if (entry.rawValue === '') {
-			value = 'null';
-		} else if (!Number.isNaN(Number(entry.rawValue))
-				|| entry.rawValue === 'true' || entry.rawValue === 'false') {
-			value = entry.rawValue;
-		} else {
-			value = `'${entry.rawValue}'`;
-		}
+		const value = serializedRawValuetoJs(entry.rawValue);
 		return entry.rawName === '' ? value : `{'${entry.rawName}': ${value}}`;
+	}
+
+	if (entry.rawName === '{}') { // todo: use suffix ('{'?) instead
+		const jsValues = entry.children.map((child) => {
+			const jsValue = child.children.length === 0
+				? serializedRawValuetoJs(child.rawValue)
+				: child.children.map((_child) => serializedEntryToJs(_child)).join(', ');
+			return `\n${indent(iLvl - 1)}'${child.rawName}': ${jsValue},`;
+		});
+		return `{${jsValues.join('')}\n${indent(iLvl - 2)}}`;
 	}
 
 	const strList = `[${entry.children.map((child) => serializedEntryToJs(child, iLvl + 1))

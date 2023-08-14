@@ -50,7 +50,7 @@ export function valueToSerializedEntry(rawValue: unknown): Entry {
 			return keyValToSerializedEntry(keys[0], (<Dict<unknown>>rawValue)[keys[0]]);
 		}
 		return {
-			rawName: '',
+			rawName: '{}',
 			rawValue: '',
 			children: keys.map((key) => valueToSerializedEntry({
 				[key]: (<Dict<unknown>>rawValue)[key],
