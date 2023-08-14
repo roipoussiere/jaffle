@@ -13,6 +13,15 @@ describe('Testing u.entryToEntryType()', () => {
 		expect(u.entryToEntryType(input)).toBe(EntryType.Function);
 	});
 
+	test('function containing serialized data return EntryType.Function', () => {
+		const input: Entry = {
+			rawName: 'a^',
+			rawValue: '',
+			children: [],
+		};
+		expect(u.entryToEntryType(input)).toBe(EntryType.Function);
+	});
+
 	test('mininitation value entry return EntryType.MininotationFunction', () => {
 		const input: Entry = {
 			rawName: '',
@@ -56,15 +65,6 @@ describe('Testing u.entryToEntryType()', () => {
 			children: [],
 		};
 		expect(u.entryToEntryType(input)).toBe(EntryType.ConstantDef);
-	});
-
-	test('serialized entry return EntryType.SerializedData', () => {
-		const input: Entry = {
-			rawName: 'a^',
-			rawValue: '',
-			children: [],
-		};
-		expect(u.entryToEntryType(input)).toBe(EntryType.SerializedData);
 	});
 });
 

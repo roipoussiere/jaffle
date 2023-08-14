@@ -90,6 +90,7 @@ describe('Testing BE.buildBoxTyping()', () => {
 		const expected: BoxTyping = {
 			type: EntryType.Function,
 			valueType: ValueType.Number,
+			isSerialized: false,
 			error: false,
 		};
 		expect(GE.buildBoxTyping(input)).toEqual(expected);
@@ -108,6 +109,7 @@ describe('Testing BE.buildBoxTyping()', () => {
 		const expected: BoxTyping = {
 			type: EntryType.Function,
 			valueType: ValueType.Empty,
+			isSerialized: false,
 			error: false,
 		};
 		expect(GE.buildBoxTyping(input)).toEqual(expected);
@@ -211,6 +213,7 @@ describe('Testing BE.entryToBox()', () => {
 
 			type: EntryType.ChainedFunction,
 			valueType: ValueType.Mininotation,
+			isSerialized: false,
 			error: false,
 
 			displayName: 'a',
@@ -246,6 +249,7 @@ describe('Testing BE.entryToBox()', () => {
 
 			type: EntryType.Function,
 			valueType: ValueType.Empty,
+			isSerialized: false,
 			error: false,
 
 			displayName: 'a',
@@ -264,6 +268,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				type: EntryType.Function,
 				valueType: ValueType.String,
+				isSerialized: false,
 				error: false,
 
 				displayName: 'b',
@@ -310,6 +315,7 @@ describe('Testing BE.entryToBox()', () => {
 
 			type: EntryType.Function,
 			valueType: ValueType.Empty,
+			isSerialized: false,
 			error: false,
 
 			displayName: 'a',
@@ -328,6 +334,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				type: EntryType.Function,
 				valueType: ValueType.Boolean,
+				isSerialized: false,
 				error: false,
 
 				displayName: 'b123',
@@ -347,6 +354,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				type: EntryType.ChainedFunction,
 				valueType: ValueType.Number,
+				isSerialized: false,
 				error: false,
 
 				displayName: 'c',
@@ -366,6 +374,7 @@ describe('Testing BE.entryToBox()', () => {
 
 				type: EntryType.Function,
 				valueType: ValueType.Null,
+				isSerialized: false,
 				error: false,
 
 				displayName: 'd',
