@@ -387,7 +387,11 @@ export class NodeEditor extends AbstractEditor {
 			.attr('rx', 3)
 			.attr('ry', 3)
 			.attr('opacity', 0)
-			.on('mouseover', (event, n: FuncNode) => this.focusBox(`k${n.data.id}`))
+			.on('mouseover', (event, n: FuncNode) => {
+				if (!this.isTyping) {
+					this.focusBox(`k${n.data.id}`);
+				}
+			})
 			.on('click', () => self.drawInput());
 
 		box.append('rect')
@@ -399,7 +403,11 @@ export class NodeEditor extends AbstractEditor {
 			.attr('rx', 3)
 			.attr('ry', 3)
 			.attr('opacity', 0)
-			.on('mouseover', (event, n: FuncNode) => this.focusBox(`v${n.data.id}`))
+			.on('mouseover', (event, n: FuncNode) => {
+				if (!this.isTyping) {
+					this.focusBox(`v${n.data.id}`);
+				}
+			})
 			.on('click', () => self.drawInput());
 
 	// 		box.append('title')
