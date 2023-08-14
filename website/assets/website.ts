@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import { Editor, NodeEditor, YamlEditor, JsEditor, PlayButton, StopButton, WebsiteButton }
+import { Editor, NodeEditor, YamlEditor, JsEditor, PlayBtn, StopBtn, WebsiteBtn, ShortcutsBtn }
 	from './jaffle';
 
 import StrudelRepl from './strudelRepl';
@@ -19,7 +19,7 @@ const editors = [
 	new JsEditor(),
 ];
 
-const editor = new Editor(editorConfig, editors, [PlayButton, StopButton], [WebsiteButton]);
+const editor = new Editor(editorConfig, editors, [PlayBtn, StopBtn], [WebsiteBtn, ShortcutsBtn]);
 
 const strudel = new StrudelRepl(
 	(error) => {

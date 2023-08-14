@@ -150,7 +150,7 @@ export class EditorBar {
 		const domMenuItemExamples = document.createElement('p');
 		domMenuItemExamples.id = 'jaffle-menu-item-examples';
 		domMenuItemExamples.className = 'jaffle-menu-item';
-		domMenuItemExamples.innerText = 'Load example';
+		domMenuItemExamples.innerText = 'Examples';
 		domMenuItemExamples.addEventListener('mouseover', () => {
 			clearTimeout(this.menuTimer);
 			this.domExplMenu.style.display = 'block';
