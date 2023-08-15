@@ -4,7 +4,7 @@ import { Entry, EntryType } from '../../model';
 import { entryToEntryType, entryToFuncName } from '../utils';
 
 function indent(indentLevel: number): string {
-	return '  '.repeat(indentLevel);
+	return '\t'.repeat(indentLevel);
 }
 
 function serializedRawValuetoJs(rawValue: string): string {
@@ -33,15 +33,16 @@ export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 			const jsValue = child.children.length === 0
 				? serializedRawValuetoJs(child.rawValue)
 				: `{${child.children
-					.map((_child) => `\n${indent(iLvl)}${serializedEntryToJs(_child)}`)
-					.join(', ')}\n${indent(iLvl - 1)}}`;
-			return `\n${indent(iLvl - 1)}'${child.rawName}': ${jsValue},`;
+					.map((ch) => `\n${indent(iLvl + 1)}${serializedEntryToJs(ch, iLvl + 1)}`)
+					.join(',')}\n${indent(iLvl)}}`;
+			return `\n${indent(iLvl)}'${child.rawName}': ${jsValue},`;
 		});
-		return `{${jsValues.join('')}\n${indent(iLvl - 2)}}`;
+		return `{${jsValues.join('')}\n${indent(iLvl - 1)}}`;
 	}
 
-	const strList = `[${entry.children.map((child) => serializedEntryToJs(child, iLvl + 1))
-		.join(`,\n${indent(iLvl)}`)}]`;
+	const strList = `[${entry.children
+		.map((child) => `\n${indent(iLvl)}${serializedEntryToJs(child, iLvl + 1)}`)
+		.join(',')}\n${indent(iLvl - 1)}]`;
 	return entry.rawName === '' ? strList : `{'${entry.rawName}': ${strList}}`;
 }
 
@@ -151,7 +152,7 @@ export function childEntryToJs(_entry: Entry, iLvl = 0): string {
 
 	const serializeSuffix = entry.rawName.split(c.SERIALIZE_FUNC_SUFFIX)[1];
 	// eslint-disable-next-line no-use-before-define
-	const jsGroups = paramsToJsGroups(entry.children, serializeSuffix, iLvl + 1);
+	const jsGroups = paramsToJsGroups(entry.children, serializeSuffix, iLvl);
 
 	if (entryType === EntryType.ConstantDef) {
 		return `const ${c.VAR_NAME_PREFIX}${funcName} = ${jsGroups[0]}`;
@@ -161,8 +162,12 @@ export function childEntryToJs(_entry: Entry, iLvl = 0): string {
 		return funcName[0].toLowerCase() + funcName.substring(1);
 	}
 
-	const lineBreak = entry.children.length > 1 ? `\n${indent(iLvl)}` : '';
-	return `${funcName}(${lineBreak}${jsGroups.join(`,\n${indent(iLvl)}`)})`;
+	const areValues = entry.children.filter((child) => child.rawName === '').length
+		=== entry.children.length;
+	const lineBreak = areValues ? '' : `\n${indent(iLvl)}`;
+	const paramLineBreak = areValues ? '' : `\n\n${indent(iLvl)}`;
+
+	return `${funcName}(${lineBreak}${jsGroups.join(`,${paramLineBreak}`)})`;
 }
 
 /**
@@ -251,7 +256,7 @@ export function entryToJs(entry: Entry): string {
 	}
 	const groups = paramsToJsGroups(entry.children);
 	const tuneMain = groups.pop();
-	outputJs += groups.map((group) => `${group};\n`).join('');
+	outputJs += groups.map((group) => `${group};\n\n`).join('');
 	outputJs += `return ${tuneMain};`;
 
 	return outputJs;
