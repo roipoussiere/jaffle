@@ -1,6 +1,7 @@
 export const CHAINED_FUNC_PREFIX = '.';
 export const CONSTANT_DEF_PREFIX = '$';
 export const SERIALIZE_FUNC_SUFFIX = '^';
+export const DICT_PREFIX = '.';
 
 export const MINI_STR_PREFIX = '_';
 export const EXPR_STR_PREFIX = '=';

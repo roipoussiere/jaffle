@@ -25,17 +25,27 @@ function serializedRawValuetoJs(rawValue: string): string {
 export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 	if (entry.children.length === 0) {
 		const jsValue = serializedRawValuetoJs(entry.rawValue);
-		return entry.rawName === '' ? jsValue : `'${entry.rawName}': ${jsValue}`;
+		return entry.rawName === ''
+			? jsValue : `'${entry.rawName.split('.').reverse()[0]}': ${jsValue}`;
 	}
 
-	if (entry.rawName.slice(-1) === '{') {
+	if (entry.children[0].rawName[0] === c.DICT_PREFIX) {
 		const jsValues = entry.children.map((child) => {
-			const jsValue = child.children.length === 0
-				? serializedRawValuetoJs(child.rawValue)
-				: `{${child.children
+			let jsValue: string;
+			if (child.children.length === 0) {
+				jsValue = serializedRawValuetoJs(child.rawValue);
+			} else if (child.children.length === 1
+					|| child.children[0].rawName[0] === c.DICT_PREFIX) {
+				jsValue = `{${child.children
 					.map((ch) => `\n${indent(iLvl + 1)}${serializedEntryToJs(ch, iLvl + 1)}`)
 					.join(',')}\n${indent(iLvl)}}`;
-			return `\n${indent(iLvl)}'${child.rawName}': ${jsValue},`;
+			} else {
+				jsValue = `[${child.children
+					.map((ch) => `\n${indent(iLvl + 1)}${serializedEntryToJs(ch, iLvl + 1)}`)
+					.join(',')}\n${indent(iLvl)}]`;
+			}
+
+			return `\n${indent(iLvl)}'${child.rawName.split('.').reverse()[0]}': ${jsValue},`;
 		});
 		return `{${jsValues.join('')}\n${indent(iLvl - 1)}}`;
 	}
@@ -165,7 +175,7 @@ export function childEntryToJs(_entry: Entry, iLvl = 0): string {
 	const areValues = entry.children.filter((child) => child.rawName === '').length
 		=== entry.children.length;
 	const lineBreak = areValues ? '' : `\n${indent(iLvl)}`;
-	const paramLineBreak = areValues ? '' : `\n\n${indent(iLvl)}`;
+	const paramLineBreak = areValues ? ' ' : `\n\n${indent(iLvl)}`;
 
 	return `${funcName}(${lineBreak}${jsGroups.join(`,${paramLineBreak}`)})`;
 }
