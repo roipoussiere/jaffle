@@ -24,7 +24,7 @@ export function keyValToSerializedEntry(key: string, value: unknown): Entry {
 			children: Object.keys(value).map((childKey) => {
 				const childValue = value instanceof Array
 					? value[Number(childKey)]
-					: { [`${c.DICT_PREFIX}${childKey}`]: value[childKey] };
+					: { [`${c.DICT_PREFIX}${childKey}`]: (<Dict<unknown>>value)[childKey] };
 				// eslint-disable-next-line no-use-before-define
 				return valueToSerializedEntry(childValue);
 			}),
@@ -50,13 +50,14 @@ export function valueToSerializedEntry(value: unknown): Entry {
 	if (value instanceof Object) {
 		const keys = Object.keys(value);
 		if (keys.length === 1) {
-			return keyValToSerializedEntry(keys[0], value[keys[0]]);
+			return keyValToSerializedEntry(keys[0], (<Dict<unknown>>value)[keys[0]]);
 		}
 		return {
 			rawName: '',
 			rawValue: '',
-			children: keys
-				.map((key) => keyValToSerializedEntry(`${c.DICT_PREFIX}${key}`, value[key])),
+			children: keys.map((key) => (
+				keyValToSerializedEntry(`${c.DICT_PREFIX}${key}`, (<Dict<unknown>>value)[key])
+			)),
 		};
 	}
 

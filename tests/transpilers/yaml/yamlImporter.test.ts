@@ -49,11 +49,11 @@ describe('Testing YI.keyValToSerializedEntry()', () => {
 			rawName: 'a',
 			rawValue: '',
 			children: [{
-				rawName: 'b',
+				rawName: '_b',
 				rawValue: '1',
 				children: [],
 			}, {
-				rawName: 'c',
+				rawName: '_c',
 				rawValue: 'd',
 				children: [],
 			}],
@@ -103,11 +103,11 @@ describe('Testing YI.serialize()', () => {
 			rawName: '',
 			rawValue: '',
 			children: [{
-				rawName: 'a',
+				rawName: '_a',
 				rawValue: '1',
 				children: [],
 			}, {
-				rawName: 'b',
+				rawName: '_b',
 				rawValue: 'c',
 				children: [],
 			}],

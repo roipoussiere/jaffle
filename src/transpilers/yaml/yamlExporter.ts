@@ -5,7 +5,7 @@ import * as c from '../../constants';
 import { Dict, Entry } from '../../model';
 
 function dictEntryToDict(entry: Entry): Dict<unknown> {
-	const dict = {};
+	const dict: Dict<unknown> = {};
 	entry.children.forEach((child) => {
 		const newKey = child.rawName.split(c.DICT_PREFIX).reverse()[0];
 		let value: unknown;
