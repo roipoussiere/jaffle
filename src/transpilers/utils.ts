@@ -35,7 +35,9 @@ export function entryToFuncName(entry: Entry): string {
 	}
 
 	let funcName = entry.rawName;
-	if (funcName[0] === c.CHAINED_FUNC_PREFIX || funcName[0] === c.CONSTANT_DEF_PREFIX) {
+	if (funcName[0] === c.CHAINED_FUNC_PREFIX
+			|| funcName[0] === c.CONSTANT_DEF_PREFIX
+			|| funcName[0] === c.DICT_PREFIX) {
 		funcName = funcName.substring(1);
 	}
 	if (funcName.slice(-1) === c.SERIALIZE_FUNC_SUFFIX) {
