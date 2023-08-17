@@ -22,11 +22,14 @@ function serializedRawValuetoJs(rawValue: string): string {
  * @param entry the object to serialize
  * @returns a string reprensenting the object in JSON
  */
-export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
+export function serializedEntryToJs(entry: Entry, iLvl = 0, curly = true): string {
 	if (entry.children.length === 0) {
 		const jsValue = serializedRawValuetoJs(entry.rawValue);
-		return entry.rawName === ''
-			? jsValue : `'${entry.rawName.split(c.DICT_PREFIX).reverse()[0]}': ${jsValue}`;
+		if (entry.rawName === '') {
+			return jsValue;
+		}
+		const newKey = entry.rawName.split(c.DICT_PREFIX).reverse()[0];
+		return `${curly ? '{ ' : ''}'${newKey}': ${jsValue}${curly ? ' }' : ''}`;
 	}
 
 	if (entry.children[0].rawName[0] === c.DICT_PREFIX) {
@@ -37,7 +40,7 @@ export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 			} else if (child.children.length === 1
 					|| child.children[0].rawName[0] === c.DICT_PREFIX) {
 				jsValue = `{${child.children
-					.map((ch) => `\n${indent(iLvl + 1)}${serializedEntryToJs(ch, iLvl + 1)}`)
+					.map((ch) => `\n${indent(iLvl + 1)}${serializedEntryToJs(ch, iLvl + 1, false)}`)
 					.join(',')}\n${indent(iLvl)}}`;
 			} else {
 				jsValue = `[${child.children
