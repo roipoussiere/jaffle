@@ -50,12 +50,12 @@ export function serializedEntryToJs(entry: Entry, iLvl = 0, curly = true): strin
 			const newKey = child.rawName.split(c.DICT_PREFIX).reverse()[0];
 			return `\n${indent(iLvl)}'${newKey}': ${jsValue},`;
 		});
-		return `{${jsValues.join('')}\n${indent(iLvl - 1)}}`;
+		return `{${jsValues.join('')}\n${indent(iLvl)}}`;
 	}
 
 	const strList = `[${entry.children
 		.map((child) => `\n${indent(iLvl)}${serializedEntryToJs(child, iLvl + 1)}`)
-		.join(',')}\n${indent(iLvl - 1)}]`;
+		.join(',')}\n${indent(iLvl)}]`;
 	return entry.rawName === '' ? strList : `{'${entry.rawName}': ${strList}}`;
 }
 
