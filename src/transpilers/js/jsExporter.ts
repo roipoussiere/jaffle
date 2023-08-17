@@ -26,7 +26,7 @@ export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 	if (entry.children.length === 0) {
 		const jsValue = serializedRawValuetoJs(entry.rawValue);
 		return entry.rawName === ''
-			? jsValue : `'${entry.rawName.split('.').reverse()[0]}': ${jsValue}`;
+			? jsValue : `'${entry.rawName.split(c.DICT_PREFIX).reverse()[0]}': ${jsValue}`;
 	}
 
 	if (entry.children[0].rawName[0] === c.DICT_PREFIX) {
@@ -44,8 +44,8 @@ export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 					.map((ch) => `\n${indent(iLvl + 1)}${serializedEntryToJs(ch, iLvl + 1)}`)
 					.join(',')}\n${indent(iLvl)}]`;
 			}
-
-			return `\n${indent(iLvl)}'${child.rawName.split('.').reverse()[0]}': ${jsValue},`;
+			const newKey = child.rawName.split(c.DICT_PREFIX).reverse()[0];
+			return `\n${indent(iLvl)}'${newKey}': ${jsValue},`;
 		});
 		return `{${jsValues.join('')}\n${indent(iLvl - 1)}}`;
 	}

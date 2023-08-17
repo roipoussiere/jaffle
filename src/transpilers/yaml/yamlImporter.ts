@@ -21,10 +21,10 @@ export function keyValToSerializedEntry(key: string, value: unknown): Entry {
 		return {
 			rawName: key,
 			rawValue: '',
-			children: Object.keys(value).map((childKey, id) => {
+			children: Object.keys(value).map((childKey) => {
 				const childValue = value instanceof Array
 					? value[Number(childKey)]
-					: { [id === 0 ? `.${childKey}` : childKey]: value[childKey] };
+					: { [`${c.DICT_PREFIX}${childKey}`]: value[childKey] };
 				// eslint-disable-next-line no-use-before-define
 				return valueToSerializedEntry(childValue);
 			}),
@@ -56,7 +56,7 @@ export function valueToSerializedEntry(value: unknown): Entry {
 			rawName: '',
 			rawValue: '',
 			children: keys
-				.map((key, id) => keyValToSerializedEntry(id === 0 ? `.${key}` : key, value[key])),
+				.map((key) => keyValToSerializedEntry(`${c.DICT_PREFIX}${key}`, value[key])),
 		};
 	}
 
