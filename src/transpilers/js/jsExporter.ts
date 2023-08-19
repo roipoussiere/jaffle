@@ -7,6 +7,10 @@ function indent(indentLevel: number): string {
 	return '\t'.repeat(indentLevel);
 }
 
+function getEntryName(entry: Entry) {
+	return entry.rawName.split(c.DICT_PREFIX).reverse()[0];
+}
+
 function serializedRawValuetoJs(rawValue: string): string {
 	if (rawValue === '') {
 		return 'null';
@@ -28,8 +32,7 @@ export function serializedEntryToJs(entry: Entry, iLvl = 0, curly = true): strin
 		if (entry.rawName === '') {
 			return jsValue;
 		}
-		const newKey = entry.rawName.split(c.DICT_PREFIX).reverse()[0];
-		return `${curly ? '{ ' : ''}'${newKey}': ${jsValue}${curly ? ' }' : ''}`;
+		return `${curly ? '{ ' : ''}'${getEntryName(entry)}': ${jsValue}${curly ? ' }' : ''}`;
 	}
 
 	if (entry.children[0].rawName[0] === c.DICT_PREFIX) {
@@ -47,10 +50,13 @@ export function serializedEntryToJs(entry: Entry, iLvl = 0, curly = true): strin
 					.map((ch) => `\n${indent(iLvl + 1)}${serializedEntryToJs(ch, iLvl + 1)}`)
 					.join(',')}\n${indent(iLvl)}]`;
 			}
-			const newKey = child.rawName.split(c.DICT_PREFIX).reverse()[0];
-			return `\n${indent(iLvl)}'${newKey}': ${jsValue},`;
+			return `\n${indent(iLvl)}'${getEntryName(child)}': ${jsValue}`;
 		});
-		return `{${jsValues.join('')}\n${indent(iLvl)}}`;
+		const jsValue = `{${jsValues.join(',')}\n${indent(iLvl)}}`;
+		if (entry.rawName === '') {
+			return jsValue;
+		}
+		return `{'${getEntryName(entry)}': ${jsValue}}`;
 	}
 
 	const strList = `[${entry.children
