@@ -119,10 +119,10 @@ describe('Testing JE.serializedEntryToJs()', () => {
 		expect(JE.serializedEntryToJs(strValEntry)).toBe("'foo'");
 		expect(JE.serializedEntryToJs(numberValEntry)).toBe('42');
 		expect(JE.serializedEntryToJs(miniFuncEntry)).toBe("'_bar'");
-		expect(JE.serializedEntryToJs(listEntry)).toBe("[\n'foo',\n42\n]");
+		expect(JE.serializedEntryToJs(listEntry)).toBe("[\n\t'foo',\n\t42\n]");
 		expect(JE.serializedEntryToJs(mainFuncEntry)).toBe("{ 'a': null }");
 		expect(JE.serializedEntryToJs(mainFuncParamEntry)).toBe("{ 'b': 42 }");
-		expect(JE.serializedEntryToJs(mainFuncParamsEntry)).toBe("{'c': [\n'foo',\n42\n]}");
+		expect(JE.serializedEntryToJs(mainFuncParamsEntry)).toBe("{\n'c': [\n\t'foo',\n\t42\n]}");
 	});
 });
 
@@ -172,7 +172,7 @@ describe('Testing childEntryToJs()', () => {
 		expect(JE.childEntryToJs(parentFuncEntry)).toBe("g(\nc('foo', 42))");
 		expect(JE.childEntryToJs(chainFuncParamsEntry)).toBe('f(\na()\n.d())');
 		expect(JE.childEntryToJs(objectEntry)).toBe('h');
-		expect(JE.childEntryToJs(serializedFuncEntry)).toBe("a(\n'_bar',\n\n{ '.d': null })");
+		expect(JE.childEntryToJs(serializedFuncEntry)).toBe("a('_bar', { '.d': null })");
 	});
 });
 
