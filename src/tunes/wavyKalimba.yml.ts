@@ -3,7 +3,7 @@ const tune = `
 # @license CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
 # @by Felix Roos
 
-samples^: 
+- samples^: 
     kalimba:
       c5: https://freesound.org/data/previews/536/536549_11935698-lq.mp3
 
