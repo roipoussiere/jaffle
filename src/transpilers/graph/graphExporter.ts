@@ -39,7 +39,8 @@ export function buildBoxTyping(entry: Entry): BoxTyping {
 
 export function getDisplayValue(entry: Entry) {
 	if (entry.rawValue === '') {
-		return entry.children.length === 0 ? '∅' : ' ';
+		return entry.children.length === 0 && entry.rawName[0] !== entry.rawName.toUpperCase()[0]
+			? '∅' : ' ';
 	}
 
 	if (entry.rawValue[0] === c.MINI_STR_PREFIX || entry.rawValue[0] === c.EXPR_STR_PREFIX) {
