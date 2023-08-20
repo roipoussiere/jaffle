@@ -1,7 +1,7 @@
 const tune = `
 # "Sample drums"
 
-- samples^1:
+- samples^:
   - bd: bd/BT0A0D0.wav
     sn: sn/ST0T0S3.wav
     hh: hh/000_hh3closedhh.wav
