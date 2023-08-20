@@ -419,18 +419,24 @@ export class NodeEditor extends AbstractEditor {
 			.on('click', () => self.drawInput());
 
 	// 		box.append('title')
-	// 			.text((d: FuncNode) => `id: ${d.data.id}
-	// groupId: ${d.data.groupId}
-	// name:
-	//   displayName: ${d.data.displayName}
-	//   rawName: ${d.data.rawName}
-	//   type: ${BoxType[d.data.type]}
-	// value:
-	//   displayValue: ${d.data.displayValue}
-	//   rawValue: ${d.data.rawValue}
-	//   valueType: ${ValueType[d.data.valueType]}
-	// padding: ${d.data.padding}
-	// width: ${d.data.width}`);
+	// 			.text((d: FuncNode) => `Entry data:
+	// 	rawName: ${d.data.rawName}
+	// 	rawValue: ${d.data.rawValue}
+	// Internal:
+	// 	id: ${d.data.id}
+	// 	groupId: ${d.data.groupId}
+	// 	lastSiblingId: ${d.data.lastSiblingId}
+	// BoxDisplay:
+	// 	displayName: ${d.data.displayName}
+	// 	displayValue: ${d.data.displayValue}
+	// BoxTyping:
+	// 	type: ${EntryType[d.data.type]}
+	// 	valueType: ${ValueType[d.data.valueType]}
+	// 	isSerialized: ${d.data.isSerialized ? 'yes' : 'no'}
+	// 	error: ${d.data.error ? 'yes' : 'no'}
+	// BoxGeometry:
+	// 	padding: ${d.data.padding}
+	// 	width: ${d.data.width}`);
 	}
 
 	private drawInput(): void {
