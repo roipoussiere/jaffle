@@ -11,7 +11,7 @@ function getEntryName(entry: Entry) {
 	return entry.rawName.split(c.DICT_PREFIX).reverse()[0];
 }
 
-function serializedRawValuetoJs(rawValue: string): string {
+function serializedRawValueToJs(rawValue: string): string {
 	if (rawValue === '') {
 		return 'null';
 	}
@@ -21,50 +21,51 @@ function serializedRawValuetoJs(rawValue: string): string {
 	return `'${rawValue}'`;
 }
 
+function serializedListToJs(entries: Array<Entry>, iLvl = 0): string {
+	const innerJs = entries
+		// eslint-disable-next-line no-use-before-define
+		.map((ch) => `\n${indent(iLvl)}${serializedEntryToJs(ch, iLvl + 1)}`)
+		.join(',');
+	return `[${innerJs}\n${indent(iLvl === 0 ? 0 : iLvl - 1)}]`;
+}
+
+function serializedDictToJs(entries: Array<Entry>, iLvl = 0): string {
+	const jsEntries = entries.map((child) => {
+		let jsValue: string;
+		if (child.children.length === 0) {
+			jsValue = serializedRawValueToJs(child.rawValue);
+		} else if (child.children.length === 1 || child.children[0].rawName[0] === c.DICT_PREFIX) {
+			jsValue = serializedDictToJs(child.children, iLvl + 1);
+		} else {
+			jsValue = serializedListToJs(child.children, iLvl + 1);
+		}
+		return `\n${indent(iLvl)}'${getEntryName(child)}': ${jsValue}`;
+	});
+
+	return `{${jsEntries.join(',')}\n${indent(iLvl === 0 ? 0 : iLvl - 1)}}`;
+}
+
 /**
  * Serialise an object to JSON.
  * @param entry the object to serialize
  * @returns a string reprensenting the object in JSON
  */
-export function serializedEntryToJs(entry: Entry, iLvl = 0, curly = true): string {
+export function serializedEntryToJs(entry: Entry, iLvl = 0): string {
 	if (entry.children.length === 0) {
-		const jsValue = serializedRawValuetoJs(entry.rawValue);
-		if (entry.rawName === '') {
-			return jsValue;
-		}
-		return `${curly ? '{ ' : ''}'${getEntryName(entry)}': ${jsValue}${curly ? ' }' : ''}`;
+		const jsValue = serializedRawValueToJs(entry.rawValue);
+		return entry.rawName === '' ? jsValue : `{ '${getEntryName(entry)}': ${jsValue} }`;
 	}
 
 	if (entry.children[0].rawName[0] === c.DICT_PREFIX) {
-		const jsValues = entry.children.map((child) => {
-			let jsValue: string;
-			if (child.children.length === 0) {
-				jsValue = serializedRawValuetoJs(child.rawValue);
-			} else if (child.children.length === 1
-					|| child.children[0].rawName[0] === c.DICT_PREFIX) {
-				jsValue = `{${child.children
-					.map((ch) => `\n${indent(iLvl + 1)}${serializedEntryToJs(ch, iLvl + 1, false)}`)
-					.join(',')}\n${indent(iLvl)}}`;
-			} else {
-				jsValue = `[${child.children
-					.map((ch) => `\n${indent(iLvl + 1)}${serializedEntryToJs(ch, iLvl + 1)}`)
-					.join(',')}\n${indent(iLvl)}]`;
-			}
-			const _indent = indent(iLvl + (entry.rawName === '' ? 0 : 1));
-			return `\n${_indent}'${getEntryName(child)}': ${jsValue}`;
-		});
-
-		if (entry.rawName === '') {
-			return `{${jsValues.join(',')}\n${indent(iLvl)}}`;
-		}
-		const jsValue = `{${jsValues.join(',')}\n${indent(iLvl)}}`;
-		return `{\n${indent(iLvl)}'${getEntryName(entry)}': ${jsValue}}`;
+		const jsValue = serializedDictToJs(entry.children, iLvl + 1);
+		return entry.rawName === '' ? jsValue
+			: `{\n${indent(iLvl)}'${getEntryName(entry)}': ${jsValue}}`;
 	}
 
-	const strList = `[${entry.children
-		.map((child) => `\n${indent(iLvl + 1)}${serializedEntryToJs(child, iLvl + 1)}`)
-		.join(',')}\n${indent(iLvl)}]`;
-	return entry.rawName === '' ? strList : `{\n${indent(iLvl)}'${entry.rawName}': ${strList}}`;
+	const jsValue = serializedListToJs(entry.children, iLvl + 1);
+	return entry.rawName === ''
+		? `\n${jsValue}`
+		: `{\n${indent(iLvl)}'${entry.rawName}': ${jsValue}}`;
 }
 
 /**
@@ -183,8 +184,8 @@ export function childEntryToJs(_entry: Entry, iLvl = 0): string {
 		return funcName[0].toLowerCase() + funcName.substring(1);
 	}
 
-	const areValues = entry.children.filter((child) => child.rawName === '').length
-		=== entry.children.length || serializeSuffix !== undefined;
+	const areValues = serializeSuffix === undefined
+		&& entry.children.filter((child) => child.rawName === '').length === entry.children.length;
 	const lineBreak = areValues ? '' : `\n${indent(iLvl)}`;
 	const paramLineBreak = areValues ? ' ' : `\n\n${indent(iLvl)}`;
 
@@ -203,6 +204,7 @@ export function groupFuncParams(params: Array<Entry>, serializedParamId = -1): A
 	if (params.length === 0) {
 		throw new ExporterError('group of params is empty');
 	}
+
 	const groups: Array<Array<Entry>> = [];
 	let onMainFunc = false;
 
@@ -258,15 +260,14 @@ paramsToJsGroups(params: Array<Entry>, serializeSuffix?: string, iLvl = 0): Arra
 		throw new ExporterError('param identifier out of range');
 	}
 
-	return groups
-		.map((group, id) => (group
-			.map((param) => (
-				[id, -2].includes(serializedParamId)
-					? serializedEntryToJs(param, iLvl)
-					: childEntryToJs(param, iLvl + 1)
-			))
-			.join(`\n${indent(iLvl)}.`)
-		));
+	if (serializedParamId === -2 && groups[0][0].rawName[0] === c.DICT_PREFIX) {
+		return [serializedDictToJs(groups.map((group) => group[0]), iLvl + 1)];
+	}
+
+	return groups.map((group, id) => (id === serializedParamId || serializedParamId === -2
+		? serializedEntryToJs(group[0], iLvl)
+		: group.map((param) => childEntryToJs(param, iLvl + 1)).join(`\n${indent(iLvl)}.`)
+	));
 }
 
 export function entryToJs(entry: Entry): string {
