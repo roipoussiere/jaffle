@@ -4,8 +4,30 @@ import { Box, BoxDisplay, BoxTyping } from '../../../src/transpilers/graph/graph
 import { EntryType, Entry, ValueType } from '../../../src/model';
 import * as GE from '../../../src/transpilers/graph/graphExporter';
 
-describe('Testing BE.getBoxValue()', () => {
-	test('Entry with mininotation value return ValueType.Mininotation', () => {
+describe('Testing GE.getValueType()', () => {
+	test('entry with children -> ValueType.Empty', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [{
+				rawName: 'b',
+				rawValue: '42',
+				children: [],
+			}],
+		};
+		expect(GE.getValueType(input)).toBe(ValueType.Empty);
+	});
+
+	test('empty raw value -> ValueType.Null', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [],
+		};
+		expect(GE.getValueType(input)).toBe(ValueType.Null);
+	});
+
+	test('raw value starting with "_" -> ValueType.Mininotation', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: '_a',
@@ -14,7 +36,7 @@ describe('Testing BE.getBoxValue()', () => {
 		expect(GE.getValueType(input)).toBe(ValueType.Mininotation);
 	});
 
-	test('Entry with expression value return ValueType.Expression', () => {
+	test('raw value starting with "=" -> ValueType.Expression', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: '=a',
@@ -23,7 +45,7 @@ describe('Testing BE.getBoxValue()', () => {
 		expect(GE.getValueType(input)).toBe(ValueType.Expression);
 	});
 
-	test('Entry with number value return ValueType.Number', () => {
+	test('number in raw value -> ValueType.Number', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: '42',
@@ -32,7 +54,7 @@ describe('Testing BE.getBoxValue()', () => {
 		expect(GE.getValueType(input)).toBe(ValueType.Number);
 	});
 
-	test('Entry with boolean value return ValueType.Boolean', () => {
+	test('"true" or "false" in raw value -> ValueType.Boolean', () => {
 		const inputTrue: Entry = {
 			rawName: 'a',
 			rawValue: 'true',
@@ -48,16 +70,7 @@ describe('Testing BE.getBoxValue()', () => {
 		expect(GE.getValueType(inputFalse)).toBe(ValueType.Boolean);
 	});
 
-	test('Entry with null value return ValueType.Null', () => {
-		const input: Entry = {
-			rawName: 'a',
-			rawValue: '',
-			children: [],
-		};
-		expect(GE.getValueType(input)).toBe(ValueType.Null);
-	});
-
-	test('Entry with string value return ValueType.String', () => {
+	test('other string in raw value -> ValueType.String', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: 'b',
@@ -65,22 +78,29 @@ describe('Testing BE.getBoxValue()', () => {
 		};
 		expect(GE.getValueType(input)).toBe(ValueType.String);
 	});
+});
 
-	test('Entry with children return ValueType.Empty', () => {
+describe('Testing GE.isSerialized()', () => {
+	test('raw name prefixed with "^" -> true', () => {
+		const input: Entry = {
+			rawName: 'a^',
+			rawValue: 'b',
+			children: [],
+		};
+		expect(GE.isSerialized(input)).toBeTruthy();
+	});
+
+	test('raw name not prefixed with "^" -> false', () => {
 		const input: Entry = {
 			rawName: 'a',
-			rawValue: '',
-			children: [{
-				rawName: 'b',
-				rawValue: '42',
-				children: [],
-			}],
+			rawValue: 'b',
+			children: [],
 		};
-		expect(GE.getValueType(input)).toBe(ValueType.Empty);
+		expect(GE.isSerialized(input)).toBeFalsy();
 	});
 });
 
-describe('Testing BE.buildBoxTyping()', () => {
+describe('Testing GE.buildBoxTyping()', () => {
 	test('Entry without children can be used to build BoxTyping', () => {
 		const input: Entry = {
 			rawName: 'a',
@@ -116,35 +136,8 @@ describe('Testing BE.buildBoxTyping()', () => {
 	});
 });
 
-describe('Testing BE.getDisplayValue()', () => {
-	test('Entry with string value return the string', () => {
-		const input: Entry = {
-			rawName: 'a',
-			rawValue: 'b',
-			children: [],
-		};
-		expect(GE.getDisplayValue(input)).toBe('b');
-	});
-
-	test('Entry with mininotation value return the stripped string', () => {
-		const input: Entry = {
-			rawName: 'a',
-			rawValue: '_b',
-			children: [],
-		};
-		expect(GE.getDisplayValue(input)).toBe('b');
-	});
-
-	test('Entry with expression value return the stripped string', () => {
-		const input: Entry = {
-			rawName: 'a',
-			rawValue: '=b',
-			children: [],
-		};
-		expect(GE.getDisplayValue(input)).toBe('b');
-	});
-
-	test('Entry with null value return the ∅ symbol', () => {
+describe('Testing GE.getDisplayValue()', () => {
+	test('entry with null value -> "∅"', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: '',
@@ -153,7 +146,7 @@ describe('Testing BE.getDisplayValue()', () => {
 		expect(GE.getDisplayValue(input)).toBe('∅');
 	});
 
-	test('Entry with children return an empty string', () => {
+	test('entry with children -> " "', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: '',
@@ -165,10 +158,46 @@ describe('Testing BE.getDisplayValue()', () => {
 		};
 		expect(GE.getDisplayValue(input)).toBe(' ');
 	});
+
+	test('object entry without value -> " "', () => {
+		const input: Entry = {
+			rawName: 'A',
+			rawValue: '',
+			children: [],
+		};
+		expect(GE.getDisplayValue(input)).toBe(' ');
+	});
+
+	test('entry with mininotation value -> stripped raw name', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '_b',
+			children: [],
+		};
+		expect(GE.getDisplayValue(input)).toBe('b');
+	});
+
+	test('Entry with expression value -> stripped raw name', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '=b',
+			children: [],
+		};
+		expect(GE.getDisplayValue(input)).toBe('b');
+	});
+
+	test('other entries -> raw name', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: 'b',
+			children: [],
+		};
+		expect(GE.getDisplayValue(input)).toBe('b');
+	});
 });
 
-describe('Testing BE.buildBoxDisplay()', () => {
-	test('Entry without children can be used to build BoxDisplay', () => {
+describe('Testing GE.buildBoxDisplay()', () => {
+	test('entry without children can be used to build BoxDisplay', () => {
 		const input: Entry = {
 			rawName: '.a',
 			rawValue: '_b',
@@ -181,7 +210,7 @@ describe('Testing BE.buildBoxDisplay()', () => {
 		expect(GE.buildBoxDisplay(input)).toEqual(expected);
 	});
 
-	test('Entry with children can be used to build BoxDisplay', () => {
+	test('entry with children can be used to build BoxDisplay', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: '',
@@ -199,8 +228,8 @@ describe('Testing BE.buildBoxDisplay()', () => {
 	});
 });
 
-describe('Testing BE.entryToBox()', () => {
-	test('Entry without children can be used to build Box', () => {
+describe('Testing GE.entryToBox()', () => {
+	test('entry without children can be used to build Box', () => {
 		const input: Entry = {
 			rawName: '.a',
 			rawValue: '_b',
@@ -232,7 +261,7 @@ describe('Testing BE.entryToBox()', () => {
 		expect(GE.entryToBox(input)).toEqual(expected);
 	});
 
-	test('Entry with one child can be used to build Box', () => {
+	test('entry with one child can be used to build Box', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: '',
@@ -288,7 +317,7 @@ describe('Testing BE.entryToBox()', () => {
 		expect(GE.entryToBox(input)).toEqual(expected);
 	});
 
-	test('Entry with several children can be used to build Box', () => {
+	test('entry with func chain as children can be used to build Box', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: '',
