@@ -3,15 +3,15 @@ import { ExporterError } from '../../errors';
 import { Entry, EntryType } from '../../model';
 import { entryToEntryType, entryToFuncName } from '../utils';
 
-function indent(indentLevel: number): string {
+export function indent(indentLevel: number): string {
 	return '\t'.repeat(indentLevel);
 }
 
-function getEntryName(entry: Entry) {
+export function getEntryName(entry: Entry) {
 	return entry.rawName.split(c.DICT_PREFIX).reverse()[0];
 }
 
-function serializedRawValueToJs(rawValue: string): string {
+export function serializedRawValueToJs(rawValue: string): string {
 	if (rawValue === '') {
 		return 'null';
 	}
@@ -21,7 +21,7 @@ function serializedRawValueToJs(rawValue: string): string {
 	return `'${rawValue}'`;
 }
 
-function serializedListToJs(entries: Array<Entry>, iLvl = 0): string {
+export function serializedListToJs(entries: Array<Entry>, iLvl = 0): string {
 	const innerJs = entries
 		// eslint-disable-next-line no-use-before-define
 		.map((ch) => `\n${indent(iLvl)}${serializedEntryToJs(ch, iLvl + 1)}`)
@@ -29,7 +29,7 @@ function serializedListToJs(entries: Array<Entry>, iLvl = 0): string {
 	return `[${innerJs}\n${indent(iLvl === 0 ? 0 : iLvl - 1)}]`;
 }
 
-function serializedDictToJs(entries: Array<Entry>, iLvl = 0): string {
+export function serializedDictToJs(entries: Array<Entry>, iLvl = 0): string {
 	const jsEntries = entries.map((child) => {
 		let jsValue: string;
 		if (child.children.length === 0) {

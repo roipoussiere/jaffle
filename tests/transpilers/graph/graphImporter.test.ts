@@ -4,7 +4,7 @@ import * as GI from '../../../src/transpilers/graph/graphImporter';
 import { EntryType, Entry, ValueType } from '../../../src/model';
 import { Box } from '../../../src/transpilers/graph/graphModel';
 
-describe('Testing BI.boxToEntry()', () => {
+describe('Testing GI.boxToEntry()', () => {
 	test('box without children can be converted to an Entry', () => {
 		const input: Box = {
 			rawName: 'a',

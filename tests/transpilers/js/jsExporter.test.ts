@@ -109,10 +109,81 @@ const chainedObjectEntry: Entry = {
 };
 
 const serializedFuncEntry: Entry = {
-	rawName: 'a^',
+	rawName: 'j^',
 	rawValue: '',
 	children: [miniFuncEntry, chainedFuncEntry],
 };
+
+const dictEntry: Entry = {
+	rawName: '_k',
+	rawValue: '',
+	children: [mainFuncParamEntry],
+};
+
+const namedListEntry: Entry = {
+	rawName: 'l',
+	rawValue: '',
+	children: [strValEntry, numberValEntry],
+};
+
+describe('Testing JE.indent()', () => {
+	test('code is indented', () => {
+		expect(JE.indent(0)).toBe('');
+		expect(JE.indent(1)).toBe('\t');
+		expect(JE.indent(2)).toBe('\t\t');
+	});
+});
+
+describe('Testing JE.getEntryName()', () => {
+	test('dict -> stripped raw name', () => {
+		expect(JE.getEntryName(dictEntry)).toBe('k');
+	});
+
+	test('non dict -> raw name', () => {
+		expect(JE.getEntryName(mainFuncEntry)).toBe('a');
+	});
+});
+
+describe('Testing JE.serializedRawValueToJs()', () => {
+	test('"" -> "null"', () => {
+		expect(JE.serializedRawValueToJs('')).toBe('null');
+	});
+
+	test('number/boolean -> value without quotes', () => {
+		expect(JE.serializedRawValueToJs('42')).toBe('42');
+		expect(JE.serializedRawValueToJs('-2.21')).toBe('-2.21');
+		expect(JE.serializedRawValueToJs('true')).toBe('true');
+		expect(JE.serializedRawValueToJs('false')).toBe('false');
+	});
+
+	test('other strings -> value with quotes', () => {
+		expect(JE.serializedRawValueToJs('foo')).toBe("'foo'");
+	});
+});
+
+describe('Testing JE.serializedListToJs()', () => {
+	test('list of values can be serialized', () => {
+		expect(JE.serializedListToJs([miniFuncEntry, strValEntry]).replace(/[\n\t]/g, ''))
+			.toBe("['_bar','foo']");
+	});
+});
+
+describe('Testing JE.serializedDictToJs()', () => {
+	test('dict can be serialized', () => {
+		expect(JE.serializedDictToJs([mainFuncEntry, mainFuncParamEntry]).replace(/[\n\t]/g, ''))
+			.toBe("{'a': null,'b': 42}");
+	});
+
+	test('dict within dict can be serialized', () => {
+		expect(JE.serializedDictToJs([parentFuncEntry]).replace(/[\n\t]/g, ''))
+			.toBe("{'g': {'c': ['foo',42]}}");
+	});
+
+	test('list within dict can be serialized', () => {
+		expect(JE.serializedDictToJs([namedListEntry]).replace(/[\n\t]/g, ''))
+			.toBe("{'l': ['foo',42]}");
+	});
+});
 
 describe('Testing JE.serializedEntryToJs()', () => {
 	test('any value can be serialized', () => {
@@ -172,7 +243,8 @@ describe('Testing childEntryToJs()', () => {
 		expect(JE.childEntryToJs(parentFuncEntry)).toBe("g(\nc('foo', 42))");
 		expect(JE.childEntryToJs(chainFuncParamsEntry)).toBe('f(\na()\n.d())');
 		expect(JE.childEntryToJs(objectEntry)).toBe('h');
-		expect(JE.childEntryToJs(serializedFuncEntry)).toBe("a(\n'_bar',\n\n{ '.d': null })");
+		expect(JE.childEntryToJs(serializedFuncEntry).replace(/[\n\t]/g, ''))
+			.toBe("j('_bar',{ '.d': null })");
 	});
 });
 
