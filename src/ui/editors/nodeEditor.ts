@@ -60,6 +60,8 @@ export class NodeEditor extends AbstractEditor {
 
 	private _domContainer: HTMLDivElement;
 
+	private _domCtxMenu: HTMLUListElement;
+
 	private _svg?: d3.Selection<SVGSVGElement, undefined, null, undefined>;
 
 	private _tree?: FuncNode;
@@ -81,6 +83,8 @@ export class NodeEditor extends AbstractEditor {
 	get tree() { return this._tree || (function t() { throw new UndefErr(); }()); }
 
 	get domContainer() { return this._domContainer || (function t() { throw new UndefErr(); }()); }
+
+	get domCtxMenu() { return this._domCtxMenu || (function t() { throw new UndefErr(); }()); }
 
 	// eslint-disable-next-line class-methods-use-this
 	get tab(): Tab {
@@ -108,6 +112,8 @@ export class NodeEditor extends AbstractEditor {
 		this.domContainer.style.width = `${this.config.width - 10}px`;
 		this.domContainer.style.height = `${this.config.height - 35}px`;
 		this.domContainer.style.overflow = 'scroll';
+
+		this.buildContextMenu();
 		this.domEditor.appendChild(this.domContainer);
 		this.addKeyboardEvents();
 	}
@@ -400,7 +406,14 @@ export class NodeEditor extends AbstractEditor {
 					this.focusBox(`k${n.data.id}`);
 				}
 			})
-			.on('click', () => self.drawInput());
+			.on('click', () => self.drawInput())
+			.on('contextmenu', (e) => {
+				this.domCtxMenu.style.display = 'block';
+				this.domCtxMenu.style.left = `${e.layerX}px`;
+				this.domCtxMenu.style.top = `${e.layerY}px`;
+				console.log(e);
+				e.preventDefault();
+			});
 
 		box.append('rect')
 			.attr('id', (n: FuncNode) => `v${n.data.id}`)
@@ -510,6 +523,30 @@ export class NodeEditor extends AbstractEditor {
 
 		this.reload();
 		domInput.parentElement?.remove();
+	}
+
+	buildContextMenu() {
+		this._domCtxMenu = document.createElement('ul');
+		this.domCtxMenu.style.position = 'absolute';
+		this.domCtxMenu.style.backgroundColor = 'grey';
+		this.domCtxMenu.style.display = 'none';
+		this.domCtxMenu.style.cursor = 'pointer';
+
+		const ctxMenuAddChildItem = document.createElement('li');
+		ctxMenuAddChildItem.innerText = 'add child';
+		ctxMenuAddChildItem.addEventListener('click', () => {
+			this.domCtxMenu.style.display = 'none';
+		});
+		this.domCtxMenu.appendChild(ctxMenuAddChildItem);
+
+		const ctxMenuRemoveItem = document.createElement('li');
+		ctxMenuRemoveItem.innerText = 'remove';
+		ctxMenuRemoveItem.addEventListener('click', () => {
+			this.domCtxMenu.style.display = 'none';
+		});
+		this.domCtxMenu.appendChild(ctxMenuRemoveItem);
+
+		this.domContainer.appendChild(this.domCtxMenu);
 	}
 }
 
