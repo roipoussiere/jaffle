@@ -257,12 +257,7 @@ export class NodeEditor extends AbstractEditor {
 
 			if (event.shiftKey) {
 				if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-					const funcNode = this.getNodeById(boxId) as FuncNode;
-					const { children } = (funcNode.parent as FuncNode).data;
-					const entry = entryToBox(EMPTY_ENTRY);
-					entry.rawName = '.…';
-					children.splice(event.key === 'ArrowUp' ? index : index + 1, 0, entry);
-					this.reload();
+					this.insertBox(event.key === 'ArrowUp');
 					return;
 				}
 			}
@@ -283,28 +278,56 @@ export class NodeEditor extends AbstractEditor {
 				return;
 			}
 
-			const funcNode = this.getNodeById(boxId) as FuncNode;
-
 			if (event.key === 'Tab') {
-				if (funcNode.data.children.length === 0) {
-					funcNode.data.children = [entryToBox(EMPTY_ENTRY)];
-					this.reload();
-				}
+				this.addChildBox();
 				return;
 			}
 
 			if (event.key === 'Delete') {
 				if (event.shiftKey) {
-					(funcNode.parent as FuncNode).data.children.splice(index, 1);
-				} else if (isKey) {
-					funcNode.data.rawName = '';
+					this.removeBox();
 				} else {
-					funcNode.data.rawValue = '';
-					funcNode.data.children = [];
+					const funcNode = this.getNodeById(boxId) as FuncNode;
+					if (isKey) {
+						funcNode.data.rawName = '';
+					} else {
+						funcNode.data.rawValue = '';
+						funcNode.data.children = [];
+					}
+					this.reload();
 				}
-				this.reload();
 			}
 		});
+	}
+
+	private insertBox(above: boolean): void {
+		const boxId = this.focusedBoxId.substring(1);
+		const path = boxId.split('-');
+		const index = Number(path.pop());
+		const funcNode = this.getNodeById(boxId) as FuncNode;
+		const { children } = (funcNode.parent as FuncNode).data;
+		const entry = entryToBox(EMPTY_ENTRY);
+		entry.rawName = '.…';
+		children.splice(above ? index : index + 1, 0, entry);
+		this.reload();
+	}
+
+	private addChildBox(): void {
+		const boxId = this.focusedBoxId.substring(1);
+		const funcNode = this.getNodeById(boxId) as FuncNode;
+		if (funcNode.data.children.length === 0) {
+			funcNode.data.children = [entryToBox(EMPTY_ENTRY)];
+			this.reload();
+		}
+	}
+
+	private removeBox(): void {
+		const boxId = this.focusedBoxId.substring(1);
+		const path = boxId.split('-');
+		const index = Number(path.pop());
+		const funcNode = this.getNodeById(boxId) as FuncNode;
+		(funcNode.parent as FuncNode).data.children.splice(index, 1);
+		this.reload();
 	}
 
 	private drawSvg(): void {
@@ -411,7 +434,6 @@ export class NodeEditor extends AbstractEditor {
 				this.domCtxMenu.style.display = 'block';
 				this.domCtxMenu.style.left = `${e.layerX}px`;
 				this.domCtxMenu.style.top = `${e.layerY}px`;
-				console.log(e);
 				e.preventDefault();
 			});
 
@@ -429,7 +451,13 @@ export class NodeEditor extends AbstractEditor {
 					this.focusBox(`v${n.data.id}`);
 				}
 			})
-			.on('click', () => self.drawInput());
+			.on('click', () => self.drawInput())
+			.on('contextmenu', (e) => {
+				this.domCtxMenu.style.display = 'block';
+				this.domCtxMenu.style.left = `${e.layerX}px`;
+				this.domCtxMenu.style.top = `${e.layerY}px`;
+				e.preventDefault();
+			});
 
 	// 		box.append('title')
 	// 			.text((d: FuncNode) => `Entry data:
@@ -531,18 +559,38 @@ export class NodeEditor extends AbstractEditor {
 		this.domCtxMenu.style.backgroundColor = 'grey';
 		this.domCtxMenu.style.display = 'none';
 		this.domCtxMenu.style.cursor = 'pointer';
+		this.domCtxMenu.style.listStyleType = 'none';
+		this.domCtxMenu.style.padding = '0px';
 
 		const ctxMenuAddChildItem = document.createElement('li');
 		ctxMenuAddChildItem.innerText = 'add child';
 		ctxMenuAddChildItem.addEventListener('click', () => {
 			this.domCtxMenu.style.display = 'none';
+			this.addChildBox();
 		});
 		this.domCtxMenu.appendChild(ctxMenuAddChildItem);
+
+		const ctxMenuInsertAboveItem = document.createElement('li');
+		ctxMenuInsertAboveItem.innerText = 'insert above';
+		ctxMenuInsertAboveItem.addEventListener('click', () => {
+			this.domCtxMenu.style.display = 'none';
+			this.insertBox(true);
+		});
+		this.domCtxMenu.appendChild(ctxMenuInsertAboveItem);
+
+		const ctxMenuInsertBelowItem = document.createElement('li');
+		ctxMenuInsertBelowItem.innerText = 'insert below';
+		ctxMenuInsertBelowItem.addEventListener('click', () => {
+			this.domCtxMenu.style.display = 'none';
+			this.insertBox(false);
+		});
+		this.domCtxMenu.appendChild(ctxMenuInsertBelowItem);
 
 		const ctxMenuRemoveItem = document.createElement('li');
 		ctxMenuRemoveItem.innerText = 'remove';
 		ctxMenuRemoveItem.addEventListener('click', () => {
 			this.domCtxMenu.style.display = 'none';
+			this.removeBox();
 		});
 		this.domCtxMenu.appendChild(ctxMenuRemoveItem);
 
