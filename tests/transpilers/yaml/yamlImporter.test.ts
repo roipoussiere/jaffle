@@ -18,16 +18,7 @@ describe('Testing YI.getEntryName()', () => {
 });
 
 describe('Testing YI.keyValToSerializedEntry()', () => {
-	test('can build serialized box from key and literal', () => {
-		const expected: Entry = {
-			rawName: 'a',
-			rawValue: '_b',
-			children: [],
-		};
-		expect(YI.keyValToSerializedEntry('a', '_b')).toEqual(expected);
-	});
-
-	test('can build serialized box from key and array', () => {
+	test('can build serialized entry from key and array', () => {
 		const expected: Entry = {
 			rawName: 'a',
 			rawValue: '',
@@ -44,7 +35,7 @@ describe('Testing YI.keyValToSerializedEntry()', () => {
 		expect(YI.keyValToSerializedEntry('a', [1, 'b'])).toEqual(expected);
 	});
 
-	test('can build serialized box from key and object', () => {
+	test('can build serialized entry from key and object', () => {
 		const expected: Entry = {
 			rawName: 'a',
 			rawValue: '',
@@ -60,19 +51,19 @@ describe('Testing YI.keyValToSerializedEntry()', () => {
 		};
 		expect(YI.keyValToSerializedEntry('a', { b: 1, c: 'd' })).toEqual(expected);
 	});
-});
 
-describe('Testing YI.serialize()', () => {
-	test('can build serialized box from literal', () => {
+	test('can build serialized entry from key and literal', () => {
 		const expected: Entry = {
-			rawName: '',
-			rawValue: '42',
+			rawName: 'a',
+			rawValue: '_b',
 			children: [],
 		};
-		expect(YI.valueToSerializedEntry(42)).toEqual(expected);
+		expect(YI.keyValToSerializedEntry('a', '_b')).toEqual(expected);
 	});
+});
 
-	test('can build serialized box from array', () => {
+describe('Testing YI.valueToSerializedEntry()', () => {
+	test('can build serialized entry from array', () => {
 		const expected: Entry = {
 			rawName: '',
 			rawValue: '',
@@ -89,7 +80,7 @@ describe('Testing YI.serialize()', () => {
 		expect(YI.valueToSerializedEntry([1, 'a'])).toEqual(expected);
 	});
 
-	test('can build serialized box from object with unique key', () => {
+	test('can build serialized entry from object with unique key', () => {
 		const expected: Entry = {
 			rawName: 'a',
 			rawValue: '1',
@@ -98,7 +89,7 @@ describe('Testing YI.serialize()', () => {
 		expect(YI.valueToSerializedEntry({ a: 1 })).toEqual(expected);
 	});
 
-	test('can build serialized box from object with several keys', () => {
+	test('can build serialized entry from object with several keys', () => {
 		const expected: Entry = {
 			rawName: '',
 			rawValue: '',
@@ -114,25 +105,52 @@ describe('Testing YI.serialize()', () => {
 		};
 		expect(YI.valueToSerializedEntry({ a: 1, b: 'c' })).toEqual(expected);
 	});
-});
 
-describe('Testing YI.buildLiteralBox()', () => {
-	test('can build box from literal', () => {
+	test('can build serialized entry from literal', () => {
 		const expected: Entry = {
 			rawName: '',
-			rawValue: 'a',
+			rawValue: '42',
 			children: [],
 		};
-		expect(YI.buildLiteralEntry('a')).toEqual(expected);
+		expect(YI.valueToSerializedEntry(42)).toEqual(expected);
 	});
 });
 
-describe('Testing YI.buildListBox()', () => {
-	test('empty lists fails', () => {
+describe('Testing YI.buildLiteralEntry()', () => {
+	test('can build entry from null value', () => {
+		const expected: Entry = {
+			rawName: '',
+			rawValue: '',
+			children: [],
+		};
+		expect(YI.buildLiteralEntry(null)).toEqual(expected);
+	});
+
+	test('can build entry from string value', () => {
+		const expected: Entry = {
+			rawName: '',
+			rawValue: 'foo',
+			children: [],
+		};
+		expect(YI.buildLiteralEntry('foo')).toEqual(expected);
+	});
+
+	test('can build entry from number value', () => {
+		const expected: Entry = {
+			rawName: '',
+			rawValue: '42',
+			children: [],
+		};
+		expect(YI.buildLiteralEntry(42)).toEqual(expected);
+	});
+});
+
+describe('Testing YI.buildListEntry()', () => {
+	test('empty list fails', () => {
 		expect(() => YI.buildListEntry([])).toThrow(ImporterError);
 	});
 
-	test('can build box from list of literals', () => {
+	test('can build entry from list of literals', () => {
 		const expected: Entry = {
 			rawName: '',
 			rawValue: '',
@@ -154,31 +172,17 @@ describe('Testing YI.buildListBox()', () => {
 	});
 });
 
-describe('Testing YI.buildFuncBox()', () => {
-	test('bad funcs fails', () => {
-		expect(() => YI.buildFuncEntry({})).toThrow(ImporterError);
-		expect(() => YI.buildFuncEntry({ a: 1, b: 2 })).toThrow(ImporterError);
-	});
-
-	test('can build box from main func with literal', () => {
+describe('Testing YI.buildFuncEntry()', () => {
+	test('can build entry from serialized func', () => {
 		const expected: Entry = {
-			rawName: 'a',
-			rawValue: 'b',
+			rawName: 'a^',
+			rawValue: '_a',
 			children: [],
 		};
-		expect(YI.buildFuncEntry({ a: 'b' })).toEqual(expected);
+		expect(YI.buildFuncEntry({ 'a^': '_a' })).toEqual(expected);
 	});
 
-	test('can build box from main func with mininotation', () => {
-		const expected: Entry = {
-			rawName: 'a',
-			rawValue: '_b',
-			children: [],
-		};
-		expect(YI.buildFuncEntry({ a: '_b' })).toEqual(expected);
-	});
-
-	test('can build box from main func with array', () => {
+	test('can build entry from main func with array', () => {
 		const expected: Entry = {
 			rawName: 'a',
 			rawValue: '',
@@ -198,7 +202,30 @@ describe('Testing YI.buildFuncBox()', () => {
 		expect(YI.buildFuncEntry({ a: [1, 2] })).toEqual(expected);
 	});
 
-	test('can build box from chained func', () => {
+	test('bad funcs fails', () => {
+		expect(() => YI.buildFuncEntry({})).toThrow(ImporterError);
+		expect(() => YI.buildFuncEntry({ a: 1, b: 2 })).toThrow(ImporterError);
+	});
+
+	test('can build entry from main func with literal', () => {
+		const expected: Entry = {
+			rawName: 'a',
+			rawValue: 'b',
+			children: [],
+		};
+		expect(YI.buildFuncEntry({ a: 'b' })).toEqual(expected);
+	});
+
+	test('can build entry from main func with mininotation', () => {
+		const expected: Entry = {
+			rawName: 'a',
+			rawValue: '_b',
+			children: [],
+		};
+		expect(YI.buildFuncEntry({ a: '_b' })).toEqual(expected);
+	});
+
+	test('can build entry from chained func', () => {
 		const expected: Entry = {
 			rawName: '.a',
 			rawValue: '1',
@@ -206,55 +233,10 @@ describe('Testing YI.buildFuncBox()', () => {
 		};
 		expect(YI.buildFuncEntry({ '.a': 1 })).toEqual(expected);
 	});
-
-	test('can build box from serialized func', () => {
-		const expected: Entry = {
-			rawName: 'a^',
-			rawValue: '_a',
-			children: [],
-		};
-		expect(YI.buildFuncEntry({ 'a^': '_a' })).toEqual(expected);
-	});
 });
 
-describe('Testing YI.buildBoxChildren()', () => {
-	test('can build boxes from literals', () => {
-		const expected: Array<Entry> = [
-			{
-				rawName: '',
-				rawValue: 'true',
-				children: [],
-			}, {
-				rawName: '',
-				rawValue: '1',
-				children: [],
-			}, {
-				rawName: '',
-				rawValue: 'a',
-				children: [],
-			},
-		];
-		expect(YI.buildEntryChildren([true, 1, 'a'])).toEqual(expected);
-	});
-
-	test('can build boxes from main and chained funcs', () => {
-		const expected: Array<Entry> = [{
-			rawName: 'a',
-			rawValue: 'true',
-			children: [],
-		}, {
-			rawName: '.b',
-			rawValue: '42',
-			children: [],
-		}, {
-			rawName: 'c',
-			rawValue: 'd',
-			children: [],
-		}];
-		expect(YI.buildEntryChildren([{ a: true }, { '.b': 42 }, { c: 'd' }])).toEqual(expected);
-	});
-
-	test('can build boxes from lists', () => {
+describe('Testing YI.buildEntryChildren()', () => {
+	test('can build entry from lists', () => {
 		const expected: Array<Entry> = [{
 			rawName: '',
 			rawValue: '',
@@ -281,6 +263,42 @@ describe('Testing YI.buildBoxChildren()', () => {
 			}],
 		}];
 		expect(YI.buildEntryChildren([[null, true], [42, 'a']])).toEqual(expected);
+	});
+
+	test('can build entry from main and chained funcs', () => {
+		const expected: Array<Entry> = [{
+			rawName: 'a',
+			rawValue: 'true',
+			children: [],
+		}, {
+			rawName: '.b',
+			rawValue: '42',
+			children: [],
+		}, {
+			rawName: 'c',
+			rawValue: 'd',
+			children: [],
+		}];
+		expect(YI.buildEntryChildren([{ a: true }, { '.b': 42 }, { c: 'd' }])).toEqual(expected);
+	});
+
+	test('can build entry from literals', () => {
+		const expected: Array<Entry> = [
+			{
+				rawName: '',
+				rawValue: 'true',
+				children: [],
+			}, {
+				rawName: '',
+				rawValue: '1',
+				children: [],
+			}, {
+				rawName: '',
+				rawValue: 'a',
+				children: [],
+			},
+		];
+		expect(YI.buildEntryChildren([true, 1, 'a'])).toEqual(expected);
 	});
 });
 
