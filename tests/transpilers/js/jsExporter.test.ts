@@ -115,15 +115,35 @@ const serializedFuncEntry: Entry = {
 };
 
 const dictEntry: Entry = {
-	rawName: '_k',
+	rawName: 'k',
 	rawValue: '',
-	children: [mainFuncParamEntry],
+	children: [{
+		rawName: '_l',
+		rawValue: '1',
+		children: [],
+	}, {
+		rawName: '_m',
+		rawValue: '2',
+		children: [],
+	}],
 };
 
 const namedListEntry: Entry = {
-	rawName: 'l',
+	rawName: 'n',
 	rawValue: '',
 	children: [strValEntry, numberValEntry],
+};
+
+const lambdaFuncEntry: Entry = {
+	rawName: 'set',
+	rawValue: 'foo',
+	children: [mainFuncEntry],
+};
+
+const constantDefEntry: Entry = {
+	rawName: '$o',
+	rawValue: '42',
+	children: [],
 };
 
 describe('Testing JE.indent()', () => {
@@ -136,7 +156,7 @@ describe('Testing JE.indent()', () => {
 
 describe('Testing JE.getEntryName()', () => {
 	test('dict -> stripped raw name', () => {
-		expect(JE.getEntryName(dictEntry)).toBe('k');
+		expect(JE.getEntryName(dictEntry.children[0])).toBe('l');
 	});
 
 	test('non dict -> raw name', () => {
@@ -181,29 +201,35 @@ describe('Testing JE.serializedDictToJs()', () => {
 
 	test('list within dict can be serialized', () => {
 		expect(JE.serializedDictToJs([namedListEntry]).replace(/[\n\t]/g, ''))
-			.toBe("{'l': ['foo',42]}");
+			.toBe("{'n': ['foo',42]}");
 	});
 });
 
 describe('Testing JE.serializedEntryToJs()', () => {
-	test('any value can be serialized', () => {
+	test('value entries can be serialized', () => {
 		expect(JE.serializedEntryToJs(strValEntry)).toBe("'foo'");
 		expect(JE.serializedEntryToJs(numberValEntry)).toBe('42');
 		expect(JE.serializedEntryToJs(miniFuncEntry)).toBe("'_bar'");
-		expect(JE.serializedEntryToJs(listEntry)).toBe("\n[\n\t'foo',\n\t42\n]");
-		expect(JE.serializedEntryToJs(mainFuncEntry)).toBe("{ 'a': null }");
+	});
+
+	test('key-value entries can be serialized', () => {
 		expect(JE.serializedEntryToJs(mainFuncParamEntry)).toBe("{ 'b': 42 }");
-		expect(JE.serializedEntryToJs(mainFuncParamsEntry)).toBe("{\n'c': [\n\t'foo',\n\t42\n]}");
+		expect(JE.serializedEntryToJs(mainFuncEntry)).toBe("{ 'a': null }");
+		expect(JE.serializedEntryToJs(mainFuncParamsEntry).replace(/[\n\t]/g, ''))
+			.toBe("{'c': ['foo',42]}");
+	});
+
+	test('dict entries with key can be serialized', () => {
+		expect(JE.serializedEntryToJs(dictEntry).replace(/[\n\t]/g, ''))
+			.toBe("{'k': {'l': 1,'m': 2}}");
+	});
+
+	test('list entries can be serialized', () => {
+		expect(JE.serializedEntryToJs(listEntry).replace(/[\n\t]/g, '')).toBe("['foo',42]");
 	});
 });
 
 describe('Testing JE.rawValueToJs()', () => {
-	test('common strings are transpiled with quotes', () => {
-		expect(JE.rawValueToJs('abc')).toBe("'abc'");
-		expect(JE.rawValueToJs('_abc')).toBe("'_abc'");
-		expect(JE.rawValueToJs('ab\ncd')).toBe('`ab\ncd`');
-	});
-
 	test('non-string are transpiled without quotes', () => {
 		expect(JE.rawValueToJs('2.21')).toBe('2.21');
 		expect(JE.rawValueToJs('true')).toBe('true');
@@ -215,34 +241,81 @@ describe('Testing JE.rawValueToJs()', () => {
 		expect(JE.rawValueToJs('= ab + (42 - cd/2) * 2.21')).toBe('_ab + (42 - _cd/2) * 2.21');
 	});
 
+	test('common strings are transpiled with quotes', () => {
+		expect(JE.rawValueToJs('abc')).toBe("'abc'");
+		expect(JE.rawValueToJs('_abc')).toBe("'_abc'");
+		expect(JE.rawValueToJs('ab\ncd')).toBe('`ab\ncd`');
+	});
+
 	test('non-valid expression string fails', () => {
 		expect(() => JE.rawValueToJs('=$')).toThrow(ExporterError);
 	});
 });
 
 describe('Testing lambdaEntryToJs()', () => {
-	test('', () => {
+	test('lambda without param can be transpiled', () => {
 		expect(JE.lambdaParamsToJs('')).toBe('_x_ => _x_');
+	});
+
+	test('lambda with one param can be transpiled', () => {
+		expect(JE.lambdaParamsToJs('foo')).toBe('(_x_, _foo) => _x_');
+	});
+
+	test('lambda with several params can be transpiled', () => {
+		expect(JE.lambdaParamsToJs('foo,bar')).toBe('(_x_, _foo, _bar) => _x_');
+	});
+
+	test('lambda with invalid param fails', () => {
 		expect(() => JE.lambdaParamsToJs('A')).toThrow(ExporterError);
 		expect(() => JE.lambdaParamsToJs('0')).toThrow(ExporterError);
 		expect(() => JE.lambdaParamsToJs('$')).toThrow(ExporterError);
-		expect(JE.lambdaParamsToJs('foo')).toBe('(_x_, _foo) => _x_');
-		expect(JE.lambdaParamsToJs('foo,bar')).toBe('(_x_, _foo, _bar) => _x_');
+	});
+});
+
+describe('Testing expandEntry()', () => {
+	test('main func with param can be expanded', () => {
+		expect(JE.expandEntry(mainFuncParamEntry)).toEqual(expandedMainFuncParamEntry);
+	});
+
+	test('mininotation func can be expanded', () => {
+		expect(JE.expandEntry(miniFuncEntry)).toEqual(expandedMiniFuncEntry);
 	});
 });
 
 describe('Testing childEntryToJs()', () => {
-	test('', () => {
+	test('value and expression entries can be transpiled', () => {
 		expect(JE.childEntryToJs(strValEntry)).toBe("'foo'");
-		expect(JE.childEntryToJs(numberValEntry)).toBe('42');
-		expect(JE.childEntryToJs(miniFuncEntry)).toBe("mini('bar')");
 		expect(JE.childEntryToJs(exprFuncEntry)).toBe('_baz');
-		expect(JE.childEntryToJs(listEntry)).toBe("['foo',\n42]");
+	});
+
+	test('list entries can be transpiled', () => {
+		expect(JE.childEntryToJs(listEntry).replace(/[\n\t]/g, '')).toBe("['foo',42]");
+	});
+
+	test('lambda func entries can be transpiled', () => {
+		expect(JE.childEntryToJs(lambdaFuncEntry)).toBe('(_x_, _foo) => _x_');
+	});
+
+	test('constant defs entries can be transpiled', () => {
+		expect(JE.childEntryToJs(constantDefEntry)).toBe('const _o = 42');
+	});
+
+	test('object entries can be transpiled', () => {
+		expect(JE.childEntryToJs(objectEntry)).toBe('h');
+	});
+
+	test('func entries can be transpiled', () => {
+		expect(JE.childEntryToJs(miniFuncEntry)).toBe("mini('bar')");
 		expect(JE.childEntryToJs(mainFuncEntry)).toBe('a()');
 		expect(JE.childEntryToJs(mainFuncParamsEntry)).toBe("c('foo', 42)");
-		expect(JE.childEntryToJs(parentFuncEntry)).toBe("g(\nc('foo', 42))");
-		expect(JE.childEntryToJs(chainFuncParamsEntry)).toBe('f(\na()\n.d())');
-		expect(JE.childEntryToJs(objectEntry)).toBe('h');
+		expect(JE.childEntryToJs(parentFuncEntry).replace(/[\n\t]/g, '')).toBe("g(c('foo', 42))");
+	});
+
+	test('chained func entries can be transpiled', () => {
+		expect(JE.childEntryToJs(chainFuncParamsEntry).replace(/[\n\t]/g, '')).toBe('f(a().d())');
+	});
+
+	test('serialized entries can be transpiled', () => {
 		expect(JE.childEntryToJs(serializedFuncEntry).replace(/[\n\t]/g, ''))
 			.toBe("j('_bar',{ '.d': null })");
 	});
@@ -292,12 +365,12 @@ describe('Testing groupFuncParams()', () => {
 			.toEqual([[mainFuncParamEntry], [chainedFuncEntry], [miniFuncEntry]]);
 		expect(JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry], 1))
 			.toEqual([[expandedMainFuncParamEntry], [chainedFuncEntry]]);
-		expect(() => JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry], 0))
-			.toThrow(ExporterError);
 	});
 
-	test('Trying to group bad groups fails', () => {
+	test('trying to group bad groups fails', () => {
 		expect(() => JE.groupFuncParams([])).toThrow(ExporterError);
+		expect(() => JE.groupFuncParams([mainFuncParamEntry, chainedFuncEntry], 0))
+			.toThrow(ExporterError);
 		expect(() => JE.groupFuncParams([chainedFuncEntry])).toThrow(ExporterError);
 		expect(() => JE.groupFuncParams([chainedFuncEntry, mainFuncEntry])).toThrow(ExporterError);
 		expect(() => JE.groupFuncParams([strValEntry, chainedFuncEntry])).toThrow(ExporterError);
