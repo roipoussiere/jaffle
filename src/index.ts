@@ -14,7 +14,6 @@ import entryToYaml from './transpilers/yaml/yamlExporter';
 
 import * as errors from './errors';
 import { entryToString } from './transpilers/utils';
-import { boxToString } from './transpilers/graph/graphUtils';
 
 export {
 	Editor,
@@ -36,5 +35,4 @@ export {
 	entryToYaml,
 
 	entryToString,
-	boxToString,
 };
