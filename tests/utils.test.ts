@@ -24,22 +24,30 @@ describe('Testing JE.getEntryName()', () => {
 });
 
 describe('Testing u.entryToEntryType()', () => {
-	test('function entry return EntryType.Function', () => {
+	test('list entry return EntryType.List', () => {
 		const input: Entry = {
-			rawName: 'a',
+			rawName: '',
 			rawValue: '',
-			children: [],
+			children: [{
+				rawName: '',
+				rawValue: 'a',
+				children: [],
+			}, {
+				rawName: '',
+				rawValue: 'b',
+				children: [],
+			}],
 		};
-		expect(u.entryToEntryType(input)).toBe(EntryType.Function);
+		expect(u.entryToEntryType(input)).toBe(EntryType.List);
 	});
 
-	test('function containing serialized data return EntryType.Function', () => {
+	test('constant def entry return EntryType.ConstantDef', () => {
 		const input: Entry = {
-			rawName: 'a^',
+			rawName: '$a',
 			rawValue: '',
 			children: [],
 		};
-		expect(u.entryToEntryType(input)).toBe(EntryType.Function);
+		expect(u.entryToEntryType(input)).toBe(EntryType.ConstantDef);
 	});
 
 	test('mininitation value entry return EntryType.MininotationFunction', () => {
@@ -78,27 +86,36 @@ describe('Testing u.entryToEntryType()', () => {
 		expect(u.entryToEntryType(input)).toBe(EntryType.ChainedFunction);
 	});
 
-	test('constant def entry return EntryType.ConstantDef', () => {
+	test('lambda function entry return EntryType.LambdaFunction', () => {
 		const input: Entry = {
-			rawName: '$a',
+			rawName: 'set',
 			rawValue: '',
 			children: [],
 		};
-		expect(u.entryToEntryType(input)).toBe(EntryType.ConstantDef);
+		expect(u.entryToEntryType(input)).toBe(EntryType.LambdaFunction);
 	});
-});
 
-describe('Testing u.entryToFuncName()', () => {
-	test('Entry of main func return func name', () => {
+	test('function entry return EntryType.Function', () => {
 		const input: Entry = {
 			rawName: 'a',
 			rawValue: '',
 			children: [],
 		};
-		expect(u.entryToFuncName(input)).toBe('a');
+		expect(u.entryToEntryType(input)).toBe(EntryType.Function);
 	});
 
-	test('Entry of value return empty string', () => {
+	test('function containing serialized data return EntryType.Function', () => {
+		const input: Entry = {
+			rawName: 'a^',
+			rawValue: '',
+			children: [],
+		};
+		expect(u.entryToEntryType(input)).toBe(EntryType.Function);
+	});
+});
+
+describe('Testing u.entryToFuncName()', () => {
+	test('entry of value return empty string', () => {
 		const input: Entry = {
 			rawName: '',
 			rawValue: '42',
@@ -107,7 +124,7 @@ describe('Testing u.entryToFuncName()', () => {
 		expect(u.entryToFuncName(input)).toBe('');
 	});
 
-	test('Entry of chained func return stripped func name', () => {
+	test('entry of chained func return stripped func name', () => {
 		const input: Entry = {
 			rawName: '.a',
 			rawValue: '',
@@ -116,9 +133,18 @@ describe('Testing u.entryToFuncName()', () => {
 		expect(u.entryToFuncName(input)).toBe('a');
 	});
 
-	test('Entry of constant def return stripped func name', () => {
+	test('entry of constant def return stripped func name', () => {
 		const input: Entry = {
 			rawName: '$a',
+			rawValue: '',
+			children: [],
+		};
+		expect(u.entryToFuncName(input)).toBe('a');
+	});
+
+	test('entry of serialized dict return stripped func name', () => {
+		const input: Entry = {
+			rawName: '_a',
 			rawValue: '',
 			children: [],
 		};
@@ -128,6 +154,15 @@ describe('Testing u.entryToFuncName()', () => {
 	test('Entry of serialized data return stripped func name', () => {
 		const input: Entry = {
 			rawName: 'a^',
+			rawValue: '',
+			children: [],
+		};
+		expect(u.entryToFuncName(input)).toBe('a');
+	});
+
+	test('entry of main func return func name', () => {
+		const input: Entry = {
+			rawName: 'a',
 			rawValue: '',
 			children: [],
 		};
