@@ -1,6 +1,10 @@
 import { Entry, EntryType } from '../model';
 import * as c from '../constants';
 
+export function getEntryName(entry: Entry) {
+	return entry.rawName.split(c.DICT_PREFIX).reverse()[0];
+}
+
 export function entryToEntryType(entry: Entry): EntryType {
 	if (entry.rawName === '' && entry.rawValue === '') {
 		return EntryType.List;

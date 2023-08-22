@@ -1,14 +1,10 @@
+import { entryToEntryType, entryToFuncName, getEntryName } from '../utils';
 import * as c from '../../constants';
 import { ExporterError } from '../../errors';
 import { Entry, EntryType } from '../../model';
-import { entryToEntryType, entryToFuncName } from '../utils';
 
 export function indent(indentLevel: number): string {
 	return '\t'.repeat(indentLevel);
-}
-
-export function getEntryName(entry: Entry) {
-	return entry.rawName.split(c.DICT_PREFIX).reverse()[0];
 }
 
 export function serializedRawValueToJs(rawValue: string): string {

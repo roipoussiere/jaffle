@@ -154,16 +154,6 @@ describe('Testing JE.indent()', () => {
 	});
 });
 
-describe('Testing JE.getEntryName()', () => {
-	test('dict -> stripped raw name', () => {
-		expect(JE.getEntryName(dictEntry.children[0])).toBe('l');
-	});
-
-	test('non dict -> raw name', () => {
-		expect(JE.getEntryName(mainFuncEntry)).toBe('a');
-	});
-});
-
 describe('Testing JE.serializedRawValueToJs()', () => {
 	test('"" -> "null"', () => {
 		expect(JE.serializedRawValueToJs('')).toBe('null');

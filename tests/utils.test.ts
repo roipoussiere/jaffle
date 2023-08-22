@@ -3,6 +3,26 @@ import { describe, expect, test } from '@jest/globals';
 import * as u from '../src/transpilers/utils';
 import { Entry, EntryType } from '../src/model';
 
+describe('Testing JE.getEntryName()', () => {
+	test('dict -> stripped raw name', () => {
+		const input = {
+			rawName: '_a',
+			rawValue: '1',
+			children: [],
+		};
+		expect(u.getEntryName(input)).toBe('a');
+	});
+
+	test('non dict -> raw name', () => {
+		const input = {
+			rawName: 'a',
+			rawValue: '1',
+			children: [],
+		};
+		expect(u.getEntryName(input)).toBe('a');
+	});
+});
+
 describe('Testing u.entryToEntryType()', () => {
 	test('function entry return EntryType.Function', () => {
 		const input: Entry = {
