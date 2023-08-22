@@ -3,21 +3,34 @@ import { dump as dumpYaml } from 'js-yaml';
 
 import * as c from '../../constants';
 import { Dict, Entry } from '../../model';
+import { getEntryName } from '../utils';
 
-function dictEntryToDict(entry: Entry): Dict<unknown> {
+export function stringToValue(str: string): unknown {
+	if (str === '') {
+		return null;
+	}
+
+	if (!Number.isNaN(Number(str))) {
+		return Number(str);
+	}
+
+	if (str === 'true') {
+		return true;
+	}
+
+	if (str === 'false') {
+		return false;
+	}
+
+	return str;
+}
+
+export function dictEntryToDict(entry: Entry): Dict<unknown> {
 	const dict: Dict<unknown> = {};
 	entry.children.forEach((child) => {
-		const newKey = child.rawName.split(c.DICT_PREFIX).reverse()[0];
-		let value: unknown;
-		if (child.children.length === 0) {
-			value = child.rawValue;
-		} else if (child.children[0].rawName[0] === c.DICT_PREFIX) {
-			value = dictEntryToDict(child);
-		} else {
-			// eslint-disable-next-line no-use-before-define
-			value = child.children.map((_child) => entryToObject(_child));
-		}
-		dict[newKey] = value;
+		dict[getEntryName(child)] = child.children.length === 0
+			? stringToValue(child.rawValue)
+			: dictEntryToDict(child);
 	});
 	return dict;
 }
@@ -26,7 +39,7 @@ export function entryToObject(entry: Entry): unknown {
 	let value: unknown;
 
 	if (entry.children.length === 0) {
-		value = entry.rawValue;
+		value = stringToValue(entry.rawValue);
 	} else if (entry.children[0].rawName[0] === c.DICT_PREFIX) {
 		value = dictEntryToDict(entry);
 	} else {
