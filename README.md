@@ -4,7 +4,7 @@
 
 <img style="display: block; margin: auto;" src="./website/static/images/jaffle_logo_128.png"/>
 
-Check out the [demo website](https://roipoussiere.frama.io)!
+Check out the [demo website](https://roipoussiere.frama.io/jaffle)!
 
 ## Introduction
 
@@ -12,26 +12,23 @@ Jaffle is an hybrid yaml/node editor for [Tidal-cycles](https://tidalcycles.org/
 
 It aims to make algorithmic music more accessible for people who are not familiar with programming languages.
 
-![](images/editor_and_graph.png)
+![](images/node_editor.png)
+
+![](images/yaml_editor.png)
 
 Under the hood, Jaffle is a transpiler generating JavaScript code, which is then interpreted by Strudel.
 
 ## Features
 
-- tune visualization
+- node editor to visualize and edit tunes without writing code
 - easy to read yaml syntax (albeit ususally a bit more verbose than Strudel, because less compact)
 - use lambda functions, expressions, variable definitions, [and more](https://roipoussiere.frama.io/jaffle/syntax/)
-- includes all Strudel examples converted into Jaffle syntax
-- extensive [unit tests](tests/transpiler.test.ts)
+- includes all Strudel examples converted into Jaffle
 
 ## Roadmap
 
-- make the graph editable and allow to switch between yaml and node editor
-- improve node editor layout
-- allow to import strudel tune
+- allow to import Strudel tunes
 - create a desktop app
-- code completion
-- own documentation
 
 ## Syntax
 
@@ -45,6 +42,7 @@ Jaffle stands on the shoulders of giants:
 - graph renderer: [D3](https://d3js.org/)
 - text editor: [CodeMirror](https://codemirror.net/)
 - website generator: [Hugo](https://gohugo.io/)
+- bundler: [ESbuild](https://esbuild.github.io/)
 - unit tests framework: [Jest](https://jestjs.io)
 - linter: [ESLint](https://eslint.org/)
 
@@ -54,7 +52,7 @@ See the [contribution guide](./CONTRIBUTING.md)!
 
 ## Authorship
 
-### Jaffle transpiler and website
+### Jaffle transpilers, editors and website
 
 - credits: Nathanaël Jourdane and contributors
 - license: [AGPL-3.0](./LICENSE)
