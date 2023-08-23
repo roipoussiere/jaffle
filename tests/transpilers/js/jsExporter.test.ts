@@ -373,7 +373,7 @@ describe('Testing paramsToJsGroups()', () => {
 		expect(JE.paramsToJsGroups([])).toEqual([]);
 	});
 
-	test('empty params return empty array', () => {
+	test('other params can be transpiled', () => {
 		expect(JE.paramsToJsGroups([mainFuncEntry])).toEqual(['a()']);
 		expect(JE.paramsToJsGroups([mainFuncParamEntry])).toEqual(['b(42)']);
 		expect(JE.paramsToJsGroups([mainFuncEntry, strValEntry])).toEqual(['a()', "'foo'"]);
@@ -389,5 +389,23 @@ describe('Testing paramsToJsGroups()', () => {
 		expect(JE.paramsToJsGroups([parentFuncEntry])).toEqual(["g(\n\tc('foo', 42))"]);
 		expect(JE.paramsToJsGroups([mainFuncEntry, objectEntry])).toEqual(['a()', 'h']);
 		expect(JE.paramsToJsGroups([mainFuncEntry, chainedObjectEntry])).toEqual(['a()\n.i']);
+	});
+
+	test('invalid serialize suffix fails', () => {
+		expect(() => JE.paramsToJsGroups([mainFuncEntry], '2')).toThrow(ExporterError);
+	});
+});
+
+describe('Testing entryToJs()', () => {
+	test('entry with children can be transpiled', () => {
+		expect(JE.entryToJs(mainFuncParamsEntry)).toBe("'foo';\n\nreturn 42;");
+	});
+
+	test('entry with chain func children can be transpiled', () => {
+		expect(JE.entryToJs(chainFuncParamsEntry)).toBe('return a()\n.d();');
+	});
+
+	test('entry without children fails', () => {
+		expect(() => JE.entryToJs(mainFuncParamEntry)).toThrow(ExporterError);
 	});
 });
