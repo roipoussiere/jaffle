@@ -4,11 +4,11 @@ title: "Syntax"
 
 # Jaffle Syntax
 
-This chapter aims to provide an overview of the Jaffle syntax, for people already familiar with Strudel.
+This page aims to provide an overview of the Jaffle syntax, for people already familiar with the Strudel language.
 
-If necessary, read the [Strudel documentation](https://strudel.tidalcycles.org/learn).
+If necessary, read the [Strudel documentation](https://strudel.tidalcycles.org/learn) to understand how to write music with Strudel.
 
-Also, if you have some suggestions about this syntax or simply want to talk about it, see the [contribution guide](https://github.com/roipoussiere/jaffle/blob/main/CONTRIBUTING.md). ;)
+Most of this syntax is used both in the yaml and node editors: when editing a node, you can add a prefix or a suffix to change its behavior.
 
 ## Yaml basics
 
