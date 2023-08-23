@@ -6,7 +6,7 @@ publishDir: ../public
 canonifyURLs: true
 
 params:
-  description: Music live coding in Yaml
+  description: Music live coding made easy
   favicon: images/jaffle_icon_32.png
   stylesheet: css/website.css
   menu:
