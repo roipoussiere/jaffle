@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
 
-import * as u from '../src/transpilers/utils';
-import { Entry, EntryType } from '../src/model';
+import * as u from '../../src/transpilers/utils';
+import { Entry, EntryType } from '../../src/model';
 
 describe('Testing JE.getEntryName()', () => {
 	test('dict -> stripped raw name', () => {
@@ -167,5 +167,16 @@ describe('Testing u.entryToFuncName()', () => {
 			children: [],
 		};
 		expect(u.entryToFuncName(input)).toBe('a');
+	});
+});
+
+describe('Testing u.entryToString()', () => {
+	test('entry of value return empty string', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: 'b',
+			children: [],
+		};
+		expect(u.entryToString(input)).toBe("'a': 'b'");
 	});
 });
