@@ -422,4 +422,18 @@ describe('Testing GE.entryToBox()', () => {
 
 		expect(GE.entryToBox(input)).toEqual(expected);
 	});
+
+	test('entry with bad func chain as children builds errored Box', () => {
+		const input: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [{
+				rawName: '.b',
+				rawValue: '123',
+				children: [],
+			}],
+		};
+
+		expect(GE.entryToBox(input).children[0].error).toBeTruthy();
+	});
 });

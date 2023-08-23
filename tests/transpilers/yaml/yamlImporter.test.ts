@@ -60,6 +60,15 @@ describe('Testing YI.keyValToSerializedEntry()', () => {
 		};
 		expect(YI.keyValToSerializedEntry('a', '_b')).toEqual(expected);
 	});
+
+	test('can build serialized entry from key and null value', () => {
+		const expected: Entry = {
+			rawName: 'a',
+			rawValue: '',
+			children: [],
+		};
+		expect(YI.keyValToSerializedEntry('a', null)).toEqual(expected);
+	});
 });
 
 describe('Testing YI.valueToSerializedEntry()', () => {
@@ -113,6 +122,15 @@ describe('Testing YI.valueToSerializedEntry()', () => {
 			children: [],
 		};
 		expect(YI.valueToSerializedEntry(42)).toEqual(expected);
+	});
+
+	test('can build serialized entry from null value', () => {
+		const expected: Entry = {
+			rawName: '',
+			rawValue: '',
+			children: [],
+		};
+		expect(YI.valueToSerializedEntry(null)).toEqual(expected);
 	});
 });
 
