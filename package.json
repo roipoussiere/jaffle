@@ -1,6 +1,6 @@
 {
 	"name": "jaffle",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "An hybrid yaml/node editor for Tidal Cycles, based on Strudel.",
 	"keywords": [
 		"music",
