@@ -1,5 +1,5 @@
 import Editor from './ui/ui';
-import { PlayBtn, StopBtn, WebsiteBtn, ShortcutsBtn } from './ui/widgets/buttons';
+import { PlayBtn, StopBtn, WebsiteBtn, ShortcutsBtn, AboutBtn } from './ui/widgets/buttons';
 
 import NodeEditor from './ui/editors/nodeEditor';
 import YamlEditor from './ui/editors/yamlEditor';
@@ -26,6 +26,7 @@ export {
 	StopBtn,
 	WebsiteBtn,
 	ShortcutsBtn,
+	AboutBtn,
 
 	boxToEntry,
 	yamlToEntry,
