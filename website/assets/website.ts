@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
 
-import { Editor, NodeEditor, YamlEditor, JsEditor, Button, PlayBtn, StopBtn, ShortcutsBtn }
-	from './jaffle';
-
+import { Editor, NodeEditor, YamlEditor, JsEditor, Button, ShortcutsBtn } from './jaffle';
 import StrudelRepl from './strudelRepl';
 
 const editorConfig = {
@@ -11,6 +9,22 @@ const editorConfig = {
 	fontSize: 16,
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	onUpdate: () => {},
+};
+
+const PlayBtn: Button = {
+	id: 'play',
+	label: 'Play',
+	tooltip: 'Play/update tune (Ctrl-Enter)',
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	onClick: () => {},
+};
+
+const StopBtn: Button = {
+	id: 'stop',
+	label: 'Stop',
+	tooltip: 'Stop tune (Ctrl-.)',
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	onClick: () => {},
 };
 
 const WebsiteBtn: Button = {
@@ -71,9 +85,23 @@ const strudel = new StrudelRepl(
 	},
 	() => editor.errorBar.setError(),
 );
-editor.play = () => strudel.play(editor.getJs());
-editor.stop = () => strudel.stop();
+
+const play = () => strudel.play(editor.getJs());
+const stop = () => strudel.stop();
+
+editor.buttons[0].onClick = play;
+editor.buttons[1].onClick = stop;
+
 strudel.init();
+
+document.addEventListener('keydown', (event) => {
+	if (event.ctrlKey && event.key === 'Enter') {
+		play();
+	}
+	if (event.ctrlKey && event.key === '.') {
+		stop();
+	}
+}, false);
 
 window.addEventListener('DOMContentLoaded', () => {
 	const domEditor = document.getElementById('jaffle-editor') as HTMLDivElement;

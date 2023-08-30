@@ -1,30 +1,8 @@
-import { JaffleError } from '../../errors';
-
-type OnButtonClick = () => void;
-
-const defaultOnclick = () => {
-	throw new JaffleError('no action assigned to this button');
-};
-
 export type Button = {
 	id: string,
 	label: string,
 	tooltip: string,
-	onClick: OnButtonClick,
-};
-
-export const PlayBtn: Button = {
-	id: 'play',
-	label: 'Play',
-	tooltip: 'Play/update tune (Ctrl-Enter)',
-	onClick: defaultOnclick,
-};
-
-export const StopBtn: Button = {
-	id: 'stop',
-	label: 'Stop',
-	tooltip: 'Stop tune (Ctrl-.)',
-	onClick: defaultOnclick,
+	onClick: () => void,
 };
 
 export const ShortcutsBtn: Button = {

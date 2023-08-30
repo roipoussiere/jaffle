@@ -10,9 +10,6 @@ import ErrorBar from './widgets/errorBar';
 import YamlEditor from './editors/yamlEditor';
 import { Button } from './widgets/buttons';
 
-type OnPlay = () => void;
-type OnStop = () => void;
-
 export class Editor {
 	editorConfig: EditorConfig;
 
@@ -30,14 +27,10 @@ export class Editor {
 
 	content: Entry;
 
-	play: OnPlay;
-
-	stop: OnStop;
-
 	constructor(
 		editorConfig: Partial<EditorConfig>,
 		editors: Array<AbstractEditor>,
-		buttons: Array<Button>, // todo: one array of buttons, with ButtonLocation enum
+		buttons: Array<Button>, // todo: one array of buttons, with Menu beeing a button
 		menu: Array<Button>,
 	) {
 		this.editorConfig = { ...DEFAULT_EDITOR_CONFIG, ...editorConfig };
@@ -45,8 +38,6 @@ export class Editor {
 		this.buttons = buttons;
 		this.menu = menu;
 		this.content = EMPTY_ENTRY;
-		this.play = () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
-		this.stop = () => {}; // eslint-disable-line @typescript-eslint/no-empty-function
 		this.errorBar = new ErrorBar();
 		this.editorBar = new EditorBar(
 			'Jaffle',
@@ -59,7 +50,6 @@ export class Editor {
 		);
 
 		this.addButtonsEvents();
-		this.addKeyboardEvents();
 	}
 
 	loadExample(tuneExample: string): void {
@@ -124,14 +114,6 @@ export class Editor {
 	}
 
 	private addButtonsEvents() {
-		this.buttons.forEach((button, id) => {
-			if (button.id === 'play') {
-				this.buttons[id].onClick = () => this.play();
-			} else if (button.id === 'stop') {
-				this.buttons[id].onClick = () => this.stop();
-			}
-		});
-
 		this.editorBar.onTabSwitch = (oldTabId: string, newTabId: string) => {
 			const oldEditor = this.getEditor(oldTabId);
 			const newEditor = this.getEditor(newTabId);
@@ -147,17 +129,6 @@ export class Editor {
 			oldEditor.getDom().style.setProperty('display', 'none', 'important');
 			newEditor.getDom().style.display = 'block';
 		};
-	}
-
-	private addKeyboardEvents() {
-		document.addEventListener('keydown', (event) => {
-			if (event.ctrlKey && event.key === 'Enter') {
-				this.play();
-			}
-			if (event.ctrlKey && event.key === '.') {
-				this.stop();
-			}
-		}, false);
 	}
 
 	static getStyle() {
