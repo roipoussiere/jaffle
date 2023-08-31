@@ -1,5 +1,6 @@
 import Editor from './ui/ui';
-import { Button, ShortcutsBtn } from './ui/widgets/buttons';
+import { Button } from './ui/widgets/buttons';
+import * as buttonUtils from './ui/widgets/buttons';
 
 import NodeEditor from './ui/editors/nodeEditor';
 import YamlEditor from './ui/editors/yamlEditor';
@@ -23,7 +24,7 @@ export {
 	errors,
 
 	Button,
-	ShortcutsBtn,
+	buttonUtils,
 
 	boxToEntry,
 	yamlToEntry,

@@ -1,7 +1,11 @@
 /* eslint-disable no-console */
 
-import { Editor, NodeEditor, YamlEditor, JsEditor, Button, ShortcutsBtn } from './jaffle';
+import { Editor, NodeEditor, yamlToEntry, YamlEditor, JsEditor, Button, buttonUtils }
+	from './jaffle';
+import tunes from './jaffle/tunes/_tuneIndex';
 import StrudelRepl from './strudelRepl';
+
+const PRELOADED_TUNE = 'amen_sister';
 
 const editorConfig = {
 	width: 800,
@@ -25,6 +29,15 @@ const StopBtn: Button = {
 	tooltip: 'Stop tune (Ctrl-.)',
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	onClick: () => {},
+};
+
+const ExamplesBtn: Button = {
+	id: 'examples',
+	label: 'Examples',
+	tooltip: 'Load an example',
+	onClick: () => {
+		document.getElementById('jaffle-examples').style.display = 'block';
+	},
 };
 
 const WebsiteBtn: Button = {
@@ -75,7 +88,7 @@ const editor = new Editor(
 	editorConfig,
 	editors,
 	[PlayBtn, StopBtn],
-	[WebsiteBtn, ShortcutsBtn, AboutBtn],
+	[ExamplesBtn, WebsiteBtn, buttonUtils.ShortcutsBtn, AboutBtn],
 );
 
 const strudel = new StrudelRepl(
@@ -103,8 +116,20 @@ document.addEventListener('keydown', (event) => {
 	}
 }, false);
 
+function loadExample() {
+	const tuneName = window.location.hash.substring(1);
+	editor.setContent(yamlToEntry(tunes[tuneName] || tunes[PRELOADED_TUNE]));
+	document.getElementById('jaffle-examples').style.display = 'none';
+}
+
+window.addEventListener('hashchange', () => loadExample());
 window.addEventListener('DOMContentLoaded', () => {
 	const domEditor = document.getElementById('jaffle-editor') as HTMLDivElement;
 	editor.build(domEditor, domEditor.classList.contains('jaffle-fs'));
-	editor.loadExample('amen_sister');
+	const exampleLinks = Object.keys(tunes).map((tune) => ({
+		label: tune,
+		url: `#${tune}`,
+	}));
+	domEditor.appendChild(buttonUtils.buildLinksCloud('jaffle-examples', exampleLinks));
+	loadExample();
 });

@@ -1,3 +1,8 @@
+export type Link = {
+	label: string,
+	url: string,
+}
+
 export type Button = {
 	id: string,
 	label: string,
@@ -36,4 +41,44 @@ export function buildButton(button: Button): HTMLButtonElement {
 	domButton.addEventListener('click', button.onClick);
 
 	return domButton;
+}
+
+export function buildLinksCloud(id: string, links: Array<Link>): HTMLDivElement {
+	const domButtonsCloud = document.createElement('div');
+	domButtonsCloud.id = id;
+	domButtonsCloud.style.cssText = `
+display: none;
+position: absolute;
+max-width: 70%;
+top: 67px;
+right: 15%;
+background-color: #002b36;
+padding: 3px;
+padding-bottom: 0;
+padding-left: 0;`;
+
+	links.forEach((link) => {
+		const domButton = document.createElement('p');
+		domButton.innerText = link.label;
+		domButton.addEventListener('click', () => { window.location.href = link.url; });
+		domButton.addEventListener('mouseover', () => {
+			domButton.style.backgroundColor = 'cadetblue';
+		});
+		domButton.addEventListener('mouseout', () => {
+			domButton.style.backgroundColor = 'darkseagreen';
+		});
+		domButton.style.cssText = `
+display: inline-block;
+float: left;
+background-color: darkseagreen;
+border: none;
+margin: 0;
+padding: 5px;
+margin-left: 3px;
+margin-bottom: 3px;
+cursor: pointer;`;
+		domButtonsCloud.appendChild(domButton);
+	});
+
+	return domButtonsCloud;
 }

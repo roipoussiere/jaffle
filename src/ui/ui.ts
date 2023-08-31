@@ -1,8 +1,6 @@
 import { Entry, EMPTY_ENTRY } from '../model';
 import { UndefError } from '../errors';
 import entryToJs from '../transpilers/js/jsExporter';
-import tunes from '../tunes/_tuneIndex';
-import yamlToEntry from '../transpilers/yaml/yamlImporter';
 
 import { AbstractEditor, EditorConfig, DEFAULT_EDITOR_CONFIG } from './editors/abstractEditor';
 import { EditorBar } from './widgets/editorBar';
@@ -39,21 +37,9 @@ export class Editor {
 		this.menu = menu;
 		this.content = EMPTY_ENTRY;
 		this.errorBar = new ErrorBar();
-		this.editorBar = new EditorBar(
-			'Jaffle',
-			this.editors.map((editor) => editor.tab),
-			buttons,
-			menu,
-			Object.keys(tunes),
-			(example) => this.loadExample(example),
-			'node',
-		);
-
+		const tabs = this.editors.map((editor) => editor.tab);
+		this.editorBar = new EditorBar('Jaffle', tabs, buttons, menu, 'node');
 		this.addButtonsEvents();
-	}
-
-	loadExample(tuneExample: string): void {
-		this.setContent(yamlToEntry(tunes[tuneExample]));
 	}
 
 	getEditor(tabId: string): AbstractEditor {
