@@ -2,7 +2,7 @@
 
 import { Editor, NodeEditor, yamlToEntry, YamlEditor, JsEditor, Button, buttonUtils }
 	from './jaffle';
-import tunes from './jaffle/tunes/_tuneIndex';
+import tunes from './tunes/_tuneIndex';
 import StrudelRepl from './strudelRepl';
 
 const PRELOADED_TUNE = 'amen_sister';
