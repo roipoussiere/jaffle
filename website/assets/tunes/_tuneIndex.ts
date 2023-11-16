@@ -1,5 +1,3 @@
-import { StringDict } from '../model';
-
 import amenSister from './amenSister.yml';
 import arpoon from './arpoon.yml';
 import festivalOfFingers3 from './festivalOfFingers3.yml';
@@ -38,6 +36,9 @@ import ws4AddStack from './ws4AddStack.yml';
 import echoPiano from './echoPiano.yml';
 import randomBells from './randomBells.yml';
 import zeldaRescue from './zeldaRescue.yml';
+
+
+export type StringDict = { [key: string]: string };
 
 const tunes: StringDict = {
 	amen_sister: amenSister,

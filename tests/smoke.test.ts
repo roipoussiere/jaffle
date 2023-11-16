@@ -1,6 +1,6 @@
 import { describe, test } from '@jest/globals';
 
-import tunes from '../src/tunes/_tuneIndex';
+import tunes from '../website/assets/tunes/_tuneIndex';
 import yamlToEntry from '../src/transpilers/yaml/yamlImporter';
 import entryToYaml from '../src/transpilers/yaml/yamlExporter';
 import boxToEntry from '../src/transpilers/graph/graphImporter';
