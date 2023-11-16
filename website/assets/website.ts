@@ -4,6 +4,8 @@ import { Editor, NodeEditor, yamlToEntry, YamlEditor, JsEditor, Button, buttonUt
 	from './jaffle';
 import tunes from './tunes/_tuneIndex';
 import StrudelRepl from './strudelRepl';
+import Hydra from 'hydra-synth';
+
 
 const PRELOADED_TUNE = 'amen_sister';
 
@@ -128,12 +130,13 @@ function addCanvas(domEditor: HTMLDivElement) {
 	domCanvas.width = domEditor.offsetWidth;
 	domCanvas.height = domEditor.offsetHeight;
 	domEditor.appendChild(domCanvas);
+	return domCanvas;
 }
 
 window.addEventListener('hashchange', () => loadExample());
 window.addEventListener('DOMContentLoaded', () => {
 	const domEditor = document.getElementById('jaffle-editor') as HTMLDivElement;
-	addCanvas(domEditor);
+	const domCanvas = addCanvas(domEditor);
 	editor.build(domEditor, domEditor.classList.contains('jaffle-fs'));
 	const exampleLinks = Object.keys(tunes).map((tune) => ({
 		label: tune,
@@ -141,4 +144,9 @@ window.addEventListener('DOMContentLoaded', () => {
 	}));
 	domEditor.appendChild(buttonUtils.buildLinksCloud('jaffle-examples', exampleLinks));
 	loadExample();
+
+	new Hydra({
+		canvas: domCanvas,
+		detectAudio: false,
+	});
 });
