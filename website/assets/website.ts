@@ -122,9 +122,18 @@ function loadExample() {
 	document.getElementById('jaffle-examples').style.display = 'none';
 }
 
+function addCanvas(domEditor: HTMLDivElement) {
+	const domCanvas = document.createElement('canvas');
+	domCanvas.id = 'test-canvas';
+	domCanvas.width = domEditor.offsetWidth;
+	domCanvas.height = domEditor.offsetHeight;
+	domEditor.appendChild(domCanvas);
+}
+
 window.addEventListener('hashchange', () => loadExample());
 window.addEventListener('DOMContentLoaded', () => {
 	const domEditor = document.getElementById('jaffle-editor') as HTMLDivElement;
+	addCanvas(domEditor);
 	editor.build(domEditor, domEditor.classList.contains('jaffle-fs'));
 	const exampleLinks = Object.keys(tunes).map((tune) => ({
 		label: tune,
