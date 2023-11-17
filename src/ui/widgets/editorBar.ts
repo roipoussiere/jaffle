@@ -68,11 +68,26 @@ export class EditorBar {
 			this.dom.appendChild(buildButton(button));
 		});
 		domContainer.appendChild(this.dom);
+		this.addKeyboardEvents();
 	}
 
 	setTitle(title: string): void {
 		this.title = title;
 		this.domTitle.innerText = title;
+	}
+
+	private addKeyboardEvents() {
+		document.addEventListener('keydown', (event) => {
+			// console.log(event);
+			const kbdShortcuts = {
+				'1': 'node',
+				'2': 'yaml',
+				'3': 'js'
+			};
+			if (event.ctrlKey && event.key in kbdShortcuts) {
+				this.switchTab(kbdShortcuts[event.key]);
+			}
+		});
 	}
 
 	private switchTab(newActiveTabId: string): void {

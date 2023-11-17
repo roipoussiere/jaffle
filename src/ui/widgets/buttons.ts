@@ -15,7 +15,10 @@ export const ShortcutsBtn: Button = {
 	label: 'Shortcuts',
 	tooltip: 'Display keyboard shortcuts',
 	// eslint-disable-next-line no-alert
-	onClick: () => alert(`Node editor:
+	onClick: () => alert(`Global:
+	- Ctrl + 1/2/3: focus tab
+
+Node editor:
 	- Enter: edit / validate
 	- Up/down: move cursor to previous/next box
 	- Left/right: move cursor to parent/child box
@@ -25,6 +28,7 @@ export const ShortcutsBtn: Button = {
 	- Tab: new box child
 	- Delete: clear box key/value
 	- Ctrl + delete: remove box
+	- Ctrl + shift + n : clear all
 
 Text editor (Yaml/JS):
 	- Ctrl + z: undo
