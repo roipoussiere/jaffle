@@ -320,20 +320,28 @@ export class NodeEditor extends AbstractEditor {
 		const boxId = this.focusedBoxId.substring(1);
 		const path = boxId.split('-');
 		const index = Number(path.pop());
+		const newId = above ? index : index + 1;
+		path.push(newId.toString())
+
 		const funcNode = this.getNodeById(boxId) as FuncNode;
 		const { children } = (funcNode.parent as FuncNode).data;
 		const entry = entryToBox(EMPTY_ENTRY);
-		entry.rawName = '.…';
-		children.splice(above ? index : index + 1, 0, entry);
+		children.splice(newId, 0, entry);
+		entry.rawName = index === 0 ? '…' : '.…';
+
 		this.reload();
+		this.focusBox(`k${path.join('-')}`);
 	}
 
 	private addChildBox(): void {
 		const boxId = this.focusedBoxId.substring(1);
 		const funcNode = this.getNodeById(boxId) as FuncNode;
+
 		if (funcNode.data.children.length === 0) {
 			funcNode.data.children = [entryToBox(EMPTY_ENTRY)];
+
 			this.reload();
+			this.focusBox(`k${boxId}-0`);
 		}
 	}
 
@@ -341,9 +349,13 @@ export class NodeEditor extends AbstractEditor {
 		const boxId = this.focusedBoxId.substring(1);
 		const path = boxId.split('-');
 		const index = Number(path.pop());
+		path.push((index - 1).toString());
+
 		const funcNode = this.getNodeById(boxId) as FuncNode;
 		(funcNode.parent as FuncNode).data.children.splice(index, 1);
+
 		this.reload();
+		this.focusBox(`k${path.join('-')}`);
 	}
 
 	private clearAll(): void {
@@ -352,6 +364,7 @@ export class NodeEditor extends AbstractEditor {
 			rawValue: '',
 			children: [EMPTY_ENTRY],
 		});
+		this.focusBox(`k0`);
 	}
 
 	private drawSvg(): void {
