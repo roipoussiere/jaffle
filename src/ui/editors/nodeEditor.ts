@@ -118,15 +118,15 @@ export class NodeEditor extends AbstractEditor {
 		this.domContainer.style.overflow = 'scroll';
 
 		this._domCtxMenuBox = this.buildContextMenu({
-			'add child': () => this.addChildBox(),
-			'insert above': () => this.insertBox(true),
-			'insert below': () => this.insertBox(false),
-			'remove': () => this.removeBox()
+			'add child (tab)': () => this.addChildBox(),
+			'insert above (shift+up)': () => this.insertBox(true),
+			'insert below (shift+down)': () => this.insertBox(false),
+			'remove (shift+del)': () => this.removeBox()
 		});
 		this.domContainer.appendChild(this._domCtxMenuBox);
 
 		this._domCtxMenuBg = this.buildContextMenu({
-			'clear all': () => this.clearAll(),
+			'clear all (ctrl+n)': () => this.clearAll(),
 		});
 		this.domContainer.appendChild(this._domCtxMenuBg);
 
