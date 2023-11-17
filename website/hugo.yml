@@ -16,6 +16,8 @@ params:
     url: /syntax
   - name: Editor
     url: /editor
+  - name: Tutorial
+    url: /tutorial
   - name: Source code ↗️
     url: https://github.com/roipoussiere/jaffle
 

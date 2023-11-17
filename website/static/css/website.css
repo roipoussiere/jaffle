@@ -116,3 +116,9 @@ pre {
 	padding: 5px;
 	font-size: 15px;
 }
+
+blockquote {
+	background-color: darkcyan;
+	padding: 1em;
+	border-radius: 5px;
+}
