@@ -94,6 +94,10 @@ export function entryToBox(entry: Entry, id: Array<number> = []): Box {
 			const _child = child;
 			_child.padding = child.type === EntryType.Value ? 1 : paddings[child.groupId];
 			_child.width = paddings[child.groupId] + widths[child.groupId];
+			if (_child.children.length > 0) {
+				_child.displayValue = '―'.repeat(_child.width - _child.padding);
+			}
+		
 			_child.lastSiblingId = lastSiblingIds[child.groupId];
 			return _child;
 		});
