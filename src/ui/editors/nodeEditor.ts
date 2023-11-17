@@ -60,7 +60,7 @@ export class NodeEditor extends AbstractEditor {
 
 	private _domContainer: HTMLDivElement;
 
-	private _domCtxMenu: HTMLUListElement;
+	private _domCtxMenuBox: HTMLUListElement;
 
 	private _svg?: d3.Selection<SVGSVGElement, undefined, null, undefined>;
 
@@ -84,7 +84,7 @@ export class NodeEditor extends AbstractEditor {
 
 	get domContainer() { return this._domContainer || (function t() { throw new UndefErr(); }()); }
 
-	get domCtxMenu() { return this._domCtxMenu || (function t() { throw new UndefErr(); }()); }
+	get domCtxMenuBox() { return this._domCtxMenuBox || (function t() { throw new UndefErr(); }()); }
 
 	// eslint-disable-next-line class-methods-use-this
 	get tab(): Tab {
@@ -113,7 +113,14 @@ export class NodeEditor extends AbstractEditor {
 		this.domContainer.style.height = `${this.config.height - 35}px`;
 		this.domContainer.style.overflow = 'scroll';
 
-		this.buildContextMenu();
+		this._domCtxMenuBox = this.buildContextMenu({
+			'add child': () => this.addChildBox(),
+			'insert above': () => this.insertBox(true),
+			'insert below': () => this.insertBox(false),
+			'remove': () => this.removeBox()
+		});
+		this.domContainer.appendChild(this._domCtxMenuBox);
+
 		this.domEditor.appendChild(this.domContainer);
 		this.addKeyboardEvents();
 	}
@@ -431,9 +438,9 @@ export class NodeEditor extends AbstractEditor {
 			})
 			.on('click', () => self.drawInput())
 			.on('contextmenu', (e) => {
-				this.domCtxMenu.style.display = 'block';
-				this.domCtxMenu.style.left = `${e.layerX}px`;
-				this.domCtxMenu.style.top = `${e.layerY}px`;
+				this.domCtxMenuBox.style.display = 'block';
+				this.domCtxMenuBox.style.left = `${e.layerX}px`;
+				this.domCtxMenuBox.style.top = `${e.layerY}px`;
 				e.preventDefault();
 			});
 
@@ -453,9 +460,9 @@ export class NodeEditor extends AbstractEditor {
 			})
 			.on('click', () => self.drawInput())
 			.on('contextmenu', (e) => {
-				this.domCtxMenu.style.display = 'block';
-				this.domCtxMenu.style.left = `${e.layerX}px`;
-				this.domCtxMenu.style.top = `${e.layerY}px`;
+				this.domCtxMenuBox.style.display = 'block';
+				this.domCtxMenuBox.style.left = `${e.layerX}px`;
+				this.domCtxMenuBox.style.top = `${e.layerY}px`;
 				e.preventDefault();
 			});
 
@@ -553,54 +560,38 @@ export class NodeEditor extends AbstractEditor {
 		domInput.parentElement?.remove();
 	}
 
-	buildContextMenu() {
-		this._domCtxMenu = document.createElement('ul');
-		this.domCtxMenu.style.position = 'absolute';
-		this.domCtxMenu.style.backgroundColor = '#777';
-		this.domCtxMenu.style.display = 'none';
-		this.domCtxMenu.style.cursor = 'pointer';
-		this.domCtxMenu.style.listStyleType = 'none';
-		this.domCtxMenu.style.padding = '0px';
-		this.domCtxMenu.style.borderRadius = '3px';
-		this.domCtxMenu.addEventListener('mouseleave', () => {
-			this.domCtxMenu.style.display = 'none';
+	buildContextMenu(items: { [key: string]: CallableFunction }) {
+		const domCtxMenu = document.createElement('ul');
+		domCtxMenu.style.position = 'absolute';
+		domCtxMenu.style.backgroundColor = '#777';
+		domCtxMenu.style.display = 'none';
+		domCtxMenu.style.cursor = 'pointer';
+		domCtxMenu.style.listStyleType = 'none';
+		domCtxMenu.style.padding = '0px';
+		domCtxMenu.style.borderRadius = '3px';
+		domCtxMenu.addEventListener('mouseleave', () => {
+			domCtxMenu.style.display = 'none';
 		});
 
-		const ctxMenuAddChildItem = document.createElement('li');
-		ctxMenuAddChildItem.innerText = 'add child';
-		ctxMenuAddChildItem.addEventListener('click', () => this.addChildBox());
-		this.domCtxMenu.appendChild(ctxMenuAddChildItem);
+		for (const [label, onClick] of Object.entries(items)) {
+			const domCtxMenuItem = document.createElement('li');
+			domCtxMenuItem.innerText = label;
+			domCtxMenuItem.addEventListener('click', () => onClick());
+			domCtxMenu.appendChild(domCtxMenuItem);
 
-		const ctxMenuInsertAboveItem = document.createElement('li');
-		ctxMenuInsertAboveItem.innerText = 'insert above';
-		ctxMenuInsertAboveItem.addEventListener('click', () => this.insertBox(true));
-		this.domCtxMenu.appendChild(ctxMenuInsertAboveItem);
-
-		const ctxMenuInsertBelowItem = document.createElement('li');
-		ctxMenuInsertBelowItem.innerText = 'insert below';
-		ctxMenuInsertBelowItem.addEventListener('click', () => this.insertBox(false));
-		this.domCtxMenu.appendChild(ctxMenuInsertBelowItem);
-
-		const ctxMenuRemoveItem = document.createElement('li');
-		ctxMenuRemoveItem.innerText = 'remove';
-		ctxMenuRemoveItem.addEventListener('click', () => this.removeBox());
-		this.domCtxMenu.appendChild(ctxMenuRemoveItem);
-
-		this.domCtxMenu.childNodes.forEach((_ctxMenuItem) => {
-			const ctxMenuItem = (_ctxMenuItem as HTMLElement);
-			ctxMenuItem.style.padding = '3px';
-			ctxMenuItem.style.borderRadius = '3px';
-			ctxMenuItem.addEventListener('click', () => {
-				this.domCtxMenu.style.display = 'none';
+			domCtxMenuItem.style.padding = '3px';
+			domCtxMenuItem.style.borderRadius = '3px';
+			domCtxMenuItem.addEventListener('click', () => {
+				domCtxMenu.style.display = 'none';
 			});
-			ctxMenuItem.addEventListener('mouseover', () => {
-				ctxMenuItem.style.backgroundColor = 'white';
+			domCtxMenuItem.addEventListener('mouseover', () => {
+				domCtxMenuItem.style.backgroundColor = 'white';
 			});
-			ctxMenuItem.addEventListener('mouseleave', () => {
-				ctxMenuItem.style.backgroundColor = '#777';
+			domCtxMenuItem.addEventListener('mouseleave', () => {
+				domCtxMenuItem.style.backgroundColor = '#777';
 			});
-		});
-		this.domContainer.appendChild(this.domCtxMenu);
+		};
+		return domCtxMenu;
 	}
 }
 
