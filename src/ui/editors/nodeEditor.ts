@@ -126,7 +126,7 @@ export class NodeEditor extends AbstractEditor {
 		this.domContainer.appendChild(this._domCtxMenuBox);
 
 		this._domCtxMenuBg = this.buildContextMenu({
-			'clear all (ctrl+n)': () => this.clearAll(),
+			'clear all (ctrl+shift+n)': () => this.clearAll(),
 		});
 		this.domContainer.appendChild(this._domCtxMenuBg);
 
@@ -262,6 +262,8 @@ export class NodeEditor extends AbstractEditor {
 					this.domContainer.scrollBy(-100, 0);
 				} else if (event.key === 'ArrowRight') {
 					this.domContainer.scrollBy(100, 0);
+				} else if (event.shiftKey && event.key === 'N') {
+					this.clearAll();
 				}
 				return;
 			}
