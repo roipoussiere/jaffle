@@ -345,6 +345,7 @@ export class NodeEditor extends AbstractEditor {
 
 		if (funcNode.data.children.length === 0) {
 			funcNode.data.children = [entryToBox(EMPTY_ENTRY)];
+			funcNode.data.rawValue = '';
 
 			this.reload();
 			this.focusBox(`k${boxId}-0`);
