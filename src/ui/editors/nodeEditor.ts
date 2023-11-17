@@ -236,6 +236,10 @@ export class NodeEditor extends AbstractEditor {
 		document.addEventListener('keydown', (event) => {
 			// console.log(event);
 
+			if (this.domContainer.style.display === 'none') {
+				return;
+			}
+
 			if (!event.ctrlKey && event.key === 'Enter') {
 				if (this.isTyping) {
 					this.validateInput();
@@ -248,8 +252,8 @@ export class NodeEditor extends AbstractEditor {
 				return;
 			}
 
-			if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Space']
-				.indexOf(event.code) > -1) {
+			const preventKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Space'];
+			if (preventKeys.indexOf(event.code) > -1) {
 				event.preventDefault();
 			}
 
@@ -600,7 +604,7 @@ export class NodeEditor extends AbstractEditor {
 		domInput.parentElement?.remove();
 	}
 
-	buildContextMenu(items: { [key: string]: CallableFunction }) {
+	private buildContextMenu(items: { [key: string]: CallableFunction }) {
 		const domCtxMenu = document.createElement('ul');
 		domCtxMenu.style.position = 'absolute';
 		domCtxMenu.style.backgroundColor = '#777';
