@@ -535,7 +535,7 @@ export class NodeEditor extends AbstractEditor {
 	private drawInput(): void {
 		const isKey = this.focusedBoxId[0] === 'k';
 		const focusedNode = this.getNodeById(this.focusedBoxId.substring(1));
-		if (focusedNode === undefined) {
+		if (focusedNode === undefined || focusedNode.children?.length !== 0) {
 			return;
 		}
 
