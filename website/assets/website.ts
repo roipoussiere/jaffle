@@ -139,7 +139,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	const domCanvas = addCanvas(domEditor);
 	editor.build(domEditor, domEditor.classList.contains('jaffle-fs'));
 	const exampleLinks = Object.keys(tunes).map((tune) => ({
-		label: tune,
+		label: tune.replace(/_/g, ' '),
 		url: `#${tune}`,
 	}));
 	domEditor.appendChild(buttonUtils.buildLinksCloud('jaffle-examples', exampleLinks));
