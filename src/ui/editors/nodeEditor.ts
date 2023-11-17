@@ -220,7 +220,7 @@ export class NodeEditor extends AbstractEditor {
 		document.addEventListener('keydown', (event) => {
 			// console.log(event);
 
-			if (event.key === 'Enter') {
+			if (!event.ctrlKey && event.key === 'Enter') {
 				if (this.isTyping) {
 					this.validateInput();
 				} else {
