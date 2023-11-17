@@ -62,6 +62,8 @@ export class NodeEditor extends AbstractEditor {
 
 	private _domCtxMenuBox: HTMLUListElement;
 
+	private _domCtxMenuBg: HTMLUListElement;
+
 	private _svg?: d3.Selection<SVGSVGElement, undefined, null, undefined>;
 
 	private _tree?: FuncNode;
@@ -85,6 +87,8 @@ export class NodeEditor extends AbstractEditor {
 	get domContainer() { return this._domContainer || (function t() { throw new UndefErr(); }()); }
 
 	get domCtxMenuBox() { return this._domCtxMenuBox || (function t() { throw new UndefErr(); }()); }
+
+	get domCtxMenuBg() { return this._domCtxMenuBg || (function t() { throw new UndefErr(); }()); }
 
 	// eslint-disable-next-line class-methods-use-this
 	get tab(): Tab {
@@ -120,6 +124,11 @@ export class NodeEditor extends AbstractEditor {
 			'remove': () => this.removeBox()
 		});
 		this.domContainer.appendChild(this._domCtxMenuBox);
+
+		this._domCtxMenuBg = this.buildContextMenu({
+			'clear all': () => this.clearAll(),
+		});
+		this.domContainer.appendChild(this._domCtxMenuBg);
 
 		this.domEditor.appendChild(this.domContainer);
 		this.addKeyboardEvents();
@@ -337,13 +346,29 @@ export class NodeEditor extends AbstractEditor {
 		this.reload();
 	}
 
+	private clearAll(): void {
+		this.setContent({
+			rawName: '',
+			rawValue: '',
+			children: [EMPTY_ENTRY],
+		});
+	}
+
 	private drawSvg(): void {
 		this._svg = d3.create('svg')
 			.attr('class', 'jaffle-graph')
 			.attr('width', this.svgWidth)
 			.attr('height', this.svgHeight)
 			.attr('viewBox', [this.offsetX, this.offsetY, this.svgWidth, this.svgHeight])
-			.style('font', `${this.config.fontSize}px mono`);
+			.style('font', `${this.config.fontSize}px mono`)
+			.on('contextmenu', (e) => {
+				if (e.target.tagName !== 'rect') {
+					this.domCtxMenuBg.style.display = 'block';
+					this.domCtxMenuBg.style.left = `${e.layerX}px`;
+					this.domCtxMenuBg.style.top = `${e.layerY}px`;
+					e.preventDefault();
+				}
+			});
 
 		this.drawLinks();
 		this.drawGroupArea();
