@@ -347,15 +347,15 @@ This is shorter and more readable than:
 Now we've learned the basics of the so called Mini-Notation, the rhythm language of Tidal.
 This is what we've leared so far:
 
-| Concept           | Syntax   | Example                             |
-| ----------------- | -------- | ----------------------------------- |
-| Sequence          | space    | `- sound: _bd bd sd hh`             |
-| Sample Number     | :x       | `- sound: _hh:0 hh:1 hh:2 hh:3`     |
-| Rests             | ~        | `- sound: _metal ~ jazz jazz:1`     |
-| Sub-Sequences     | \[\]     | `- sound: _bd wind [metal jazz] hh` |
-| Sub-Sub-Sequences | \[\[\]\] | `- sound: _bd [metal [jazz sd]]`    |
-| Speed up          | \*       | `- sound: _bd sd*2 cp*3`            |
-| Parallel          | ,        | `- sound: _bd*2, hh*2 [hh oh]`      |
+| Concept           | Syntax     | Example                             |
+| ----------------- | ---------- | ----------------------------------- |
+| Sequence          | *space*    | `- sound: _bd bd sd hh`             |
+| Sample Number     | `:x`       | `- sound: _hh:0 hh:1 hh:2 hh:3`     |
+| Rests             | `~`        | `- sound: _metal ~ jazz jazz:1`     |
+| Sub-Sequences     | `[`, `]`   | `- sound: _bd wind [metal jazz] hh` |
+| Sub-Sub-Sequences | `[[`, `]]` | `- sound: _bd [metal [jazz sd]]`    |
+| Speed up          | `*`        | `- sound: _bd sd*2 cp*3`            |
+| Parallel          | `,`        | `- sound: _bd*2, hh*2 [hh oh]`      |
 
 The Mini-Notation is usually used inside some function. These are the functions we've seen so far:
 
@@ -437,7 +437,7 @@ We Will Rock you
 - .cpm: =100/2
 ```
 
-Now that we know the basics of how to make beats, let's look at how we can play [notes](/workshop/first-notes)
+Now that we know the basics of how to make beats, let's look at how we can play [notes](#first-notes)
 
 # First Notes
 
@@ -531,251 +531,203 @@ Just like with unpitched sounds, we can change the sound of our notes with `soun
 >
 > We will see more ways to combine patterns later..
 
-<!--
-
 ## Longer Sequences
 
 **Divide sequences with `/` to slow them down**
 
-{/* [c2 bb1 f2 eb2] */}
+```yml
+- note: _[36 34 41 39]/4
+- .sound: gm_acoustic_bass
+```
 
-<MiniRepl hideHeader client:visible tune={`note("[36 34 41 39]/4").sound("gm_acoustic_bass")`} punchcard />
+> The `/4` plays the sequence in brackets over 4 cycles (=4s).
+> 
+> So each of the 4 notes is 1s long.
+> 
+> Try adding more notes inside the brackets and notice how it gets faster.
 
-<Box>
+Because it is so common to just play one thing per cycle, you can...
 
-The `/4` plays the sequence in brackets over 4 cycles (=4s).
+**Play one per cycle with `<` and `>`**
 
-So each of the 4 notes is 1s long.
+```yml
+- note: _<36 34 41 39>
+- .sound: gm_acoustic_bass
+```
 
-Try adding more notes inside the brackets and notice how it gets faster.
-
-</Box>
-
-Because it is so common to just play one thing per cycle, you can..
-
-**Play one per cycle with \< \>**
-
-<MiniRepl hideHeader client:visible tune={`note("<36 34 41 39>").sound("gm_acoustic_bass")`} punchcard />
-
-<Box>
-
-Try adding more notes inside the brackets and notice how it does **not** get faster.
-
-</Box>
+> Try adding more notes inside the brackets and notice how it does **not** get faster.
 
 **Play one sequence per cycle**
 
-{/* <[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2 */}
-
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("<[36 48]*4 [34 46]*4 [41 53]*4 [39 51]*4>/2")
-.sound("gm_acoustic_bass")`}
-  punchcard
-/>
+```yml
+- note: _<[36 48]*4 [34 46]*4 [41 53]*4 [39 51]*4>/2
+- .sound: gm_acoustic_bass
+```
 
 **Alternate between multiple things**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("60 <63 62 65 63>")
-.sound("gm_xylophone")`}
-  punchcard
-/>
+```yml
+- note: _60 <63 62 65 63>
+- .sound: gm_xylophone
+```
 
 This is also useful for unpitched sounds:
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`sound("bd*2, ~ <sd cp>, [~ hh]*2")
-.bank("RolandTR909")`}
-  punchcard
-/>
+```yml
+- sound: _bd*2, ~ <sd cp>, [~ hh]*2
+- .bank: RolandTR909
+```
 
 ## Scales
 
-Finding the right notes can be difficult.. Scales are here to help:
+Finding the right notes can be difficult... Scales are here to help:
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`n("0 2 4 <[6,8] [7,9]>")
-.scale("C:minor").sound("piano")`}
-  punchcard
-/>
+```yml
+- n: _0 2 4 <[6,8] [7,9]>
+- .scale: _C:minor
+- .sound: piano
+```
 
-<Box>
+> Try out different numbers. Any number should sound good!
+>
+> Try out different scales:
+>
+> - `C:major`
+> - `A2:minor`
+> - `D:dorian`
+> - `G:mixolydian`
+> - `A2:minor:pentatonic`
+> - `F:major:pentatonic`
 
-Try out different numbers. Any number should sound good!
-
-Try out different scales:
-
-- C:major
-- A2:minor
-- D:dorian
-- G:mixolydian
-- A2:minor:pentatonic
-- F:major:pentatonic
-
-</Box>
-
-**automate scales**
+**Automate scales**
 
 Just like anything, we can automate the scale with a pattern:
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`n("<0 -3>, 2 4 <[6,8] [7,9]>")
-.scale("<C:major D:mixolydian>/4")
-.sound("piano")`}
-  punchcard
-/>
+```yml
+- n: _<0 -3>, 2 4 <[6,8] [7,9]>
+- .scale: _<C:major D:mixolydian>/4
+- .sound: _piano
+```
 
-<Box>
-
-If you have no idea what these scale mean, don't worry.
-These are just labels for different sets of notes that go well together.
-
-Take your time and you'll find scales you like!
-
-</Box>
+> If you have no idea what these scale mean, don't worry.
+> These are just labels for different sets of notes that go well together.
+>
+> Take your time and you'll find scales you like!
 
 ## Repeat & Elongate
 
 **Elongate with @**
 
-<MiniRepl hideHeader client:visible tune={`note("c@3 eb").sound("gm_acoustic_bass")`} punchcard />
+```yml
+- note: _c@3 eb
+- .sound: gm_acoustic_bass
+```
 
-<Box>
-
-Not using `@` is like using `@1`. In the above example, c is 3 units long and eb is 1 unit long.
-
-Try changing that number!
-
-</Box>
+> Not using `@` is like using `@1`. In the above example, c is 3 units long and eb is 1 unit long.
+>
+> Try changing that number!
 
 **Elongate within sub-sequences**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`n("<[4@2 4] [5@2 5] [6@2 6] [5@2 5]>*2")
-.scale("<C2:mixolydian F2:mixolydian>/4")
-.sound("gm_acoustic_bass")`}
-  punchcard
-/>
+```yml
+- n: _<[4@2 4] [5@2 5] [6@2 6] [5@2 5]>*2
+- .scale: _<C2:mixolydian F2:mixolydian>/4
+- .sound: gm_acoustic_bass
+```
 
-<Box>
-
-This groove is called a `shuffle`.
-Each beat has two notes, where the first is twice as long as the second.
-This is also sometimes called triplet swing. You'll often find it in blues and jazz.
-
-</Box>
+> This groove is called a `shuffle`.
+>
+> Each beat has two notes, where the first is twice as long as the second.
+>
+> This is also sometimes called triplet swing. You'll often find it in blues and jazz.
 
 **Replicate**
 
-<MiniRepl hideHeader client:visible tune={`note("c!2 [eb,<g a bb a>]").sound("piano")`} punchcard />
+```yml
+- note: _c!2 [eb,<g a bb a>]
+- .sound: piano
+```
 
-<Box>
-
-Try switching between `!`, `*` and `@`
-
-What's the difference?
-
-</Box>
+> Try switching between `!`, `*` and `@`
+>
+> What's the difference?
 
 ## Recap
 
 Let's recap what we've learned in this chapter:
 
-| Concept   | Syntax | Example                                                             |
-| --------- | ------ | ------------------------------------------------------------------- |
-| Slow down | \/     | <MiniRepl hideHeader client:visible tune={`note("[c a f e]/2")`} /> |
-| Alternate | \<\>   | <MiniRepl hideHeader client:visible tune={`note("c <e g>")`} />     |
-| Elongate  | @      | <MiniRepl hideHeader client:visible tune={`note("c@3 e")`} />       |
-| Replicate | !      | <MiniRepl hideHeader client:visible tune={`note("c!3 e")`} />       |
+| Concept   | Syntax  | Example               |
+| --------- | ------- | --------------------- |
+| Slow down | `/`      | `- note: _[c a f e]/2` |
+| Alternate | `<`, `>` | `- note: _c <e g>`     |
+| Elongate  | `@`      | `- note: _c@3 e`       |
+| Replicate | `!`      | `- note: _c!3 e`       |
 
 New functions:
 
-| Name  | Description                         | Example                                                                                      |
-| ----- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
-| note  | set pitch as number or letter       | <MiniRepl hideHeader client:visible tune={`note("b g e c").sound("piano")`} />               |
-| scale | interpret `n` as scale degree       | <MiniRepl hideHeader client:visible tune={`n("6 4 2 0").scale("C:minor").sound("piano")`} /> |
-| stack | play patterns in parallel (read on) | <MiniRepl hideHeader client:visible tune={`stack(s("bd sd"),note("c eb g"))`} />             |
+| Name  | Description                         | Example                                          |
+| ----- | ----------------------------------- | ------------------------------------------------ |
+| note  | set pitch as number or letter       | `[note: _b g e c, .sound: piano]`                |
+| scale | interpret `n` as scale degree       | `[n: _6 4 2 0, .scale: _C:minor, .sound: piano]` |
+| stack | play patterns in parallel (read on) | `- stack: [s: _bd sd, note: _c eb g]`            |
 
 ## Examples
 
 **Classy Bassline**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2")
-.sound("gm_synth_bass_1")
-.lpf(800) // <-- we'll learn about this soon`}
-/>
+```yml
+- note: _<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2
+- .sound: gm_synth_bass_1
+- .lpf: 800 # <-- we'll learn about this soon
+```
 
 **Classy Melody**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`n(\`<
-[~ 0] 2 [0 2] [~ 2]
-[~ 0] 1 [0 1] [~ 1]
-[~ 0] 3 [0 3] [~ 3]
-[~ 0] 2 [0 2] [~ 2]
->*2\`).scale("C4:minor")
-.sound("gm_synth_strings_1")`}
-/>
+```yml
+- n: |
+    _<[~ 0] 2 [0 2] [~ 2]
+      [~ 0] 1 [0 1] [~ 1]
+      [~ 0] 3 [0 3] [~ 3]
+      [~ 0] 2 [0 2] [~ 2]
+    >*2
+- .scale: _C4:minor
+- .sound: gm_synth_strings_1
+```
 
 **Classy Drums**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`sound("bd*2, ~ <sd cp>, [~ hh]*2")
-.bank("RolandTR909")`}
-/>
+```yml
+- sound: _bd*2, ~ <sd cp>, [~ hh]*2
+- .bank: RolandTR909
+```
 
 **If there just was a way to play all the above at the same time.......**
 
-<Box>
+> It's called `stack` 😙
 
-It's called `stack` 😙
+```yml
+- stack:
+  - note: _<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2
+  - .sound: gm_synth_bass_1
+  - .lpf: 800
+  - n: |
+    _<
+     [~ 0] 2 [0 2] [~ 2]
+     [~ 0] 1 [0 1] [~ 1]
+     [~ 0] 3 [0 3] [~ 3]
+     [~ 0] 2 [0 2] [~ 2]
+    >*2
+  - .scale: _C4:minor
+  - .sound: gm_synth_strings_1
+  - sound: _bd*2, ~ <sd cp>, [~ hh]*2
+  - .bank: RolandTR909
+```
 
-</Box>
-
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2")
-  .sound("gm_synth_bass_1").lpf(800),
-  n(\`<
-  [~ 0] 2 [0 2] [~ 2]
-  [~ 0] 1 [0 1] [~ 1]
-  [~ 0] 3 [0 3] [~ 3]
-  [~ 0] 2 [0 2] [~ 2]
-  >*2\`).scale("C4:minor")
-  .sound("gm_synth_strings_1"),
-  sound("bd*2, ~ <sd cp>, [~ hh]*2")
-  .bank("RolandTR909")
-)`}
-/>
-
-This is starting to sound like actual music! We have sounds, we have notes, now the last piece of the puzzle is missing: [effects](/workshop/first-effects)
+This is starting to sound like actual music! We have sounds, we have notes, now the last piece of the puzzle is missing: [effects](#first-effects)
 
 ---
 
 # First Effects
-
-import Box from '@components/Box.astro';
 
 We have sounds, we have notes, now let's look at effects!
 
@@ -783,208 +735,170 @@ We have sounds, we have notes, now let's look at effects!
 
 **low-pass filter**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2")
-.sound("sawtooth").lpf(800)`}
-/>
+```yml
+- note: _<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2
+- .sound: sawtooth
+- .lpf: 800
+```
 
-<Box>
-
-lpf = **l**ow **p**ass **f**ilter
-
-- Change lpf to 200. Notice how it gets muffled. Think of it as standing in front of the club with the door closed 🚪.
-- Now let's open the door... change it to 5000. Notice how it gets brighter ✨🪩
-
-</Box>
+> lpf = **l**ow **p**ass **f**ilter
+>
+> - Change lpf to 200. Notice how it gets muffled. Think of it as standing in front of the club with the door closed 🚪.
+> - Now let's open the door... change it to 5000. Notice how it gets brighter ✨🪩
 
 **pattern the filter**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2")
-.sound("sawtooth").lpf("200 1000")`}
-/>
+```yml
+- note: _<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2
+- .sound: sawtooth
+- .lpf: _200 1000
+```
 
-<Box>
-
-- Try adding more values
-- Notice how the pattern in lpf does not change the overall rhythm
-
-We will learn how to automate with waves later...
-
-</Box>
+> - Try adding more values
+> - Notice how the pattern in lpf does not change the overall rhythm
+>
+> We will learn how to automate with waves later...
 
 **vowel**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("<[c3,g3,e4] [bb2,f3,d4] [a2,f3,c4] [bb2,g3,eb4]>/2")
-.sound("sawtooth").vowel("<a e i o>/2")`}
-/>
+```yml
+- note: _<[c3,g3,e4] [bb2,f3,d4] [a2,f3,c4] [bb2,g3,eb4]>/2
+- .sound: sawtooth
+- .vowel: _<a e i o>/2
+```
 
 **gain**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  sound("hh*8").gain("[.25 1]*2"),
-  sound("bd*2,~ sd:1")
-) `}
-  punchcard
-/>
+```yml
+- stack:
+  - sound: _hh*8
+  - .gain: _[.25 1]*2
+  - sound: _bd*2,~ sd:1
+```
 
-<Box>
-
-Rhythm is all about dynamics!
-
-- Remove `.gain(...)` and notice how flat it sounds.
-- Bring it back by undoing (ctrl+z)
-
-</Box>
+> Rhythm is all about dynamics!
+>
+> - Remove `.gain(...)` and notice how flat it sounds.
+> - Bring it back by undoing (ctrl+z)
 
 **stacks within stacks**
 
 Let's combine all of the above into a little tune:
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  stack(
-    sound("hh*8").gain("[.25 1]*2"),
-    sound("bd*2,~ sd:1")
-  ),
-  note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2")
-  .sound("sawtooth").lpf("200 1000"),
-  note("<[c3,g3,e4] [bb2,f3,d4] [a2,f3,c4] [bb2,g3,eb4]>/2")
-  .sound("sawtooth").vowel("<a e i o>/2")
-) `}
-/>
+```yml
+- stack:
+  - stack:
+    - sound: _hh*8
+    - .gain: _[.25 1]*2
+    - sound: _bd*2,~ sd:1
 
-<Box>
+  - note: _<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2
+  - .sound: sawtooth
+  - .lpf: _200 1000
 
-Try to identify the individual parts of the stacks, pay attention to where the commas are.
-The 3 parts (drums, bassline, chords) are exactly as earlier, just stacked together, separated by comma.
+  - note: _<[c3,g3,e4] [bb2,f3,d4] [a2,f3,c4] [bb2,g3,eb4]>/2
+  - .sound: sawtooth
+  - .vowel: _<a e i o>/2
+```
 
-</Box>
+> Try to identify the individual parts of the stacks, pay attention to where the commas are.
+> The 3 parts (drums, bassline, chords) are exactly as earlier, just stacked together, separated by comma.
 
 **shape the sound with an adsr envelope**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("<c3 bb2 f3 eb3>")
-.sound("sawtooth").lpf(600)
-.attack(.1)
-.decay(.1)
-.sustain(.25)
-.release(.2)`}
-/>
+```yml
+- note: _<c3 bb2 f3 eb3>
+- .sound: sawtooth
+- .lpf: 600
+- .attack: .1
+- .decay: .1
+- .sustain: .25
+- .release: .2
+```
 
-<Box>
-
-Try to find out what the numbers do.. Compare the following
-
-- attack: `.5` vs `0`
-- decay: `.5` vs `0`
-- sustain: `1` vs `.25` vs `0`
-- release: `0` vs `.5` vs `1`
-
-Can you guess what they do?
-
-</Box>
-
-<QA q="Click to see solution" client:visible>
-
-- attack: time it takes to fade in
-- decay: time it takes to fade to sustain
-- sustain: level after decay
-- release: time it takes to fade out after note is finished
-
-![ADSR](https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/ADSR_parameter.svg/1920px-ADSR_parameter.svg.png)
-
-</QA>
+> Try to find out what the numbers do... Compare the following
+>
+> - attack: `.5` vs `0`
+> - decay: `.5` vs `0`
+> - sustain: `1` vs `.25` vs `0`
+> - release: `0` vs `.5` vs `1`
+>
+> Can you guess what they do?
+>
+> ---
+>
+> - attack: time it takes to fade in
+> - decay: time it takes to fade to sustain
+> - sustain: level after decay
+> - release: time it takes to fade out after note is finished
+> 
+> ![ADSR](../images/adsr.png)
 
 **adsr short notation**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("<c3 bb2 f3 eb3>")
-.sound("sawtooth").lpf(600)
-.adsr(".1:.1:.5:.2")
-`}
-/>
+```yml
+- note: _<c3 bb2 f3 eb3>
+- .sound: sawtooth
+- .lpf: 600
+- .adsr: _.1:.1:.5:.2
+```
 
 **delay**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  note("~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]")
-  .sound("gm_electric_guitar_muted"),
-  sound("<bd rim>").bank("RolandTR707")
-).delay(".5")`}
-/>
+```yml
+- stack:
+  - note: _~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]
+  - .sound: gm_electric_guitar_muted
+  - sound: _<bd rim>
+  - .bank: RolandTR707
+- .delay: _.5
+```
 
-<Box>
-
-Try some `delay` values between 0 and 1. Btw, `.5` is short for `0.5`
-
-What happens if you use `.delay(".8:.125")` ? Can you guess what the second number does?
-
-What happens if you use `.delay(".8:.06:.8")` ? Can you guess what the third number does?
-
-</Box>
-
-<QA q="Lösung anzeigen" client:visible>
-
-`delay("a:b:c")`:
-
-- a: delay volume
-- b: delay time
-- c: feedback (smaller number = quicker fade)
-
-</QA>
+> Try some `delay` values between 0 and 1. Btw, `.5` is short for `0.5`
+>
+> What happens if you use `.delay: _.8:.125` ? Can you guess what the second number does?
+>
+> What happens if you use `.delay: _.8:.06:.8` ? Can you guess what the third number does?
+>
+> ---
+>
+> `delay: _a:b:c`:
+>
+> - a: delay volume
+> - b: delay time
+> - c: feedback (smaller number = quicker fade)
 
 **room aka reverb**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`n("<4 [3@3 4] [<2 0> ~@16] ~>/2")
-.scale("D4:minor").sound("gm_accordion:2")
-.room(2)`}
-/>
+```yml
+- n: _<4 [3@3 4] [<2 0> ~@16] ~>/2
+- .scale: _D4:minor
+- .sound: _gm_accordion:2
+- .room: 2
+```
 
-<Box>
-
-Try different values!
-
-Add a delay too!
-
-</Box>
+> Try different values!
+>
+> Add a delay too!
 
 **little dub tune**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  note("~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]")
-  .sound("gm_electric_guitar_muted").delay(.5),
-  sound("<bd rim>").bank("RolandTR707").delay(.5),
-  n("<4 [3@3 4] [<2 0> ~@16] ~>/2")
-  .scale("D4:minor").sound("gm_accordion:2")
-  .room(2).gain(.5)
-)`}
-/>
+```yml
+- stack:
+  - note: _~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]
+  - .sound: gm_electric_guitar_muted
+  - .delay: .5
+  - sound: _<bd rim>
+  - .bank: RolandTR707
+  - .delay: .5
+  - n: _<4 [3@3 4] [<2 0> ~@16] ~>/2
+  - .scale: _D4:minor
+  - .sound: _gm_accordion:2
+  - .room: 2
+  - .gain: .5
+```
+
+<!--
 
 Let's add a bass to make this complete:
 
