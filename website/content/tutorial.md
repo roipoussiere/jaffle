@@ -710,6 +710,7 @@ New functions:
   - note: _<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2
   - .sound: gm_synth_bass_1
   - .lpf: 800
+
   - n: |
     _<
      [~ 0] 2 [0 2] [~ 2]
@@ -719,6 +720,7 @@ New functions:
     >*2
   - .scale: _C4:minor
   - .sound: gm_synth_strings_1
+
   - sound: _bd*2, ~ <sd cp>, [~ hh]*2
   - .bank: RolandTR909
 ```
@@ -773,6 +775,7 @@ We have sounds, we have notes, now let's look at effects!
 - stack:
   - sound: _hh*8
   - .gain: _[.25 1]*2
+
   - sound: _bd*2,~ sd:1
 ```
 
@@ -849,6 +852,7 @@ Let's combine all of the above into a little tune:
 - stack:
   - note: _~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]
   - .sound: gm_electric_guitar_muted
+
   - sound: _<bd rim>
   - .bank: RolandTR707
 - .delay: _.5
@@ -888,9 +892,11 @@ Let's combine all of the above into a little tune:
   - note: _~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]
   - .sound: gm_electric_guitar_muted
   - .delay: .5
+
   - sound: _<bd rim>
   - .bank: RolandTR707
   - .delay: .5
+
   - n: _<4 [3@3 4] [<2 0> ~@16] ~>/2
   - .scale: _D4:minor
   - .sound: _gm_accordion:2
@@ -898,124 +904,125 @@ Let's combine all of the above into a little tune:
   - .gain: .5
 ```
 
-<!--
-
 Let's add a bass to make this complete:
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  note("~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]")
-  .sound("gm_electric_guitar_muted").delay(.5),
-  sound("<bd rim>").bank("RolandTR707").delay(.5),
-  n("<4 [3@3 4] [<2 0> ~@16] ~>/2")
-  .scale("D4:minor").sound("gm_accordion:2")
-  .room(2).gain(.4),
-  n("<0 [~ 0] 4 [3 2] [0 ~] [0 ~] <0 2> ~>*2")
-  .scale("D2:minor")
-  .sound("sawtooth,triangle").lpf(800)
-)`}
-/>
+```yml
+- stack:
+  - note: _~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]
+  - .sound: gm_electric_guitar_muted
+  - .delay: .5
 
-<Box>
+  - sound: _<bd rim>
+  - .bank: RolandTR707
+  - .delay: .5
 
-Try adding `.hush()` at the end of one of the patterns in the stack...
+  - n: _<4 [3@3 4] [<2 0> ~@16] ~>/2
+  - .scale: _D4:minor
+  - .sound: _gm_accordion:2
+  - .room: 2
+  - .gain: .4
 
-</Box>
+  - n: _<0 [~ 0] 4 [3 2] [0 ~] [0 ~] <0 2> ~>*2
+  - .scale: _D2:minor
+  - .sound: _sawtooth,triangle
+  - .lpf: 800
+```
+
+> Try adding `.hush()` at the end of one of the patterns in the stack...
 
 **pan**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`sound("numbers:1 numbers:2 numbers:3 numbers:4")
-.pan("0 0.3 .6 1")
-.slow(2)`}
-/>
+```yml
+- sound: _numbers:1 numbers:2 numbers:3 numbers:4
+- .pan: _0 0.3 .6 1
+- .slow: 2
+```
 
 **speed**
 
-<MiniRepl hideHeader client:visible tune={`sound("bd rim").speed("<1 2 -1 -2>").room(.2)`} />
+```yml
+- sound: _bd rim
+- .speed: _<1 2 -1 -2>
+- .room: .2
+```
 
 **fast and slow**
 
 We can use `fast` and `slow` to change the tempo of a pattern outside of Mini-Notation:
 
-<MiniRepl hideHeader client:visible tune={`sound("bd*2,~ rim").slow(2)`} />
+```yml
+- sound: _bd*2,~ rim
+- .slow: 2
+```
 
-<Box>
-
-Change the `slow` value. Try replacing it with `fast`.
-
-What happens if you use a pattern like `.fast("<1 [2 4]>")`?
-
-</Box>
+> Change the `slow` value. Try replacing it with `fast`.
+>
+> What happens if you use a pattern like `.fast("<1 [2 4]>")`?
 
 By the way, inside Mini-Notation, `fast` is `*` and `slow` is `/`.
 
-<MiniRepl hideHeader client:visible tune={`sound("[bd*2,~ rim]*<1 [2 4]>")`} />
+```yml
+- sound: _[bd*2,~ rim]*<1 [2 4]>
+```
 
 ## automation with signals
 
 Instead of changing values stepwise, we can also control them with signals:
 
-<MiniRepl hideHeader client:visible tune={`sound("hh*16").gain(sine)`} punchcard punchcardLabels={false} />
+```yml
+- sound: _hh*16
+- .gain:
+  - Sine:
+```
 
-<Box>
+Note that on Jaffle, signals are written with a capital first letter.
 
-The basic waveforms for signals are `sine`, `saw`, `square`, `tri` 🌊
-
-Try also random signals `rand` and `perlin`!
-
-The gain is visualized as transparency in the pianoroll.
-
-</Box>
+> The basic waveforms for signals are `Sine`, `Saw`, `Square`, `Tri` 🌊.
+>
+> Try also random signals `Rand` and `Perlin`!
+>
+> The gain is visualized as transparency in the pianoroll.
 
 **setting a range**
 
 By default, waves oscillate between 0 to 1. We can change that with `range`:
 
-<MiniRepl hideHeader client:visible tune={`sound("hh*8").lpf(saw.range(500, 2000))`} />
+```yml
+- sound: _hh*8
+- .lpf:
+  - Saw:
+  - .range: [500, 2000]
+```
 
-<Box>
-
-What happens if you flip the range values?
-
-</Box>
+> What happens if you flip the range values?
 
 We can change the automation speed with slow / fast:
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2")
-.sound("sawtooth")
-.lpf(sine.range(100, 2000).slow(8))`}
-/>
+```yml
+- note: _<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>/2
+- .sound: sawtooth
+- .lpf:
+  - Sine:
+  - .range: [100, 2000]
+  - .slow: 8
+```
 
-<Box>
-
-The whole automation will now take 8 cycles to repeat.
-
-</Box>
+> The whole automation will now take 8 cycles to repeat.
 
 ## Recap
 
-| name  | example                                                                                            |
-| ----- | -------------------------------------------------------------------------------------------------- |
-| lpf   | <MiniRepl hideHeader client:visible tune={`note("c2 c3").s("sawtooth").lpf("<400 2000>")`} />      |
-| vowel | <MiniRepl hideHeader client:visible tune={`note("c3 eb3 g3").s("sawtooth").vowel("<a e i o>")`} /> |
-| gain  | <MiniRepl hideHeader client:visible tune={`s("hh*8").gain("[.25 1]*2")`} />                        |
-| delay | <MiniRepl hideHeader client:visible tune={`s("bd rim").delay(.5)`} />                              |
-| room  | <MiniRepl hideHeader client:visible tune={`s("bd rim").room(.5)`} />                               |
-| pan   | <MiniRepl hideHeader client:visible tune={`s("bd rim").pan("0 1")`} />                             |
-| speed | <MiniRepl hideHeader client:visible tune={`s("bd rim").speed("<1 2 -1 -2>")`} />                   |
-| range | <MiniRepl hideHeader client:visible tune={`s("hh*16").lpf(saw.range(200,4000))`} />                |
+| name  | example                                                |
+| ----- | ------------------------------------------------------ |
+| lpf   | `[note: _c2 c3, .s: sawtooth, .lpf: _<400 2000]`       |
+| vowel | `[note: _c3 eb3 g3, .s: sawtooth, .vowel: _<a e i o>]` |
+| gain  | `[s: _hh*8, .gain: '_[.25 1]*2']`                      |
+| delay | `[s: _bd rim, .delay: .5]`                             |
+| room  | `[s: _bd rim, .room: .5]`                              |
+| pan   | `[s: _bd rim, .pan: _0 1]`                             |
+| speed | `[s: _bd rim, .speed: _<1 2 -1 -2>]`                   |
+| range | `[s: _hh*16, .lpf: [Saw:, .range: [200, 4000]]]`       |
 
 Let us now take a look at some of Tidal's typical [pattern effects](/workshop/pattern-effects).
-
----
 
 # Pattern Effects
 
@@ -1025,170 +1032,174 @@ In this chapter, we are going to look at functions that are more unique to tidal
 
 **reverse patterns with rev**
 
-<MiniRepl hideHeader client:visible tune={`n("0 1 [4 3] 2").sound("jazz").rev()`} />
+```yml
+- n: _0 1 [4 3] 2
+- .sound: jazz
+- .rev:
+```
 
 **play pattern left and modify it right with jux**
 
-<MiniRepl hideHeader client:visible tune={`n("0 1 [4 3] 2").sound("jazz").jux(rev)`} />
+```yml
+- n: _0 1 [4 3] 2
+- .sound: jazz
+- .jux: [ rev: ]
+```
 
 This is the same as:
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  n("0 1 [4 3] 2").sound("jazz").pan(0),
-  n("0 1 [4 3] 2").sound("jazz").pan(1).rev()
-)`}
-/>
+```yml
+- stack:
+  - n: _0 1 [4 3] 2
+  - .sound: jazz
+  - .pan: 0
+
+  - n: _0 1 [4 3] 2
+  - .sound: jazz
+  - .pan: 1
+  - .rev:
+```
 
 Let's visualize what happens here:
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  n("0 1 [4 3] 2").sound("jazz").pan(0).color("cyan"),
-  n("0 1 [4 3] 2").sound("jazz").pan(1).color("magenta").rev()
-)`}
-  punchcard
-/>
+```yml
+- stack:
+  - [ n: '_0 1 [4 3] 2', .sound: jazz, .pan: 0, .color: cyan ]
+  - [ n: '_0 1 [4 3] 2', .sound: jazz, .pan: 1, .color: majenta, .rev: ]
+```
 
-<Box>
-
-Try commenting out one of the two by adding `//` before a line
-
-</Box>
+> Try commenting out one of the two by adding `#` before a line
 
 **multiple tempos**
 
-<MiniRepl hideHeader client:visible tune={`note("c2, eb3 g3 [bb3 c4]").sound("piano").slow("1,2,3")`} />
+```yml
+- note: _c2, eb3 g3 [bb3 c4]
+- .sound: piano
+- .slow: _1,2,3
+```
 
 This is like doing
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  note("c2, eb3 g3 [bb3 c4]").s("piano").slow(1).color('cyan'),
-  note("c2, eb3 g3 [bb3 c4]").s("piano").slow(2).color('magenta'),
-  note("c2, eb3 g3 [bb3 c4]").s("piano").slow(3).color('yellow')
-)`}
-  punchcard
-/>
+```yml
+- stack:
+  - [ note: '_c2, eb3 g3 [bb3 c4]', .s: piano, .slow: 1, .color: cyan' ]
+  - [ note: '_c2, eb3 g3 [bb3 c4]', .s: piano, .slow: 2, .color: magenta' ]
+  - [ note: '_c2, eb3 g3 [bb3 c4]', .s: piano, .slow: 3, .color: yellow' ]
+```
 
-<Box>
-
-Try commenting out one or more by adding `//` before a line
-
-</Box>
+> Try commenting out one or more by adding `#` before a line
 
 **add**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("c2 [eb3,g3]".add("<0 <1 -1>>"))
-.color("<cyan <magenta yellow>>").adsr("[.1 0]:.2:[1 0]")
-.sound("gm_acoustic_bass").room(.5)`}
-  punchcard
-/>
+```yml
+- note:
+  - _c2 [eb3,g3]
+  - .add: _<0 <1 -1>>
+- .color: _<cyan <magenta yellow>>
+- .adsr: _[.1 0]:.2:[1 0]
+- .sound: _gm_acoustic_bass
+- .room: .5
+```
 
-<Box>
-
-If you add a number to a note, the note will be treated as if it was a number
-
-</Box>
+> If you add a number to a note, the note will be treated as if it was a number
 
 We can add as often as we like:
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("c2 [eb3,g3]".add("<0 <1 -1>>").add("0,7"))
-.color("<cyan <magenta yellow>>").adsr("[.1 0]:.2:[1 0]")
-.sound("gm_acoustic_bass").room(.5)`}
-  punchcard
-/>
+```yml
+- note:
+  - _c2 [eb3,g3]
+  - .add: _<0 <1 -1>>
+- .add: _0,7
+- .color: _<cyan <magenta yellow>>
+- .adsr: _[.1 0]:.2:[1 0]
+- .sound: gm_acoustic_bass
+- .room: .5
+```
 
 **add with scale**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`n("<0 [2 4] <3 5> [~ <4 1>]>*2".add("<0 [0,2,4]>/4"))
-.scale("C5:minor").release(.5)
-.sound("gm_xylophone").room(.5)`}
-  punchcard
-/>
+```yml
+- n:
+  - _<0 [2 4] <3 5> [~ <4 1>]>*2
+  - .add: _<0 [0,2,4]>/4
+- .scale: _C5:minor
+- .release: .5
+- .sound: gm_xylophone
+- .room: .5
+```
 
 **time to stack**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`stack(
-  n("<0 [2 4] <3 5> [~ <4 1>]>*2".add("<0 [0,2,4]>/4"))
-  .scale("C5:minor")
-  .sound("gm_xylophone")
-  .room(.4).delay(.125),
-  note("c2 [eb3,g3]".add("<0 <1 -1>>"))
-  .adsr("[.1 0]:.2:[1 0]")
-  .sound("gm_acoustic_bass")
-  .room(.5),
-  n("0 1 [2 3] 2").sound("jazz").jux(rev).slow(2)
-)`}
-/>
+```yml
+- stack:
+  - n:
+    - _<0 [2 4] <3 5> [~ <4 1>]>*2
+    - .add: _<0 [0,2,4]>/4
+  - .scale: _C5:minor
+  - .sound: gm_xylophone
+  - .room: .4
+  - .delay: .125
+
+  - note:
+    - _c2 [eb3,g3]
+    - .add: _<0 <1 -1>>
+  - .adsr: _[.1 0]:.2:[1 0]
+  - .sound: gm_acoustic_bass
+  - .room: .5
+
+  - n: _0 1 [2 3] 2
+  - .sound: jazz
+  - .jux: [ rev: ]
+  - .slow: 2
+```
 
 **ply**
 
-<MiniRepl hideHeader client:visible tune={`sound("hh, bd rim").bank("RolandTR707").ply(2)`} punchcard />
+```yml
+- sound: _hh, bd rim
+- .bank: RolandTR707
+- .ply: 2
+```
 
 this is like writing:
 
-<MiniRepl hideHeader client:visible tune={`sound("hh*2, bd*2 rim*2").bank("RolandTR707")`} punchcard />
+```yml
+- sound: _hh*2, bd*2 rim*2
+- .bank: RolandTR707
+```
 
-<Box>
-
-Try patterning the `ply` function, for example using `"<1 2 1 3>"`
-
-</Box>
+> Try patterning the `ply` function, for example using `_<1 2 1 3>`
 
 **off**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`n("<0 [4 <3 2>] <2 3> [~ 1]>"
-  .off(1/8, x=>x.add(4))
-  //.off(1/4, x=>x.add(7))
-).scale("<C5:minor Db5:mixolydian>/4")
-.s("triangle").room(.5).ds(".1:0").delay(.5)`}
-  punchcard
-/>
+```yml
+- n: _<0 [4 <3 2>] <2 3> [~ 1]>
+- .off: [ =1/8, [ set: , add: 4 ]]
+# - .off: [ =1/4, [ set: , add: 7 ]]
+- .scale: _<C5:minor Db5:mixolydian>/4
+- .s: triangle
+- .room: .5
+- .ds: _.1:0
+- .delay: .5
+```
 
-<Box>
+`off` is also useful for sounds:
 
-In the notation `x=>x.`, the `x` is the shifted pattern, which where modifying.
+```yml
+- s: _bd sd,[~ hh]*2
+- .bank: CasioRZ1
+- .off: [ =1/8, [ set: , .speed: 1.5, .gain: .25 ]]
+```
 
-</Box>
+| name | description                    | example                                                   |
+| ---- | ------------------------------ | --------------------------------------------------------- |
+| rev  | reverse                        | `[ n: _0 2 4 6, .scale: _C:minor, .rev: ]`                |
+| jux  | split left/right, modify right | `[ n: _0 2 4 6, .scale: _C:minor, .jux: [ rev: ]]`        |
+| add  | add numbers / notes            | `[ n: [ _0 2 4 6, .add: _<0 1 2 1> ], .scale: _C:minor ]` |
+| ply  | speed up each event n times    | `[ s: _bd sd, .ply: _<1 2 3> ]`                           |
+| off  | copy, shift time & modify      | `[ s: _bd sd, hh*4, .off: [ =1/8, [ set: .speed: 2 ]]]`   |
 
-off is also useful for sounds:
-
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`s("bd sd,[~ hh]*2").bank("CasioRZ1")
-  .off(1/8, x=>x.speed(1.5).gain(.25))`}
-/>
-
-| name | description                    | example                                                                                        |
-| ---- | ------------------------------ | ---------------------------------------------------------------------------------------------- |
-| rev  | reverse                        | <MiniRepl hideHeader client:visible tune={`n("0 2 4 6").scale("C:minor").rev()`} />            |
-| jux  | split left/right, modify right | <MiniRepl hideHeader client:visible tune={`n("0 2 4 6").scale("C:minor").jux(rev)`} />         |
-| add  | add numbers / notes            | <MiniRepl hideHeader client:visible tune={`n("0 2 4 6".add("<0 1 2 1>")).scale("C:minor")`} /> |
-| ply  | speed up each event n times    | <MiniRepl hideHeader client:visible tune={`s("bd sd").ply("<1 2 3>")`} />                      |
-| off  | copy, shift time & modify      | <MiniRepl hideHeader client:visible tune={`s("bd sd, hh*4").off(1/8, x=>x.speed(2))`} />       |
+<!--
 
 ---
 
