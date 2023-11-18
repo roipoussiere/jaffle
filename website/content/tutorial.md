@@ -439,8 +439,6 @@ We Will Rock you
 
 Now that we know the basics of how to make beats, let's look at how we can play [notes](/workshop/first-notes)
 
-<!--
-
 # First Notes
 
 Let's look at how we can play notes
@@ -449,86 +447,46 @@ Let's look at how we can play notes
 
 **play notes with numbers**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("48 52 55 59").sound("piano")`}
-  claviature
-  claviatureLabels={Object.fromEntries(
-    Array(49)
-      .fill()
-      .map((_, i) => [midi2note(i + 36), i + 36]),
-  )}
-/>
+```yml
+- note: _48 52 55 59
+- .sound: piano
+```
 
-<Box>
-
-Try out different numbers!
-
-Try decimal numbers, like 55.5
-
-</Box>
+> Try out different numbers!
+>
+> Try decimal numbers, like 55.5
 
 **play notes with letters**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("c e g b").sound("piano")`}
-  claviature
-  claviatureLabels={Object.fromEntries(['c3', 'd3', 'e3', 'f3', 'g3', 'a3', 'b3'].map((n) => [n, n.split('')[0]]))}
-/>
+```yml
+- note: _c e g b
+- .sound: piano
+```
 
-<Box>
-
-Try out different letters (a - g).
-
-Can you find melodies that are actual words? Hint: ☕ 😉 ⚪
-
-</Box>
+> Try out different letters (a - g).
+>
+> Can you find melodies that are actual words? Hint: ☕ 😉 ⚪
 
 **add flats or sharps to play the black keys**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("db eb gb ab bb").sound("piano")`}
-  claviature
-  claviatureLabels={Object.fromEntries(
-    ['db3', 'eb3', 'gb3', 'ab3', 'bb3'].map((n) => [n, n.split('').slice(0, 2).join('')]),
-  )}
-/>
+```yml
+- note: _db eb gb ab bb
+- .sound: piano
+```
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("c# d# f# g# a#").sound("piano")`}
-  claviature
-  claviatureLabels={Object.fromEntries(
-    ['c#3', 'd#3', 'f#3', 'g#3', 'a#3'].map((n) => [n, n.split('').slice(0, 2).join('')]),
-  )}
-/>
+```yml
+- note: _c# d# f# g# a#
+- .sound: piano
+```
 
 **play notes with letters in different octaves**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("c2 e3 g4 b5").sound("piano")`}
-  claviature
-  claviatureLabels={Object.fromEntries(['c1', 'c2', 'c3', 'c4', 'c5'].map((n) => [n, n]))}
-  claviatureLabels={Object.fromEntries(
-    Array(49)
-      .fill()
-      .map((_, i) => [midi2note(i + 36), midi2note(i + 36)]),
-  )}
-/>
+```yml
+- note: _c2 e3 g4 b5
+- .sound: piano
+```
 
-<Box>
-
-Try out different octaves (1-8)
-
-</Box>
+> Try out different octaves (1-8)
 
 If you are not comfortable with the note letter system, it should be easier to use numbers instead.
 Most of the examples below will use numbers for that reason.
@@ -538,51 +496,42 @@ We will also look at ways to make it easier to play the right notes later.
 
 Just like with unpitched sounds, we can change the sound of our notes with `sound`:
 
-<MiniRepl hideHeader client:visible tune={`note("36 43, 52 59 62 64").sound("piano")`} />
+```yml
+- note: _36 43, 52 59 62 64
+- .sound: piano
+```
 
-{/* c2 g2, e3 b3 d4 e4 */}
-
-<Box>
-
-Try out different sounds:
-
-- gm_electric_guitar_muted
-- gm_acoustic_bass
-- gm_voice_oohs
-- gm_blown_bottle
-- sawtooth
-- square
-- triangle
-- how about bd, sd or hh?
-- remove `.sound('...')` completely
-
-</Box>
+> Try out different sounds:
+>
+> - `gm_electric_guitar_muted`
+> - `gm_acoustic_bass`
+> - `gm_voice_oohs`
+> - `gm_blown_bottle`
+> - `sawtooth`
+> - `square`
+> - `triangle`
+> - how about `bd`, `sd` or `hh`?
+> - remove `.sound: ...` completely
 
 **switch between sounds**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("48 67 63 [62, 58]")
-.sound("piano gm_electric_guitar_muted")`}
-/>
+```yml
+- note: _48 67 63 [62, 58]
+- .sound: _piano gm_electric_guitar_muted
+```
 
 **stack multiple sounds**
 
-<MiniRepl
-  hideHeader
-  client:visible
-  tune={`note("48 67 63 [62, 58]")
-.sound("piano, gm_electric_guitar_muted")`}
-/>
+```yml
+- note: _48 67 63 [62, 58]
+- .sound: _piano, gm_electric_guitar_muted
+```
 
-<Box>
+> The `note` and `sound` patterns are combined!
+>
+> We will see more ways to combine patterns later..
 
-The `note` and `sound` patterns are combined!
-
-We will see more ways to combine patterns later..
-
-</Box>
+<!--
 
 ## Longer Sequences
 
