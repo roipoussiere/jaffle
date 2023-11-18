@@ -1,4 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
+
+// based on Strudel Repl prebake:
+// https://github.com/tidalcycles/strudel/blob/main/website/src/repl/prebake.mjs
+
 import * as core from '@strudel.cycles/core';
 import * as mini from '@strudel.cycles/mini';
 import * as webaudio from '@strudel.cycles/webaudio';
@@ -78,23 +82,23 @@ class Strudel {
 		registerSoundfonts();
 
 		webaudio.samples(
-			'https://strudel.tidalcycles.org/piano.json',
-			'https://strudel.tidalcycles.org/piano/',
+			'/jaffle/sound/piano.json',
+			'/sound/piano/',
 			{ prebake: true },
 		);
 		webaudio.samples(
-			'https://strudel.tidalcycles.org/vcsl.json',
+			'/jaffle/sound/vcsl.json',
 			'github:sgossner/VCSL/master/',
 			{ prebake: true },
 		);
 		webaudio.samples(
-			'https://strudel.tidalcycles.org/tidal-drum-machines.json',
+			'/jaffle/sound/tidal-drum-machines.json',
 			'github:ritchse/tidal-drum-machines/main/machines/',
 			{ prebake: true, tag: 'drum-machines' },
 		);
 		webaudio.samples(
-			'https://strudel.tidalcycles.org/EmuSP12.json',
-			'https://strudel.tidalcycles.org/EmuSP12/',
+			'/jaffle/sound/EmuSP12.json',
+			'/jaffle/sound/EmuSP12/',
 			{ prebake: true, tag: 'drum-machines' },
 		);
 		webaudio.samples(
