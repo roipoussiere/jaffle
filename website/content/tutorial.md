@@ -469,10 +469,14 @@ Let's look at how we can play notes
 
 **add flats or sharps to play the black keys**
 
+flats `b`:
+
 ```yml
 - note: _db eb gb ab bb
 - .sound: piano
 ```
+
+sharps `#`:
 
 ```yml
 - note: _c# d# f# g# a#
@@ -606,7 +610,7 @@ Just like anything, we can automate the scale with a pattern:
 ```yml
 - n: _<0 -3>, 2 4 <[6,8] [7,9]>
 - .scale: _<C:major D:mixolydian>/4
-- .sound: _piano
+- .sound: piano
 ```
 
 > If you have no idea what these scale mean, don't worry.
@@ -665,11 +669,11 @@ Let's recap what we've learned in this chapter:
 
 New functions:
 
-| Name  | Description                         | Example                                          |
-| ----- | ----------------------------------- | ------------------------------------------------ |
-| note  | set pitch as number or letter       | `[note: _b g e c, .sound: piano]`                |
-| scale | interpret `n` as scale degree       | `[n: _6 4 2 0, .scale: _C:minor, .sound: piano]` |
-| stack | play patterns in parallel (read on) | `- stack: [s: _bd sd, note: _c eb g]`            |
+| Name  | Description                         | Example                                            |
+| ----- | ----------------------------------- | -------------------------------------------------- |
+| note  | set pitch as number or letter       | `[ note: _b g e c, .sound: piano ]`                |
+| scale | interpret `n` as scale degree       | `[ n: _6 4 2 0, .scale: _C:minor, .sound: piano ]` |
+| stack | play patterns in parallel (read on) | `- stack: [ s: _bd sd, note: _c eb g ]`            |
 
 ## Examples
 
@@ -712,12 +716,12 @@ New functions:
   - .lpf: 800
 
   - n: |
-    _<
-     [~ 0] 2 [0 2] [~ 2]
-     [~ 0] 1 [0 1] [~ 1]
-     [~ 0] 3 [0 3] [~ 3]
-     [~ 0] 2 [0 2] [~ 2]
-    >*2
+      _<
+      [~ 0] 2 [0 2] [~ 2]
+      [~ 0] 1 [0 1] [~ 1]
+      [~ 0] 3 [0 3] [~ 3]
+      [~ 0] 2 [0 2] [~ 2]
+      >*2
   - .scale: _C4:minor
   - .sound: gm_synth_strings_1
 
@@ -1011,16 +1015,16 @@ We can change the automation speed with slow / fast:
 
 ## Recap
 
-| name  | example                                                |
-| ----- | ------------------------------------------------------ |
-| lpf   | `[note: _c2 c3, .s: sawtooth, .lpf: _<400 2000]`       |
-| vowel | `[note: _c3 eb3 g3, .s: sawtooth, .vowel: _<a e i o>]` |
-| gain  | `[s: _hh*8, .gain: '_[.25 1]*2']`                      |
-| delay | `[s: _bd rim, .delay: .5]`                             |
-| room  | `[s: _bd rim, .room: .5]`                              |
-| pan   | `[s: _bd rim, .pan: _0 1]`                             |
-| speed | `[s: _bd rim, .speed: _<1 2 -1 -2>]`                   |
-| range | `[s: _hh*16, .lpf: [Saw:, .range: [200, 4000]]]`       |
+| name  | example                                                  |
+| ----- | -------------------------------------------------------- |
+| lpf   | `[ note: _c2 c3, .s: sawtooth, .lpf: _<400 2000> ]`      |
+| vowel | `[ note: _c3 eb3 g3, .s: sawtooth, .vowel: _<a e i o> ]` |
+| gain  | `[ s: _hh*8, .gain: '_[.25 1]*2' ]`                      |
+| delay | `[ s: _bd rim, .delay: .5 ]`                             |
+| room  | `[ s: _bd rim, .room: .5 ]`                              |
+| pan   | `[ s: _bd rim, .pan: _0 1 ]`                             |
+| speed | `[ s: _bd rim, .speed: _<1 2 -1 -2> ]`                   |
+| range | `[ s: _hh*16, .lpf: [ Saw: , .range: [200, 4000] ] ]`    |
 
 Let us now take a look at some of Tidal's typical [pattern effects](/workshop/pattern-effects).
 
@@ -1064,11 +1068,20 @@ Let's visualize what happens here:
 
 ```yml
 - stack:
-  - [ n: '_0 1 [4 3] 2', .sound: jazz, .pan: 0, .color: cyan ]
-  - [ n: '_0 1 [4 3] 2', .sound: jazz, .pan: 1, .color: majenta, .rev: ]
+
+  - n: _0 1 [4 3] 2
+  - .sound: jazz
+  - .pan: 0
+  - .color: cyan
+
+  - n: _0 1 [4 3] 2
+  - .sound: jazz
+  - .pan: 1
+  - .color: majenta
+  - .rev:
 ```
 
-> Try commenting out one of the two by adding `#` before a line
+> Try commenting out one of the two by adding `#` before each line of a block
 
 **multiple tempos**
 
@@ -1082,12 +1095,23 @@ This is like doing
 
 ```yml
 - stack:
-  - [ note: '_c2, eb3 g3 [bb3 c4]', .s: piano, .slow: 1, .color: cyan' ]
-  - [ note: '_c2, eb3 g3 [bb3 c4]', .s: piano, .slow: 2, .color: magenta' ]
-  - [ note: '_c2, eb3 g3 [bb3 c4]', .s: piano, .slow: 3, .color: yellow' ]
+  - note: _c2, eb3 g3 [bb3 c4]
+  - .s: piano
+  - .slow: 1
+  - .color: cyan
+
+  - note: _c2, eb3 g3 [bb3 c4]
+  - .s: piano
+  - .slow: 2
+  - .color: magenta
+
+  - note: _c2, eb3 g3 [bb3 c4]
+  - .s: piano
+  - .slow: 3
+  - .color: yellow
 ```
 
-> Try commenting out one or more by adding `#` before a line
+> Try commenting out one or more by adding `#` before each line of a block
 
 **add**
 
@@ -1173,9 +1197,10 @@ this is like writing:
 **off**
 
 ```yml
-- n: _<0 [4 <3 2>] <2 3> [~ 1]>
-- .off: [ =1/8, [ set: , add: 4 ]]
-# - .off: [ =1/4, [ set: , add: 7 ]]
+- n:
+  - _<0 [4 <3 2>] <2 3> [~ 1]>
+  - .off: [ =1/8, set: , .add: 4 ]
+# - .off: [ =1/4, set: , .add: 7 ]
 - .scale: _<C5:minor Db5:mixolydian>/4
 - .s: triangle
 - .room: .5
@@ -1188,16 +1213,16 @@ this is like writing:
 ```yml
 - s: _bd sd,[~ hh]*2
 - .bank: CasioRZ1
-- .off: [ =1/8, [ set: , .speed: 1.5, .gain: .25 ]]
+- .off: [ =1/8, [ set: , .speed: 1.5, .gain: .25 ] ]
 ```
 
 | name | description                    | example                                                   |
 | ---- | ------------------------------ | --------------------------------------------------------- |
 | rev  | reverse                        | `[ n: _0 2 4 6, .scale: _C:minor, .rev: ]`                |
-| jux  | split left/right, modify right | `[ n: _0 2 4 6, .scale: _C:minor, .jux: [ rev: ]]`        |
+| jux  | split left/right, modify right | `[ n: _0 2 4 6, .scale: _C:minor, .jux: [ rev: ] ]`       |
 | add  | add numbers / notes            | `[ n: [ _0 2 4 6, .add: _<0 1 2 1> ], .scale: _C:minor ]` |
 | ply  | speed up each event n times    | `[ s: _bd sd, .ply: _<1 2 3> ]`                           |
-| off  | copy, shift time & modify      | `[ s: _bd sd, hh*4, .off: [ =1/8, [ set: .speed: 2 ]]]`   |
+| off  | copy, shift time & modify      | `[ s: '_bd sd, hh*4', .off: [ =1/8, set: , .speed: 2 ] ]` |
 
 # Workshop Recap
 
@@ -1207,12 +1232,12 @@ This part is just a listing of all functions covered in the workshop!
 
 | Concept           | Syntax    | Example                             |
 | ----------------- | --------- | ----------------------------------- |
-| Sequence          | *space*   | `- sound: _bd bd sn hh`             |
+| Sequence          | *space*   | `- sound: _bd bd sd hh`             |
 | Sample Number     | `:x`      | `- sound: _hh:0 hh:1 hh:2 hh:3`     |
 | Rests             | `~`       | `- sound: _metal ~ jazz jazz:1`     |
 | Sub-Sequences     | `[`, `]`  | `- sound: _bd wind [metal jazz] hh` |
-| Sub-Sub-Sequences | `[[`, `]]`| `- sound: _bd [metal [jazz sn]]`    |
-| Speed up          | `*`       | `- sound: _bd sn*2 cp*3`            |
+| Sub-Sub-Sequences | `[[`, `]]`| `- sound: _bd [metal [jazz sd]]`    |
+| Speed up          | `*`       | `- sound: _bd sd*2 cp*3`            |
 | Parallel          | `,`       | `- sound: _bd*2, hh*2 [hh oh]`      |
 | Slow down         | `/`       | `- note: _[c a f e]/2`              |
 | Alternate         | `<`, `>`  | `- note: _c <e g>`                  |
@@ -1244,19 +1269,19 @@ This part is just a listing of all functions covered in the workshop!
 | gain  | `[ s: _hh*8, .gain: '_[.25 1]*2' ]`                      |
 | delay | `[ s: _bd rim, .delay: .5 ]`                             |
 | room  | `[ s: _bd rim, .room: .5 ]`                              |
-| pan   | `[ s: _bd rim, .pan: _0 1`                               |
+| pan   | `[ s: _bd rim, .pan: _0 1 ]`                             |
 | speed | `[ s: _bd rim, .speed: _<1 2 -1 -2> ]`                   |
 | range | `[ s: _hh*16, .lpf: [Saw: , .range: [200, 4000] ] ]`     |
 
 ## Pattern Effects
 
-| name | description                         | example                                                     |
-| ---- | ----------------------------------- | ----------------------------------------------------------- |
-| cpm  | sets the tempo in cycles per minute | `[ sound: _bd sd, .cpm: 90 ]`                               |
-| fast | speed up                            | `[ sound: _bd sd, .fast: 2 ]`                               |
-| slow | slow down                           | `[ sound: _bd sd, .slow: 2 ]`                               |
-| rev  | reverse                             | `[ n: _0 2 4 6, .scale: _C:minor, .rev: ]`                  |
-| jux  | split left/right, modify right      | `[ n: _0 2 4 6, .scale: _C:minor, .jux: [ rev: ] ]`         |
-| add  | add numbers / notes                 | `[ n: [ _0 2 4 6, .add: _<0 1 2 1> ], .scale: _C:minor ]`   |
-| ply  | speed up each event n times         | `[ s: _bd sd, .ply: _<1 2 3> ]`                             |
-| off  | copy, shift time & modify           | `[ s: _bd sd, hh*4, .off: [ =1/8, [ Set: , .speed: 2 ] ] ]` |
+| name | description                         | example                                                   |
+| ---- | ----------------------------------- | --------------------------------------------------------- |
+| cpm  | sets the tempo in cycles per minute | `[ sound: _bd sd, .cpm: 90 ]`                             |
+| fast | speed up                            | `[ sound: _bd sd, .fast: 2 ]`                             |
+| slow | slow down                           | `[ sound: _bd sd, .slow: 2 ]`                             |
+| rev  | reverse                             | `[ n: _0 2 4 6, .scale: _C:minor, .rev: ]`                |
+| jux  | split left/right, modify right      | `[ n: _0 2 4 6, .scale: _C:minor, .jux: [ rev: ] ]`       |
+| add  | add numbers / notes                 | `[ n: [ _0 2 4 6, .add: _<0 1 2 1> ], .scale: _C:minor ]` |
+| ply  | speed up each event n times         | `[ s: _bd sd, .ply: _<1 2 3> ]`                           |
+| off  | copy, shift time & modify           | `[ s: '_bd sd, hh*4', .off: [ =1/8, set: , .speed: 2 ] ]` |

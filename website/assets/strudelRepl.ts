@@ -83,7 +83,7 @@ class Strudel {
 
 		webaudio.samples(
 			'/jaffle/sound/piano.json',
-			'/sound/piano/',
+			'/jaffle/sound/piano/',
 			{ prebake: true },
 		);
 		webaudio.samples(
